@@ -1,0 +1,190 @@
+/* const picture = "./" */
+
+.audio-page {
+  min-height: 100vh;
+  background: linear-gradient(to top, #fbeee0 60%, #b7d6f6 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  /* 可添加音乐符号等SVG背景 */
+}
+
+.audio-upload-block {
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,0.92);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(163, 177, 138, 0.10);
+  padding: 36px 32px 28px 32px;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 320px;
+}
+
+.audio-upload-block h2 {
+  margin-bottom: 18px;
+  color: #b89b7b;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.audio-upload-block input[type="file"] {
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.audio-upload-block button {
+  background: #b7d6f6;
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(183,214,246,0.10);
+}
+
+.audio-upload-block button:disabled {
+  background: #e0e0e0;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.audio-upload-block div {
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+/* 录音界面样式 */
+.audio-upload-block.recording {
+  background: rgba(255, 240, 230, 0.95);
+  border: 1px solid #ffd6b3;
+}
+
+.audio-upload-block.recording h2 {
+  color: #ff9966;
+}
+
+.audio-upload-block.recording button {
+  background: #ff9966;
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 153, 102, 0.2);
+}
+
+.audio-upload-block.recording button:disabled {
+  background: #ffcc99;
+  color: #fff;
+}
+
+.warm-bg {
+  background: linear-gradient(180deg, #c0f2ff 0%, #d9e0cf 100%) !important;
+}
+
+.call-card {
+  background: #fff7ef;
+  border-radius: 24px;
+  box-shadow: 0 6px 32px rgba(255, 183, 102, 0.13);
+  padding: 36px 24px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 320px;
+  max-width: 340px;
+  margin: 0 auto;
+  margin-top: 48px;
+  position: relative;
+}
+
+.tag-list {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.call-tag {
+  font-size: 0.92rem;
+  color: #fff;
+  border-radius: 12px;
+  padding: 4px 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 183, 102, 0.08);
+}
+
+.avatar-block {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.avatar-img {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 4px solid #ffd6b3;
+  background: #fff3e0;
+  object-fit: cover;
+  box-shadow: 0 2px 12px rgba(255, 183, 102, 0.13);
+}
+
+.avatar-call-icon {
+  position: absolute;
+  right: -8px;
+  bottom: 0;
+  font-size: 1.6rem;
+  background: #ffb366;
+  color: #fff;
+  border-radius: 50%;
+  padding: 4px 7px 2px 7px;
+  box-shadow: 0 2px 8px rgba(255, 183, 102, 0.18);
+}
+
+.call-nickname {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ff9966;
+  margin-bottom: 4px;
+  margin-top: 2px;
+}
+
+.call-desc {
+  color: #b88b5a;
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 22px;
+  margin-top: 2px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.call-btn {
+  background: linear-gradient(90deg, #ffb366 0%, #ffd699 100%);
+  color: #fff;
+  border: none;
+  padding: 14px 0;
+  border-radius: 24px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  width: 100%;
+  margin-top: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(255, 183, 102, 0.13);
+  transition: background 0.2s;
+}
+
+.call-btn:hover {
+  background: linear-gradient(90deg, #ff9966 0%, #ffb366 100%);
+}
+
