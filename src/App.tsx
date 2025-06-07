@@ -59,27 +59,17 @@ function HomePage() {
       </section>
 
       <section className="categories categories-second">
-        <div className="category-card card-bottom-2">
-          <img src="/images/medium_medium.jpg" alt="Lifestyle" />
-          <h2>回忆</h2>
-        </div>
         <div className="category-card card-top-2">
-          <img src="/images/medium_right.png" alt="Home" />
-          <h2>未来</h2>
-        </div>
-      </section>
-
-      <section className="categories categories-third">
-        <div className="category-card card-bottom-3">
-          <img src="/images/medium_right.png" alt="Home" />
-          <h2>未来</h2>
-        </div>
-        <div className="category-card card-top-3">
           <img src="/images/medium_medium.jpg" alt="Lifestyle" />
           <h2>回忆</h2>
         </div>
+        <div className="category-card card-bottom-2">
+          <img src="/images/medium_right.png" alt="Home" />
+          <h2>未来</h2>
+        </div>
       </section>
 
+      
       <section className="newsletter">
         <h2>欢迎来到我们的小屋</h2>
         <p>welcome to here</p>

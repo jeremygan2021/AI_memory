@@ -45,7 +45,7 @@ h1, h2, h3, .logo {
   position: absolute;
   width: 100%;
   padding: 2rem 0;
-  background: linear-gradient(to bottom, rgba(250, 245, 235, 0.9), transparent);
+  background: linear-gradient(to bottom, rgba(250, 245, 235, 1), transparent);
   backdrop-filter: blur(8px);
   z-index: 100;
 }
@@ -66,11 +66,13 @@ h1, h2, h3, .logo {
 }
 
 .logo {
-  font-size: 2rem;
-  font-weight: 500;
+  font-family: 'HongLeiBanShuJianTi', sans-serif;
+  font-weight: normal;
+  font-size: 2.5rem;
+  font-weight: 70;
   color: var(--color-brown);
-  margin-bottom: 0.3rem;
-  text-shadow: 1px 1px 2px rgba(201, 167, 131, 0.2);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
 }
 
 .subtitle {
@@ -79,7 +81,15 @@ h1, h2, h3, .logo {
   color: var(--color-text);
   opacity: 0.85;
 }
+@font-face {
+  font-family: 'HongLeiBanShuJianTi';
+  src: url('/public/fonts/HongLeiBanShuJianTi-2.ttf') format('truetype');
+}
 
+@font-face {
+  font-family: 'ZuiShenYeLi';
+  src: url('/public/fonts/ZuiShenDeYeLiZuiWenRou-2.ttf') format('truetype');
+}
 .nav-links {
   display: flex;
   gap: 2rem;
@@ -122,8 +132,9 @@ h1, h2, h3, .logo {
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items:flex-start;
   overflow: hidden;
+  padding-top: 180px;
 }
 
 .hero-bg {
@@ -131,12 +142,13 @@ h1, h2, h3, .logo {
   inset: 0;
   background: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/web/AI_memory/front_img.jpg') center/cover no-repeat;
   filter: blur(12px) brightness(1.1) saturate(0.8);
-  opacity: 0.3;
-  z-index: -1;
+  opacity: 0.9;
+  z-index: 1;
 }
 
 .hero-content {
   max-width: 800px;
+  height: 350px;
   background: linear-gradient(135deg, rgba(250, 245, 235, 0.92), rgba(250, 245, 235, 0.85));
   padding: 3.5rem 3rem;
   border-radius: var(--radius-md);
@@ -163,10 +175,13 @@ h1, h2, h3, .logo {
 }
 
 .hero h1 {
-  font-size: 2rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
   color: var(--color-brown);
+  margin-bottom: 18px;
+  font-family: 'ZuiShenYeLi', sans-serif;
+  font-weight: normal;
+  letter-spacing: 0.05em;
+  text-shadow: 2px 2px 4px rgba(88, 255, 4, 0.2);
 }
 
 .hero p {
@@ -237,11 +252,12 @@ h1, h2, h3, .logo {
   display: flex;
   justify-content: center;
   margin-bottom: 6rem;
+  height: 300px;
 }
 
 .card-bottom-1 {
   z-index: 1;
-  width: 800px;
+  width: 1200px;
   background: linear-gradient(135deg, rgba(250, 245, 235, 0.95), rgba(250, 245, 235, 0.9));
   border: 1px solid var(--color-border);
   box-shadow: 0 8px 24px rgba(201, 167, 131, 0.12);
@@ -250,7 +266,7 @@ h1, h2, h3, .logo {
 
 .card-top-1 {
   z-index: 2;
-  width: 1200px;
+  width: 1800px;
   height: 320px;
   background: rgba(255, 255, 255, 0.85);
   border: 1px solid rgba(163, 177, 138, 0.3);
@@ -271,6 +287,7 @@ h1, h2, h3, .logo {
   display: flex;
   justify-content: center;
   margin-bottom: 6rem;
+  height: 450px;
 }
 
 .card-bottom-2 {
@@ -279,7 +296,7 @@ h1, h2, h3, .logo {
   background: linear-gradient(135deg, rgba(250, 245, 235, 0.95), rgba(250, 245, 235, 0.9));
   border: 1px solid var(--color-border);
   box-shadow: 0 8px 24px rgba(201, 167, 131, 0.12);
-  transform: translateX(-60px);
+  transform: translateX(-120px);
 }
 
 .card-top-2 {
@@ -289,13 +306,13 @@ h1, h2, h3, .logo {
   background: rgba(255, 255, 255, 0.85);
   border: 1px solid rgba(163, 177, 138, 0.3);
   box-shadow: 0 4px 16px rgba(163, 177, 138, 0.15);
-  transform: translateX(-120px) translateY(50px);
+  transform: translateX(30px) translateY(50px);
   transition: all 0.3s ease-in-out;
 }
 
 /* 顶层卡片hover效果 */
-.card-top-2:hover {
-  transform: translateX(-120px) translateY(50px) scale(1.05);
+.card-bottom-2:hover {
+  transform: translateX(120px) translateY(50px) scale(1.05);
   box-shadow: 0 8px 24px rgba(163, 177, 138, 0.25);
   cursor: pointer;
 }
@@ -305,6 +322,7 @@ h1, h2, h3, .logo {
   display: flex;
   justify-content: center;
   margin-bottom: 6rem;
+  height: 450px;
 }
 
 .card-bottom-3 {
@@ -336,48 +354,16 @@ h1, h2, h3, .logo {
 
 /* 卡片hover效果 */
 .category-card:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-/* 响应式布局 */
-@media (max-width: 768px) {
-  .category-card {
-    width: 90%;
-    max-width: 400px;
-    height: 360px;
-  }
-  
-  .card-bottom-1, .card-bottom-2, .card-bottom-3 {
-    transform: translateX(-30px);
-  }
-  
-  .card-top-1, .card-top-2, .card-top-3 {
-    transform: translateX(-60px) translateY(20px);
-  }
-}
-
-@media (max-width: 480px) {
-  .category-card {
-    width: 95%;
-    height: 320px;
-  }
-  
-  .card-bottom-1, .card-bottom-2, .card-bottom-3 {
-    transform: translateX(-10px);
-  }
-  
-  .card-top-1, .card-top-2, .card-top-3 {
-    transform: translateX(-20px) translateY(15px);
-  }
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
 }
 
 /* Newsletter section */
 .newsletter {
-  background: var(--color-bg-light);
-  padding: 5rem 2rem;
-  text-align: center;
   position: relative;
+  padding: 6rem 2rem;
+  background: linear-gradient(135deg, var(--color-cream), var(--color-bg-light));
+  text-align: center;
   overflow: hidden;
 }
 
@@ -460,77 +446,9 @@ h1, h2, h3, .logo {
 
 .featured-image img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-soft);
-}
-
-/* Responsive design */
-@media (max-width: 1024px) {
-  .featured {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    text-align: center;
-  }
-  
-  .featured-content {
-    padding-right: 0;
-  }
-}
-@media (max-width: 768px) {
-  .header {
-    position: relative;
-    background: var(--color-cream);
-  }
-  
-  .navbar {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .brand-block {
-    align-items: center;
-  }
-  
-  .nav-links {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .social-links {
-    margin: 1rem 0 0 0;
-  }
-  
-  .hero {
-    min-height: auto;
-    padding-top: 2rem;
-  }
-  
-  .hero-content {
-    padding: 2rem 1.5rem;
-  }
-  
-  .categories {
-    grid-template-columns: 1fr;
-  }
-  
-  .category-card {
-    aspect-ratio: 16/9;
-  }
-}
-
-@media (max-width: 480px) {
-  .logo {
-    font-size: 1.5rem;
-  }
-  
-  .hero h1 {
-    font-size: 1.5rem;
-  }
-  
-  .newsletter h2 {
-    font-size: 1.8rem;
-  }
 }
 
