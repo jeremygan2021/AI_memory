@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
+import FamilyPage from './FamilyPage';
+import RecordComponent from './record';
 
 // 图标组件
 const MicrophoneIcon = () => (
@@ -46,12 +48,41 @@ const UserIcon = () => (
 );
 
 function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+
+  if (currentPage === 'family') {
+    return <FamilyPage />;
+  }
+
+  if (currentPage === 'record') {
+    return (
+      <div>
+        {/* 返回按钮 */}
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '20px',
+          zIndex: 1000,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '50px',
+          padding: '10px 20px',
+          cursor: 'pointer',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+          backdropFilter: 'blur(10px)'
+        }} onClick={() => setCurrentPage('home')}>
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50' }}>← 返回主页</span>
+        </div>
+        <RecordComponent />
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       {/* 顶部导航栏 */}
       <header className="header">
         <div className="header-left">
-          <div className="logo">
+          <div className="logo" onClick={() => setCurrentPage(currentPage === 'home' ? 'family' : 'home')} style={{cursor: 'pointer'}}>
             <div className="logo-icon">🤖</div>
             <span>AI管家</span>
           </div>
@@ -73,7 +104,7 @@ function App() {
       <main className="main-content">
         {/* 左侧功能卡片 */}
         <div className="left-sidebar">
-          <div className="feature-card voice-record">
+          <div className="feature-card voice-record" onClick={() => setCurrentPage('record')} style={{cursor: 'pointer'}}>
             <div className="card-icon">
               <MicrophoneIcon />
             </div>
@@ -236,4 +267,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
