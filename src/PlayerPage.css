@@ -1,0 +1,633 @@
+/* 播放页面样式 */
+.player-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 背景装饰 */
+.background-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 2px, transparent 2px);
+  background-size: 60px 60px;
+  animation: backgroundMove 25s linear infinite;
+}
+
+.wave1 {
+  animation-delay: 0s;
+  background-size: 40px 40px;
+}
+
+.wave2 {
+  animation-delay: -8s;
+  background-size: 80px 80px;
+  opacity: 0.5;
+}
+
+.wave3 {
+  animation-delay: -16s;
+  background-size: 120px 120px;
+  opacity: 0.3;
+}
+
+@keyframes backgroundMove {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 加载状态 */
+.player-page.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 错误状态 */
+.player-page.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-content {
+  text-align: center;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.error-content h2 {
+  margin: 0 0 16px 0;
+  font-size: 24px;
+}
+
+.error-content p {
+  margin: 0 0 24px 0;
+  opacity: 0.8;
+}
+
+/* 顶部导航 */
+.player-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-back-btn,
+.delete-recording-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 25px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.nav-back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-3px);
+}
+
+.delete-recording-btn:hover {
+  background: rgba(220, 53, 69, 0.3);
+  transform: translateY(-2px);
+}
+
+.back-icon {
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.nav-back-btn:hover .back-icon {
+  transform: translateX(-2px);
+}
+
+.session-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.session-id {
+  font-size: 14px;
+  color: white;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-family: 'SF Mono', monospace;
+}
+
+/* 主播放器区域 */
+.player-main {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  padding: 40px 20px;
+}
+
+.player-container {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 50px 40px;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.15),
+    0 10px 35px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 录音信息区域 */
+.recording-info {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.recording-avatar {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 30px;
+}
+
+.avatar-icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.sound-waves {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 4px;
+  z-index: 1;
+}
+
+.wave-bar {
+  width: 4px;
+  height: 20px;
+  background: rgba(102, 126, 234, 0.6);
+  border-radius: 2px;
+  transform-origin: bottom;
+  transition: all 0.3s ease;
+}
+
+.wave-bar.active {
+  animation: waveAnimation 1.5s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(1) { animation-delay: 0s; }
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+
+@keyframes waveAnimation {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(2); }
+}
+
+.recording-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 25px 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.recording-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #666;
+}
+
+.metadata-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 12px;
+  border-left: 3px solid #667eea;
+}
+
+.metadata-item .label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.metadata-item .value {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 进度条区域 */
+.progress-section {
+  margin-bottom: 40px;
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-family: 'SF Mono', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.progress-container {
+  position: relative;
+  height: 6px;
+  background: rgba(102, 126, 234, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+  transition: all 0.3s ease;
+}
+
+.progress-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.7);
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 3px;
+  transition: width 0.1s ease;
+  z-index: 1;
+}
+
+/* 主控制按钮 */
+.main-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.control-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 16px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+.control-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-3px);
+}
+
+.skip-btn .btn-icon {
+  font-size: 24px;
+}
+
+.skip-btn .btn-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.play-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.play-btn:hover {
+  background: linear-gradient(135deg, #764ba2, #667eea);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+}
+
+.play-btn .btn-icon {
+  font-size: 32px;
+}
+
+.play-btn.playing {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+  50% { box-shadow: 0 15px 45px rgba(102, 126, 234, 0.7); }
+  100% { box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+}
+
+/* 高级控制 */
+.advanced-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.control-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 播放速度控制 */
+.speed-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.speed-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  background: white;
+  color: #667eea;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.speed-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
+}
+
+.speed-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+}
+
+/* 音量控制 */
+.volume-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.volume-slider {
+  flex: 1;
+  height: 4px;
+  background: rgba(102, 126, 234, 0.2);
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+}
+
+.volume-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #667eea;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .player-header {
+    padding: 15px 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .nav-back-btn,
+  .delete-recording-btn {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+
+  .session-info {
+    order: 3;
+    flex-basis: 100%;
+    margin-top: 10px;
+  }
+
+  .player-main {
+    padding: 20px 15px;
+    min-height: calc(100vh - 100px);
+  }
+
+  .player-container {
+    padding: 30px 25px;
+    border-radius: 25px;
+  }
+
+  .avatar-icon {
+    width: 100px;
+    height: 100px;
+    font-size: 50px;
+  }
+
+  .recording-title {
+    font-size: 26px;
+  }
+
+  .metadata-item {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .main-controls {
+    gap: 20px;
+  }
+
+  .play-btn {
+    width: 70px;
+    height: 70px;
+  }
+
+  .play-btn .btn-icon {
+    font-size: 28px;
+  }
+
+  .speed-buttons {
+    justify-content: center;
+  }
+
+  .control-group {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-header {
+    padding: 12px 15px;
+  }
+
+  .player-container {
+    padding: 25px 20px;
+    border-radius: 20px;
+  }
+
+  .avatar-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 40px;
+  }
+
+  .recording-title {
+    font-size: 22px;
+  }
+
+  .time-display {
+    font-size: 14px;
+  }
+
+  .main-controls {
+    gap: 15px;
+  }
+
+  .play-btn {
+    width: 60px;
+    height: 60px;
+  }
+
+  .play-btn .btn-icon {
+    font-size: 24px;
+  }
+
+  .skip-btn .btn-icon {
+    font-size: 20px;
+  }
+
+  .advanced-controls {
+    gap: 20px;
+  }
+} 
