@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './record.css';
 import { getUserCode, buildRecordingPath, buildSessionStorageKey, validateUserCode } from './utils/userCode';
+import recordButtonImg from './asset/record_button.png';
+import mic_icon from './asset/icon/mic.png'
 
 // API配置
 const API_BASE_URL = 'http://localhost:8000';
@@ -149,7 +151,7 @@ const RecordComponent = () => {
         extension = 'ogg';
       }
       
-      const fileName = `recording_${recording.id}_${Date.now()}.${extension}`;
+      const fileName = `recording_${recording.id}.${extension}`;
       await uploadAudioFile(recording.audioBlob, recording.id, fileName);
     }
   };
@@ -244,16 +246,22 @@ const RecordComponent = () => {
       
       // 监听录音停止事件
       mediaRecorder.onstop = async () => {
+        // 确保计时器已停止
+        stopTimer();
+        
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType || 'audio/webm' });
         const url = URL.createObjectURL(audioBlob);
         setAudioURL(url);
+        
+        // 获取当前录音时长（在停止时的最终时长）
+        const finalDuration = recordingTime;
         
         // 创建录音记录
         const newRecording = {
           id: Date.now(),
           url: url,
           audioBlob: audioBlob, // 保存Blob用于上传
-          duration: recordingTime,
+          duration: finalDuration,
           timestamp: new Date().toLocaleString('zh-CN'),
           sessionId: id || 'default',
           cloudUrl: null, // 云端URL
@@ -273,7 +281,8 @@ const RecordComponent = () => {
           extension = 'ogg';
         }
         
-        const fileName = `recording_${newRecording.id}_${Date.now()}.${extension}`;
+        // 使用recordingId作为文件名的一部分，确保能够匹配
+        const fileName = `recording_${newRecording.id}.${extension}`;
         const uploadResult = await uploadAudioFile(audioBlob, newRecording.id, fileName);
         
         if (uploadResult.success) {
@@ -306,20 +315,44 @@ const RecordComponent = () => {
     }
   };
 
+  // 开始计时
+  const startTimer = () => {
+    // 确保之前的计时器被清除
+    stopTimer();
+    console.log('启动计时器');
+    timerRef.current = setInterval(() => {
+      setRecordingTime(prev => {
+        console.log('计时器更新:', prev + 1);
+        return prev + 1;
+      });
+    }, 1000);
+  };
+
+  // 停止计时
+  const stopTimer = () => {
+    if (timerRef.current) {
+      console.log('停止计时器');
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
   // 停止录音
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
+    console.log('停止录音被调用');
+    // 立即停止计时器和更新状态
+    stopTimer();
+    setIsRecording(false);
+    setIsPaused(false);
+    
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      setIsPaused(false);
-      
-      // 停止计时
-      stopTimer();
-      
-      // 停止媒体流
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
+    }
+    
+    // 停止媒体流
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
   };
 
@@ -338,25 +371,26 @@ const RecordComponent = () => {
     }
   };
 
-  // 开始计时
-  const startTimer = () => {
-    timerRef.current = setInterval(() => {
-      setRecordingTime(prev => prev + 1);
-    }, 1000);
-  };
-
-  // 停止计时
-  const stopTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
   // 重置录音
   const resetRecording = () => {
+    console.log('重置录音被调用');
+    // 立即停止计时器和更新状态
+    stopTimer();
+    setIsRecording(false);
+    setIsPaused(false);
     setRecordingTime(0);
     setAudioURL('');
+    
+    // 如果正在录音，先停止
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    
+    // 停止媒体流
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
   };
 
   // 绑定录音
@@ -365,7 +399,13 @@ const RecordComponent = () => {
       ...recording,
       boundAt: new Date().toLocaleString('zh-CN'),
       sessionId: id,
-      userCode: userCode
+      userCode: userCode,
+      // 保存原始录音ID以便播放页面能够匹配
+      originalRecordingId: recording.id,
+      // 如果有objectKey，也保存下来
+      objectKey: recording.objectKey || null,
+      // 保存云端URL
+      cloudUrl: recording.cloudUrl || null
     };
     
     setBoundRecordings(prev => [boundRecording, ...prev]);
@@ -482,8 +522,24 @@ const RecordComponent = () => {
   // 清理函数
   useEffect(() => {
     return () => {
+      // 清理计时器
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      
+      // 清理长按计时器
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
+      }
+      
+      // 停止媒体流
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      
+      // 停止录音
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
       }
     };
   }, []);
@@ -539,14 +595,27 @@ const RecordComponent = () => {
 
   return (
     <div className="record-container">
+      {/* 顶部状态栏 */}
+      <div className="header-status">
+
+        <div className="user-info">
+                               
+
+                               
+        </div>
+      </div>
+
       {/* 录音控制面板 */}
       <div className="record-panel">
         <div className="record-header">
-          <h2>🎙️ 语音录制</h2>
+          <h2>语言录制</h2>
           <div className="record-time">
             {formatTime(recordingTime)}
           </div>
         </div>
+        
+        {/* 录音进度指示线 */}
+        <div className={`record-progress-line ${isRecording ? 'recording' : ''}`} />
         
         {/* 录音状态指示器 */}
         <div className={`record-indicator ${isRecording ? 'recording' : ''} ${isPaused ? 'paused' : ''} ${touchFeedback ? 'touch-feedback' : ''}`}>
@@ -556,11 +625,6 @@ const RecordComponent = () => {
              isRecording ? (isPaused ? '已暂停' : (isLongPress ? '长按录音中...' : '录音中...')) : 
              '准备录音'}
           </span>
-          {touchFeedback && (
-            <div className="touch-hint">
-              <span>📱 长按录音模式</span>
-            </div>
-          )}
         </div>
         
         {/* 控制按钮 */}
@@ -568,7 +632,7 @@ const RecordComponent = () => {
           {!isRecording ? (
             <button 
               ref={startBtnRef}
-              className={`btn btn-start ${touchFeedback ? 'touch-active' : ''}`} 
+              className={`record-button-img ${touchFeedback ? 'touch-active' : ''}`} 
               onClick={startRecording}
               onTouchStart={handleTouchStart(startRecording)}
               onTouchEnd={handleTouchEnd}
@@ -577,10 +641,7 @@ const RecordComponent = () => {
               onMouseUp={() => window.innerWidth > 768 && setTouchFeedback(false)}
               onMouseLeave={() => window.innerWidth > 768 && setTouchFeedback(false)}
             >
-              <span className="btn-icon">🎤</span>
-              <span className="btn-text">
-                {window.innerWidth <= 768 ? '点击或长按录音' : '开始录音'}
-              </span>
+              <img src={recordButtonImg} alt="录音按钮" />
             </button>
           ) : (
             <>
@@ -614,7 +675,7 @@ const RecordComponent = () => {
         )}
       </div>
       
-      {/* 临时录音列表 */}
+      {/* 待绑定录音列表 */}
       {recordings.length > 0 && (
         <div className="recordings-list">
           <h3>🎵 待绑定录音</h3>
@@ -673,14 +734,9 @@ const RecordComponent = () => {
       )}
       
       {/* 绑定录音列表 */}
-      <div className="recordings-list bound-recordings">
-        <h3>🔗 已绑定录音 {userCode && id && `(会话: ${userCode}/${id})`}</h3>
-        {boundRecordings.length === 0 ? (
-          <div className="empty-state">
-            <p>暂无绑定录音</p>
-            <span>录制并绑定您的第一个录音</span>
-          </div>
-        ) : (
+      {boundRecordings.length > 0 && (
+        <div className="recordings-list bound-recordings">
+          <h3>已绑定录音 {userCode && id && `(会议: ${userCode}/${id})`}</h3>
           <div className="recordings-grid">
             {boundRecordings.map((recording) => (
               <div key={recording.id} className="recording-item bound-item">
@@ -726,8 +782,19 @@ const RecordComponent = () => {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      
+      {/* 添加录音按钮 */}
+      {!isRecording && (
+        <button 
+          className="add-recording-btn" 
+          onClick={startRecording}
+          title="开始录音"
+        >
+          +
+        </button>
+      )}
     </div>
   );
 };

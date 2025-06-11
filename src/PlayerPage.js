@@ -32,6 +32,32 @@ const PlayerPage = () => {
     }
   }, [userid, navigate]);
 
+  // 移动端视口高度修正
+  useEffect(() => {
+    const setVhProperty = () => {
+      // 获取真实的视口高度
+      const vh = window.innerHeight * 0.01;
+      // 设置CSS自定义属性
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    // 初始设置
+    setVhProperty();
+
+    // 监听窗口大小变化（包括移动端地址栏显示/隐藏）
+    const handleResize = () => {
+      setVhProperty();
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
+
   // 从云端API加载录音数据
   useEffect(() => {
     if (id && recordingId && userCode) {
@@ -67,30 +93,80 @@ const PlayerPage = () => {
           const objectKey = file.object_key || file.objectKey || file.key || file.name;
           if (!objectKey) return false;
 
-          // 从object_key提取唯一标识符
+          // 从object_key提取文件名
           const fileName = objectKey.split('/').pop();
           const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
-          const parts = nameWithoutExt.split('_');
-          const uniqueId = parts[parts.length - 1];
-
-          console.log(`文件 ${fileName}:`);
-          console.log(`  提取的唯一标识符: ${uniqueId}`);
+          
+          console.log(`检查文件 ${fileName}:`);
+          console.log(`  文件名（无扩展名）: ${nameWithoutExt}`);
           console.log(`  查找的recordingId: ${recordingId}`);
-          console.log(`  匹配结果: ${uniqueId === recordingId || uniqueId === recordingId.toString()}`);
-
-          // 尝试多种匹配方式
-          return (
-            uniqueId === recordingId ||                    // 直接匹配
-            uniqueId === recordingId.toString() ||         // 字符串匹配
-            parts.includes(recordingId) ||                 // 包含在任何部分
-            parts.includes(recordingId.toString()) ||      // 包含在任何部分（字符串）
-            nameWithoutExt.includes(recordingId) ||        // 文件名包含
-            nameWithoutExt.includes(recordingId.toString()) // 文件名包含（字符串）
-          );
+          
+          // 多种匹配策略
+          const strategies = [
+            // 策略1: 精确的recording_ID格式匹配
+            () => nameWithoutExt === `recording_${recordingId}`,
+            
+            // 策略2: 文件名包含recordingId
+            () => nameWithoutExt.includes(recordingId.toString()),
+            
+            // 策略3: 下划线分割后的任意部分匹配
+            () => {
+              const parts = nameWithoutExt.split('_');
+              return parts.includes(recordingId.toString()) || parts.includes(recordingId);
+            },
+            
+            // 策略4: 如果文件名是纯数字，直接比较
+            () => {
+              const fileNumber = nameWithoutExt.replace(/\D/g, '');
+              return fileNumber === recordingId.toString();
+            },
+            
+            // 策略5: 检查文件名最后的数字部分是否匹配recordingId的后几位
+            () => {
+              const fileParts = nameWithoutExt.split('_');
+              const lastPart = fileParts[fileParts.length - 1];
+              const recordingIdStr = recordingId.toString();
+              
+              // 检查最后部分是否是recordingId的后8位或前8位
+              return (
+                lastPart === recordingIdStr ||
+                (recordingIdStr.length > 8 && lastPart === recordingIdStr.slice(-8)) ||
+                (recordingIdStr.length > 8 && lastPart === recordingIdStr.slice(0, 8))
+              );
+            }
+          ];
+          
+          // 逐一尝试每种策略
+          for (let i = 0; i < strategies.length; i++) {
+            try {
+              const result = strategies[i]();
+              if (result) {
+                console.log(`  匹配成功！使用策略 ${i + 1}`);
+                return true;
+              }
+            } catch (e) {
+              console.warn(`  策略 ${i + 1} 执行失败:`, e);
+            }
+          }
+          
+          console.log(`  所有策略都未匹配成功`);
+          return false;
         });
 
         // 如果找到匹配的文件，或者会话中只有一个文件就使用它
-        const targetFile = foundFile || (files.length === 1 ? files[0] : null);
+        let targetFile = foundFile || (files.length === 1 ? files[0] : null);
+        
+        // 如果还是没找到，尝试按时间排序找最新的文件作为备选
+        if (!targetFile && files.length > 0) {
+          console.log('未找到精确匹配，尝试使用最新的录音文件');
+          const sortedFiles = [...files].sort((a, b) => {
+            const timeA = new Date(a.last_modified || a.lastModified || a.modified || 0);
+            const timeB = new Date(b.last_modified || b.lastModified || b.modified || 0);
+            return timeB - timeA; // 降序排列，最新的在前
+          });
+          targetFile = sortedFiles[0];
+          console.log('使用最新文件作为备选:', targetFile);
+        }
 
         if (targetFile) {
           console.log('使用录音文件:', targetFile);
@@ -427,7 +503,7 @@ const PlayerPage = () => {
 
       {/* 顶部导航 */}
       <header className="player-header">
-        <button onClick={() => navigate(`/${userCode}/${id}`)} className="nav-back-btn">
+        <button onClick={() => navigate(`/${userCode}`)} className="nav-back-btn">
           <span className="back-icon">←</span>
           <span>返回</span>
         </button>
@@ -446,10 +522,13 @@ const PlayerPage = () => {
       {/* 主播放器区域 */}
       <main className="player-main">
         <div className="player-container">
+          <img src="/asset/elephant.png" alt="背景" className="elephant-icon" />
           {/* 录音信息 */}
           <div className="recording-info">
             <div className="recording-avatar">
-              <div className="avatar-icon">🎵</div>
+              <div className="avatar-icon">
+                <img src="/asset/music.png" alt="音乐图标" style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
+              </div>
               <div className="sound-waves">
                 <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
                 <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
@@ -504,7 +583,12 @@ const PlayerPage = () => {
               className="control-btn skip-btn"
               title="后退10秒"
             >
-              <span className="btn-icon">⏪</span>
+              <img 
+                src="/asset/fast.png" 
+                alt="后退10秒"
+                className="btn-icon"
+                style={{ width: '50px', height: '50px', transform: 'rotate(180deg)' }}
+              />
               <span className="btn-label">-10s</span>
             </button>
             
@@ -514,9 +598,16 @@ const PlayerPage = () => {
               disabled={!audioReady}
               title={!audioReady ? '音频加载中...' : isPlaying ? '暂停' : '播放'}
             >
-              <span className="btn-icon">
-                {!audioReady ? '⏳' : isPlaying ? '⏸️' : '▶️'}
-              </span>
+              <img 
+                src={!audioReady ? "/asset/loading.png" : isPlaying ? "/asset/stop_button.png" : "/asset/play_button.png"} 
+                alt={!audioReady ? "加载中" : isPlaying ? "暂停" : "播放"} 
+                className="btn-icon"
+                style={{ 
+                  width: '90px', 
+                  height: '90px', 
+                  transform: isPlaying ? 'translateY(-2px)' : 'translateY(+2px)' 
+                }}
+              />
             </button>
             
             <button 
@@ -524,7 +615,12 @@ const PlayerPage = () => {
               className="control-btn skip-btn"
               title="前进10秒"
             >
-              <span className="btn-icon">⏩</span>
+              <img 
+                src="/asset/fast.png" 
+                alt="前进10秒"
+                className="btn-icon"
+                style={{ width: '50px', height: '50px' }}
+              />
               <span className="btn-label">+10s</span>
             </button>
           </div>

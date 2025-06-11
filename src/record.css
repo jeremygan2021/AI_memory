@@ -1,153 +1,364 @@
-/* 录音组件样式 - 宽屏优化版本 */
+/* 录音组件样式 - 绿色主题版本 */
 * {
   box-sizing: border-box;
 }
 
 .record-container {
-  max-width: 1400px;
+  max-width: 430px;
   margin: 0 auto;
-  padding: 40px;
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  padding: 20px;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 30%, #81C784 60%, #66BB6A 100%);
+  background-image: url('./asset/background2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   min-height: 100vh;
-  color: #333;
+  color: #2E7D32;
   position: relative;
   overflow-x: hidden;
 }
 
-/* 背景装饰元素 */
-.record-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
-  background-size: 50px 50px;
-  animation: backgroundMove 20s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes backgroundMove {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(50px, 50px); }
-}
-
-/* 宽屏布局 - 双栏设计 */
-@media (min-width: 1200px) {
+/* 宽屏适配 - 平板横屏 */
+@media (min-width: 768px) and (max-width: 1024px) {
   .record-container {
+    max-width: 600px;
+    padding: 30px;
+  }
+  
+  .record-panel, .recordings-list {
+    padding: 36px;
+  }
+  
+  .record-header h2 {
+    font-size: 28px;
+  }
+  
+  .record-time {
+    font-size: 64px;
+  }
+  
+  .control-buttons {
+    gap: 20px;
+  }
+  
+  .btn {
+    padding: 18px 36px;
+    font-size: 16px;
+    min-height: 52px;
+  }
+  
+  .btn-start {
+    min-height: 64px;
+    font-size: 18px;
+  }
+}
+
+/* 宽屏适配 - 桌面端 */
+@media (min-width: 1025px) {
+  .record-container {
+    max-width: 800px;
+    padding: 40px;
+  }
+  
+  .record-panel, .recordings-list {
+    padding: 48px;
+  }
+  
+  .record-header h2 {
+    font-size: 32px;
+  }
+  
+  .record-time {
+    font-size: 72px;
+  }
+  
+  .control-buttons {
+    gap: 24px;
+    max-width: 600px;
+    margin: 40px auto;
+  }
+  
+  .btn {
+    padding: 20px 40px;
+    font-size: 18px;
+    min-height: 56px;
+  }
+  
+  .btn-start {
+    min-height: 72px;
+    font-size: 20px;
+    max-width: 400px;
+  }
+  
+  .recordings-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+  }
+}
+
+/* 超宽屏适配 - 大桌面显示器 */
+@media (min-width: 1440px) {
+  .record-container {
+    max-width: 1200px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
     align-items: start;
   }
   
+  /* .header-status {
+    grid-column: 1 / -1;
+  } */
+  
   .record-panel {
     grid-column: 1;
+    margin-bottom: 0;
   }
   
   .recordings-list {
     grid-column: 2;
+    margin-bottom: 0;
   }
+  
+  .recordings-list.bound-recordings {
+    grid-column: 1 / -1;
+    margin-top: 40px;
+  }
+  
+  .recordings-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  
+  .control-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  /* 宽屏下的录音指示器优化 */
+  .record-indicator {
+    padding: 24px;
+    margin: 40px 0;
+  }
+  
+  .status-text {
+    font-size: 18px;
+  }
+  
+  .indicator-dot {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* 宽屏下的添加按钮调整 */
+  .add-recording-btn {
+    width: 64px;
+    height: 64px;
+    font-size: 32px;
+    bottom: 40px;
+    right: 40px;
+  }
+  
+  /* 宽屏下的音频播放器优化 */
+  .audio-player, .recording-audio {
+    height: 52px;
+    border-radius: 26px;
+  }
+  
+  /* 宽屏下的删除按钮优化 */
+  .delete-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    top: 20px;
+    right: 20px;
+  }
+  
+  /* 宽屏下的空状态优化 */
+  .empty-state {
+    padding: 60px 40px;
+  }
+  
+  .empty-state p {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .empty-state span {
+    font-size: 16px;
+  }
+  
+  /* 宽屏下的错误消息优化 */
+  .error-message {
+    padding: 60px 48px;
+  }
+  
+  .error-message h3 {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+  
+  .error-message p {
+    font-size: 18px;
+  }
+  
+  /* 宽屏下的当前音频区域优化 */
+  .current-audio {
+    margin-top: 40px;
+    padding: 32px;
+  }
+  
+  .current-audio h4 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+/* 超宽屏三列布局 - 4K显示器等 */
+@media (min-width: 1920px) {
+  .record-container {
+    max-width: 1600px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    padding: 60px;
+  }
+  
+  /* .header-status {
+    grid-column: 1 / -1;
+  } */
+  
+  .record-panel {
+    grid-column: 1;
+  }
+  
+  .recordings-list:not(.bound-recordings) {
+    grid-column: 2;
+  }
+  
+  .recordings-list.bound-recordings {
+    grid-column: 3;
+    margin-top: 0;
+  }
+  
+  .recordings-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .record-time {
+    font-size: 80px;
+  }
+  
+  .record-header h2 {
+    font-size: 36px;
+  }
+  
+  .btn-start {
+    min-height: 80px;
+    font-size: 22px;
+  }
+}
+
+/* 背景叠加层，保持绿色主调 */
+.record-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(200, 230, 201, 0.85) 0%, rgba(165, 214, 167, 0.8) 50%, rgba(129, 199, 132, 0.85) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 顶部状态栏样式 */
+/* .header-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #4CAF50;
+  box-shadow: 0 2px 20px rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+} */
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #4CAF50;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.user-info {
+  color: #4CAF50;
+  font-size: 14px;
 }
 
 /* 录音控制面板 */
 .record-panel {
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(253, 254, 249, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 24px;
-  padding: 40px;
-  margin-bottom: 40px;
+  padding: 32px;
+  margin-bottom: 16px;
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.1),
-    0 8px 25px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    0 8px 32px rgba(76, 175, 80, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.1);
   position: relative;
   overflow: hidden;
-}
-
-.record-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-  background-size: 200% 100%;
-  animation: gradientShift 3s ease-in-out infinite;
-}
-
-@keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-.record-panel:hover {
-  transform: translateY(-4px);
-  box-shadow: 
-    0 30px 80px rgba(0, 0, 0, 0.15),
-    0 12px 35px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  width: 100%;
+  max-width: 100%;
 }
 
 /* 录音面板头部 */
 .record-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 35px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+  text-align: center;
+  margin-bottom: 32px;
   position: relative;
 }
 
-.record-header::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  border-radius: 1px;
-}
-
 .record-header h2 {
-  margin: 0;
-  font-size: 32px;
+  margin: 0 0 20px 0;
+  font-size: 24px;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #4CAF50;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   letter-spacing: -0.5px;
 }
 
 .record-time {
-  font-size: 36px;
-  font-weight: 800;
+  font-size: 56px;
+  font-weight: 300;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24, #ff6b6b);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  background-size: 200% 100%;
-  animation: timeGradient 2s ease-in-out infinite;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  letter-spacing: 2px;
-}
-
-@keyframes timeGradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  color: #2E7D32;
+  letter-spacing: 4px;
+  text-align: center;
 }
 
 /* 录音状态指示器 */
@@ -156,134 +367,559 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin: 35px 0;
+  margin: 32px 0;
   padding: 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 20px;
+  background: #f9fff1;
+  border: 4px solid rgba(76, 175, 80, 0.15);
   transition: all 0.3s ease;
   position: relative;
-  overflow: hidden;
-}
-
-.record-indicator::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-  transition: left 0.6s ease;
-}
-
-.record-indicator:hover::before {
-  left: 100%;
 }
 
 .indicator-dot {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: #95a5a6;
+  background: #81C784;
   transition: all 0.3s ease;
   position: relative;
 }
 
-.indicator-dot::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: inherit;
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
 .record-indicator.recording .indicator-dot {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: #4CAF50;
   animation: pulseRecord 1.5s infinite;
   box-shadow: 
-    0 0 20px rgba(231, 76, 60, 0.6),
-    0 0 40px rgba(231, 76, 60, 0.3);
-}
-
-.record-indicator.recording .indicator-dot::before {
-  opacity: 0.6;
-  animation: ripple 1.5s infinite;
+    0 0 20px rgba(76, 175, 80, 0.6),
+    0 0 40px rgba(76, 175, 80, 0.3);
 }
 
 .record-indicator.paused .indicator-dot {
-  background: linear-gradient(135deg, #f39c12, #e67e22);
+  background: #FF9800;
   animation: blinkPause 1s infinite;
 }
 
 .record-indicator.touch-feedback {
-  background: linear-gradient(135deg, #e8f5e8, #d4f1d4);
-  border-color: rgba(46, 204, 113, 0.3);
+  background: rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.3);
   transform: scale(1.02);
 }
 
-.record-indicator.touch-feedback .indicator-dot {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
-  animation: pulseTouch 0.6s ease-in-out infinite alternate;
-}
-
 .status-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #2E7D32;
   letter-spacing: 0.5px;
   text-align: center;
   flex: 1;
 }
 
-.touch-hint {
+/* 控制按钮区域 */
+.control-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 32px 0;
+  flex-wrap: wrap;
+}
+
+/* 按钮基础样式 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  text-decoration: none;
+  min-width: 140px;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* 开始录音按钮 */
+.btn-start {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  box-shadow: 
+    0 4px 20px rgba(76, 175, 80, 0.4),
+    0 2px 8px rgba(76, 175, 80, 0.3);
+  min-height: 56px;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 24px rgba(76, 175, 80, 0.5),
+    0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-start:active, .btn-start.touch-active {
+  transform: scale(0.98);
+  box-shadow: 
+    0 2px 12px rgba(76, 175, 80, 0.6),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 暂停按钮 */
+.btn-pause {
+  background: linear-gradient(135deg, #FF9800, #FFB74D);
+  color: white;
+  box-shadow: 
+    0 4px 16px rgba(255, 152, 0, 0.4),
+    0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+.btn-pause:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 152, 0, 0.5),
+    0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+/* 停止按钮 */
+.btn-stop {
+  background: linear-gradient(135deg, #F44336, #EF5350);
+  color: white;
+  box-shadow: 
+    0 4px 16px rgba(244, 67, 54, 0.4),
+    0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.btn-stop:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(244, 67, 54, 0.5),
+    0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+/* 重置按钮 */
+.btn-reset {
+  background: linear-gradient(135deg, #9E9E9E, #BDBDBD);
+  color: white;
+  box-shadow: 
+    0 4px 16px rgba(158, 158, 158, 0.4),
+    0 2px 8px rgba(158, 158, 158, 0.3);
+}
+
+.btn-reset:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(158, 158, 158, 0.5),
+    0 4px 12px rgba(158, 158, 158, 0.4);
+}
+
+.btn-icon {
+  font-size: 20px;
+}
+
+.btn-text {
+  font-weight: 600;
+}
+
+/* 当前录音播放区域 */
+.current-audio {
+  margin-top: 32px;
+  padding: 24px;
+  background: rgba(76, 175, 80, 0.05);
+  border-radius: 20px;
+  border: 1px solid rgba(76, 175, 80, 0.15);
+}
+
+.current-audio h4 {
+  margin: 0 0 16px 0;
+  color: #2E7D32;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audio-player {
+  width: 100%;
+  height: 48px;
+  border-radius: 24px;
+  outline: none;
+  filter: hue-rotate(80deg) saturate(1.2);
+}
+
+/* 录音历史列表 */
+.recordings-list {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 16px;
+  box-shadow: 
+    0 8px 32px rgba(76, 175, 80, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+}
+
+.recordings-list h3 {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  color: #4CAF50;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: #81C784;
+  position: relative;
+}
+
+.empty-state p {
+  font-size: 18px;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+.empty-state span {
+  font-size: 14px;
+  opacity: 0.8;
+  line-height: 1.6;
+  color: #81C784;
+}
+
+/* 添加录音按钮 */
+.add-recording-btn {
   position: absolute;
-  bottom: -35px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(46, 204, 113, 0.9);
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 
+    0 8px 24px rgba(76, 175, 80, 0.4),
+    0 4px 12px rgba(76, 175, 80, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 300;
+}
+
+.add-recording-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 
+    0 12px 32px rgba(76, 175, 80, 0.5),
+    0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.add-recording-btn:active {
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* 录音网格布局 */
+.recordings-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+  align-items: stretch; /* 确保所有卡片高度一致 */
+}
+
+/* 录音项目 */
+.recording-item {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.08);
+  display: flex;
+  flex-direction: column;
+  min-height: 180px; /* 设置最小高度确保卡片平齐 */
+  justify-content: space-between; /* 内容分布均匀 */
+}
+
+.recording-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 24px rgba(76, 175, 80, 0.15),
+    0 4px 12px rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.recording-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50);
+}
+
+/* 录音信息 */
+.recording-info {
+  margin-bottom: 16px;
+  flex-grow: 1; /* 让信息区域填充可用空间 */
+}
+
+.recording-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2E7D32;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+  min-height: 24px; /* 确保标题区域高度一致 */
+}
+
+.recording-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 12px;
+  color: #81C784;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 44px; /* 确保元数据区域高度一致 */
+}
+
+.duration {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.timestamp {
+  font-style: italic;
+  font-weight: 500;
+  color: #81C784;
+}
+
+/* 录音音频播放器 */
+.recording-audio {
+  width: 100%;
+  height: 40px;
+  margin: 12px 0;
+  border-radius: 20px;
+  outline: none;
+  filter: hue-rotate(80deg) saturate(1.2);
+  flex-shrink: 0; /* 防止音频播放器被压缩 */
+}
+
+/* 删除按钮 */
+.delete-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(135deg, #F44336, #EF5350);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.5);
+}
+
+/* 动作按钮 */
+.recording-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto; /* 将按钮推到底部 */
+  justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0; /* 防止按钮区域被压缩 */
+  min-height: 32px; /* 确保按钮区域高度一致 */
+}
+
+.bind-btn {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  cursor: pointer;
   font-size: 12px;
   font-weight: 600;
-  white-space: nowrap;
-  animation: fadeInUp 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+.bind-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
-@keyframes pulseTouch {
-  from {
-    transform: scale(1);
-    box-shadow: 
-      0 0 20px rgba(46, 204, 113, 0.6),
-      0 0 40px rgba(46, 204, 113, 0.3);
-  }
-  to {
-    transform: scale(1.1);
-    box-shadow: 
-      0 0 30px rgba(46, 204, 113, 0.8),
-      0 0 60px rgba(46, 204, 113, 0.4);
-  }
+.play-btn {
+  background: linear-gradient(135deg, #2196F3, #42A5F5);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
 }
 
-/* 增强的动画效果 */
+.play-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
+.retry-btn {
+  background: linear-gradient(135deg, #FF9800, #FFB74D);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+.retry-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+/* 上传状态徽章 */
+.upload-status-badge {
+  margin-left: 8px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.upload-status {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.upload-status.uploading {
+  background: linear-gradient(135deg, #FF9800, #FFB74D);
+  color: white;
+}
+
+.upload-status.success {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+}
+
+.upload-status.error {
+  background: linear-gradient(135deg, #F44336, #EF5350);
+  color: white;
+}
+
+.upload-status.local {
+  background: linear-gradient(135deg, #9E9E9E, #BDBDBD);
+  color: white;
+}
+
+/* 云端徽章 */
+.cloud-badge {
+  margin-left: 8px;
+  font-size: 12px;
+  opacity: 0.8;
+  color: #4CAF50;
+}
+
+.cloud-url {
+  display: block;
+  color: #4CAF50;
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cloud-url:hover {
+  color: #2E7D32;
+  text-decoration: underline;
+}
+
+/* 绑定录音区域 */
+.bound-recordings {
+  position: relative;
+}
+
+.bound-recordings h3 {
+  color: #4CAF50;
+  border-left: 4px solid #4CAF50;
+  padding-left: 16px;
+  margin-bottom: 20px;
+}
+
+.bound-item {
+  border-left: 4px solid #4CAF50;
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.bound-item:hover {
+  background: rgba(76, 175, 80, 0.1);
+  border-left-color: #2E7D32;
+}
+
+.bound-time {
+  display: block;
+  color: #4CAF50;
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* 动画效果 */
 @keyframes pulseRecord {
   0% {
     transform: scale(1);
@@ -299,1414 +935,539 @@
   }
 }
 
-@keyframes ripple {
-  0% {
-    transform: translate(-50%, -50%) scale(0.8);
-    opacity: 0.6;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(2);
-    opacity: 0;
-  }
-}
-
 @keyframes blinkPause {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0.4; }
 }
 
-/* 控制按钮区域 */
-.control-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 35px 0;
-  flex-wrap: wrap;
-}
-
-/* 按钮基础样式 */
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 32px;
-  border: none;
-  border-radius: 50px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  text-decoration: none;
-  min-width: 140px;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.6s ease;
-  z-index: 1;
-}
-
-.btn:hover::before {
-  left: 100%;
-}
-
-.btn-icon {
-  font-size: 20px;
-  z-index: 2;
-  position: relative;
-}
-
-.btn span:not(.btn-icon) {
-  z-index: 2;
-  position: relative;
-}
-
-/* 开始录音按钮 */
-.btn-start {
-  background: linear-gradient(135deg, #27ae60, #2ecc71, #27ae60);
-  color: white;
-  box-shadow: 
-    0 8px 25px rgba(46, 204, 113, 0.4),
-    0 4px 12px rgba(46, 204, 113, 0.3);
-  background-size: 200% 100%;
-}
-
-.btn-start:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 
-    0 12px 35px rgba(46, 204, 113, 0.5),
-    0 6px 20px rgba(46, 204, 113, 0.4);
-  background-position: 100% 0;
-}
-
-.btn-start:active {
-  transform: translateY(-1px) scale(1.02);
-}
-
-.btn-start.touch-active {
-  background: linear-gradient(135deg, #229954, #27ae60);
-  transform: scale(0.98);
-  box-shadow: 
-    0 4px 15px rgba(46, 204, 113, 0.6),
-    inset 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-start.touch-active::after {
-  opacity: 1;
-}
-
-.btn-text {
-  z-index: 2;
-  position: relative;
-}
-
-/* 暂停按钮 */
-.btn-pause {
-  background: linear-gradient(135deg, #f39c12, #e67e22, #f39c12);
-  color: white;
-  box-shadow: 
-    0 8px 25px rgba(243, 156, 18, 0.4),
-    0 4px 12px rgba(243, 156, 18, 0.3);
-  background-size: 200% 100%;
-}
-
-.btn-pause:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 
-    0 12px 35px rgba(243, 156, 18, 0.5),
-    0 6px 20px rgba(243, 156, 18, 0.4);
-  background-position: 100% 0;
-}
-
-/* 停止按钮 */
-.btn-stop {
-  background: linear-gradient(135deg, #e74c3c, #c0392b, #e74c3c);
-  color: white;
-  box-shadow: 
-    0 8px 25px rgba(231, 76, 60, 0.4),
-    0 4px 12px rgba(231, 76, 60, 0.3);
-  background-size: 200% 100%;
-}
-
-.btn-stop:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 
-    0 12px 35px rgba(231, 76, 60, 0.5),
-    0 6px 20px rgba(231, 76, 60, 0.4);
-  background-position: 100% 0;
-}
-
-/* 重置按钮 */
-.btn-reset {
-  background: linear-gradient(135deg, #95a5a6, #7f8c8d, #95a5a6);
-  color: white;
-  box-shadow: 
-    0 8px 25px rgba(149, 165, 166, 0.4),
-    0 4px 12px rgba(149, 165, 166, 0.3);
-  background-size: 200% 100%;
-}
-
-.btn-reset:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 
-    0 12px 35px rgba(149, 165, 166, 0.5),
-    0 6px 20px rgba(149, 165, 166, 0.4);
-  background-position: 100% 0;
-}
-
-/* 当前录音播放区域 */
-.current-audio {
-  margin-top: 35px;
-  padding: 30px;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border-radius: 20px;
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  position: relative;
-  overflow: hidden;
-}
-
-.current-audio::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-}
-
-.current-audio h4 {
-  margin: 0 0 20px 0;
-  color: #2c3e50;
-  font-size: 20px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.audio-player {
-  width: 100%;
-  height: 50px;
-  border-radius: 25px;
-  outline: none;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-}
-
-/* 录音历史列表 */
-.recordings-list {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  padding: 40px;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.1),
-    0 8px 25px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-.recordings-list::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #764ba2, #667eea, #764ba2);
-  background-size: 200% 100%;
-  animation: gradientShift 3s ease-in-out infinite reverse;
-}
-
-.recordings-list h3 {
-  margin: 0 0 35px 0;
-  font-size: 28px;
-  background: linear-gradient(135deg, #764ba2, #667eea);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-/* 空状态 */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #7f8c8d;
-}
-
-.empty-state p {
-  font-size: 20px;
-  margin: 0 0 15px 0;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.empty-state span {
-  font-size: 16px;
-  opacity: 0.8;
-  line-height: 1.6;
-}
-
-/* 录音网格布局 - 宽屏优化 */
-.recordings-grid {
-  display: grid;
-  gap: 25px;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-}
-
-@media (min-width: 1200px) {
-  .recordings-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-  }
-}
-
-@media (min-width: 1600px) {
-  .recordings-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
-/* 录音项目 */
-.recording-item {
-  background: linear-gradient(135deg, #ffffff, #f8f9fa);
-  border-radius: 20px;
-  padding: 25px;
-  border: 1px solid rgba(102, 126, 234, 0.1);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-}
-
-.recording-item:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.12),
-    0 8px 25px rgba(102, 126, 234, 0.15);
-  border-color: rgba(102, 126, 234, 0.3);
-}
-
-.recording-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-  background-size: 200% 100%;
-  animation: gradientShift 4s ease-in-out infinite;
-}
-
-/* 录音信息 */
-.recording-info {
-  margin-bottom: 20px;
-}
-
-.recording-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  letter-spacing: 0.3px;
-}
-
-.recording-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  color: #7f8c8d;
-  gap: 10px;
-}
-
-.duration {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.timestamp {
-  font-style: italic;
-  font-weight: 500;
-}
-
-/* 录音音频播放器 */
-.recording-audio {
-  width: 100%;
-  height: 45px;
-  margin-bottom: 15px;
-  border-radius: 22px;
-  outline: none;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-}
-
-/* 删除按钮 */
-.delete-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  opacity: 0.8;
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-}
-
-.delete-btn:hover {
-  opacity: 1;
-  transform: scale(1.15) rotate(5deg);
-  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);
-}
-
-.delete-btn:active {
-  transform: scale(1.05) rotate(5deg);
-}
-
 /* 错误消息 */
 .error-message {
   text-align: center;
-  padding: 60px 40px;
-  background: rgba(255, 255, 255, 0.98);
+  padding: 48px 32px;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(231, 76, 60, 0.2);
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.2);
 }
 
 .error-message h3 {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 20px;
-  font-size: 28px;
+  color: #F44336;
+  margin-bottom: 16px;
+  font-size: 24px;
   font-weight: 700;
 }
 
 .error-message p {
-  color: #7f8c8d;
-  font-size: 18px;
-  line-height: 1.8;
+  color: #81C784;
+  font-size: 16px;
+  line-height: 1.6;
   font-weight: 500;
 }
 
-/* 移动端优化样式 */
-
-/* 触摸设备优化 */
-@media (hover: none) and (pointer: coarse) {
-  .btn:hover {
-    transform: none;
-    box-shadow: none;
-  }
-  
-  .btn:active {
-    transform: scale(0.95);
-    transition: transform 0.1s ease;
-  }
-  
-  .record-panel:hover {
-    transform: none;
-    box-shadow: 
-      0 20px 60px rgba(0, 0, 0, 0.1),
-      0 8px 25px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  }
-  
-  .recording-item:hover {
-    transform: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    border-color: rgba(102, 126, 234, 0.1);
-  }
-}
-
-/* 响应式设计 - 宽屏 */
-@media (max-width: 1199px) {
-  .record-container {
-    display: block;
-  }
-}
-
-/* 平板横屏优化 */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .record-container {
-    padding: 30px;
-  }
-  
-  .record-panel, .recordings-list {
-    padding: 35px;
-  }
-  
-  .recordings-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-  }
-}
-
-/* 平板竖屏和大手机优化 */
+/* 移动端适配 */
 @media (max-width: 768px) {
   .record-container {
     padding: 16px;
-    min-height: 100vh;
+    padding-bottom: 80px; /* 为底部按钮留出空间，防止遮挡 */
     display: flex;
     flex-direction: column;
-  }
-  
-  .record-panel {
-    margin-bottom: 20px;
-    padding: 24px;
-    border-radius: 20px;
-    position: sticky;
-    top: 16px;
-    z-index: 10;
-  }
-  
-  .recordings-list {
-    flex: 1;
-    padding: 24px;
-    border-radius: 20px;
-  }
-  
-  .record-header {
-    flex-direction: column;
     gap: 16px;
-    text-align: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    min-height: 100vh; /* 确保页面高度足够 */
   }
   
-  .record-header h2 {
-    font-size: 28px;
-    line-height: 1.2;
-  }
-  
-  .record-time {
-    font-size: 32px;
-    padding: 12px 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  /* 录音指示器移动端优化 */
-  .record-indicator {
-    margin: 20px 0;
-    padding: 16px;
-    border-radius: 16px;
-  }
-  
-  .status-text {
-    font-size: 16px;
-    font-weight: 600;
-  }
-  
-     /* 移动端按钮优化 */
-   .control-buttons {
-     gap: 12px;
-     margin: 20px 0;
-     display: grid;
-     grid-template-columns: 1fr 1fr;
-   }
-   
-   .btn {
-     width: 100%;
-     padding: 16px 20px;
-     font-size: 15px;
-     min-height: 56px;
-     border-radius: 16px;
-     font-weight: 700;
-     letter-spacing: 0.5px;
-     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-     position: relative;
-     overflow: hidden;
-     touch-action: manipulation;
-     user-select: none;
-     -webkit-user-select: none;
-     -webkit-tap-highlight-color: transparent;
-   }
-   
-   /* 录音按钮特殊处理 */
-   .btn-start {
-     grid-column: 1 / -1;
-     font-size: 18px;
-     min-height: 68px;
-     background: linear-gradient(135deg, #27ae60, #2ecc71);
-     position: relative;
-     border: 2px solid rgba(46, 204, 113, 0.3);
-   }
-   
-   .btn-start::after {
-     content: '';
-     position: absolute;
-     top: 0;
-     left: 0;
-     right: 0;
-     bottom: 0;
-     background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
-     opacity: 0;
-     transition: opacity 0.3s ease;
-   }
-   
-   .btn-start:active::after {
-     opacity: 1;
-   }
-   
-   .btn-start.touch-active {
-     background: linear-gradient(135deg, #229954, #27ae60);
-     border-color: rgba(46, 204, 113, 0.6);
-     box-shadow: 
-       0 2px 15px rgba(46, 204, 113, 0.4),
-       inset 0 2px 4px rgba(0, 0, 0, 0.1);
-   }
-   
-   /* 移动端录音提示 */
-   .btn-start .btn-text {
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     gap: 4px;
-   }
-   
-       .btn-start .btn-text::after {
-      content: '长按快速录音';
-      font-size: 11px;
-      opacity: 0.8;
-      font-weight: 500;
-    }
-    
-    /* 桌面端隐藏移动端提示 */
-    @media (min-width: 769px) {
-      .btn-start .btn-text::after {
-        display: none;
-      }
-    }
-   
-   /* 触摸反馈 */
-   .btn:active {
-     transform: scale(0.98);
-     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-     transition: all 0.1s ease;
-   }
-   
-   /* 其他按钮的移动端优化 */
-   .btn-pause, .btn-stop, .btn-reset {
-     border: 1px solid rgba(255, 255, 255, 0.2);
-   }
-   
-   .btn-pause:active {
-     background: linear-gradient(135deg, #e67e22, #d35400);
-   }
-   
-   .btn-stop:active {
-     background: linear-gradient(135deg, #c0392b, #a93226);
-   }
-   
-   .btn-reset:active {
-     background: linear-gradient(135deg, #7f8c8d, #6c7b7d);
-   }
-  
-  /* 当前录音播放区域 */
-  .current-audio {
-    margin-top: 20px;
+  .record-panel, .recordings-list {
     padding: 20px;
-    border-radius: 16px;
-  }
-  
-  .current-audio h4 {
-    font-size: 18px;
-    margin-bottom: 16px;
-  }
-  
-  .audio-player {
-    height: 48px;
-    border-radius: 24px;
-  }
-  
-  /* 录音列表优化 */
-  .recordings-list h3 {
-    font-size: 24px;
-    margin-bottom: 24px;
+    margin-bottom: 0;
   }
   
   .recordings-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 16px; /* 保持一致的间距 */
+    padding-bottom: 16px; /* 为网格底部增加间距 */
   }
   
   .recording-item {
-    padding: 20px;
-    border-radius: 16px;
-    position: relative;
+    padding: 16px;
+    min-height: 200px; /* 移动端调整最小高度 */
+    margin-bottom: 8px; /* 增加卡片间距 */
+  }
+  
+  /* 移动端录音信息优化 */
+  .recording-title {
+    font-size: 15px;
+    min-height: 22px;
   }
   
   .recording-meta {
+    font-size: 11px;
+    min-height: 50px; /* 移动端增加高度适应换行 */
     flex-direction: column;
-    gap: 8px;
     align-items: flex-start;
+    gap: 4px;
   }
   
-  .delete-btn {
-    top: 16px;
-    right: 16px;
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
-    touch-action: manipulation;
+  .recording-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center; /* 移动端居中显示按钮 */
   }
   
-  .delete-btn:active {
-    transform: scale(0.9);
-  }
-}
-
-/* 手机小屏优化 */
-@media (max-width: 480px) {
-  .record-container {
-    padding: 12px;
-  }
-  
-  .record-panel, .recordings-list {
-    padding: 20px;
-    border-radius: 16px;
+  /* 移动端按钮优化 */
+  .bind-btn, .play-btn, .retry-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    min-width: 60px;
   }
   
   .record-header h2 {
-    font-size: 24px;
+    font-size: 20px;
   }
   
   .record-time {
-    font-size: 28px;
-    padding: 10px 16px;
+    font-size: 48px;
   }
   
-  /* 录音指示器 */
-  .record-indicator {
-    padding: 14px;
-    margin: 16px 0;
-  }
-  
-  .indicator-dot {
-    width: 14px;
-    height: 14px;
-  }
-  
-  .status-text {
-    font-size: 15px;
-  }
-  
-  /* 按钮组合优化 */
   .control-buttons {
-    gap: 10px;
-    margin: 16px 0;
+    gap: 12px;
+    margin: 24px 0;
   }
   
   .btn {
-    padding: 14px 16px;
+    padding: 14px 24px;
     font-size: 14px;
-    min-height: 52px;
-    border-radius: 14px;
+    min-height: 48px;
   }
   
-     .btn-start {
-     font-size: 15px;
-     min-height: 64px;
-     border: 2px solid rgba(46, 204, 113, 0.3);
-   }
-   
-   .btn-start .btn-text::after {
-     font-size: 10px;
-   }
-   
-   .btn-icon {
-     font-size: 18px;
-   }
-  
-  /* 当前录音 */
-  .current-audio {
-    margin-top: 16px;
-    padding: 16px;
+  .btn-start {
+    width: 100%;
+    max-width: none;
+    min-height: 56px;
   }
   
-  .current-audio h4 {
-    font-size: 16px;
-    margin-bottom: 12px;
+  /* 移动端添加录音按钮优化 */
+  .add-recording-btn {
+    position: fixed; /* 改为固定定位，确保不遮挡内容 */
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    z-index: 1000; /* 确保按钮在最上层 */
+    box-shadow: 
+      0 8px 24px rgba(76, 175, 80, 0.4),
+      0 4px 12px rgba(76, 175, 80, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1); /* 添加白色边框提高可见性 */
   }
   
-  .audio-player {
-    height: 44px;
-    border-radius: 22px;
+  /* 移动端滚动优化 - 确保内容不会被按钮遮挡 */
+  .recordings-list:last-child {
+    margin-bottom: 20px; /* 为最后一个列表添加底部间距 */
   }
   
-  /* 录音历史 */
-  .recordings-list h3 {
-    font-size: 20px;
-    margin-bottom: 20px;
+  .recordings-list:last-child .recordings-grid {
+    padding-bottom: 20px; /* 为最后一个网格添加底部间距 */
   }
   
-  .recordings-grid {
-    gap: 12px;
+  /* 移动端平滑滚动 */
+  .record-container {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; /* iOS平滑滚动 */
   }
   
+  /* 移动端卡片阴影优化 */
   .recording-item {
-    padding: 16px;
-    border-radius: 14px;
+    box-shadow: 
+      0 2px 8px rgba(76, 175, 80, 0.1),
+      0 1px 4px rgba(0, 0, 0, 0.05);
   }
   
-  .recording-title {
-    font-size: 16px;
-    margin-bottom: 10px;
+  .recording-item:active {
+    transform: scale(0.98);
+    box-shadow: 
+      0 1px 4px rgba(76, 175, 80, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
-  .recording-audio {
-    height: 40px;
-    border-radius: 20px;
-    margin-bottom: 12px;
+  /* 移动端录音提示 */
+  .btn-start .btn-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
   }
   
+  .btn-start .btn-text::after {
+    content: '长按快速录音';
+    font-size: 11px;
+    opacity: 0.8;
+    font-weight: 400;
+  }
+  
+  /* 移动端触摸优化 */
+  .recording-item {
+    touch-action: manipulation; /* 优化触摸响应 */
+  }
+  
+  .btn, .bind-btn, .play-btn, .retry-btn, .delete-btn {
+    touch-action: manipulation; /* 优化按钮触摸响应 */
+    min-height: 44px; /* iOS建议的最小触摸目标 */
+  }
+  
+  /* 移动端删除按钮优化 */
   .delete-btn {
     width: 36px;
     height: 36px;
-    font-size: 14px;
     top: 12px;
     right: 12px;
+    font-size: 16px;
   }
   
-  /* 空状态 */
-  .empty-state {
-    padding: 40px 16px;
+  /* 移动端音频播放器优化 */
+  .recording-audio, .audio-player {
+    height: 44px; /* 增加高度便于触摸 */
+    margin: 16px 0;
   }
   
-  .empty-state p {
-    font-size: 18px;
+  /* 移动端安全区域适配（刘海屏等） */
+  .record-container {
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(80px, calc(env(safe-area-inset-bottom) + 80px));
   }
   
-  .empty-state span {
-    font-size: 14px;
+  .add-recording-btn {
+    bottom: max(20px, calc(env(safe-area-inset-bottom) + 20px));
+    right: max(20px, env(safe-area-inset-right) + 20px);
+  }
+  
+  /* 桌面端优化 */
+  @media (min-width: 769px) {
+    /* 隐藏移动端提示 */
+    .btn-start .btn-text::after {
+      display: none;
+    }
+    
+    /* 恢复桌面端按钮定位 */
+    .add-recording-btn {
+      position: absolute;
+      z-index: auto;
+      box-shadow: 
+        0 8px 24px rgba(76, 175, 80, 0.4),
+        0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+    
+    /* 桌面端恢复容器底部间距 */
+    .record-container {
+      padding-bottom: 20px;
+    }
+    
+    /* 桌面端hover效果恢复 */
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .btn-start:hover {
+      transform: translateY(-2px) scale(1.02);
+    }
+    
+    .recording-item:hover {
+      transform: translateY(-3px);
+    }
+    
+    .add-recording-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+    }
+    
+    .delete-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    /* 桌面端音频播放器优化 */
+    .audio-player:hover, .recording-audio:hover {
+      filter: hue-rotate(80deg) saturate(1.4) brightness(1.05);
+    }
   }
 }
 
-/* 超小屏设备优化 */
-@media (max-width: 360px) {
+/* 平板布局优化 */
+@media (min-width: 769px) and (max-width: 1024px) {
   .record-container {
-    padding: 8px;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
   }
   
-  .record-panel, .recordings-list {
-    padding: 16px;
+  .record-panel {
+    grid-column: 1 / -1;
   }
   
-  .record-header h2 {
-    font-size: 20px;
+  .recordings-list {
+    margin-bottom: 0;
   }
   
-  .record-time {
-    font-size: 24px;
-    padding: 8px 12px;
+  .recordings-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    align-items: stretch;
   }
   
-  .btn {
-    padding: 12px 14px;
+  .recording-item {
+    min-height: 220px; /* 平板端调整最小高度 */
+  }
+  
+  /* 平板端三列布局当空间足够时 */
+  @media (min-width: 900px) and (max-width: 1024px) {
+    .recordings-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    
+    .recording-item {
+      min-height: 200px;
+    }
+    
+    .recording-title {
+      font-size: 14px;
+    }
+    
+    .recording-meta {
+      font-size: 11px;
+    }
+    
+    .bind-btn, .play-btn, .retry-btn {
+      padding: 6px 10px;
+      font-size: 11px;
+    }
+  }
+}
+
+/* 桌面端布局优化 */
+@media (min-width: 1025px) and (max-width: 1439px) {
+  .record-container {
+    padding: 32px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .record-panel {
+    grid-column: 1;
+    align-self: start;
+    position: sticky;
+    top: 32px;
+  }
+  
+  .recordings-list {
+    margin-bottom: 0;
+  }
+  
+  .recordings-list.bound-recordings {
+    grid-column: 1 / -1;
+  }
+  
+  .recordings-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    align-items: stretch;
+  }
+  
+  .recording-item {
+    min-height: 240px; /* 桌面端调整最小高度 */
+  }
+  
+  /* 当绑定录音跨列显示时的三列布局 */
+  .recordings-list.bound-recordings .recordings-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  .recordings-list.bound-recordings .recording-item {
+    min-height: 220px;
+  }
+}
+
+/* 大屏幕布局优化 */
+@media (min-width: 1440px) {
+  .record-container {
+    padding: 40px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  
+  /* .header-status {
+    grid-column: 1 / -1;
+  } */
+  
+  .record-panel {
+    grid-column: 1;
+    align-self: start;
+    position: sticky;
+    top: 40px;
+  }
+  
+  .recordings-list:not(.bound-recordings) {
+    grid-column: 2;
+    margin-bottom: 0;
+  }
+  
+  .recordings-list.bound-recordings {
+    grid-column: 3;
+    margin-bottom: 0;
+  }
+  
+  .recordings-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+  
+  .recording-item {
+    min-height: 260px; /* 大屏幕最小高度 */
+  }
+  
+  /* 大屏幕三列时的优化布局 */
+  .recordings-list:not(.bound-recordings) .recordings-grid,
+  .recordings-list.bound-recordings .recordings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+/* 超宽屏幕布局优化 */
+@media (min-width: 1920px) {
+  .record-container {
+    padding: 48px;
+    max-width: 1800px;
+    gap: 48px;
+  }
+  
+  .record-panel {
+    top: 48px;
+  }
+  
+  .recordings-grid {
+    gap: 32px;
+  }
+  
+  .recording-item {
+    padding: 24px;
+    min-height: 280px; /* 超宽屏最小高度 */
+  }
+  
+  /* 超宽屏的卡片内容优化 */
+  .recording-title {
+    font-size: 18px;
+    min-height: 28px;
+  }
+  
+  .recording-meta {
     font-size: 13px;
     min-height: 48px;
   }
   
-     .btn-start {
-     font-size: 14px;
-     min-height: 60px;
-     border: 2px solid rgba(46, 204, 113, 0.3);
-   }
-   
-   .btn-start .btn-text::after {
-     font-size: 9px;
-   }
-   
-   .control-buttons {
-     gap: 8px;
-   }
+  .bind-btn, .play-btn, .retry-btn {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
 }
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 4px;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #764ba2, #667eea);
+  background: linear-gradient(135deg, #66BB6A, #4CAF50);
 }
 
 /* 选择文本时的颜色 */
 ::selection {
-  background: rgba(102, 126, 234, 0.3);
-  color: #2c3e50;
+  background: rgba(76, 175, 80, 0.3);
+  color: #2E7D32;
 }
 
 ::-moz-selection {
-  background: rgba(102, 126, 234, 0.3);
-  color: #2c3e50;
+  background: rgba(76, 175, 80, 0.3);
+  color: #2E7D32;
 }
 
-/* 新增样式 - 绑定录音和播放功能 */
-
-/* 录音操作按钮组 */
-.recording-actions {
+/* 录音按钮图片样式 */
+.record-button-img {
+  width: 220px;
+  height: 120px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease;
   display: flex;
-  gap: 8px;
-  margin-top: 12px;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
 }
 
-/* 绑定按钮 */
-.bind-btn {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.record-button-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.bind-btn:hover {
-  background: linear-gradient(135deg, #45a049, #3d8b40);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+.record-button-img.touch-active {
+  transform: scale(0.95);
 }
 
-.bind-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-}
-
-/* 播放按钮 */
-.play-btn {
-  background: linear-gradient(135deg, #2196F3, #1976D2);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.play-btn:hover {
-  background: linear-gradient(135deg, #1976D2, #1565C0);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
-}
-
-.play-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
-}
-
-/* 重试按钮 */
-.retry-btn {
-  background: linear-gradient(135deg, #FF9800, #F57C00);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.retry-btn:hover {
-  background: linear-gradient(135deg, #F57C00, #E65100);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
-}
-
-.retry-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
-}
-
-/* 上传状态徽章 */
-.upload-status-badge {
-  margin-left: 8px;
-  font-size: 16px;
-  vertical-align: middle;
-  animation: statusPulse 2s ease-in-out infinite;
-}
-
-.upload-status-badge:hover {
-  transform: scale(1.2);
-  transition: transform 0.2s ease;
-}
-
-@keyframes statusPulse {
-  0%, 100% { 
-    opacity: 1; 
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 0.7; 
-    transform: scale(1.05);
-  }
-}
-
-/* 上传状态文本 */
-.upload-status {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-top: 4px;
-  display: inline-block;
-}
-
-.upload-status.uploading {
-  background: linear-gradient(135deg, #FF9800, #F57C00);
-  color: white;
-  animation: uploadingPulse 1.5s ease-in-out infinite;
-}
-
-.upload-status.success {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
-}
-
-.upload-status.error {
-  background: linear-gradient(135deg, #f44336, #d32f2f);
-  color: white;
-  animation: errorBlink 1s ease-in-out infinite alternate;
-}
-
-.upload-status.local {
-  background: linear-gradient(135deg, #607D8B, #455A64);
-  color: white;
-}
-
-@keyframes uploadingPulse {
-  0%, 100% { 
-    opacity: 1; 
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 0.8; 
-    transform: scale(1.02);
-  }
-}
-
-@keyframes errorBlink {
-  0% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-/* 云端徽章 */
-.cloud-badge {
-  margin-left: 8px;
-  font-size: 14px;
-  opacity: 0.8;
-  color: #2196F3;
-  filter: drop-shadow(0 1px 2px rgba(33, 150, 243, 0.3));
-  animation: cloudFloat 3s ease-in-out infinite;
-}
-
-@keyframes cloudFloat {
-  0%, 100% { 
-    transform: translateY(0); 
-  }
-  50% { 
-    transform: translateY(-2px); 
-  }
-}
-
-/* 云端文件链接 */
-.cloud-url {
-  display: block;
-  color: #2196F3;
-  font-size: 10px;
-  font-weight: 500;
-  margin-top: 2px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cloud-url:hover {
-  color: #1976D2;
-  text-decoration: underline;
-}
-
-/* 绑定录音区域 */
-.bound-recordings {
-  margin-top: 30px;
-}
-
-.bound-recordings h3 {
-  color: #4CAF50;
-  border-left: 4px solid #4CAF50;
-  padding-left: 16px;
-  margin-bottom: 20px;
-}
-
-/* 绑定录音项目 */
-.bound-item {
-  border-left: 4px solid #4CAF50;
-  background: rgba(76, 175, 80, 0.05);
-}
-
-.bound-item:hover {
-  background: rgba(76, 175, 80, 0.1);
-  border-left-color: #45a049;
-}
-
-/* 绑定时间显示 */
-.bound-time {
-  display: block;
-  color: #4CAF50;
-  font-size: 11px;
-  font-weight: 500;
-  margin-top: 4px;
-}
-
-/* 上传进度条 */
-.upload-progress {
+/* 录音进度指示线 */
+.record-progress-line {
   width: 100%;
   height: 4px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(76, 175, 80, 0.1);
   border-radius: 2px;
-  margin-top: 8px;
+  margin: 16px 0;
+  position: relative;
   overflow: hidden;
-  position: relative;
 }
 
-.upload-progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #4CAF50, #45a049);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-  position: relative;
-}
-
-.upload-progress-bar::after {
+.record-progress-line::before {
   content: '';
   position: absolute;
-  top: 0;
   left: 0;
-  bottom: 0;
-  right: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: progressShine 2s ease-in-out infinite;
-}
-
-@keyframes progressShine {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* 录音信息增强 */
-.recording-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  font-size: 13px;
-  color: #7f8c8d;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-  .recording-actions {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
-  }
-  
-  .bind-btn, .play-btn, .retry-btn {
-    font-size: 11px;
-    padding: 6px 12px;
-    min-width: 60px;
-  }
-  
-  .upload-status-badge {
-    font-size: 14px;
-    margin-left: 4px;
-  }
-  
-  .cloud-badge {
-    font-size: 12px;
-    margin-left: 4px;
-  }
-  
-  .recording-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-  
-  .upload-status {
-    font-size: 10px;
-    padding: 1px 6px;
-  }
-}
-
-@media (max-width: 480px) {
-  .recording-actions {
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-  }
-  
-  .bind-btn, .play-btn, .retry-btn {
-    width: 100%;
-    font-size: 10px;
-    padding: 4px 8px;
-  }
-  
-  .upload-status-badge {
-    font-size: 12px;
-  }
-  
-  .cloud-badge {
-    font-size: 11px;
-  }
-}
-
-/* 播放页面样式 */
-.player-mode {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
-  min-height: 100vh;
-  padding: 100px 40px 40px;
-}
-
-.player-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 40px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 20px 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.back-btn {
-  background: linear-gradient(135deg, #6c757d, #5a6268);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-}
-
-.back-btn:hover {
-  background: linear-gradient(135deg, #5a6268, #495057);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
-}
-
-.player-header h2 {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.player-content {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.recording-details {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(102, 126, 234, 0.2);
-}
-
-.recording-details h3 {
-  margin: 0 0 20px 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: #333;
-}
-
-.recording-meta p {
-  margin: 8px 0;
-  font-size: 14px;
-  color: #666;
-}
-
-.recording-meta strong {
-  color: #333;
-  font-weight: 600;
-}
-
-.audio-player-container {
-  margin: 30px 0;
-  text-align: center;
-}
-
-.main-audio-player {
+  top: 0;
+  height: 100%;
   width: 100%;
-  max-width: 600px;
-  height: 60px;
-  border-radius: 30px;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  box-shadow: 
-    inset 0 4px 8px rgba(0, 0, 0, 0.1),
-    0 4px 20px rgba(102, 126, 234, 0.2);
-  border: 2px solid rgba(102, 126, 234, 0.1);
-  transition: all 0.3s ease;
+  background: linear-gradient(90deg, 
+    rgba(76, 175, 80, 0.3) 0%,
+    rgba(76, 175, 80, 0.6) 50%,
+    rgba(76, 175, 80, 0.3) 100%
+  );
+  transform: translateX(-100%);
+  animation: none;
 }
 
-.main-audio-player:focus {
-  outline: none;
-  box-shadow: 
-    inset 0 4px 8px rgba(0, 0, 0, 0.1),
-    0 4px 20px rgba(102, 126, 234, 0.4),
-    0 0 0 3px rgba(102, 126, 234, 0.1);
+.record-progress-line.recording::before {
+  animation: progressLine 2s linear infinite;
 }
 
-.player-actions {
-  margin-top: 30px;
-  text-align: center;
-}
-
-.delete-btn-large {
-  background: linear-gradient(135deg, #dc3545, #c82333);
-  color: white;
-  border: none;
-  padding: 16px 32px;
-  border-radius: 16px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-}
-
-.delete-btn-large:hover {
-  background: linear-gradient(135deg, #c82333, #bd2130);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-}
-
-.delete-btn-large:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-}
-
-/* 播放页面移动端适配 */
-@media (max-width: 768px) {
-  .player-mode {
-    padding: 80px 20px 20px;
+@keyframes progressLine {
+  0% {
+    transform: translateX(-100%);
   }
-  
-  .player-header {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
-  
-  .player-header h2 {
-    font-size: 24px;
-  }
-  
-  .player-content {
-    padding: 24px;
-  }
-  
-  .recording-details h3 {
-    font-size: 20px;
-  }
-  
-  .main-audio-player {
-    height: 50px;
-  }
-  
-  .delete-btn-large {
-    width: 100%;
-    padding: 14px;
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .bound-recordings h3 {
-    font-size: 18px;
-  }
-  
-  .bound-time {
-    margin-top: 2px;
+  100% {
+    transform: translateX(100%);
   }
 }

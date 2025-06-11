@@ -1,10 +1,34 @@
+/* CSS自定义属性 - 移动端视口支持 */
+:root {
+  /* 移动端视口高度支持 */
+  --vh: 1vh;
+  --dvh: 1dvh;
+  /* 安全区域支持 */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+/* 移动端视口高度修正 */
+@supports (height: 100dvh) {
+  :root {
+    --vh: 1dvh;
+  }
+}
+
 /* 播放页面样式 */
 .player-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  min-height: calc(var(--vh, 1vh) * 100); /* 使用CSS变量确保兼容性 */
+  background: linear-gradient(135deg, #a8e6a3 0%, #88d982 50%, #a8e6a3 100%);
   position: relative;
   overflow-x: hidden;
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* 确保背景在移动端完全覆盖 */
+  background-attachment: fixed;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 /* 背景装饰 */
@@ -23,7 +47,7 @@
   position: absolute;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.05) 2px, transparent 2px);
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 2px, transparent 2px);
   background-size: 60px 60px;
   animation: backgroundMove 25s linear infinite;
 }
@@ -111,9 +135,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 30px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .nav-back-btn,
@@ -122,10 +146,10 @@
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #f8fae6;
   border: none;
   border-radius: 25px;
-  color: white;
+  color: #2d5016;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -133,14 +157,23 @@
   backdrop-filter: blur(10px);
 }
 
+.elephant-icon {
+  width: 400.67px;  /* 240 * (16/9) */
+  height: 240px;    /* 保持16:9比例 */
+  position: absolute;
+  top: -80px;
+  left: 370px;
+}
+
 .nav-back-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.35);
   transform: translateX(-3px);
 }
 
 .delete-recording-btn:hover {
   background: rgba(220, 53, 69, 0.3);
   transform: translateY(-2px);
+  color: white;
 }
 
 .back-icon {
@@ -168,9 +201,9 @@
 
 .session-id {
   font-size: 14px;
-  color: white;
+  color: #2d5016;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   padding: 4px 12px;
   border-radius: 12px;
   font-family: 'SF Mono', monospace;
@@ -185,19 +218,23 @@
   justify-content: center;
   min-height: calc(100vh - 80px);
   padding: 40px 20px;
+  background-image: url('./asset/background2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .player-container {
   width: 100%;
   max-width: 600px;
-  background: rgba(255, 255, 255, 0.95);
+  background: #ffffe6;
   backdrop-filter: blur(20px);
   border-radius: 30px;
   padding: 50px 40px;
   box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.15),
-    0 10px 35px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+    0 25px 80px rgba(45, 80, 22, 0.15),
+    0 10px 35px rgba(45, 80, 22, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 /* 录音信息区域 */
@@ -216,14 +253,45 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #f3fadf;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 60px;
-  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
-  position: relative;
-  z-index: 2;
+  color: #7bbd5a;
+  box-shadow:
+    0 8px 32px 0 rgba(74, 201, 103, 0.18),
+    0 2px 8px 0 rgba(74, 201, 103, 0.10),
+    0 0 0 8px #f3fadf,
+    0 0 0 20px #f7fbe9;
+  position: absolute;
+  left: 50%;
+  top: -50px;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  border: 2px solid #e2f5c2;
+}
+
+.avatar-icon:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow:
+    0 16px 40px 0 rgba(74, 201, 103, 0.22),
+    0 0 0 8px #eaf7d0,
+    0 0 0 20px #f3fadf;
+  background: #eaf7d0;
+}
+
+.avatar-icon:active {
+  transform: translate(-50%, -50%) scale(0.95);
+  box-shadow:
+    0 8px 20px 0 rgba(74, 201, 103, 0.12),
+    0 0 0 8px #e2f5c2,
+    0 0 0 20px #f3fadf;
+  background: #e2f5c2;
 }
 
 .sound-waves {
@@ -239,7 +307,7 @@
 .wave-bar {
   width: 4px;
   height: 20px;
-  background: rgba(102, 126, 234, 0.6);
+  background: rgba(74, 201, 103, 0.6);
   border-radius: 2px;
   transform-origin: bottom;
   transition: all 0.3s ease;
@@ -263,7 +331,7 @@
   font-size: 32px;
   font-weight: 700;
   margin: 0 0 25px 0;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #4ac967, #88d982);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -281,9 +349,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 16px;
-  background: rgba(102, 126, 234, 0.05);
+  background: rgba(74, 201, 103, 0.08);
   border-radius: 12px;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #4ac967;
 }
 
 .metadata-item .label {
@@ -315,7 +383,7 @@
 .progress-container {
   position: relative;
   height: 6px;
-  background: rgba(102, 126, 234, 0.2);
+  background: rgba(74, 201, 103, 0.2);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -341,15 +409,15 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #667eea;
+  background: #4ac967;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 2px 8px rgba(74, 201, 103, 0.5);
   transition: all 0.3s ease;
 }
 
 .progress-slider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.7);
+  box-shadow: 0 4px 15px rgba(74, 201, 103, 0.7);
 }
 
 .progress-fill {
@@ -357,7 +425,7 @@
   top: 0;
   left: 0;
   height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, #4ac967, #88d982);
   border-radius: 3px;
   transition: width 0.1s ease;
   z-index: 1;
@@ -381,13 +449,13 @@
   border: none;
   cursor: pointer;
   padding: 16px;
-  border-radius: 20px;
+  border-radius: 100px;
   transition: all 0.3s ease;
   color: #333;
 }
 
 .control-btn:hover {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(74, 201, 103, 0.1);
   transform: translateY(-3px);
 }
 
@@ -402,18 +470,18 @@
 }
 
 .play-btn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  /* background: linear-gradient(135deg, #4ac967, #88d982);
+  color: white;*/
+
+  transform: translateY(-20px);
+  border-radius: 60%;
+  /* box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); */
 }
 
 .play-btn:hover {
-  background: linear-gradient(135deg, #764ba2, #667eea);
+  background: linear-gradient(135deg, #88d982, #4ac967);
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 15px 40px rgba(74, 201, 103, 0.6);
 }
 
 .play-btn .btn-icon {
@@ -425,9 +493,10 @@
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
-  50% { box-shadow: 0 15px 45px rgba(102, 126, 234, 0.7); }
-  100% { box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+  0% { box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); }
+  50% { box-shadow: 0 15px 45px rgba(74, 201, 103, 0.7); }
+  100% { box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); }
+
 }
 
 /* 高级控制 */
@@ -460,10 +529,10 @@
 }
 
 .speed-btn {
-  padding: 8px 16px;
-  border: 1px solid rgba(102, 126, 234, 0.3);
-  background: white;
-  color: #667eea;
+  padding: 10px 20px;
+  border: 4px solid #cce7b0;
+  background: #f1fad3;
+  color: #4ac967;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
@@ -472,14 +541,15 @@
 }
 
 .speed-btn:hover {
-  background: rgba(102, 126, 234, 0.1);
-  border-color: #667eea;
+  background: rgba(74, 201, 103, 0.1);
+  border-color: #4ac967;
 }
 
 .speed-btn.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #4ac967, #88d982);
   color: white;
   border-color: transparent;
+  box-shadow: 0 4px 15px rgba(74, 201, 103, 0.3);
 }
 
 /* 音量控制 */
@@ -492,7 +562,7 @@
 .volume-slider {
   flex: 1;
   height: 4px;
-  background: rgba(102, 126, 234, 0.2);
+  background: rgba(74, 201, 103, 0.2);
   border-radius: 2px;
   outline: none;
   -webkit-appearance: none;
@@ -505,21 +575,28 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #667eea;
+  background: #4ac967;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 2px 6px rgba(74, 201, 103, 0.4);
 }
 
 .volume-value {
   font-size: 12px;
   font-weight: 600;
-  color: #667eea;
+  color: #4ac967;
   min-width: 40px;
   text-align: right;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .player-page {
+    /* 移动端确保背景完全覆盖 */
+    min-height: 100vh;
+    min-height: 100dvh; /* 使用动态视口高度 */
+    background-attachment: scroll; /* 移动端改为scroll避免性能问题 */
+  }
+
   .player-header {
     padding: 15px 20px;
     flex-wrap: wrap;
@@ -540,7 +617,8 @@
 
   .player-main {
     padding: 20px 15px;
-    min-height: calc(100vh - 100px);
+    min-height: calc(100vh - 120px); /* 调整移动端高度计算 */
+    min-height: calc(100dvh - 120px); /* 使用动态视口高度 */
   }
 
   .player-container {
@@ -587,13 +665,26 @@
 }
 
 @media (max-width: 480px) {
+  .player-page {
+    /* 小屏幕设备的背景优化 */
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-attachment: scroll;
+    /* 添加额外的安全区域支持 */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   .player-header {
     padding: 12px 15px;
+    /* 考虑状态栏安全区域 */
+    padding-top: max(12px, env(safe-area-inset-top));
   }
 
   .player-container {
-    padding: 25px 20px;
+    padding: 100px 20px;
     border-radius: 20px;
+    /* 确保容器不会被底部安全区域遮挡 */
+    margin-bottom: env(safe-area-inset-bottom);
   }
 
   .avatar-icon {
