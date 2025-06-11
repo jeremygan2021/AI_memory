@@ -1,0 +1,1930 @@
+/* AppDemo.tsx 样式文件 */
+
+/*@font-face {
+    font-family: 'MUYAO-SOFTBRUSH';
+    src: url('/AI_memory/src/fonts/MUYAO-SOFTBRUSH-2.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+*/
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'MUYAO-SOFTBRUSH', 'PingFang SC', 'Microsoft YaHei', '微软雅黑', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+/* 确保移动端全宽显示 */
+@media (max-width: 768px) {
+  /* 强制所有元素适应屏幕宽度 */
+  * {
+    max-width: 100% !important;
+  }
+  
+  html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  * {
+    max-width: 100%;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #e8f5e8 0%, #a8d8a8 30%, #78c6b6 70%, #4ecdc4 100%);
+  min-height: 100vh;
+}
+
+/* 确保所有文本元素使用统一字体 */
+div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
+  font-family: 'MUYAO-SOFTBRUSH', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.memory-app-bg {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  background: linear-gradient(135deg, #e8f5e8 0%, #a8d8a8 30%, #78c6b6 70%, #4ecdc4 100%);
+  padding: 0;
+  font-family: 'Muyao-Softbrush-Regular', sans-serif;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* 顶部导航栏 */
+.memory-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(195, 234, 226, 0.88);
+  padding: 15px 30px;
+  height: 70px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.memory-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.memory-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #3bb6a6;
+  letter-spacing: 2px;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+}
+
+.navbar-center {
+  flex: 1;
+  max-width: 450px;
+  margin: 0 40px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  padding: 6px 20px;
+  width: 300px;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(59, 182, 166, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(59, 182, 166, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.search-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 182, 166, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.search-container:hover::before {
+  left: 100%;
+}
+
+.search-container:hover {
+  border-color: rgba(59, 182, 166, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(59, 182, 166, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+.search-container:focus-within {
+  border-color: #3bb6a6;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(59, 182, 166, 0.3),
+    0 0 0 4px rgba(59, 182, 166, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+.memory-search {
+  width: 250px;
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  padding: 5px 5px;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.memory-search::placeholder {
+  color: rgba(59, 182, 166, 0.6);
+  font-weight: 400;
+  transition: all 0.3s ease;
+}
+
+.memory-search:focus::placeholder {
+  color: rgba(59, 182, 166, 0.4);
+  transform: translateX(4px);
+}
+
+.search-btn {
+    position: absolute;
+    right: 2px;
+    top: 4px;
+    bottom: 2px;
+    width: 32px;
+    height: 32px;
+    background: #3bb6a6;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(59, 182, 166, 0.3);
+}
+
+.search-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transition: all 0.4s ease;
+  transform: translate(-50%, -50%);
+}
+
+.search-btn:hover {
+    background: #26999a;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(59, 182, 166, 0.4);
+  }
+  
+  .search-btn:active {
+    transform: scale(0.95);
+  }
+
+.search-icon{
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) invert(1);
+    align-items: center;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.memory-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(59, 182, 166, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.memory-icon:hover {
+  background: rgba(59, 182, 166, 0.2);
+}
+
+.memory-icon.bell::before {
+    content: ''; 
+    display: block; 
+    width: 100%;
+    height: 100%;
+    background-image: url('/public/images/bell.png'); /* 替换为你的铃铛 Logo 图片路径 */
+    background-size: contain; /* 图片适应容器大小 */
+    background-position: center; /* 图片居中显示 */
+    background-repeat: no-repeat; /* 不重复显示图片 */ 
+}
+
+.memory-icon.settings::before {
+    content: ''; 
+    display: block; 
+    width: 100%;
+    height: 100%;
+    background-image: url('/public/images/setting.png'); /* 替换为你的铃铛 Logo 图片路径 */
+    background-size: contain; /* 图片适应容器大小 */
+    background-position: center; /* 图片居中显示 */
+    background-repeat: no-repeat; /* 不重复显示图片 */ 
+}
+
+.memory-icon.user::before {
+    content: ''; 
+    display: block; 
+    width: 100%;
+    height: 100%;
+    background-image: url('/public/images/user.png'); /* 替换为你的铃铛 Logo 图片路径 */
+    background-size: contain; /* 图片适应容器大小 */
+    background-position: center; /* 图片居中显示 */
+    background-repeat: no-repeat; /* 不重复显示图片 */ 
+}
+
+/* 菜单栏 */
+.memory-menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(106, 193, 183, 1);
+  padding: 12px 0;
+  gap: 150px;
+  box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.menu-item {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: white;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+}
+
+.menu-item.active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 主体内容区 */
+.memory-main {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  min-height: calc(100vh - 140px);
+  position: relative;
+  align-items: stretch;
+  justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 用户账户信息 - 左侧栏 */
+.user-account-card {
+  background: linear-gradient(135deg, #e8f5e8, #c8e6c8);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(59, 182, 166, 0.3);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.user-account-card .user-code {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #3bb6a6;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+.user-account-card .user-status {
+  font-size: 1.15rem;
+  color: #666;
+  opacity: 0.9;
+  font-weight: 600;
+}
+
+/* 左侧功能区域 */
+.memory-left {
+  width: 600px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+/* 新增：让上半区自适应高度 */
+.memory-left-top {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  height: 100%;
+  justify-content: stretch;
+}
+
+.memory-left-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #3bb6a6;
+  font-family: 'Muyao-Softbrush-Regular', sans-serif;
+  margin-bottom: 20px;
+  padding-left: 10px;
+}
+
+.memory-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  justify-content: stretch;
+}
+
+.memory-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 1.25rem;
+  height: 240px;
+}
+
+.memory-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 20px rgba(191, 224, 202, 1);
+}
+
+/* 中心录音功能卡片 */
+.center-voice-card {
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 3px solid #3bb6a6;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0px 15px 40px rgba(59, 182, 166, 0.3);
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-align: center;
+  width: 100%;
+}
+
+.center-voice-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0px 25px 60px rgba(59, 182, 166, 0.5);
+  border-color: #2ea087;
+}
+
+.center-voice-card .voice-icon {
+  font-size: 60px;
+  margin-bottom: 15px;
+  color: #3bb6a6;
+  animation: pulse 2s infinite;
+  border-radius: 20px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.center-voice-card .voice-title {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #3bb6a6;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.center-voice-card .voice-desc {
+  font-size: 1.25rem;
+  color: #666;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.center-voice-card .voice-action {
+  background: #3bb6a6;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.center-voice-card .voice-action:hover {
+  background: #2ea087;
+  transform: scale(1.05);
+}
+
+/* 突出显示录音功能卡片 */
+.memory-card.featured-voice {
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 2px solid #3bb6a6;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0px 8px 25px rgba(59, 182, 166, 0.3);
+}
+
+.memory-card.featured-voice:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 12px 35px rgba(59, 182, 166, 0.4);
+}
+
+.memory-card.featured-voice .card-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.memory-card.featured-voice .card-desc {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* 缩小其他卡片 */
+.memory-card.compact {
+  flex: 1;
+  min-height: 120px;
+  height: auto;
+  display: flex;
+  align-items: center;
+}
+
+.memory-card.compact .card-title {
+  font-size:1.5rem;
+}
+
+.memory-card.compact .card-desc {
+  font-size: 20px;
+  position: absolute;
+  bottom: 10px;
+  left: 20px;
+}
+
+.card-center-dot {
+  width: 20px;
+  height: 20px;
+  background: #3bb6a6;
+  border-radius: 50%;
+  position: absolute;
+  flex-shrink: 0;
+  top: 20px;
+
+}
+
+.card-center-dot-inner {
+  width: 10px;
+  height: 10px;
+  background: rgb(226, 105, 105);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.card-content {
+  
+  font-size: 3.5rem;
+  height: 125px;
+  width: 80%;
+
+}
+
+.card-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #3bb6a6;
+  margin-bottom: 4px;
+  position: absolute;
+  left: 40px;
+}
+
+.card-desc {
+  font-size: 1.3rem;
+  color: #666;
+  font-weight: 400;
+}
+
+.card-dont1{
+    width: 90px;
+    height: 50px;
+    margin-left: 150px;
+    margin-top: 40px;
+  }
+
+  .card-dont2{
+    width: 60px;
+    height: 60px;
+    margin-top: 30px;
+    margin-left: -30px;
+  }
+
+.card-dont{
+    width: 90px;
+    height: 50px;
+    margin-left: 180px;
+    margin-top: 40px;
+  }
+  
+  .card-dont3{
+    width: 160px;
+    height: 100px;
+    margin-top: 30px;
+    margin-left: 60px;
+  }
+
+  .card-img {
+    width: 100px;
+    height: 120px;
+    object-fit: cover;
+    margin-left: -10px;
+  }
+
+/* 中间内容区 */
+.memory-center {
+  width: 1000px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 90%;
+  margin: 0;
+}
+
+/* 宝宝信息 */
+.baby-info {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  justify-content: stretch;
+}
+
+.baby-avatar {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #3bb6a6, #4ecdc4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  color: white;
+}
+
+.baby-avatar::before {
+  content: "👶";
+}
+
+.baby-info-top {
+  height: 55px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.baby-age {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #3bb6a6;
+  text-align: center;
+  line-height: 1.2;
+  flex: 1;
+}
+
+.baby-progress {
+  width: 100%;
+}
+
+.age-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e8f4f2;
+  outline: none;
+  margin-bottom: 15px;
+  -webkit-appearance: none;
+  position: relative;
+}
+
+.age-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #3bb6a6;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(59, 182, 166, 0.3);
+  border: 3px solid #ffffff;
+  transition: all 0.2s ease;
+}
+
+.age-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(59, 182, 166, 0.4);
+}
+
+.age-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #3bb6a6;
+  cursor: pointer;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(59, 182, 166, 0.3);
+  transition: all 0.2s ease;
+}
+
+.age-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(59, 182, 166, 0.4);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e3f6f2;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #3bb6a6, #4ecdc4);
+  transition: width 0.3s ease;
+}
+
+.age-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #3bb6a6;
+}
+
+/* 亲子活动 */
+.parent-activity {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 280px;
+}
+
+.activity-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #3bb6a6;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.activity-list {
+  list-style: none;
+  margin-bottom: 16px;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* 活动列表滚动条样式 */
+.activity-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activity-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.activity-list::-webkit-scrollbar-thumb {
+  background: #3bb6a6;
+  border-radius: 3px;
+}
+
+.activity-list::-webkit-scrollbar-thumb:hover {
+  background: #2ea087;
+}
+
+.activity-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f9f7;
+  position: relative;
+}
+
+.activity-list li:last-child {
+  border-bottom: none;
+}
+
+.activity-list li.completed .activity-text {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.activity-list input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #3bb6a6;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+}
+
+.activity-list input[type="checkbox"]:checked {
+  background: #3bb6a6;
+}
+
+.activity-text {
+  flex: 1;
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: #333;
+}
+
+.delete-btn {
+  position: absolute;
+  right: 0;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.activity-list li:hover .delete-btn {
+  opacity: 1;
+}
+
+.delete-btn:hover {
+  background: #ff5252;
+  transform: scale(1.1);
+}
+
+.add-activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.add-activity-input {
+  flex: 1;
+  border: 1px solid #3bb6a6;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.add-activity-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.confirm-btn, .cancel-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-btn {
+  background: #3bb6a6;
+  color: white;
+}
+
+.cancel-btn {
+  background: #ff6b6b;
+  color: white;
+}
+
+.activity-add {
+  width: 40px;
+  height: 40px;
+  border: 2px dashed #3bb6a6;
+  background: none;
+  border-radius: 50%;
+  color: #3bb6a6;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.activity-add:hover {
+  background: rgba(59, 182, 166, 0.1);
+}
+
+/* 活动图表 */
+.activity-chart {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #3bb6a6;
+  margin-bottom: 20px;
+}
+
+.line-chart-container {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.line-chart {
+  width: 100%;
+  height: auto;
+  min-width: 400px;
+}
+
+.chart-point {
+  transition: all 0.3s ease;
+}
+
+.chart-point:hover {
+  r: 7;
+}
+
+.chart-value {
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.chart-point:hover + .chart-value {
+  opacity: 1;
+}
+
+/* 右侧相册 */
+.memory-right {
+  width: 600px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-board {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.album-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* 自定义滚动条样式 */
+.album-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.album-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.album-list::-webkit-scrollbar-thumb {
+  background: #3bb6a6;
+  border-radius: 3px;
+}
+
+.album-list::-webkit-scrollbar-thumb:hover {
+  background: #2ea087;
+}
+
+.album-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.album-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 大图预览 */
+.album-preview-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.album-preview-box {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.album-preview-img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+}
+
+.album-preview-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.album-preview-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.album-preview-arrow.left {
+  left: -70px;
+}
+
+.album-preview-arrow.right {
+  right: -70px;
+}
+
+.album-preview-arrow:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .memory-main {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .memory-left, .memory-right {
+    width: 100%;
+  }
+  
+  .memory-center {
+    max-width: 100%;
+  }
+  
+  .album-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 通用移动端优化 */
+@media (max-width: 768px) {
+  /* 强制所有元素适应屏幕宽度 */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  
+  .memory-app-bg {
+    width: 100%;
+    max-width: 100vw;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  .memory-navbar {
+    padding: 8px 12px;
+    height: 56px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(195, 234, 226, 0.95);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+  
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  
+  .memory-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  
+  .memory-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3bb6a6;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .navbar-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin: 0 8px;
+    min-width: 0;
+  }
+  
+  .search-container {
+    width: 100%;
+    max-width: 200px;
+    padding: 4px 12px;
+    border-radius: 18px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    min-width: 120px;
+  }
+  
+  .memory-search {
+    font-size: 13px;
+    padding: 4px 6px;
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .search-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    flex-shrink: 0;
+  }
+  
+  .search-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  
+  .memory-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .memory-menu {
+    gap: 8px;
+    padding: 8px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .memory-menu::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .menu-item {
+    font-size: 13px;
+    padding: 6px 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+  
+  .memory-main {
+    padding: 8px;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+  }
+  
+  .memory-left,
+  .memory-center,
+  .memory-right {
+    width: 100%;
+    margin: 0;
+  }
+  
+  /* 确保内容区域充分利用空间 */
+  .user-account-card,
+  .baby-info,
+  .memory-card,
+  .center-voice-card,
+  .parent-activity,
+  .activity-board {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* 确保图片不会溢出 */
+  .album-img,
+  .card-img,
+  .memory-logo {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .album-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+.memory-date {
+  font-size: 1rem;
+  color: #FFA07A;
+  margin-bottom: 6px;
+  font-weight: 400;
+}
+
+.memory-description {
+  font-size: 1.05rem;
+  color: #FF8C69;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+/* 图表坐标轴等辅助信息 */
+.line-chart text, .progress-bar, .age-labels {
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+/* 手机端响应式布局优化 */
+
+/* 大屏手机 (414px以上) - iPhone 12 Pro Max, Samsung Galaxy S系列等 */
+@media (max-width: 1024px) and (min-width: 415px) {
+  .memory-app-bg {
+    padding: 0;
+  }
+  
+  .memory-navbar {
+    padding: 12px 20px;
+    height: 65px;
+  }
+  
+  .memory-title {
+    font-size: 2.2rem;
+  }
+  
+  .navbar-center {
+    margin: 0 20px;
+    max-width: 350px;
+  }
+  
+  .search-container {
+    width: 100%;
+    max-width: 320px;
+    padding: 5px 18px;
+    border-radius: 22px;
+  }
+  
+  .memory-search {
+    font-size: 15px;
+    padding: 5px 5px;
+  }
+  
+  .search-btn {
+    padding: 8px;
+    width: 40px;
+    height: 40px;
+  }
+  
+  
+  .memory-main {
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+  }
+  
+  .memory-left {
+    width: 100%;
+    order: 1;
+  }
+  
+  .memory-center {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    order: 2;
+  }
+  
+  .memory-right {
+    width: 100%;
+    order: 3;
+  }
+  
+  .user-account-card {
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  
+  .baby-info {
+    padding: 20px;
+  }
+  
+  .memory-card.compact {
+    min-height: 130px;
+    padding: 20px;
+  }
+  
+  .center-voice-card {
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+  
+  .parent-activity {
+    height: auto;
+    min-height: 250px;
+  }
+}
+
+/* 中等屏幕手机 (375px-414px) - iPhone 12, iPhone 13, 大多数Android */
+@media (max-width: 414px) and (min-width: 376px) {
+  .memory-app-bg {
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  .memory-navbar {
+    padding: 8px 12px;
+    height: 54px;
+  }
+  
+  .navbar-left {
+    gap: 6px;
+  }
+  
+  .memory-logo {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .memory-title {
+    font-size: 1.4rem;
+    letter-spacing: 0.3px;
+  }
+  
+  .navbar-center {
+    margin: 0 8px;
+    min-width: 0;
+  }
+  
+  .search-container {
+    width: 100%;
+    max-width: 180px;
+    padding: 4px 10px;
+    border-radius: 16px;
+    height: 32px;
+    min-width: 100px;
+  }
+  
+  .memory-search {
+    font-size: 12px;
+    padding: 4px 5px;
+  }
+  
+  .search-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+  }
+  
+  .search-icon {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .navbar-right {
+    gap: 6px;
+  }
+  
+  .memory-icon {
+    width: 26px;
+    height: 26px;
+  }
+  
+  
+  
+  .memory-menu {
+    padding: 8px 10px;
+    gap: 6px;
+    justify-content: space-around;
+  }
+  
+  .menu-item {
+    font-size: 12px;
+    padding: 6px 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .memory-main {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .memory-left {
+    width: 100%;
+    order: 1;
+  }
+  
+  .memory-center {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    order: 2;
+  }
+  
+  .memory-right {
+    width: 100%;
+    order: 3;
+  }
+  
+  /* 用户信息优化 */
+  .user-account-card {
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  
+  .user-account-card .user-code {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+  
+  .user-account-card .user-status {
+    font-size: 1rem;
+  }
+  
+  /* 宝宝信息优化 */
+  .baby-info {
+    padding: 18px;
+  }
+  
+  .baby-age {
+    font-size: 1.3rem;
+  }
+  
+  /* 功能卡片优化 */
+  .memory-left-title {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+    padding-left: 8px;
+  }
+  
+  .memory-card.compact {
+    min-height: 120px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .card-desc {
+    font-size: 1rem;
+  }
+  
+  /* 录制声音卡片优化 */
+  .center-voice-card {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .center-voice-card .voice-title {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+  }
+  
+  .center-voice-card .voice-desc {
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+  
+  .center-voice-card .voice-action {
+    font-size: 1rem;
+    padding: 12px 24px;
+  }
+  
+  /* 亲子活动优化 */
+  .parent-activity {
+    height: auto;
+    min-height: 240px;
+    padding: 16px;
+  }
+  
+  .activity-title {
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+  }
+  
+  .activity-text {
+    font-size: 1rem;
+  }
+  
+  /* 相册区域优化 */
+  .activity-board {
+    padding: 18px;
+  }
+  
+  .album-list {
+    gap: 12px;
+  }
+  
+  .album-img {
+    height: 120px;
+  }
+}
+
+/* 小屏手机 (320px-375px) - iPhone SE, 小屏Android */
+@media (max-width: 375px) {
+  .memory-app-bg {
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  .memory-navbar {
+    padding: 6px 10px;
+    height: 50px;
+    position: relative;
+  }
+  
+  .navbar-left {
+    gap: 5px;
+  }
+  
+  .memory-logo {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .memory-title {
+    font-size: 1.3rem;
+    letter-spacing: 0.2px;
+  }
+  
+  .navbar-center {
+    margin: 0 6px;
+    min-width: 0;
+  }
+  
+  .search-container {
+    width: 100%;
+    max-width: 140px;
+    padding: 3px 8px;
+    border-radius: 14px;
+    height: 28px;
+    min-width: 80px;
+  }
+  
+  .memory-search {
+    font-size: 11px;
+    padding: 3px;
+    min-width: 0;
+  }
+  
+  .search-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+  }
+  
+  .search-icon {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .navbar-right {
+    gap: 4px;
+  }
+  
+  .memory-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+ 
+  
+  .memory-menu {
+    padding: 6px 8px;
+    gap: 4px;
+    justify-content: space-around;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  
+  .menu-item {
+    font-size: 11px;
+    padding: 5px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+  
+  .memory-main {
+    flex-direction: column;
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .memory-left {
+    width: 100%;
+    order: 1;
+  }
+  
+  .memory-center {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    order: 2;
+  }
+  
+  .memory-right {
+    width: 100%;
+    order: 3;
+  }
+  
+  /* 用户信息优化 */
+  .user-account-card {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .user-account-card .user-code {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+  }
+  
+  .user-account-card .user-status {
+    font-size: 0.9rem;
+  }
+  
+  /* 宝宝信息优化 */
+  .baby-info {
+    padding: 16px;
+  }
+  
+  .baby-age {
+    font-size: 1.2rem;
+  }
+  
+  .baby-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+  }
+  
+  /* 功能卡片优化 */
+  .memory-left-title {
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+    padding-left: 6px;
+  }
+  
+  .memory-card.compact {
+    min-height: 100px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+  
+  .card-desc {
+    font-size: 0.9rem;
+  }
+  
+  /* 录制声音卡片优化 */
+  .center-voice-card {
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  
+  .center-voice-card .voice-icon {
+    font-size: 50px;
+    margin-bottom: 12px;
+  }
+  
+  .center-voice-card .voice-title {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+  }
+  
+  .center-voice-card .voice-desc {
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+  }
+  
+  .center-voice-card .voice-action {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+  }
+  
+  /* 亲子活动优化 */
+  .parent-activity {
+    height: auto;
+    min-height: 220px;
+    padding: 14px;
+  }
+  
+  .activity-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .activity-text {
+    font-size: 0.9rem;
+  }
+  
+  .activity-list li {
+    padding: 10px 0;
+  }
+  
+  .delete-btn {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+  }
+  
+  /* 相册区域优化 */
+  .activity-board {
+    padding: 16px;
+  }
+  
+  .album-list {
+    gap: 10px;
+  }
+  
+  .album-img {
+    height: 100px;
+  }
+}
+
+/* 超小屏设备 (320px以下) */
+@media (max-width: 320px) {
+  .memory-navbar {
+    padding: 4px 6px;
+    height: 44px;
+    position: relative;
+  }
+  
+  .navbar-left {
+    gap: 3px;
+  }
+  
+  .memory-logo {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .memory-title {
+    font-size: 1.1rem;
+    letter-spacing: 0px;
+  }
+  
+  .navbar-center {
+    margin: 0 4px;
+    min-width: 0;
+  }
+  
+  .search-container {
+    width: 100%;
+    max-width: 100px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    height: 24px;
+    min-width: 60px;
+  }
+  
+  .memory-search {
+    font-size: 10px;
+    padding: 2px;
+    min-width: 0;
+  }
+  
+  .search-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+  }
+  
+  .search-icon {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .navbar-right {
+    gap: 3px;
+  }
+  
+  .memory-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  
+  
+  .memory-main {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .user-account-card .user-code {
+    font-size: 1.4rem;
+  }
+  
+  .center-voice-card .voice-title {
+    font-size: 1.2rem;
+  }
+  
+  .center-voice-card .voice-desc {
+    font-size: 0.8rem;
+  }
+  
+  .memory-card.compact {
+    min-height: 90px;
+    padding: 12px;
+  }
+  
+  .card-title {
+    font-size: 0.9rem;
+  }
+  
+  .card-desc {
+    font-size: 0.8rem;
+  }
+}
+
+/* 触摸友好优化 */
+@media (hover: none) and (pointer: coarse) {
+  /* 增大可点击区域 */
+  .memory-card.compact {
+    min-height: 110px;
+  }
+  
+  .center-voice-card .voice-action {
+    padding: 14px 28px;
+    font-size: 1.1rem;
+  }
+  
+  /* 优化按钮大小 */
+  .delete-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+  
+  /* 移除hover效果，使用active */
+  .memory-card:hover {
+    transform: none;
+  }
+  
+  .memory-card:active {
+    transform: scale(0.98);
+  }
+} 

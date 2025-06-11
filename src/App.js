@@ -1,55 +1,156 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
-import './App.css';
+import './common.css';
+import './index.css';
 import FamilyPage from './FamilyPage';
 import RecordComponent from './record';
 import PlayerPage from './PlayerPage';
 import AudioLibrary from './AudioLibrary';
 import { validateUserCode } from './utils/userCode';
 
-// 图标组件
-const MicrophoneIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1Z" fill="currentColor"/>
-    <path d="M19 10V12C19 16.42 15.42 20 11 20V22H13V24H11H13H11V22H9V20C4.58 20 1 16.42 1 12V10H3V12C3 15.31 5.69 18 9 18H15C18.31 18 21 15.31 21 12V10H19Z" fill="currentColor"/>
-  </svg>
-);
+// 相册图片数据 - 使用占位内容
+const albumImages = [
+  '/images/qz1.png',
+  '/images/qz2.png',
+  '/images/qz3.png',
+  '/images/qz4.png',
+  '/images/qz5.png',
+  '/images/qz6.png'
+];
 
-const PhotoIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" fill="none"/>
-    <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
-    <path d="M21 15L16 10L13 13L9 9L3 15" stroke="currentColor" strokeWidth="2" fill="none"/>
-  </svg>
-);
+// 折线图数据
+const chartData = [
+  { day: '周一', time: 45 },
+  { day: '周二', time: 60 },
+  { day: '周三', time: 35 },
+  { day: '周四', time: 80 },
+  { day: '周五', time: 55 },
+  { day: '周六', time: 90 },
+  { day: '周日', time: 75 }
+];
 
-const ClockIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-    <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
+// 折线图组件
+const LineChart = () => {
+  const width = 320;
+  const height = 150;
+  const padding = 40;
+  const bottomPadding = 50;
+  const leftPadding = 50;
+  const maxTime = Math.max(...chartData.map(d => d.time));
+  
+  // 计算点的坐标
+  const points = chartData.map((data, index) => {
+    const x = leftPadding + (index * (width - leftPadding - padding)) / (chartData.length - 1);
+    const y = padding + ((maxTime - data.time) / maxTime) * (height - padding - bottomPadding);
+    return { x, y, ...data };
+  });
+  
+  // 生成路径字符串
+  const pathData = points.map((point, index) => 
+    `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+  ).join(' ');
 
-const SettingsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" fill="none"/>
-    <path d="M19.4 15A1.65 1.65 0 0 0 20.1 13.13 1.65 1.65 0 0 0 19.4 11.27L17.3 10.21A7.7 7.7 0 0 0 16.82 9.17L17.05 6.85C17.1 6.12 16.59 5.5 15.86 5.4L14.14 5.13C13.95 5.1 13.76 5.04 13.58 4.95L11.9 3.94C11.33 3.65 10.67 3.65 10.1 3.94L8.42 4.95C8.24 5.04 8.05 5.1 7.86 5.13L6.14 5.4C5.41 5.5 4.9 6.12 4.95 6.85L5.18 9.17C5.18 9.17 5.18 9.17 5.18 9.17A7.7 7.7 0 0 0 4.7 10.21L2.6 11.27A1.65 1.65 0 0 0 1.9 13.13 1.65 1.65 0 0 0 2.6 15L4.7 16.06A7.7 7.7 0 0 0 5.18 17.1L4.95 19.42C4.9 20.15 5.41 20.77 6.14 20.87L7.86 21.14C8.05 21.17 8.24 21.23 8.42 21.32L10.1 22.33C10.67 22.62 11.33 22.62 11.9 22.33L13.58 21.32C13.76 21.23 13.95 21.17 14.14 21.14L15.86 20.87C16.59 20.77 17.1 20.15 17.05 19.42L16.82 17.1A7.7 7.7 0 0 0 17.3 16.06L19.4 15Z" stroke="currentColor" strokeWidth="2" fill="none"/>
+  return (
+    <div className="line-chart-container">
+      <svg width="90%" height={height} viewBox={`0 0 ${width} ${height}`} className="line-chart">
+        {/* 网格线 */}
+        <defs>
+          <pattern id="grid" width="50" height="35" patternUnits="userSpaceOnUse">
+            <path d="M 50 0 L 0 0 0 35" fill="none" stroke="#e3f6f2" strokeWidth="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+        
+        {/* Y轴刻度线 */}
+        {[0, 25, 50, 75, 100].map(value => {
+          const y = padding + ((maxTime - value) / maxTime) * (height - padding - bottomPadding);
+          return (
+            <g key={value}>
+              <line 
+                x1={leftPadding} 
+                y1={y} 
+                x2={width - padding} 
+                y2={y} 
+                stroke="#b7e5df" 
+                strokeWidth="1" 
+                strokeDasharray="4,4"
+              />
+              <text 
+                x={leftPadding - 8} 
+                y={y + 4} 
+                fontSize="8" 
+                fill="#3bb6a6" 
+                textAnchor="end"
+                fontWeight="300"
+              >
+                {value}分
+              </text>
+            </g>
+          );
+        })}
+        
+        {/* 折线 */}
+        <path
+          d={pathData}
+          fill="none"
+          stroke="#3bb6a6"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        
+        {/* 渐变填充区域 */}
+        <defs>
+          <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#3bb6a6" stopOpacity="0.3"/>
+            <stop offset="100%" stopColor="#3bb6a6" stopOpacity="0.05"/>
+          </linearGradient>
+        </defs>
+        <path
+          d={`${pathData} L ${points[points.length - 1].x} ${height - bottomPadding} L ${points[0].x} ${height - bottomPadding} Z`}
+          fill="url(#chartGradient)"
+        />
+        
+        {/* 数据点 */}
+        {points.map((point, index) => (
+          <g key={index}>
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r="5"
+              fill="#fff"
+              stroke="#3bb6a6"
+              strokeWidth="3"
+              className="chart-point"
+            />
+            <text
+              x={point.x}
+              y={height - 20}
+              fontSize="12"
+              fill="#3bb6a6"
+              textAnchor="middle"
+              fontWeight="400"
+            >
+              {point.day}
+            </text>
+            {/* 悬停显示数值 */}
+            <text
+              x={point.x}
+              y={point.y - 15}
+              fontSize="12"
+              fill="#3bb6a6"
+              textAnchor="middle"
+              className="chart-value"
+              fontWeight="bold"
+            >
+              {point.time}分
+            </text>
+          </g>
+        ))}
   </svg>
+    </div>
 );
-
-const BellIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 8A6 6 0 0 0 6 8C6 15 3 17 3 17H21S18 15 18 8Z" stroke="currentColor" strokeWidth="2" fill="none"/>
-    <path d="M13.73 21A1.999 1.999 0 0 1 10.27 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-const UserIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 21V19A4 4 0 0 0 16 15H8A4 4 0 0 0 4 19V21" stroke="currentColor" strokeWidth="2" fill="none"/>
-    <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" fill="none"/>
-  </svg>
-);
+};
 
 // 录音页面组件
 const RecordPage = () => {
@@ -111,8 +212,24 @@ const RecordPage = () => {
 // 主页组件
 const HomePage = () => {
   const navigate = useNavigate();
-  const { userid } = useParams(); // 从URL获取用户ID
+  const { userid } = useParams();
   const [userCode, setUserCode] = useState('');
+  
+  // 大图预览相关状态
+  const [previewIndex, setPreviewIndex] = useState(null);
+  // 搜索相关状态
+  const [searchValue, setSearchValue] = useState('');
+  // 孩子年龄相关状态 (以月为单位)
+  const [babyAgeMonths, setBabyAgeMonths] = useState(18);
+  // 活动列表状态
+  const [activities, setActivities] = useState([
+    { id: 1, text: '到公园散步', completed: false },
+    { id: 2, text: '一起阅读绘本故事', completed: false },
+    { id: 3, text: '玩扔球游戏', completed: false }
+  ]);
+  // 新活动输入状态
+  const [newActivity, setNewActivity] = useState('');
+  const [showAddInput, setShowAddInput] = useState(false);
   
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -139,10 +256,107 @@ const HomePage = () => {
     }
   };
 
+  // 大图预览相关函数
+  const openPreview = (idx) => setPreviewIndex(idx);
+  const closePreview = () => setPreviewIndex(null);
+  const showPrev = (e) => {
+    e.stopPropagation();
+    setPreviewIndex(previewIndex !== null ? (previewIndex + albumImages.length - 1) % albumImages.length : null);
+  };
+  const showNext = (e) => {
+    e.stopPropagation();
+    setPreviewIndex(previewIndex !== null ? (previewIndex + 1) % albumImages.length : null);
+  };
+
+  // 搜索功能
+  const handleSearch = () => {
+    if (searchValue.trim()) {
+      console.log('搜索内容:', searchValue);
+      alert(`搜索: ${searchValue}`);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // 处理年龄调节
+  const handleAgeChange = (e) => {
+    setBabyAgeMonths(parseInt(e.target.value));
+  };
+
+  // 格式化年龄显示
+  const formatAge = (months) => {
+    if (months < 12) {
+      return `${months}月`;
+    } else if (months === 12) {
+      return '1岁';
+    } else {
+      const years = Math.floor(months / 12);
+      const remainingMonths = months % 12;
+      if (remainingMonths === 0) {
+        return `${years}岁`;
+      } else {
+        return `${years}岁${remainingMonths}月`;
+      }
+    }
+  };
+
+  // 添加新活动
+  const handleAddActivity = () => {
+    if (newActivity.trim()) {
+      const newItem = {
+        id: Math.max(...activities.map(a => a.id), 0) + 1,
+        text: newActivity.trim(),
+        completed: false
+      };
+      setActivities([...activities, newItem]);
+      setNewActivity('');
+      setShowAddInput(false);
+    }
+  };
+
+  // 显示添加输入框
+  const showAddActivityInput = () => {
+    setShowAddInput(true);
+  };
+
+  // 取消添加
+  const cancelAddActivity = () => {
+    setNewActivity('');
+    setShowAddInput(false);
+  };
+
+  // 处理活动状态变化
+  const handleActivityToggle = (id) => {
+    setActivities(activities.map(activity => 
+      activity.id === id ? { ...activity, completed: !activity.completed } : activity
+    ));
+  };
+
+  // 删除活动
+  const handleActivityDelete = (id) => {
+    setActivities(activities.filter(activity => activity.id !== id));
+  };
+
+  // 处理输入框回车
+  const handleActivityInputKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleAddActivity();
+    } else if (e.key === 'Escape') {
+      cancelAddActivity();
+    }
+  };
+
+  // 计算进度百分比 (假设最大36个月为100%)
+  const progressPercentage = Math.min((babyAgeMonths / 36) * 100, 100);
+
   // 如果没有用户ID，显示输入界面
   if (!userid) {
     return (
-      <div className="app">
+      <div className="App">
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -191,231 +405,205 @@ const HomePage = () => {
   }
 
   return (
-    <div className="app">
+    <div className="memory-app-bg">
       {/* 顶部导航栏 */}
-      <header className="header">
-        <div className="header-left">
-          <div className="logo" onClick={() => navigate('/family')} style={{cursor: 'pointer'}}>
-            <div className="logo-icon">🤖</div>
-            <span>AI管家</span>
+      <div className="memory-navbar">
+        <div className="navbar-left">
+          <img src="/images/shouye.png" className="memory-logo" alt="logo" />
+          <span className="memory-title">Memory</span>
+        </div>
+        <div className="navbar-center">
+          <div className="search-container">
+            <input 
+              className="memory-search" 
+              placeholder="Search" 
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
+            <button className="search-btn" onClick={handleSearch}>
+              <img src="/images/search.png" alt="搜索" className='search-icon'/>
+            </button>
           </div>
         </div>
-        <div className="header-center">
-          <div className="search-bar">
-            <span className="search-icon">🔍</span>
-            <input type="text" placeholder="搜索..." />
-          </div>
+        <div className="navbar-right">
+          <span className="memory-icon bell" />
+          <span className="memory-icon settings" />
+          <span className="memory-icon user" />
         </div>
-        <div className="header-right">
-          <BellIcon />
-          <SettingsIcon />
-          <UserIcon />
-        </div>
-      </header>
+      </div>
 
-      {/* 主要内容区域 */}
-      <main className="main-content">
-        {/* 左侧功能卡片 */}
-        <div className="left-sidebar">
-          <div className="feature-card voice-record" onClick={goToAudioLibrary} style={{cursor: 'pointer'}}>
-            <div className="card-icon">
-              <MicrophoneIcon />
-            </div>
-            <h3>录制我的声音</h3>
-          </div>
-          
-          <div className="feature-card photo-memory">
-            <div className="card-icon">
-              <PhotoIcon />
-            </div>
-            <h3>回忆相册</h3>
-          </div>
-          
-          <div className="feature-card time-rewind">
-            <div className="card-icon">
-              <ClockIcon />
-            </div>
-            <h3>时间回溯</h3>
-            <p>Bedroom1</p>
-          </div>
-        </div>
+      {/* 菜单栏 */}
+      <div className="memory-menu">
+        <span className="menu-item active">首页</span>
+        <span className="menu-item">智能回忆</span>
+        <span className="menu-item">成长日志</span>
+        <span className="menu-item">安全管家</span>
+      </div>
 
-        {/* 中间控制面板 */}
-        <div className="center-panel">
-          {/* 温度控制 */}
-          <div className="control-card temperature-card">
-            <div className="control-header">
-              <span>Temperature</span>
-              <div className="toggle-switch">
-                <input type="checkbox" defaultChecked />
-                <span className="slider"></span>
+      {/* 主体内容区 - 三栏布局 */}
+      <div className="memory-main">
+        {/* 左侧：用户信息、宝宝信息和其他功能 */}
+        <div className="memory-left">
+          <div className="memory-left-top">
+            {/* 用户账户信息 */}
+            <div className="user-account-card">
+              <div className="user-code">{userCode}</div>
+              <div className="user-status">✓ 已激活</div>
+            </div>
+            {/* 宝宝信息 */}
+            <div className="baby-info">
+              <div className="baby-info-top">
+                <div className="baby-avatar" />
+                <div className="baby-age">{formatAge(babyAgeMonths)}BABY</div>
               </div>
-            </div>
-            <div className="temperature-display">
-              <span className="current-temp">26°C</span>
-              <div className="temp-info">
-                <span className="target-temp">🎯 32°C</span>
-                <span className="humidity">💧 20%</span>
-              </div>
-            </div>
-            <div className="control-slider">
-              <input type="range" min="16" max="35" defaultValue="26" />
-              <button className="plus-btn">+</button>
-            </div>
-          </div>
-
-          {/* 灯光控制 */}
-          <div className="control-card light-card">
-            <div className="control-header">
-              <span>Light</span>
-              <div className="toggle-switch">
-                <input type="checkbox" defaultChecked />
-                <span className="slider"></span>
-              </div>
-            </div>
-            <div className="light-display">
-              <span className="power">3 KW</span>
-            </div>
-            <div className="control-slider light-slider">
-              <span className="brightness-icon">☀️</span>
-              <input type="range" min="0" max="100" defaultValue="60" />
-              <span className="moon-icon">🌙</span>
-            </div>
-          </div>
-
-          {/* 用电量图表 */}
-          <div className="chart-card">
-            <div className="chart-header">
-              <span>这周用电量</span>
-              <select defaultValue="This Week">
-                <option>This Week</option>
-                <option>This Month</option>
-              </select>
-            </div>
-            <div className="chart">
-              <div className="chart-bars">
-                <div className="bar" style={{height: '20%'}}><span>Sun</span></div>
-                <div className="bar" style={{height: '40%'}}><span>Mon</span></div>
-                <div className="bar" style={{height: '30%'}}><span>Tue</span></div>
-                <div className="bar" style={{height: '25%'}}><span>Wed</span></div>
-                <div className="bar" style={{height: '45%'}}><span>Thu</span></div>
-                <div className="bar" style={{height: '70%'}}><span>Fri</span></div>
-                <div className="bar" style={{height: '85%'}}><span>Sat</span></div>
-              </div>
-              <div className="chart-labels">
-                <span>0</span>
-                <span>1 kW</span>
-                <span>2 kW</span>
-                <span>3 kW</span>
-                <span>4 kW</span>
-                <span>5 kW</span>
-                <span>6 kW</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 右侧应用区域 */}
-        <div className="right-sidebar">
-          {/* 应用图标 */}
-          <div className="app-icons">
-            <div className="app-icon memory-seed">
-              <span>🌱</span>
-              <p>记忆种子</p>
-            </div>
-            <div className="app-icon ai-memory">
-              <span>🧠</span>
-              <p>AI可忆</p>
-            </div>
-            <div className="app-icon table-record">
-              <span>📊</span>
-              <p>表格记录</p>
-            </div>
-            <div className="app-icon data-memory">
-              <span>⏰</span>
-              <p>数据回忆</p>
-            </div>
-          </div>
-
-          {/* 事项记录 */}
-          <div className="task-card">
-            <div className="task-header">
-              <span>事项记录</span>
-              <div className="menu-dots">⋮</div>
-            </div>
-            <div className="task-content">
-              <div className="task-item">
-                <span className="check">✓</span>
-                <div className="task-text">
-                  <p>今天需要联系9个客户</p>
-                  <span className="task-date">周三</span>
+              <div className="baby-progress">
+                <input
+                  type="range"
+                  min="1"
+                  max="36"
+                  value={babyAgeMonths}
+                  onChange={handleAgeChange}
+                  className="age-slider"
+                />
+                <div className="age-labels">
+                  <span>1月</span>
+                  <span>3岁</span>
                 </div>
               </div>
-              <div className="task-description">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-              </div>
             </div>
           </div>
-
-          {/* 用户账号 */}
-          <div className="login-card">
-            <div className="login-header">
-              <span>用户账号</span>
-              <div className="status-indicator" style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: '#4CAF50',
-                marginLeft: '8px'
-              }}></div>
+          {/* 其他功能 */}
+          <div className="memory-left-title">美好回忆</div>
+          <div className="memory-card-list">
+            <div className="memory-card compact">
+              <div className="card-center-dot">
+                <div className="card-center-dot-inner"></div>
+              </div>
+              <div className="card-content">
+                <div className="card-title">回忆相册</div>
+                <div className="card-desc">美好时光收藏</div>
+                <img className="card-dont1" src="/images/done1.png"/>
+              </div>
+              <img className="card-img" src="/images/baby1.png"  />
+              <img className="card-dont2" src="/images/done2.png"/>
             </div>
-            <div className="login-content">
-              <div className="username-field">
-                <label>账号标识</label>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  background: '#f8f9fa',
-                  border: '2px solid #4a90e2',
-                  borderRadius: '8px',
-                  padding: '12px 16px',
-                  marginTop: '8px'
-                }}>
-                  <span style={{
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    color: '#4a90e2',
-                    letterSpacing: '2px',
-                    fontFamily: 'monospace'
-                  }}>{userCode}</span>
-                  <div style={{
-                    marginLeft: 'auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                    fontSize: '12px',
-                    color: '#4CAF50',
-                    fontWeight: '500'
-                  }}>
-                    <span style={{ marginRight: '4px' }}>✓</span>
-                    已激活
+            <div className="memory-card compact">
+              <div className="card-center-dot">
+                <div className="card-center-dot-inner"></div>
+              </div>
+              <div className="card-content">
+                <div className="card-title">时间回溯</div>
+                <div className="card-desc">历史记录追踪</div>
+                <img className="card-dont" src="/images/done3.png"/>
+              </div>
+              <img className="card-img" src="/images/baby2.png"  />
+            </div>
+            <div className="memory-card compact">
+              <div className="card-center-dot">
+                <div className="card-center-dot-inner"></div>
+              </div>
+              <div className="card-content">
+                <div className="card-title">成长档案</div>
+                <div className="card-desc">宝宝成长每一步</div>
+                <img className="card-dont3" src="/images/done4.png"/>
+              </div>
+              <img className="card-img" src="/images/baby3.png"  />
+            </div>
+          </div>
+        </div>
+
+        {/* 中间：录制声音、亲子活动和活动时长 */}
+        <div className="memory-center">
+          {/* 录制声音功能 */}
+          <div className="center-voice-card" onClick={goToAudioLibrary}>
+            <div className="voice-icon">🎤</div>
+            <div className="voice-title">录制我的声音</div>
+            <div className="voice-desc">智能语音助手，记录您的美好时光</div>
+            <button className="voice-action">开始录制</button>
+          </div>
+
+          {/* 亲子活动 */}
+          <div className="parent-activity">
+            <div className="activity-title">每天的亲子活动</div>
+            <ul className="activity-list">
+              {activities.map((activity) => (
+                <li key={activity.id} className={activity.completed ? 'completed' : ''}>
+                  <input 
+                    type="checkbox" 
+                    checked={activity.completed}
+                    onChange={() => handleActivityToggle(activity.id)}
+                  /> 
+                  <span className="activity-text">{activity.text}</span>
+                  <button 
+                    className="delete-btn"
+                    onClick={() => handleActivityDelete(activity.id)}
+                    title="删除活动"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+              {showAddInput && (
+                <li className="add-activity-item">
+                  <input 
+                    type="text"
+                    className="add-activity-input"
+                    placeholder="输入新的活动..."
+                    value={newActivity}
+                    onChange={(e) => setNewActivity(e.target.value)}
+                    onKeyPress={handleActivityInputKeyPress}
+                    autoFocus
+                  />
+                  <div className="add-activity-buttons">
+                    <button className="confirm-btn" onClick={handleAddActivity}>✓</button>
+                    <button className="cancel-btn" onClick={cancelAddActivity}>×</button>
                   </div>
-                </div>
-              </div>
-              <div className="login-visual">
-                <div className="house-icon">🏠</div>
-              </div>
-              <div style={{
-                fontSize: '12px',
-                color: '#6c757d',
-                marginTop: '8px',
-                textAlign: 'center'
-              }}>
-                通过URL路径固定标识，不可更改
-              </div>
+                </li>
+              )}
+            </ul>
+            {!showAddInput && (
+              <button className="activity-add" onClick={showAddActivityInput}>+</button>
+            )}
+          </div>
+
+          {/* 亲子活动时长图表 */}
+          <div className="activity-chart">
+            <div className="chart-title">亲子活动时长</div>
+            <LineChart />
+          </div>
+        </div>
+
+        {/* 右侧：亲子相册 */}
+        <div className="memory-right">
+          <div className="activity-board">
+            <div className="activity-title">亲子相册</div>
+            <div className="album-list">
+              {albumImages.map((src, idx) => (
+                <img
+                  key={idx}
+                  src={src}
+                  className="album-img"
+                  alt={`相册图片${idx + 1}`}
+                  onClick={() => openPreview(idx)}
+                />
+              ))}
             </div>
           </div>
         </div>
-      </main>
+      </div>
+
+      {/* 大图预览弹窗 */}
+      {previewIndex !== null && (
+        <div className="album-preview-mask" onClick={closePreview}>
+          <div className="album-preview-box" onClick={e => e.stopPropagation()}>
+            <img className="album-preview-img" src={albumImages[previewIndex]} alt="大图预览" />
+            <button className="album-preview-close" onClick={closePreview}>×</button>
+            <button className="album-preview-arrow left" onClick={showPrev}>‹</button>
+            <button className="album-preview-arrow right" onClick={showNext}>›</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

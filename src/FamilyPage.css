@@ -58,8 +58,8 @@
 }
 
 .welcome-title {
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 600;
   color: #FF6B6B;
   margin-bottom: 8px;
   display: flex;
@@ -79,9 +79,10 @@
 }
 
 .welcome-subtitle {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #FF8C69;
   opacity: 0.8;
+  font-weight: 400;
 }
 
 /* 家庭成员头像组 */
@@ -124,9 +125,9 @@
 }
 
 .member-name {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #FF6B6B;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* 主要内容区域 */
@@ -160,8 +161,8 @@
 }
 
 .sidebar-title {
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: #FF6B6B;
   margin-bottom: 20px;
   text-align: center;
@@ -224,8 +225,8 @@
 }
 
 .activity-name {
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 /* 今日任务 */
@@ -237,8 +238,8 @@
 }
 
 .tasks-title {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: #FF6B6B;
   margin-bottom: 16px;
   text-align: center;
@@ -280,7 +281,7 @@
 }
 
 .task-text {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #FF6B6B;
   font-weight: 500;
 }
@@ -357,23 +358,24 @@
 }
 
 .stat-info h4 {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #FF8C69;
   margin-bottom: 4px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .stat-number {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #FF6B6B;
   display: block;
 }
 
 .stat-unit {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #FFA07A;
   opacity: 0.8;
+  font-weight: 400;
 }
 
 /* 活动详情 */
@@ -395,8 +397,8 @@
 }
 
 .activity-header h3 {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #FF6B6B;
 }
 
@@ -409,10 +411,10 @@
   padding: 10px 20px;
   border: none;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .control-btn.start {
@@ -441,9 +443,9 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #FF8C69;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .progress-bar {
@@ -468,10 +470,10 @@
 
 /* 书籍推荐 */
 .book-recommendations h4 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #FF6B6B;
   margin-bottom: 16px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .book-grid {
@@ -506,9 +508,9 @@
 }
 
 .book-title {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #FF6B6B;
-  font-weight: 600;
+  font-weight: 500;
   text-align: center;
 }
 
@@ -579,9 +581,9 @@
 }
 
 .memory-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #FF6B6B;
+  font-size: 2.4rem;
+  font-weight: 400;
+  color: #3bb6a6;
   margin-bottom: 4px;
 }
 
@@ -606,8 +608,8 @@
 }
 
 .add-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: #FF6B6B;
   margin-bottom: 16px;
   text-align: center;
@@ -630,8 +632,8 @@
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 500;
   color: #FF6B6B;
 }
 
