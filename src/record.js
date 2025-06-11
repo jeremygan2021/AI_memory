@@ -641,7 +641,7 @@ const RecordComponent = () => {
               onMouseUp={() => window.innerWidth > 768 && setTouchFeedback(false)}
               onMouseLeave={() => window.innerWidth > 768 && setTouchFeedback(false)}
             >
-              <img src={recordButtonImg} alt="录音按钮" />
+              <img src="/asset/record_button.png" alt="录音按钮" />
             </button>
           ) : (
             <>

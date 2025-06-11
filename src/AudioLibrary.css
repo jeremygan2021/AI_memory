@@ -413,6 +413,11 @@
 /* 会话容器 */
 .sessions-container {
   padding: 40px;
+  background-image: url('./asset/background3.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 /* 空状态 */
@@ -754,8 +759,12 @@
   
   .sessions-container {
     padding: 20px;
+    background-image: url('./asset/background3.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
   }
-  
   .sessions-grid {
     grid-template-columns: 1fr;
     gap: 20px;
