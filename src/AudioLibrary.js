@@ -4,7 +4,7 @@ import './AudioLibrary.css';
 import { getUserCode, validateUserCode } from './utils/userCode';
 
 // API配置
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://6.6.6.65:8000';
 
 const AudioLibrary = () => {
   const navigate = useNavigate();

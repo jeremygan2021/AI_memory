@@ -6,7 +6,7 @@ import recordButtonImg from './asset/record_button.png';
 import mic_icon from './asset/icon/mic.png'
 
 // API配置
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://6.6.6.65:8000';
 
 // 录音组件
 const RecordComponent = () => {

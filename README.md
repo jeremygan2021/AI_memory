@@ -212,7 +212,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ### 基础配置
 ```javascript
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://6.6.6.65:8000';
 ```
 
 ### 支持的API接口
@@ -310,7 +310,7 @@ const API_BASE_URL = 'http://localhost:8000';
 ### 环境变量
 ```javascript
 // API基础URL - 可根据环境修改
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://6.6.6.65:8000';
 ```
 
 ### 依赖项
