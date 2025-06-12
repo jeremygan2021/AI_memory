@@ -6,7 +6,7 @@ import recordButtonImg from './asset/record_button.png';
 import mic_icon from './asset/icon/mic.png'
 
 // API配置
-const API_BASE_URL = 'http://6.6.6.65:8000';
+const API_BASE_URL = 'https://data.tangledup-ai.com';
 
 // 录音组件
 const RecordComponent = () => {
@@ -595,206 +595,191 @@ const RecordComponent = () => {
 
   return (
     <div className="record-container">
-      {/* 顶部状态栏 */}
-      <div className="header-status">
-
-        <div className="user-info">
-                               
-
-                               
-        </div>
-      </div>
-
-      {/* 录音控制面板 */}
-      <div className="record-panel">
-        <div className="record-header">
-          <h2>语言录制</h2>
-          <div className="record-time">
-            {formatTime(recordingTime)}
-          </div>
-        </div>
-        
-        {/* 录音进度指示线 */}
-        <div className={`record-progress-line ${isRecording ? 'recording' : ''}`} />
-        
-        {/* 录音状态指示器 */}
-        <div className={`record-indicator ${isRecording ? 'recording' : ''} ${isPaused ? 'paused' : ''} ${touchFeedback ? 'touch-feedback' : ''}`}>
-          <div className="indicator-dot"></div>
-          <span className="status-text">
-            {touchFeedback && !isRecording ? '松开结束录音' : 
-             isRecording ? (isPaused ? '已暂停' : (isLongPress ? '长按录音中...' : '录音中...')) : 
-             '准备录音'}
-          </span>
-        </div>
-        
-        {/* 控制按钮 */}
-        <div className="control-buttons">
-          {!isRecording ? (
-            <button 
-              ref={startBtnRef}
-              className={`record-button-img ${touchFeedback ? 'touch-active' : ''}`} 
-              onClick={startRecording}
-              onTouchStart={handleTouchStart(startRecording)}
-              onTouchEnd={handleTouchEnd}
-              onTouchCancel={handleLongPressEnd}
-              onMouseDown={() => window.innerWidth > 768 && setTouchFeedback(true)}
-              onMouseUp={() => window.innerWidth > 768 && setTouchFeedback(false)}
-              onMouseLeave={() => window.innerWidth > 768 && setTouchFeedback(false)}
-            >
-              <img src="/asset/record_button.png" alt="录音按钮" />
-            </button>
-          ) : (
-            <>
-              <button className="btn btn-pause" onClick={pauseRecording}>
-                <span className="btn-icon">{isPaused ? '▶️' : '⏸️'}</span>
-                <span className="btn-text">{isPaused ? '继续' : '暂停'}</span>
-              </button>
-              <button className="btn btn-stop" onClick={stopRecording}>
-                <span className="btn-icon">⏹️</span>
-                <span className="btn-text">停止</span>
-              </button>
-            </>
-          )}
-          
-          {recordingTime > 0 && !isRecording && (
-            <button className="btn btn-reset" onClick={resetRecording}>
-              <span className="btn-icon">🔄</span>
-              <span className="btn-text">重置</span>
-            </button>
-          )}
-        </div>
-        
-        {/* 当前录音播放 */}
-        {audioURL && (
-          <div className="current-audio">
-            <h4>📻 当前录音</h4>
-            <audio controls src={audioURL} className="audio-player">
-              您的浏览器不支持音频播放
-            </audio>
-          </div>
-        )}
+      {/* 顶部导航栏 - 仿FamilyPage.js风格 */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        left: '20px',
+        zIndex: 1000,
+        background: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: '50px',
+        padding: '10px 20px',
+        cursor: 'pointer',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+        backdropFilter: 'blur(10px)'
+      }} onClick={() => navigate('/')}> 
+        <span style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50' }}>← 返回主页</span>
       </div>
       
-      {/* 待绑定录音列表 */}
-      {recordings.length > 0 && (
-        <div className="recordings-list">
-          <h3>🎵 待绑定录音</h3>
-          <div className="recordings-grid">
-            {recordings.map((recording) => (
-              <div key={recording.id} className="recording-item">
-                <div className="recording-info">
-                  <div className="recording-title">
-                    🎵 录音 #{recording.id.toString().slice(-4)}
-                    <span className="upload-status-badge">
-                      {getUploadStatusIcon(recording.id)}
+      {/* 主内容区：左右布局 */}
+      <div className="record-main-layout">
+        {/* 左侧录音控制区 */}
+        <div className="record-left-panel">
+          <div className="record-control-card">
+            {/* 录音控制区标题 */}
+            <div className="record-control-header">
+              <h2>语音录制</h2>
+            </div>
+            
+            {/* 时间显示 */}
+            <div className="record-time-display">
+              <div className="record-time-large">{formatTime(recordingTime)}</div>
+            </div>
+            
+            {/* 录音状态指示 */}
+            <div className={`record-status-indicator ${isRecording ? 'recording' : ''} ${isPaused ? 'paused' : ''}`}>
+              <div className="status-dot"></div>
+              <span className="status-text">
+                {isRecording ? (isPaused ? '已暂停' : '录音中...') : '准备录音'}
+              </span>
+            </div>
+            
+            {/* 录音控制按钮 */}
+            <div className="record-control-buttons">
+              {!isRecording ? (
+                <button className="record-start-btn" onClick={startRecording}>
+                  <span className="btn-icon">
+                  <img src="/images/huatong.svg" className="btn-icon" width={32} height={32}/>
+                  </span>
+                  <span className="btn-text">开始录音</span>
+                </button>
+              ) : (
+                <div className="record-action-buttons">
+                  <button className="record-pause-btn" onClick={pauseRecording}>
+                    
+                    <span className="btn-icon">{isPaused ? '▶' : '⏸'}</span>
+                    <span className="btn-text">{isPaused ? '继续' : '暂停'}</span>
+                  </button>
+                  <button className="record-stop-btn" onClick={stopRecording}>
+                    <span className="btn-icon">
+                    <img src="/images/中止.svg" className="btn-icon" width={32} height={32}/>
                     </span>
-                  </div>
-                  <div className="recording-meta">
-                    <span className="duration">{formatTime(recording.duration)}</span>
-                    <span className="timestamp">{recording.timestamp}</span>
-                    <span className={`upload-status ${uploadStatus[recording.id] || 'local'}`}>
-                      {getUploadStatusText(recording.id)}
-                    </span>
-                  </div>
+                    <span className="btn-text">停止</span>
+                  </button>
                 </div>
-                
-                <audio controls src={recording.url} className="recording-audio">
+              )}
+              {recordingTime > 0 && !isRecording && (
+                <button className="record-reset-btn" onClick={resetRecording}>
+                  <span className="btn-icon">🔄</span>
+                  <span className="btn-text">重置</span>
+                </button>
+              )}
+            </div>
+            
+            {/* 当前录音播放器 */}
+            {audioURL && (
+              <div className="current-recording-player">
+                <div className="player-header">
+                  <span className="player-icon">📻</span>
+                  <span className="player-title">当前录音</span>
+                </div>
+                <audio controls src={audioURL} className="audio-player-control">
                   您的浏览器不支持音频播放
                 </audio>
-                
-                <div className="recording-actions">
-                  <button 
-                    className="bind-btn" 
-                    onClick={() => bindRecording(recording)}
-                    title="绑定录音"
-                  >
-                    🔗 绑定
-                  </button>
-                  {uploadStatus[recording.id] === 'error' && (
-                    <button 
-                      className="retry-btn" 
-                      onClick={() => retryUpload(recording)}
-                      title="重试上传"
-                    >
-                      🔄 重试
-                    </button>
-                  )}
-                  <button 
-                    className="delete-btn" 
-                    onClick={() => deleteRecording(recording.id)}
-                    title="删除录音"
-                  >
-                    🗑️
-                  </button>
-                </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
-      )}
-      
-      {/* 绑定录音列表 */}
-      {boundRecordings.length > 0 && (
-        <div className="recordings-list bound-recordings">
-          <h3>已绑定录音 {userCode && id && `(会议: ${userCode}/${id})`}</h3>
-          <div className="recordings-grid">
-            {boundRecordings.map((recording) => (
-              <div key={recording.id} className="recording-item bound-item">
-                <div className="recording-info">
-                  <div className="recording-title">
-                    🎵 录音 #{recording.id.toString().slice(-4)}
-                    {recording.uploaded && (
-                      <span className="cloud-badge" title="已上传到云端">
-                        ☁️
-                      </span>
-                    )}
+
+        {/* 右侧录音列表区 */}
+        <div className="record-right-panel">
+          {/* 待绑定录音区域 - 始终显示 */}
+          <div className="recordings-section">
+            <div className="section-header">
+              <h3>待绑定的录音</h3>
+              <span className="section-count">({recordings.length})</span>
+            </div>
+            <div className="recordings-list-container">
+              {recordings.length > 0 ? (
+                recordings.map((recording) => (
+                  <div key={recording.id} className="recording-list-item bound-item">
+                    <div className="recording-item-info">
+                      <div className="recording-timestamp">{recording.timestamp}</div>
+                      <div className="recording-size">{formatTime(recording.duration)} · {getUploadStatusText(recording.id)}</div>
+                    </div>
+                    <div className="recording-item-controls">
+                      <audio controls src={recording.url} className="mini-audio-player">
+                        您的浏览器不支持音频播放
+                      </audio>
+                      <div className="recording-actions">
+                        <button className="action-btn bind-btn" onClick={() => bindRecording(recording)} title="绑定录音">
+                          🔗
+                        </button>
+                        {uploadStatus[recording.id] === 'error' && (
+                          <button className="action-btn retry-btn" onClick={() => retryUpload(recording)} title="重试上传">
+                            🔄
+                          </button>
+                        )}
+                        <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="recording-meta">
-                    <span className="duration">{formatTime(recording.duration)}</span>
-                    <span className="timestamp">{recording.timestamp}</span>
-                    {recording.boundAt && (
-                      <span className="bound-time">绑定: {recording.boundAt}</span>
-                    )}
-                    {recording.cloudUrl && (
-                      <span className="cloud-url" title={recording.cloudUrl}>
-                        🌐 云端文件
-                      </span>
-                    )}
-                  </div>
+                ))
+              ) : (
+                <div className="empty-section-state">
+                  <div className="empty-section-icon">🎤</div>
+                  <p>暂无待绑定的录音</p>
+                  <span className="empty-section-hint">录制完成后的录音将出现在这里</span>
                 </div>
-                
-                <div className="recording-actions">
-                  <button 
-                    className="play-btn" 
-                    onClick={() => enterPlayerMode(recording)}
-                    title="播放录音"
-                  >
-                    ▶️ 播放
-                  </button>
-                  <button 
-                    className="delete-btn" 
-                    onClick={() => deleteRecording(recording.id, true)}
-                    title="删除录音"
-                  >
-                    🗑️
-                  </button>
-                </div>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
+
+          {/* 已绑定录音区域 - 始终显示 */}
+          <div className="recordings-section bound-section">
+            <div className="section-header">
+              <h3>已绑定的录音</h3>
+              <span className="section-count">({boundRecordings.length})</span>
+              {userCode && id && <span className="session-info">会议: {userCode}/{id}</span>}
+            </div>
+            <div className="recordings-list-container">
+              {boundRecordings.length > 0 ? (
+                boundRecordings.map((recording) => (
+                  <div key={recording.id} className="recording-list-item bound-item">
+                    <div className="recording-item-info">
+                      <div className="recording-timestamp">{recording.timestamp}</div>
+                      <div className="recording-size">
+                        {formatTime(recording.duration)} · {recording.uploaded ? '已上传' : '本地存储'}
+                        {recording.uploaded && <span className="cloud-icon">☁️</span>}
+                      </div>
+                      {recording.boundAt && (
+                        <div className="bound-time">绑定: {recording.boundAt}</div>
+                      )}
+                    </div>
+                    <div className="recording-item-controls">
+                      <div className="recording-actions">
+                        <button className="action-btn play-btn" onClick={() => enterPlayerMode(recording)} title="播放录音">
+                          ▶️
+                        </button>
+                        <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id, true)} title="删除录音">
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="empty-section-state bound-empty">
+                  <div className="empty-section-icon">✅</div>
+                  <p>暂无已绑定的录音</p>
+                  <span className="empty-section-hint">点击待绑定录音的"🔗"按钮进行绑定</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 全部为空时的状态提示 */}
+          {recordings.length === 0 && boundRecordings.length === 0 && (
+            <div className="empty-recordings-state">
+              <div className="empty-icon">🎤</div>
+              <h3>还没有录音</h3>
+              <p>点击"开始录音"按钮开始录制您的第一个录音</p>
+            </div>
+          )}
         </div>
-      )}
-      
-      {/* 添加录音按钮 */}
-      {!isRecording && (
-        <button 
-          className="add-recording-btn" 
-          onClick={startRecording}
-          title="开始录音"
-        >
-          +
-        </button>
-      )}
+      </div>
     </div>
   );
 };

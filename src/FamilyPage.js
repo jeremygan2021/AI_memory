@@ -78,22 +78,6 @@ function FamilyPage() {
 
   return (
     <div className="family-page">
-      {/* 返回按钮 */}
-      <div style={{
-        position: 'fixed',
-        top: '20px',
-        left: '20px',
-        zIndex: 1000,
-        background: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: '50px',
-        padding: '10px 20px',
-        cursor: 'pointer',
-        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-        backdropFilter: 'blur(10px)'
-      }} onClick={() => navigate('/')}>
-        <span style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50' }}>← 返回主页</span>
-      </div>
-      
       {/* 顶部欢迎区域 */}
       <div className="welcome-section">
         <div className="welcome-content">

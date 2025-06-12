@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './AudioLibrary.css';
 import { getUserCode, validateUserCode } from './utils/userCode';
+import SvgIcon from './components/SvgIcons';
+import ModernSearchBox from './components/ModernSearchBox';
 
 // API配置
-const API_BASE_URL = 'http://6.6.6.65:8000';
+const API_BASE_URL = 'https://data.tangledup-ai.com';
 
 const AudioLibrary = () => {
   const navigate = useNavigate();
@@ -380,24 +382,26 @@ const AudioLibrary = () => {
         
         <div className="header-content">
           <h1 className="library-title">
-            <span className="title-icon">☁️</span>
+            <span className="title-icon">
+            <SvgIcon name="cloud" className="icon-img" width={32} height={32} color="#3bb6a6" />
+            </span>
             云端音频库
-            {userCode && (
-              <span className="user-code-badge">
-                {userCode}
-              </span>
-            )}
+            
           </h1>
           <p className="library-subtitle">管理您在云端的所有录音会话</p>
         </div>
         
         <div className="header-actions">
           <button onClick={refreshFiles} className="refresh-btn" title="刷新">
-            <span className="btn-icon">🔄</span>
+            <span className="btn-icon">
+              <img src="/images/sx.svg" className="icon-img" width={32} height={32}/>
+            </span>
             <span>刷新</span>
           </button>
           <button onClick={createNewSession} className="new-session-btn">
-            <span className="btn-icon">➕</span>
+            <span className="btn-icon">
+            <img src="/images/add.svg" className="btn-icon" width={30} height={30}/>
+            </span>
             <span>新建录音</span>
           </button>
         </div>
@@ -405,16 +409,14 @@ const AudioLibrary = () => {
 
       {/* 控制栏 */}
       <div className="library-controls">
-        <div className="search-container">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            placeholder="搜索会话ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
+        <ModernSearchBox
+          placeholder="搜索会话ID..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          size="medium"
+          width="400px"
+          theme="gradient"
+        />
         
         <div className="sort-container">
           <label className="sort-label">排序:</label>
@@ -433,14 +435,18 @@ const AudioLibrary = () => {
       {/* 统计信息 */}
       <div className="library-stats">
         <div className="stat-item">
-          <span className="stat-icon">📁</span>
+          <span className="stat-icon">
+          <img src="/images/files.svg" className="stat-icon" width={50} height={50}/>
+          </span>
           <div className="stat-content">
             <span className="stat-number">{audioSessions.length}</span>
             <span className="stat-label">会话</span>
           </div>
         </div>
         <div className="stat-item">
-          <span className="stat-icon">🎤</span>
+          <span className="stat-icon">
+          <img src="/images/huatong.svg" className="stat-icon" width={50} height={50}/>
+          </span>
           <div className="stat-content">
             <span className="stat-number">
               {audioSessions.reduce((total, session) => total + session.count, 0)}
@@ -449,7 +455,9 @@ const AudioLibrary = () => {
           </div>
         </div>
         <div className="stat-item">
-          <span className="stat-icon">💾</span>
+          <span className="stat-icon">
+          <img src="/images/save.svg" className="stat-icon" width={50} height={50}/>
+          </span>
           <div className="stat-content">
             <span className="stat-number">
               {formatFileSize(
@@ -460,7 +468,9 @@ const AudioLibrary = () => {
           </div>
         </div>
         <div className="stat-item cloud-indicator">
-          <span className="stat-icon">☁️</span>
+          <span className="stat-icon">
+          <img src="/images/scyd.svg" className="stat-icon" width={50} height={50}/>
+          </span>
           <div className="stat-content">
             <span className="stat-number">云端</span>
             <span className="stat-label">存储</span>
@@ -492,14 +502,16 @@ const AudioLibrary = () => {
                     <h3 className="session-id">
                       <span className="id-icon">🆔</span>
                       {userCode}/{session.sessionId}
-                      <span className="cloud-badge" title="云端存储">☁️</span>
+                      <span className="cloud-badge" title="云端存储">
+                      <img src="/images/scyd.svg" className="cloud-badge" width={20} height={20}/>
+                      </span>
                     </h3>
                     <div className="session-meta">
                       <span className="session-count">
-                        🎤 {session.count} 个录音
+                      <img src="/images/huatong.svg" className="session-count" width={15} height={15}/> {session.count} 个录音
                       </span>
                       <span className="session-size">
-                        💾 {formatFileSize(
+                      <img src="/images/save.svg" className="session-count" width={15} height={15}/> {formatFileSize(
                           session.recordings.reduce((total, r) => total + (r.size || 0), 0)
                         )}
                       </span>
@@ -511,7 +523,7 @@ const AudioLibrary = () => {
                     className="delete-session-btn"
                     title="删除会话及云端文件"
                   >
-                    🗑️
+                    <img src="/images/delete.svg" className="delete-session-btn" width={50} height={50}/>
                   </button>
                 </div>
 
@@ -533,7 +545,8 @@ const AudioLibrary = () => {
 
                   <div className="session-actions">
                     <div className="action-icon">
-                      {session.recordings.length > 0 ? '▶️' : '🎤'}
+                    <img src="/images/bf.svg" className="action-icon" width={50} height={50}/>
+                      {session.recordings.length > 0 ? '' : ''}
                     </div>
                     <span className="action-text">
                       {session.recordings.length > 0 ? '播放' : '录音'}
@@ -554,6 +567,10 @@ const AudioLibrary = () => {
           </div>
         )}
       </main>
+      {/* 移动端底部大按钮 */}
+      <button className="add-device-btn" onClick={createNewSession} style={{display: 'block'}}>
+        新建录音
+      </button>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 /* AppDemo.tsx 样式文件 */
+/* 跨浏览器兼容性和CSS Reset */
 
 /*@font-face {
     font-family: 'MUYAO-SOFTBRUSH';
@@ -7,13 +8,36 @@
     font-style: normal;
   }
 */
+
+/* CSS Reset 和浏览器兼容性 */
 * {
   box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   margin: 0;
   padding: 0;
   font-family: 'MUYAO-SOFTBRUSH', 'PingFang SC', 'Microsoft YaHei', '微软雅黑', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 18px;
   font-weight: 400;
+}
+
+/* 确保HTML5语义化标签在旧版IE中正常显示 */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  line-height: 1.15;
+}
+
+/* 移除IE10+的默认清除按钮 */
+input::-ms-clear {
+  display: none;
+}
+
+/* 确保图片自适应 */
+img {
+  max-width: 100%;
+  height: auto;
+  border-style: none;
 }
 
 /* 确保移动端全宽显示 */
@@ -31,6 +55,31 @@
   
   * {
     max-width: 100%;
+  }
+  
+  /* 手机端删除按钮优化 - 确保正圆形 */
+  .delete-btn {
+    min-width: 20px !important;
+    min-height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box;
+  }
+  
+  /* 移动端图表优化 - 确保y轴文字显示完整 */
+  .activity-chart {
+    padding: 15px 15px 15px 25px; /* 增加左边距 */
+  }
+  
+  .line-chart-container {
+    overflow: visible; /* 允许溢出显示 */
+    padding-left: 10px; /* 额外左边距 */
+  }
+  
+  .line-chart {
+    min-width: 280px; /* 减小最小宽度 */
   }
 }
 
@@ -55,7 +104,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   width: 100%;
   max-width: 100vw;
   background: linear-gradient(135deg, #e8f5e8 0%, #a8d8a8 30%, #78c6b6 70%, #4ecdc4 100%);
-  padding: 0;
+  padding: 120px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
   font-family: 'Muyao-Softbrush-Regular', sans-serif;
   box-sizing: border-box;
   overflow-x: hidden;
@@ -63,17 +112,44 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 顶部导航栏 */
 .memory-navbar {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-pack: justify;
+  -moz-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
   justify-content: space-between;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
   align-items: center;
   background-color: rgba(195, 234, 226, 0.88);
   padding: 15px 30px;
   height: 70px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 
 .navbar-left {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
   align-items: center;
   gap: 12px;
 }
@@ -85,7 +161,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .memory-title {
-  font-size: 2.6rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: #3bb6a6;
   letter-spacing: 2px;
@@ -99,19 +175,30 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .search-container {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
   align-items: center;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 25px;
   padding: 6px 20px;
-  width: 300px;
+  width: 500px;
   box-shadow: 
     0 4px 20px rgba(0, 0, 0, 0.1),
     0 2px 8px rgba(59, 182, 166, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   border: 2px solid rgba(59, 182, 166, 0.2);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  -webkit-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  -moz-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  -ms-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  -o-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
 }
@@ -138,6 +225,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     0 4px 16px rgba(59, 182, 166, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transform: translateY(-1px);
+  -webkit-transform: translateY(-1px);
+  -moz-transform: translateY(-1px);
+  -ms-transform: translateY(-1px);
+  -o-transform: translateY(-1px);
 }
 
 .search-container:focus-within {
@@ -148,6 +239,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     0 0 0 4px rgba(59, 182, 166, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transform: translateY(-2px);
+  -webkit-transform: translateY(-2px);
+  -moz-transform: translateY(-2px);
+  -ms-transform: translateY(-2px);
+  -o-transform: translateY(-2px);
 }
 
 .memory-search {
@@ -157,7 +252,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   background: transparent;
   flex: 1;
   padding: 5px 5px;
-  font-size: 16px;
+  font-size: 20px;
   color: #2c3e50;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -174,11 +269,16 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   transform: translateX(4px);
 }
 
-.search-btn {
+.search-btn-box{
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  right: 20px;
+}
+
+/*.search-btn {
     position: absolute;
-    right: 2px;
-    top: 4px;
-    bottom: 2px;
+    padding: 2px;
     width: 32px;
     height: 32px;
     background: #3bb6a6;
@@ -190,7 +290,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     justify-content: center;
     transition: all 0.3s ease;
     box-shadow: 0 2px 6px rgba(59, 182, 166, 0.3);
-}
+}*/
 
 .search-btn::before {
   content: '';
@@ -216,10 +316,30 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
 
 .search-icon{
-    width: 18px;
-    height: 18px;
-    filter: brightness(0) invert(1);
-    align-items: center;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+}
+
+.search-icon:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    -webkit-transform: translate(-50%, -50%) scale(1.1);
+    -moz-transform: translate(-50%, -50%) scale(1.1);
+    -ms-transform: translate(-50%, -50%) scale(1.1);
+    -o-transform: translate(-50%, -50%) scale(1.1);
 }
 
 .navbar-right {
@@ -229,8 +349,8 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .memory-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   background: rgba(59, 182, 166, 0.1);
   cursor: pointer;
@@ -283,6 +403,12 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   padding: 12px 0;
   gap: 150px;
   box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, 0.25);
+  position: fixed;
+  top: 70px; /* 紧贴在导航栏下方 */
+  left: 0;
+  right: 0;
+  z-index: 999;
+  width: 100%;
 }
 
 .menu-item {
@@ -306,12 +432,21 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 主体内容区 */
 .memory-main {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
   gap: 12px;
-  padding: 16px;
+  padding: 50px;
   min-height: calc(100vh - 140px);
   position: relative;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+  -ms-flex-align: stretch;
   align-items: stretch;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
   justify-content: center;
   max-width: 1400px;
   margin: 0 auto;
@@ -391,7 +526,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   align-items: center;
   gap: 16px;
   font-size: 1.25rem;
-  height: 240px;
+  height: 200px;
 }
 
 .memory-card:hover {
@@ -464,6 +599,11 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   transform: scale(1.05);
 }
 
+/* 移动端的录制声音卡片 - 默认隐藏 */
+.mobile-voice-card {
+  display: none;
+}
+
 /* 突出显示录音功能卡片 */
 .memory-card.featured-voice {
   background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
@@ -488,7 +628,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   margin-top: 4px;
 }
 
-/* 缩小其他卡片 */
+/* 缩小其他卡片
 .memory-card.compact {
   flex: 1;
   min-height: 120px;
@@ -496,7 +636,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   display: flex;
   align-items: center;
 }
-
+ */
 .memory-card.compact .card-title {
   font-size:1.5rem;
 }
@@ -590,7 +730,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 中间内容区 */
 .memory-center {
-  width: 1000px;
+  width: 800px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -625,7 +765,14 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .baby-avatar::before {
-  content: "👶";
+  content: ''; 
+    display: block; 
+    width: 100%;
+    height: 100%;
+    background-image: url('/public/images/baby4.png'); /* 替换为你的铃铛 Logo 图片路径 */
+    background-size: contain; /* 图片适应容器大小 */
+    background-position: center; /* 图片居中显示 */
+    background-repeat: no-repeat; /* 不重复显示图片 */
 }
 
 .baby-info-top {
@@ -735,6 +882,45 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   text-align: left;
 }
 
+.activity-title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.photo-toggle-btn {
+  background: #3bb6a6;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.photo-toggle-btn:hover {
+  background: #2ea087;
+  transform: scale(1.05);
+}
+
+.toggle-arrow {
+  font-size: 0.6rem;
+  transition: transform 0.3s ease;
+}
+
+.toggle-arrow.up {
+  transform: rotate(180deg);
+}
+
+.toggle-arrow.down {
+  transform: rotate(0deg);
+}
+
 .activity-list {
   list-style: none;
   margin-bottom: 16px;
@@ -806,8 +992,8 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   background: #ff6b6b;
   color: white;
   border: none;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   font-size: 14px;
   cursor: pointer;
@@ -817,6 +1003,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   align-items: center;
   justify-content: center;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .activity-list li:hover .delete-btn {
@@ -900,6 +1087,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   flex: 1;
   display: flex;
   flex-direction: column;
+  max-height: 407px;
 }
 
 .chart-title {
@@ -911,6 +1099,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 .line-chart-container {
   width: 100%;
+  height: 90%;
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -924,7 +1113,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .chart-point {
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
 }
 
 .chart-point:hover {
@@ -942,9 +1131,9 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 右侧相册 */
 .memory-right {
-  width: 600px;
+  width: 400px;
   flex-shrink: 0;
-  height: 100%;
+  max-height: 1025px;
   display: flex;
   flex-direction: column;
 }
@@ -960,6 +1149,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .album-list {
+  max-height:900px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -967,6 +1157,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   flex: 1;
   overflow-y: auto;
   padding-right: 8px;
+  transition: all 0.3s ease;
 }
 
 /* 自定义滚动条样式 */
@@ -989,12 +1180,26 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .album-img {
-  width: 100%;
-  height: 140px;
+  width: 95%;
+  height: 150px;
   object-fit: cover;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+  position: relative;
+  left: 10px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .album-img:hover {
@@ -1105,7 +1310,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .memory-app-bg {
     width: 100%;
     max-width: 100vw;
-    padding: 0;
+    padding: 95px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
     overflow-x: hidden;
   }
   
@@ -1120,6 +1325,11 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     background-color: rgba(195, 234, 226, 0.95);
     backdrop-filter: blur(10px);
     overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
   }
   
   .navbar-left {
@@ -1138,13 +1348,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   .memory-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #3bb6a6;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none;
   }
   
   .navbar-center {
@@ -1157,18 +1361,18 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   
   .search-container {
     width: 100%;
-    max-width: 200px;
+    max-width: 240px;
     padding: 4px 12px;
     border-radius: 18px;
     height: 36px;
     display: flex;
     align-items: center;
-    min-width: 120px;
+    min-width: 140px;
   }
   
   .memory-search {
     font-size: 13px;
-    padding: 4px 6px;
+    padding: 4px 60px 4px 6px;
     width: auto;
     flex: 1;
     min-width: 0;
@@ -1184,6 +1388,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .search-icon {
     width: 14px;
     height: 14px;
+  }
+  
+  .search-btn-box {
+    right: 4px;
   }
   
   .navbar-right {
@@ -1217,6 +1425,11 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     white-space: nowrap;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    position: fixed;
+    top: 56px; /* 紧贴在导航栏下方 */
+    left: 0;
+    right: 0;
+    z-index: 999;
   }
   
   .memory-menu::-webkit-scrollbar {
@@ -1270,6 +1483,18 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
+  
+  /* 在768px以下显示移动端录音卡片 */
+  .mobile-voice-card {
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  /* 隐藏中间区域的原录音卡片 */
+  .memory-center .center-voice-card:not(.mobile-voice-card) {
+    display: none;
+  }
 }
 
 .memory-date {
@@ -1292,21 +1517,107 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   font-weight: 400;
 }
 
+/* 手机端删除按钮优化 - 确保正圆形 */
+@media (max-width: 768px) {
+  .delete-btn {
+    min-width: 20px !important;
+    min-height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box;
+  }
+  
+  /* 移动端图表优化 - 确保y轴文字显示完整 */
+  .activity-chart {
+    padding: 15px 15px 15px 25px; /* 增加左边距 */
+  }
+  
+  .line-chart-container {
+    overflow: visible; /* 允许溢出显示 */
+    padding-left: 10px; /* 额外左边距 */
+  }
+  
+  .line-chart {
+    min-width: 280px; /* 减小最小宽度 */
+  }
+  
+  /* 通用移动端活动列表滚动条优化 */
+  .parent-activity {
+    height: 300px; /* 固定高度确保滚动条显示 */
+    min-height: auto;
+  }
+  
+  .activity-list {
+    overflow-y: auto;
+    padding-right: 8px;
+    max-height: 200px; /* 限制最大高度确保滚动 */
+  }
+  
+  .activity-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .activity-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb {
+    background: #3bb6a6;
+    border-radius: 3px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb:hover {
+    background: #2ea087;
+  }
+  
+  /* 移动端相册优化 */
+  .activity-title-container {
+    margin-bottom: 12px;
+  }
+  
+  .photo-toggle-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    border-radius: 12px;
+  }
+  
+  .album-list {
+    gap: 8px;
+  }
+}
+
 /* 手机端响应式布局优化 */
 
 /* 大屏手机 (414px以上) - iPhone 12 Pro Max, Samsung Galaxy S系列等 */
 @media (max-width: 1024px) and (min-width: 415px) {
   .memory-app-bg {
-    padding: 0;
+    padding: 115px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
+  }
+  
+  .memory-menu {
+    position: fixed;
+    top: 65px; /* 紧贴在导航栏下方 */
+    left: 0;
+    right: 0;
+    z-index: 999;
+    width: 100%;
   }
   
   .memory-navbar {
     padding: 12px 20px;
     height: 65px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
   }
   
   .memory-title {
-    font-size: 2.2rem;
+    display: none;
   }
   
   .navbar-center {
@@ -1323,13 +1634,17 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   
   .memory-search {
     font-size: 15px;
-    padding: 5px 5px;
+    padding: 5px 60px 5px 5px;
   }
   
   .search-btn {
     padding: 8px;
     width: 40px;
     height: 40px;
+  }
+  
+  .search-btn-box {
+    right: 3px;
   }
   
   
@@ -1375,22 +1690,93 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     margin-bottom: 20px;
   }
   
+  /* 在大屏手机上显示移动端录音卡片 */
+  .mobile-voice-card {
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  /* 隐藏中间区域的原录音卡片 */
+  .memory-center .center-voice-card:not(.mobile-voice-card) {
+    display: none;
+  }
+  
+  /* 大屏手机图表优化 */
+  .activity-chart {
+    padding: 18px 18px 18px 30px;
+  }
+  
+  .line-chart-container {
+    overflow: visible;
+    padding-left: 12px;
+  }
+  
+  .line-chart {
+    min-width: 300px;
+  }
+  
+  /* 大屏手机活动列表滚动条优化 */
   .parent-activity {
-    height: auto;
-    min-height: 250px;
+    height: 280px; /* 固定高度确保滚动条显示 */
+    min-height: auto;
+  }
+  
+  .activity-list {
+    overflow-y: auto;
+    padding-right: 8px;
+    max-height: 180px; /* 限制最大高度确保滚动 */
+  }
+  
+  .activity-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .activity-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb {
+    background: #3bb6a6;
+    border-radius: 3px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb:hover {
+    background: #2ea087;
+  }
+  
+  /* 大屏手机相册优化 */
+  .activity-title-container {
+    margin-bottom: 14px;
+  }
+  
+  .photo-toggle-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 14px;
+  }
+  
+  .album-list {
+    gap: 10px;
   }
 }
 
 /* 中等屏幕手机 (375px-414px) - iPhone 12, iPhone 13, 大多数Android */
 @media (max-width: 414px) and (min-width: 376px) {
   .memory-app-bg {
-    padding: 0;
+    padding: 95px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
     overflow-x: hidden;
   }
   
   .memory-navbar {
     padding: 8px 12px;
     height: 54px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
   }
   
   .navbar-left {
@@ -1403,8 +1789,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   .memory-title {
-    font-size: 1.4rem;
-    letter-spacing: 0.3px;
+    display: none;
   }
   
   .navbar-center {
@@ -1423,7 +1808,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   
   .memory-search {
     font-size: 12px;
-    padding: 4px 5px;
+    padding: 4px 45px 4px 5px;
   }
   
   .search-btn {
@@ -1435,6 +1820,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .search-icon {
     width: 12px;
     height: 12px;
+  }
+  
+  .search-btn-box {
+    right: 6px;
   }
   
   .navbar-right {
@@ -1452,6 +1841,12 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     padding: 8px 10px;
     gap: 6px;
     justify-content: space-around;
+    position: fixed;
+    top: 54px; /* 紧贴在导航栏下方 */
+    left: 0;
+    right: 0;
+    z-index: 999;
+    width: 100%;
   }
   
   .menu-item {
@@ -1550,16 +1945,24 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     padding: 12px 24px;
   }
   
-  /* 亲子活动优化 */
-  .parent-activity {
-    height: auto;
-    min-height: 240px;
-    padding: 16px;
+  /* 在中等屏幕手机上显示移动端录音卡片 */
+  .mobile-voice-card {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 18px;
+    padding: 20px;
   }
   
+  /* 隐藏中间区域的原录音卡片 */
+  .memory-center .center-voice-card:not(.mobile-voice-card) {
+    display: none;
+  }
+  
+  /* 亲子活动优化 - 已在下方滚动条优化中统一设置 */
+  
   .activity-title {
-    font-size: 1.1rem;
-    margin-bottom: 14px;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
   }
   
   .activity-text {
@@ -1578,19 +1981,82 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .album-img {
     height: 120px;
   }
+  
+  /* 中等屏幕手机图表优化 */
+  .activity-chart {
+    padding: 16px 16px 16px 28px;
+  }
+  
+  .line-chart-container {
+    overflow: visible;
+    padding-left: 8px;
+  }
+  
+  .line-chart {
+    min-width: 280px;
+  }
+  
+  /* 中等屏幕手机活动列表滚动条优化 */
+  .parent-activity {
+    height: 260px; /* 固定高度确保滚动条显示 */
+    min-height: auto;
+  }
+  
+  .activity-list {
+    overflow-y: auto;
+    padding-right: 6px;
+    max-height: 160px; /* 限制最大高度确保滚动 */
+  }
+  
+  .activity-list::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  .activity-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb {
+    background: #3bb6a6;
+    border-radius: 3px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb:hover {
+    background: #2ea087;
+  }
+  
+  /* 中等屏幕手机相册优化 */
+  .activity-title-container {
+    margin-bottom: 12px;
+  }
+  
+  .photo-toggle-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    border-radius: 12px;
+  }
+  
+  .album-list {
+    gap: 8px;
+  }
 }
 
 /* 小屏手机 (320px-375px) - iPhone SE, 小屏Android */
 @media (max-width: 375px) {
   .memory-app-bg {
-    padding: 0;
+    padding: 90px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
     overflow-x: hidden;
   }
   
   .memory-navbar {
     padding: 6px 10px;
     height: 50px;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
   }
   
   .navbar-left {
@@ -1603,8 +2069,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   .memory-title {
-    font-size: 1.3rem;
-    letter-spacing: 0.2px;
+    display: none;
   }
   
   .navbar-center {
@@ -1623,7 +2088,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   
   .memory-search {
     font-size: 11px;
-    padding: 3px;
+    padding: 3px 40px 3px 3px;
     min-width: 0;
   }
   
@@ -1636,6 +2101,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .search-icon {
     width: 10px;
     height: 10px;
+  }
+  
+  .search-btn-box {
+    right: 2px;
   }
   
   .navbar-right {
@@ -1655,6 +2124,12 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     justify-content: space-around;
     flex-wrap: nowrap;
     overflow-x: auto;
+    position: fixed;
+    top: 50px; /* 紧贴在导航栏下方 */
+    left: 0;
+    right: 0;
+    z-index: 999;
+    width: 100%;
   }
   
   .menu-item {
@@ -1765,12 +2240,21 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     padding: 10px 20px;
   }
   
-  /* 亲子活动优化 */
-  .parent-activity {
-    height: auto;
-    min-height: 220px;
-    padding: 14px;
+  /* 在小屏手机上显示移动端录音卡片 */
+  .mobile-voice-card {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    padding: 18px;
   }
+  
+  /* 隐藏中间区域的原录音卡片 */
+  .memory-center .center-voice-card:not(.mobile-voice-card) {
+    display: none;
+  }
+  
+  /* 亲子活动优化 */
+  /* 亲子活动优化 - 已在下方滚动条优化中统一设置 */
   
   .activity-title {
     font-size: 1rem;
@@ -1786,9 +2270,11 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   .delete-btn {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     font-size: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
   
   /* 相册区域优化 */
@@ -1803,14 +2289,90 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .album-img {
     height: 100px;
   }
+  
+  /* 小屏手机图表优化 */
+  .activity-chart {
+    padding: 14px 14px 14px 26px;
+  }
+  
+  .line-chart-container {
+    overflow: visible;
+    padding-left: 6px;
+  }
+  
+  .line-chart {
+    min-width: 260px;
+  }
+  
+  /* 小屏手机活动列表滚动条优化 */
+  .parent-activity {
+    height: 240px; /* 固定高度确保滚动条显示 */
+    min-height: auto;
+  }
+  
+  .activity-list {
+    overflow-y: auto;
+    padding-right: 5px;
+    max-height: 140px; /* 限制最大高度确保滚动 */
+  }
+  
+  .activity-list::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .activity-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb {
+    background: #3bb6a6;
+    border-radius: 2px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb:hover {
+    background: #2ea087;
+  }
+  
+  /* 小屏手机相册优化 */
+  .activity-title-container {
+    margin-bottom: 10px;
+  }
+  
+  .photo-toggle-btn {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    border-radius: 10px;
+  }
+  
+  .album-list {
+    gap: 6px;
+  }
 }
 
 /* 超小屏设备 (320px以下) */
 @media (max-width: 320px) {
+  .memory-app-bg {
+    padding: 80px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
+  }
+  
+  .memory-menu {
+    position: fixed;
+    top: 44px; /* 紧贴在导航栏下方 */
+    left: 0;
+    right: 0;
+    z-index: 999;
+    width: 100%;
+  }
+  
   .memory-navbar {
     padding: 4px 6px;
     height: 44px;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
   }
   
   .navbar-left {
@@ -1823,8 +2385,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   .memory-title {
-    font-size: 1.1rem;
-    letter-spacing: 0px;
+    display: none;
   }
   
   .navbar-center {
@@ -1843,7 +2404,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   
   .memory-search {
     font-size: 10px;
-    padding: 2px;
+    padding: 2px 35px 2px 2px;
     min-width: 0;
   }
   
@@ -1856,6 +2417,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .search-icon {
     width: 8px;
     height: 8px;
+  }
+  
+  .search-btn-box {
+    right: 4px;
   }
   
   .navbar-right {
@@ -1898,6 +2463,92 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .card-desc {
     font-size: 0.8rem;
   }
+  
+  /* 在超小屏设备上显示移动端录音卡片 */
+  .mobile-voice-card {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 14px;
+    padding: 16px;
+  }
+  
+  /* 隐藏中间区域的原录音卡片 */
+  .memory-center .center-voice-card:not(.mobile-voice-card) {
+    display: none;
+  }
+  
+  /* 超小屏设备图表优化 */
+  .activity-chart {
+    padding: 12px 12px 12px 24px;
+  }
+  
+  .line-chart-container {
+    overflow: visible;
+    padding-left: 4px;
+  }
+  
+  .line-chart {
+    min-width: 240px;
+  }
+  
+  /* 超小屏设备活动列表滚动条优化 */
+  .parent-activity {
+    height: 200px; /* 固定高度确保滚动条显示 */
+    min-height: auto;
+    padding: 12px;
+  }
+  
+  .activity-list {
+    overflow-y: auto;
+    padding-right: 4px;
+    max-height: 120px; /* 限制最大高度确保滚动 */
+  }
+  
+  .activity-list::-webkit-scrollbar {
+    width: 3px;
+  }
+  
+  .activity-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb {
+    background: #3bb6a6;
+    border-radius: 2px;
+  }
+  
+  .activity-list::-webkit-scrollbar-thumb:hover {
+    background: #2ea087;
+  }
+  
+  /* 超小屏设备相册优化 */
+  .activity-title-container {
+    margin-bottom: 8px;
+  }
+  
+  .photo-toggle-btn {
+    padding: 3px 6px;
+    font-size: 0.65rem;
+    border-radius: 8px;
+  }
+  
+  .album-list {
+    gap: 4px;
+  }
+}
+
+/* 平板设备特别优化 - Surface Pro系列等 */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .memory-search {
+    padding: 5px 70px 5px 8px !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+  .memory-search {
+    padding: 5px 70px 5px 8px !important;
+  }
 }
 
 /* 触摸友好优化 */
@@ -1914,9 +2565,11 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   
   /* 优化按钮大小 */
   .delete-btn {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     font-size: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
   
   /* 移除hover效果，使用active */

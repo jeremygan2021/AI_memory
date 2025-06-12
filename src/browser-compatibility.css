@@ -1,0 +1,146 @@
+/* 浏览器兼容性专用CSS文件 */
+
+/* 确保IE9+的HTML5语义化标签支持 */
+article, aside, details, figcaption, figure, footer, header, hgroup, main, mark, nav, section, summary, time {
+  display: block;
+}
+
+/* IE8及以下版本的fallback样式 */
+.ie8 .memory-navbar {
+  display: block;
+  width: 100%;
+  height: 70px;
+  background: #c3eae2;
+}
+
+.ie8 .memory-main {
+  display: block;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ie8 .search-container {
+  display: block;
+  width: 500px;
+  background: #fff;
+  border: 1px solid #3bb6a6;
+  border-radius: 25px;
+}
+
+/* Firefox特定修复 */
+@-moz-document url-prefix() {
+  .memory-navbar {
+    -moz-box-sizing: border-box;
+  }
+  
+  .search-container {
+    -moz-box-sizing: border-box;
+  }
+}
+
+/* Chrome和Safari特定修复 */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  .search-container {
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  .memory-title {
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Edge特定修复 */
+@supports (-ms-ime-align:auto) {
+  .memory-navbar {
+    -ms-flex-direction: row;
+  }
+  
+  .search-container {
+    -ms-flex: 1;
+  }
+}
+
+/* 确保所有浏览器的滚动条样式一致 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3bb6a6 transparent;
+}
+
+/* Webkit浏览器滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(59, 182, 166, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 182, 166, 0.6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 182, 166, 0.8);
+}
+
+/* 打印样式 */
+@media print {
+  .memory-navbar,
+  .memory-menu,
+  .search-container {
+    display: none !important;
+  }
+  
+  .memory-main {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .memory-navbar {
+    background: #000 !important;
+    color: #fff !important;
+  }
+  
+  .search-container {
+    border: 2px solid #000 !important;
+    background: #fff !important;
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .memory-app-bg {
+    background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 30%, #3a5a4a 70%, #2e5c54 100%) !important;
+  }
+  
+  .memory-navbar {
+    background-color: rgba(44, 62, 58, 0.9) !important;
+  }
+  
+  .search-container {
+    background: rgba(44, 62, 58, 0.9) !important;
+    color: #fff !important;
+  }
+} 

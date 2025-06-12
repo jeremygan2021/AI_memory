@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import './common.css';
+import './browser-compatibility.css';
 import './index.css';
 import FamilyPage from './FamilyPage';
 import RecordComponent from './record';
 import PlayerPage from './PlayerPage';
 import AudioLibrary from './AudioLibrary';
 import { validateUserCode } from './utils/userCode';
+import ModernSearchBox from './components/ModernSearchBox';
 
 // 相册图片数据 - 使用占位内容
 const albumImages = [
@@ -35,7 +37,9 @@ const LineChart = () => {
   const height = 150;
   const padding = 40;
   const bottomPadding = 50;
-  const leftPadding = 50;
+  // 移动端增加左边距以确保y轴文字显示完整
+  const isMobile = window.innerWidth <= 768;
+  const leftPadding = isMobile ? 90 : 80;
   const maxTime = Math.max(...chartData.map(d => d.time));
   
   // 计算点的坐标
@@ -52,14 +56,14 @@ const LineChart = () => {
 
   return (
     <div className="line-chart-container">
-      <svg width="90%" height={height} viewBox={`0 0 ${width} ${height}`} className="line-chart">
+      <svg width={isMobile ? "95%" : "90%"} height={height} viewBox={`0 0 ${width} ${height}`} className="line-chart">
         {/* 网格线 */}
         <defs>
-          <pattern id="grid" width="50" height="35" patternUnits="userSpaceOnUse">
+          <pattern id="grid" width="50" height="30" patternUnits="userSpaceOnUse">
             <path d="M 50 0 L 0 0 0 35" fill="none" stroke="#e3f6f2" strokeWidth="1"/>
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
+        <rect width="80%" height="100%" fill="url(#grid)" />
         
         {/* Y轴刻度线 */}
         {[0, 25, 50, 75, 100].map(value => {
@@ -76,14 +80,14 @@ const LineChart = () => {
                 strokeDasharray="4,4"
               />
               <text 
-                x={leftPadding - 8} 
+                x={leftPadding - 5} 
                 y={y + 4} 
-                fontSize="8" 
+                fontSize={isMobile ? "8" : "5"} 
                 fill="#3bb6a6" 
                 textAnchor="end"
-                fontWeight="300"
+                fontWeight="100"
               >
-                {value}分
+                {value}分钟
               </text>
             </g>
           );
@@ -94,7 +98,7 @@ const LineChart = () => {
           d={pathData}
           fill="none"
           stroke="#3bb6a6"
-          strokeWidth="4"
+          strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -230,6 +234,9 @@ const HomePage = () => {
   // 新活动输入状态
   const [newActivity, setNewActivity] = useState('');
   const [showAddInput, setShowAddInput] = useState(false);
+  // 移动端相册下拉框状态
+  const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
   
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -248,6 +255,18 @@ const HomePage = () => {
       setUserCode('');
     }
   }, [userid, navigate]);
+
+  // 监听窗口大小变化，检测移动端
+  useEffect(() => {
+    const checkMobileView = () => {
+      setIsMobileView(window.innerWidth <= 768);
+    };
+    
+    checkMobileView();
+    window.addEventListener('resize', checkMobileView);
+    
+    return () => window.removeEventListener('resize', checkMobileView);
+  }, []);
   
   // 跳转到音频库
   const goToAudioLibrary = () => {
@@ -350,6 +369,11 @@ const HomePage = () => {
     }
   };
 
+  // 切换相册显示状态
+  const togglePhotoDisplay = () => {
+    setShowAllPhotos(!showAllPhotos);
+  };
+
   // 计算进度百分比 (假设最大36个月为100%)
   const progressPercentage = Math.min((babyAgeMonths / 36) * 100, 100);
 
@@ -413,18 +437,15 @@ const HomePage = () => {
           <span className="memory-title">Memory</span>
         </div>
         <div className="navbar-center">
-          <div className="search-container">
-            <input 
-              className="memory-search" 
-              placeholder="Search" 
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-            />
-            <button className="search-btn" onClick={handleSearch}>
-              <img src="/images/search.png" alt="搜索" className='search-icon'/>
-            </button>
-          </div>
+          <ModernSearchBox
+            placeholder="Search"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onSearch={handleSearch}
+            onKeyPress={handleKeyPress}
+            size="medium"
+            width="100%"
+          />
         </div>
         <div className="navbar-right">
           <span className="memory-icon bell" />
@@ -451,6 +472,15 @@ const HomePage = () => {
               <div className="user-code">{userCode}</div>
               <div className="user-status">✓ 已激活</div>
             </div>
+            
+            {/* 录制声音功能 - 移动到手机端的左侧区域，位于宝宝信息上方 */}
+            <div className="center-voice-card mobile-voice-card" onClick={goToAudioLibrary}>
+              <div className="voice-icon">🎤</div>
+              <div className="voice-title">录制我的声音</div>
+              <div className="voice-desc">智能语音助手，记录您的美好时光</div>
+              <button className="voice-action">开始录制</button>
+            </div>
+            
             {/* 宝宝信息 */}
             <div className="baby-info">
               <div className="baby-info-top">
@@ -473,6 +503,7 @@ const HomePage = () => {
               </div>
             </div>
           </div>
+          
           {/* 其他功能 */}
           <div className="memory-left-title">美好回忆</div>
           <div className="memory-card-list">
@@ -577,17 +608,34 @@ const HomePage = () => {
         {/* 右侧：亲子相册 */}
         <div className="memory-right">
           <div className="activity-board">
-            <div className="activity-title">亲子相册</div>
+            <div className="activity-title-container">
+              <div className="activity-title">亲子相册</div>
+              {isMobileView && albumImages.length > 3 && (
+                <button className="photo-toggle-btn" onClick={togglePhotoDisplay}>
+                  {showAllPhotos ? '收起' : `展开(${albumImages.length - 3}+)`}
+                  <span className={`toggle-arrow ${showAllPhotos ? 'up' : 'down'}`}>▼</span>
+                </button>
+              )}
+            </div>
             <div className="album-list">
-              {albumImages.map((src, idx) => (
-                <img
-                  key={idx}
-                  src={src}
-                  className="album-img"
-                  alt={`相册图片${idx + 1}`}
-                  onClick={() => openPreview(idx)}
-                />
-              ))}
+              {(isMobileView ? 
+                (showAllPhotos ? albumImages : albumImages.slice(0, 3)) : 
+                albumImages
+              ).map((src, idx) => {
+                // 计算真实的索引，用于大图预览
+                const realIndex = isMobileView && !showAllPhotos ? idx : idx;
+                const originalIndex = albumImages.findIndex(img => img === src);
+                
+                return (
+                  <img
+                    key={originalIndex}
+                    src={src}
+                    className="album-img"
+                    alt={`相册图片${originalIndex + 1}`}
+                    onClick={() => openPreview(originalIndex)}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
