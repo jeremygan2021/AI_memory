@@ -6,16 +6,11 @@
     src: url('./fonts/Muyao-Softbrush-2.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-<<<<<<< HEAD
+
   }
-*/
 
-/* CSS Reset 和浏览器兼容性 */
-=======
-}
 
->>>>>>> e2b6ebfbfcc84dc35d9eed809726a19c59d4ecf4
-* {
+/* * {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -24,7 +19,7 @@
   font-family: 'MUYAO-SOFTBRUSH', 'PingFang SC', 'Microsoft YaHei', '微软雅黑', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 18px;
   font-weight: 400;
-}
+} */
 
 /* 确保HTML5语义化标签在旧版IE中正常显示 */
 html {
