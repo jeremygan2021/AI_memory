@@ -1,12 +1,12 @@
 /* AppDemo.tsx 样式文件 */
 
-/*@font-face {
+@font-face {
     font-family: 'MUYAO-SOFTBRUSH';
-    src: url('/AI_memory/src/fonts/MUYAO-SOFTBRUSH-2.TTF') format('truetype');
+    src: url('./fonts/Muyao-Softbrush-2.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-  }
-*/
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
