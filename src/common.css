@@ -8,7 +8,7 @@
     font-style: normal;
 
   }
-*/
+
 
 /* CSS Reset 和浏览器兼容性 */
 
@@ -18,9 +18,16 @@
   -moz-box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'MUYAO-SOFTBRUSH', 'PingFang SC', 'Microsoft YaHei', '微软雅黑', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 18px;
+  /* 添加后备字体,提高兼容性 */
+  font-family: 'MUYAO-SOFTBRUSH', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', '微软雅黑', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* 使用相对单位,提高响应式 */
+  font-size: 1.125rem;
   font-weight: 400;
+  /* 添加平滑滚动效果 */
+  scroll-behavior: smooth;
+  /* 添加文本抗锯齿渲染 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 确保HTML5语义化标签在旧版IE中正常显示 */
