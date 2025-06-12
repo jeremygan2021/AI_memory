@@ -1,3 +1,11 @@
+/* 字体配置 */
+@font-face {
+    font-family: 'MUYAO-SOFTBRUSH';
+    src: url('./fonts/Muyao-Softbrush-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* CSS自定义属性 - 移动端视口支持 */
 :root {
   /* 移动端视口高度支持 */
@@ -24,11 +32,28 @@
   background: linear-gradient(135deg, #a8e6a3 0%, #88d982 50%, #a8e6a3 100%);
   position: relative;
   overflow-x: hidden;
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   /* 确保背景在移动端完全覆盖 */
   background-attachment: fixed;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+/* 确保所有播放页面的文本元素使用统一字体 */
+.player-page div, 
+.player-page span, 
+.player-page p, 
+.player-page h1, 
+.player-page h2, 
+.player-page h3, 
+.player-page h4, 
+.player-page h5, 
+.player-page h6, 
+.player-page button, 
+.player-page input, 
+.player-page textarea, 
+.player-page label {
+  font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* 背景装饰 */
@@ -163,6 +188,19 @@
   position: absolute;
   top: -80px;
   left: 370px;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性动画 */
+  cursor: pointer;
+  transform-origin: center center;
+}
+
+.elephant-icon:hover {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+}
+
+.elephant-icon:active {
+  transform: scale(0.95) rotate(-3deg);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
 }
 
 .nav-back-btn:hover {
@@ -672,6 +710,29 @@
     background-attachment: scroll;
     /* 添加额外的安全区域支持 */
     padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .elephant-icon {
+    width: 200px;  /* 缩小尺寸以适应窄屏 */
+    height: 120px; /* 保持16:9比例 */
+    position: absolute;
+    top: -20px;    /* 调整位置 */
+    left: 85%;     /* 水平居中 */
+    transform: translateX(-50%); /* 确保完全居中 */
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    transform-origin: center center;
+    z-index: 1;    /* 确保显示在其他元素上方 */
+  }
+
+  .elephant-icon:hover {
+    transform: translateX(-50%) scale(1.1) rotate(5deg); /* 保持水平居中同时缩放旋转 */
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+  }
+
+  .elephant-icon:active {
+    transform: translateX(-50%) scale(0.95) rotate(-3deg); /* 保持水平居中同时缩放旋转 */
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
   }
 
   .player-header {

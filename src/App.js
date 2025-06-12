@@ -416,7 +416,7 @@ const HomePage = () => {
                 fontSize: '1.1rem',
                 letterSpacing: '1px'
               }}>
-                http://localhost:3000/A1B2
+                http://me.tangledup-ai.com/userid
               </code>
             </div>
             <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>

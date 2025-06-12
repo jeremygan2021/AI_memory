@@ -6,7 +6,12 @@ import recordButtonImg from './asset/record_button.png';
 import mic_icon from './asset/icon/mic.png'
 
 // API配置
+<<<<<<< HEAD
 const API_BASE_URL = 'https://data.tangledup-ai.com';
+=======
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+
+>>>>>>> e2b6ebfbfcc84dc35d9eed809726a19c59d4ecf4
 
 // 录音组件
 const RecordComponent = () => {

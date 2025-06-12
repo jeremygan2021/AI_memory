@@ -4,7 +4,12 @@ import './PlayerPage.css';
 import { getUserCode, validateUserCode } from './utils/userCode';
 
 // API配置
+<<<<<<< HEAD
 const API_BASE_URL = 'https://data.tangledup-ai.com';
+=======
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+
+>>>>>>> e2b6ebfbfcc84dc35d9eed809726a19c59d4ecf4
 const OSS_BASE_URL = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com';
 
 const PlayerPage = () => {

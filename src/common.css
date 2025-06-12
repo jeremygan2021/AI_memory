@@ -1,15 +1,20 @@
 /* AppDemo.tsx 样式文件 */
 /* 跨浏览器兼容性和CSS Reset */
 
-/*@font-face {
+@font-face {
     font-family: 'MUYAO-SOFTBRUSH';
-    src: url('/AI_memory/src/fonts/MUYAO-SOFTBRUSH-2.TTF') format('truetype');
+    src: url('./fonts/Muyao-Softbrush-2.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
+<<<<<<< HEAD
   }
 */
 
 /* CSS Reset 和浏览器兼容性 */
+=======
+}
+
+>>>>>>> e2b6ebfbfcc84dc35d9eed809726a19c59d4ecf4
 * {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;

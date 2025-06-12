@@ -6,7 +6,11 @@ import SvgIcon from './components/SvgIcons';
 import ModernSearchBox from './components/ModernSearchBox';
 
 // API配置
+<<<<<<< HEAD
 const API_BASE_URL = 'https://data.tangledup-ai.com';
+=======
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+>>>>>>> e2b6ebfbfcc84dc35d9eed809726a19c59d4ecf4
 
 const AudioLibrary = () => {
   const navigate = useNavigate();
