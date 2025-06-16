@@ -597,25 +597,38 @@ const RecordComponent = () => {
   }
 
   return (
-    <div className="record-container">
-      {/* 顶部导航栏 - 仿FamilyPage.js风格 */}
-      <div style={{
-        position: 'fixed',
-        top: '20px',
-        left: '20px',
-        zIndex: 1000,
-        background: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: '50px',
-        padding: '10px 20px',
-        cursor: 'pointer',
-        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
-        backdropFilter: 'blur(10px)'
-      }} onClick={() => navigate('/')}> 
-        <span style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50' }}>← 返回主页</span>
+    <div>
+      {/* 背景装饰 */}
+      <div className="background-decoration">
+        <div className="wave wave1"></div>
+        <div className="wave wave2"></div>
+        <div className="wave wave3"></div>
       </div>
       
-      {/* 主内容区：左右布局 */}
-      <div className="record-main-layout">
+      {/* 顶部导航栏 */}
+      <div className="top-navigation-bar">
+        {/* <div className="nav-left">
+          <button className="back-button" onClick={() => navigate(`/${userCode}/audio-library`)}> 
+            <span>← 返回</span>
+          </button>
+        </div>
+        <div className="nav-right">
+          <span className="user-info">会议{userCode}/{id}</span>
+        </div> */}
+      </div>
+      {/* 主内容区：动态布局 */}
+      <div className={`record-main-layout ${recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0 ? 'centered-layout' : 'side-layout'}`}>
+        {/* 全部为空时的状态提示 - 只在居中布局时显示 */}
+        <div className="empty-recordings-state" style={{
+          display: (recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0) ? 'flex' : 'none',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div className="empty-icon">🎤</div>
+          <h3>还没有录音</h3>
+          <p>点击"开始录音"按钮开始录制您的第一个录音</p>
+        </div>
         {/* 左侧录音控制区 */}
         <div className="record-left-panel">
           <div className="record-control-card">
@@ -663,7 +676,9 @@ const RecordComponent = () => {
               )}
               {recordingTime > 0 && !isRecording && (
                 <button className="record-reset-btn" onClick={resetRecording}>
-                  <span className="btn-icon">🔄</span>
+                  <span className="btn-icon">
+                  <img src="/images/refresh.svg" className="btn-icon" width={32} height={32}/>
+                  </span>
                   <span className="btn-text">重置</span>
                 </button>
               )}
@@ -672,8 +687,10 @@ const RecordComponent = () => {
             {/* 当前录音播放器 */}
             {audioURL && (
               <div className="current-recording-player">
-                <div className="player-header">
-                  <span className="player-icon">📻</span>
+                <div className="current-recording-player-header">
+                  <span className="player-icon">
+                  <img src="/images/video.svg" width={30} height={30}/>
+                  </span>
                   <span className="player-title">当前录音</span>
                 </div>
                 <audio controls src={audioURL} className="audio-player-control">
@@ -684,8 +701,8 @@ const RecordComponent = () => {
           </div>
         </div>
 
-        {/* 右侧录音列表区 */}
-        <div className="record-right-panel">
+        {/* 右侧录音列表区 - 只在侧边布局时显示 */}
+        <div className={`record-right-panel ${recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0 ? 'hidden' : 'visible'}`}>
           {/* 待绑定录音区域 - 始终显示 */}
           <div className="recordings-section">
             <div className="section-header">
@@ -695,28 +712,33 @@ const RecordComponent = () => {
             <div className="recordings-list-container">
               {recordings.length > 0 ? (
                 recordings.map((recording) => (
-                  <div key={recording.id} className="recording-list-item bound-item">
-                    <div className="recording-item-info">
-                      <div className="recording-timestamp">{recording.timestamp}</div>
-                      <div className="recording-size">{formatTime(recording.duration)} · {getUploadStatusText(recording.id)}</div>
-                    </div>
-                    <div className="recording-item-controls">
-                      <audio controls src={recording.url} className="mini-audio-player">
-                        您的浏览器不支持音频播放
-                      </audio>
+                  <div key={recording.id} className="recording-list-item unbound-item">
+                    {/* 第一行：录制时间（左）+ 操作按钮（右） */}
+                    <div className="recording-first-row">
+                      <div className="recording-item-info">
+                        <div className="recording-timestamp">{recording.timestamp}</div>
+                        <div className="recording-size">{formatTime(recording.duration)} · {getUploadStatusText(recording.id)}</div>
+                      </div>
                       <div className="recording-actions">
-                        <button className="action-btn bind-btn" onClick={() => bindRecording(recording)} title="绑定录音">
-                          🔗
+                        <button className="action-btn link-btn" onClick={() => bindRecording(recording)} title="绑定录音">
+                          <img src="/images/link2.svg" width={25} height={25}/>
                         </button>
                         {uploadStatus[recording.id] === 'error' && (
-                          <button className="action-btn retry-btn" onClick={() => retryUpload(recording)} title="重试上传">
-                            🔄
+                          <button className="action-btn retry-box" onClick={() => retryUpload(recording)} title="重试上传">
+                            <img src="/images/refresh.svg" width={30} height={30}/>
                           </button>
                         )}
                         <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
-                          🗑️
+                          <img src="/images/delete2.svg"  width={25} height={25}/>
                         </button>
                       </div>
+                    </div>
+                    
+                    {/* 第二行：播放器（居中） */}
+                    <div className="recording-player-row">
+                      <audio controls src={recording.url} className="mini-audio-player">
+                        您的浏览器不支持音频播放
+                      </audio>
                     </div>
                   </div>
                 ))
@@ -741,23 +763,21 @@ const RecordComponent = () => {
               {boundRecordings.length > 0 ? (
                 boundRecordings.map((recording) => (
                   <div key={recording.id} className="recording-list-item bound-item">
-                    <div className="recording-item-info">
-                      <div className="recording-timestamp">{recording.timestamp}</div>
-                      <div className="recording-size">
-                        {formatTime(recording.duration)} · {recording.uploaded ? '已上传' : '本地存储'}
-                        {recording.uploaded && <span className="cloud-icon">☁️</span>}
+                    {/* 只有一行：录制时间（左）+ 操作按钮（右） */}
+                    <div className="recording-first-row">
+                      <div className="recording-item-info">
+                        <div className="recording-timestamp">{recording.timestamp}</div>
+                        <div className="recording-size">
+                          {formatTime(recording.duration)} · {recording.uploaded ? '已上传' : '本地存储'}
+                          {recording.uploaded && <span className="cloud-icon"> ☁️</span>}
+                        </div>
                       </div>
-                      {recording.boundAt && (
-                        <div className="bound-time">绑定: {recording.boundAt}</div>
-                      )}
-                    </div>
-                    <div className="recording-item-controls">
                       <div className="recording-actions">
-                        <button className="action-btn play-btn" onClick={() => enterPlayerMode(recording)} title="播放录音">
-                          ▶️
+                        <button className="action-btn play-icon" onClick={() => enterPlayerMode(recording)} title="播放录音">
+                          <img src="/images/bf2.svg"  width={20} height={30}/>
                         </button>
                         <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id, true)} title="删除录音">
-                          🗑️
+                          <img src="/images/delete2.svg"  width={25} height={25}/>
                         </button>
                       </div>
                     </div>
@@ -765,13 +785,17 @@ const RecordComponent = () => {
                 ))
               ) : (
                 <div className="empty-section-state bound-empty">
-                  <div className="empty-section-icon">✅</div>
+                  <div className="empty-section-icon">🎤</div>
                   <p>暂无已绑定的录音</p>
-                  <span className="empty-section-hint">点击待绑定录音的"🔗"按钮进行绑定</span>
+                  <span className="empty-section-hint">点击待绑定录音的</span>
+                  <img className="link-btn" src="/images/link2.svg" width={25} height={25}/>
+                  <span className="empty-section-hint">按钮进行绑定</span>
                 </div>
               )}
             </div>
           </div>
+
+
 
           {/* 全部为空时的状态提示 */}
           {recordings.length === 0 && boundRecordings.length === 0 && (

@@ -506,7 +506,7 @@ const PlayerPage = () => {
 
       {/* 顶部导航 */}
       <header className="player-header">
-        <button onClick={() => navigate(`/${userCode}`)} className="nav-back-btn">
+        <button onClick={() => navigate(`/${userCode}/audio-library`)} className="nav-back-btn">
           <span className="back-icon">←</span>
           <span>返回</span>
         </button>
@@ -597,7 +597,7 @@ const PlayerPage = () => {
             
             <button 
               onClick={togglePlayPause} 
-              className={`control-btn play-btn ${isPlaying ? 'playing' : ''} ${!audioReady ? 'disabled' : ''}`}
+              className={`control-btn play-box ${isPlaying ? 'playing' : ''} ${!audioReady ? 'disabled' : ''}`}
               disabled={!audioReady}
               title={!audioReady ? '音频加载中...' : isPlaying ? '暂停' : '播放'}
             >
@@ -649,7 +649,9 @@ const PlayerPage = () => {
             {/* 音量控制 */}
             <div className="control-group">
               <label className="control-label">
-                <span>🔊</span>
+                <span>
+                  <img src="/images/sound.svg"  width={30} height={30}/>
+                </span>
                 <span>音量</span>
               </label>
               <div className="volume-container">
