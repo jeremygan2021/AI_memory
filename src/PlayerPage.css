@@ -239,11 +239,12 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .session-label {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 20px;
+  color: #2d5016;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -270,7 +271,7 @@
   padding-left: max(20px, var(--safe-area-inset-left));
   padding-right: max(20px, var(--safe-area-inset-right));
   padding-bottom: max(40px, var(--safe-area-inset-bottom));
-  background-image: url('./asset/background2.png');
+  background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/asset/background2.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -296,9 +297,11 @@
 }
 
 .recording-avatar {
+  width: 75px;
+  height: 75px;
   position: relative;
   display: inline-block;
-  margin-bottom: 30px;
+  margin-bottom: 5px;
 }
 
 .avatar-icon {
@@ -348,7 +351,7 @@
 
 .sound-waves {
   position: absolute;
-  top: 50%;
+  top: -10%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -648,14 +651,37 @@
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
+  .elephant-icon {
+    width: 320px;  /* 比默认稍小，适合中等平板 */
+    height: 192px; /* 保持16:9比例 */
+    position: absolute;
+    top: -65px;
+    left: 90%;     /* 稍微左移 */
+    transform: translateX(-50%);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    transform-origin: center center;
+    z-index: 1;
+  }
+
+  .elephant-icon:hover {
+    transform: translateX(-50%) scale(1.05) rotate(3deg);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+  }
+
+  .elephant-icon:active {
+    transform: translateX(-50%) scale(0.97) rotate(-2deg);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
+  }
+
   .player-container {
     max-width: 500px;
     padding: 40px 30px;
   }
   
   .avatar-icon {
-    width: 100px;
-    height: 100px;
+    width: 75px;
+    height: 75px;
     font-size: 50px;
   }
   
@@ -669,6 +695,29 @@
     /* 移动端确保背景完全覆盖 */
     min-height: calc(var(--vh, 1vh) * 100);
     background-attachment: scroll; /* 移动端改为scroll避免性能问题 */
+  }
+
+  .elephant-icon {
+    width: 280px;  /* 适中尺寸适合768px屏幕 */
+    height: 168px; /* 保持16:9比例 */
+    position: absolute;
+    top: -70px;
+    left: 80%;     /* 左移至60%位置 */
+    transform: translateX(-50%);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    transform-origin: center center;
+    z-index: 1;
+  }
+
+  .elephant-icon:hover {
+    transform: translateX(-50%) scale(1.08) rotate(3deg);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+  }
+
+  .elephant-icon:active {
+    transform: translateX(-50%) scale(0.96) rotate(-2deg);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
   }
 
   .player-header {
@@ -708,8 +757,8 @@
   }
 
   .avatar-icon {
-    width: 90px;
-    height: 90px;
+    width: 75px;
+    height: 75px;
     font-size: 45px;
   }
 
@@ -808,8 +857,8 @@
     width: 200px;  /* 缩小尺寸以适应窄屏 */
     height: 120px; /* 保持16:9比例 */
     position: absolute;
-    top: -20px;    /* 调整位置 */
-    left: 85%;     /* 水平居中 */
+    top: -50px;    /* 调整位置 */
+    left: 83%;     /* 水平居中 */
     transform: translateX(-50%); /* 确保完全居中 */
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
@@ -846,7 +895,7 @@
     padding-left: max(10px, var(--safe-area-inset-left));
     padding-right: max(10px, var(--safe-area-inset-right));
     padding-bottom: max(15px, var(--safe-area-inset-bottom));
-    min-height: calc(calc(var(--vh, 1vh) * 100) - 100px);
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 70px);
   }
 
   .player-container {
@@ -957,6 +1006,337 @@
   }
 }
 
+/* 超小屏幕优化 (375px及以下) */
+@media (max-width: 375px) {
+  .player-page {
+    min-height: calc(var(--vh, 1vh) * 100);
+    background-attachment: scroll;
+  }
+
+  .elephant-icon {
+    width: 150px;  /* 进一步缩小大象图标 */
+    height: 90px;
+    position: absolute;
+    top: -15px;
+    left: 82%;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  .player-header {
+    padding: 8px 12px;
+    padding-top: max(8px, var(--safe-area-inset-top));
+    padding-left: max(12px, var(--safe-area-inset-left));
+    padding-right: max(12px, var(--safe-area-inset-right));
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav-back-btn,
+  .delete-recording-btn {
+    font-size: 10px;
+    padding: 6px 10px;
+    min-height: 32px;
+  }
+
+  .session-info {
+    order: 3;
+    flex-basis: 100%;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .player-main {
+    padding: 10px 8px;
+    padding-left: max(8px, var(--safe-area-inset-left));
+    padding-right: max(8px, var(--safe-area-inset-right));
+    padding-bottom: max(10px, var(--safe-area-inset-bottom));
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 65px);
+  }
+
+  .player-container {
+    padding: 20px 12px;
+    border-radius: 18px;
+    max-width: 300px;
+    margin-bottom: var(--safe-area-inset-bottom);
+  }
+
+  .recording-avatar {
+    width: 65px;
+    height: 65px;
+    margin-bottom: 3px;
+  }
+
+  .avatar-icon {
+    width: 65px;
+    height: 65px;
+    font-size: 32px;
+    top: -45px;
+  }
+
+  .sound-waves {
+    top: -15%;
+  }
+
+  .wave-bar {
+    width: 3px;
+    height: 16px;
+  }
+
+  .recording-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .metadata-item {
+    padding: 5px 8px;
+    font-size: 11px;
+    border-left-width: 2px;
+    margin-bottom: 4px;
+  }
+
+  .metadata-item .label,
+  .metadata-item .value {
+    font-size: 11px;
+  }
+
+  .progress-section {
+    margin-bottom: 20px;
+  }
+
+  .time-display {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .progress-container {
+    height: 5px;
+  }
+
+  .progress-slider::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+  }
+
+  .main-controls {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .control-btn {
+    padding: 8px;
+    min-height: 45px;
+  }
+
+  .play-box {
+    padding: 10px;
+    border-radius: 50%;
+  }
+
+  .play-box .btn-icon {
+    font-size: 22px;
+  }
+
+  .skip-btn .btn-icon {
+    font-size: 16px;
+  }
+
+  .skip-btn .btn-label {
+    font-size: 9px;
+  }
+
+  .advanced-controls {
+    gap: 12px;
+  }
+
+  .control-label {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  .speed-buttons {
+    gap: 3px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .speed-btn {
+    padding: 5px 10px;
+    font-size: 9px;
+    min-height: 28px;
+    border-width: 1px;
+  }
+
+  .control-group {
+    gap: 6px;
+  }
+
+  .volume-container {
+    gap: 8px;
+  }
+
+  .volume-slider {
+    height: 2px;
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    width: 12px;
+    height: 12px;
+  }
+
+  .volume-value {
+    font-size: 9px;
+    min-width: 25px;
+  }
+}
+
+/* 极小屏幕优化 (320px及以下) */
+@media (max-width: 320px) {
+  .elephant-icon {
+    width: 120px;  /* 更小的大象图标 */
+    height: 72px;
+    top: -10px;
+    left: 80%;
+  }
+
+  .player-header {
+    padding: 6px 10px;
+    padding-top: max(6px, var(--safe-area-inset-top));
+    padding-left: max(10px, var(--safe-area-inset-left));
+    padding-right: max(10px, var(--safe-area-inset-right));
+  }
+
+  .nav-back-btn,
+  .delete-recording-btn {
+    font-size: 9px;
+    padding: 5px 8px;
+    min-height: 28px;
+  }
+
+  .player-main {
+    padding: 8px 6px;
+    padding-left: max(6px, var(--safe-area-inset-left));
+    padding-right: max(6px, var(--safe-area-inset-right));
+    padding-bottom: max(8px, var(--safe-area-inset-bottom));
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 60px);
+  }
+
+  .player-container {
+    padding: 16px 10px;
+    border-radius: 16px;
+    max-width: 280px;
+  }
+
+  .recording-avatar {
+    width: 55px;
+    height: 55px;
+    margin-bottom: 2px;
+  }
+
+  .avatar-icon {
+    width: 55px;
+    height: 55px;
+    font-size: 28px;
+    top: -40px;
+  }
+
+  .wave-bar {
+    width: 2px;
+    height: 14px;
+    gap: 2px;
+  }
+
+  .recording-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+    line-height: 1.1;
+  }
+
+  .metadata-item {
+    padding: 4px 6px;
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+
+  .metadata-item .label,
+  .metadata-item .value {
+    font-size: 10px;
+  }
+
+  .progress-section {
+    margin-bottom: 16px;
+  }
+
+  .time-display {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  .progress-container {
+    height: 4px;
+  }
+
+  .main-controls {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .control-btn {
+    padding: 6px;
+    min-height: 40px;
+  }
+
+  .play-box {
+    padding: 8px;
+  }
+
+  .play-box .btn-icon {
+    font-size: 20px;
+  }
+
+  .skip-btn .btn-icon {
+    font-size: 14px;
+  }
+
+  .skip-btn .btn-label {
+    font-size: 8px;
+  }
+
+  .advanced-controls {
+    gap: 10px;
+  }
+
+  .control-label {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .speed-buttons {
+    gap: 2px;
+  }
+
+  .speed-btn {
+    padding: 4px 8px;
+    font-size: 8px;
+    min-height: 24px;
+  }
+
+  .volume-container {
+    gap: 6px;
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    width: 10px;
+    height: 10px;
+  }
+
+  .volume-value {
+    font-size: 8px;
+    min-width: 20px;
+  }
+}
+
 /* 横屏模式优化 */
 @media (max-width: 900px) and (orientation: landscape) {
   .player-page {
@@ -988,8 +1368,8 @@
   }
 
   .avatar-icon {
-    width: 60px;
-    height: 60px;
+    width: 75px;
+    height: 75px;
     font-size: 30px;
     position: relative;
     top: auto;
@@ -1036,6 +1416,156 @@
     padding: 4px 8px;
     font-size: 9px;
     min-height: 28px;
+  }
+}
+
+/* 超小屏幕横屏模式优化 */
+@media (max-width: 667px) and (orientation: landscape) {
+  .player-page {
+    min-height: calc(var(--vh, 1vh) * 100);
+  }
+
+  .elephant-icon {
+    width: 100px;
+    height: 60px;
+    top: -8px;
+    left: 75%;
+  }
+
+  .player-header {
+    padding: 5px 15px;
+  }
+
+  .player-main {
+    padding: 8px 15px;
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 60px);
+  }
+
+  .player-container {
+    padding: 15px 20px;
+    max-width: 95%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .recording-info {
+    flex: 1;
+    margin-bottom: 0;
+    text-align: left;
+    min-width: 0;
+  }
+
+  .recording-avatar {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 5px;
+  }
+
+  .avatar-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 25px;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(74, 201, 103, 0.3);
+  }
+
+  .sound-waves {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin-top: 5px;
+  }
+
+  .recording-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .metadata-item {
+    padding: 3px 6px;
+    font-size: 9px;
+    margin-bottom: 2px;
+  }
+
+  .progress-section,
+  .main-controls,
+  .advanced-controls {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  .progress-section {
+    max-width: 200px;
+  }
+
+  .time-display {
+    font-size: 10px;
+    margin-bottom: 5px;
+  }
+
+  .progress-container {
+    height: 3px;
+  }
+
+  .main-controls {
+    gap: 8px;
+    justify-content: center;
+    max-width: 150px;
+  }
+
+  .control-btn {
+    padding: 5px;
+    min-height: 35px;
+  }
+
+  .play-box {
+    padding: 6px;
+  }
+
+  .play-box .btn-icon {
+    font-size: 18px;
+  }
+
+  .skip-btn .btn-icon {
+    font-size: 12px;
+  }
+
+  .skip-btn .btn-label {
+    font-size: 7px;
+  }
+
+  .advanced-controls {
+    gap: 8px;
+  }
+
+  .control-label {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+
+  .speed-buttons {
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .speed-btn {
+    padding: 3px 6px;
+    font-size: 7px;
+    min-height: 22px;
+  }
+
+  .volume-container {
+    gap: 5px;
+  }
+
+  .volume-value {
+    font-size: 7px;
   }
 }
 

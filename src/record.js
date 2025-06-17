@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './record.css';
+import UploadPhotoPage from './UploadPhotoPage';
 import { getUserCode, buildRecordingPath, buildSessionStorageKey, validateUserCode } from './utils/userCode';
 import recordButtonImg from './asset/record_button.png';
 import mic_icon from './asset/icon/mic.png'
+
 
 // API配置
 
@@ -584,6 +586,18 @@ const RecordComponent = () => {
     }
   };
 
+  // 跳转到上传照片
+  const goToUploadPhotoPage = () => {
+    console.log('点击上传照片按钮，userCode:', userCode);
+    if (userCode) {
+      const targetPath = `/${userCode}/upload-photos`;
+      console.log('准备跳转到:', targetPath);
+      navigate(targetPath);
+    } else {
+      console.error('userCode 为空，无法跳转');
+    }
+  };
+
   // 如果浏览器不支持录音
   if (!isSupported) {
     return (
@@ -607,15 +621,15 @@ const RecordComponent = () => {
       
       {/* 顶部导航栏 */}
       <div className="top-navigation-bar">
+          
         {/* <div className="nav-left">
-          <button className="back-button" onClick={() => navigate(`/${userCode}/audio-library`)}> 
-            <span>← 返回</span>
-          </button>
+          
         </div>
         <div className="nav-right">
           <span className="user-info">会议{userCode}/{id}</span>
         </div> */}
       </div>
+       
       {/* 主内容区：动态布局 */}
       <div className={`record-main-layout ${recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0 ? 'centered-layout' : 'side-layout'}`}>
         {/* 全部为空时的状态提示 - 只在居中布局时显示 */}
@@ -625,12 +639,32 @@ const RecordComponent = () => {
           alignItems: 'center',
           justifyContent: 'center'
         }}>
+          
           <div className="empty-icon">🎤</div>
           <h3>还没有录音</h3>
           <p>点击"开始录音"按钮开始录制您的第一个录音</p>
         </div>
+        
+        {/* 未录音时显示上传按钮 */}
+        {!isRecording && recordingTime === 0 && (
+          <div className="upload-box upload-box-initial">
+            <button className="upload-button" onClick={goToUploadPhotoPage}> 
+              <span>上传照片</span>
+            </button>
+          </div>
+        )}
+        
         {/* 左侧录音控制区 */}
         <div className="record-left-panel">
+          {/* 录音时显示上传按钮在控制区域上方 */}
+          {(isRecording || recordingTime > 0) && (
+            <div className="upload-box upload-box-recording">
+              <button className="upload-button" onClick={goToUploadPhotoPage}> 
+                <span>上传照片</span>
+              </button>
+            </div>
+          )}
+          
           <div className="record-control-card">
             {/* 录音控制区标题 */}
             <div className="record-control-header">
@@ -655,7 +689,7 @@ const RecordComponent = () => {
               {!isRecording ? (
                 <button className="record-start-btn" onClick={startRecording}>
                   <span className="btn-icon">
-                  <img src="/images/huatong.svg" className="btn-icon" width={32} height={32}/>
+                  <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="btn-icon" width={32} height={32}/>
                   </span>
                   <span className="btn-text">开始录音</span>
                 </button>
@@ -668,7 +702,7 @@ const RecordComponent = () => {
                   </button>
                   <button className="record-stop-btn" onClick={stopRecording}>
                     <span className="btn-icon">
-                    <img src="/images/中止.svg" className="btn-icon" width={32} height={32}/>
+                    <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/中止.svg" className="btn-icon" width={32} height={32}/>
                     </span>
                     <span className="btn-text">停止</span>
                   </button>
@@ -677,7 +711,7 @@ const RecordComponent = () => {
               {recordingTime > 0 && !isRecording && (
                 <button className="record-reset-btn" onClick={resetRecording}>
                   <span className="btn-icon">
-                  <img src="/images/refresh.svg" className="btn-icon" width={32} height={32}/>
+                  <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" className="btn-icon" width={32} height={32}/>
                   </span>
                   <span className="btn-text">重置</span>
                 </button>
@@ -689,7 +723,7 @@ const RecordComponent = () => {
               <div className="current-recording-player">
                 <div className="current-recording-player-header">
                   <span className="player-icon">
-                  <img src="/images/video.svg" width={30} height={30}/>
+                  <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/video.svg" width={30} height={30}/>
                   </span>
                   <span className="player-title">当前录音</span>
                 </div>
@@ -713,29 +747,37 @@ const RecordComponent = () => {
               {recordings.length > 0 ? (
                 recordings.map((recording) => (
                   <div key={recording.id} className="recording-list-item unbound-item">
-                    {/* 第一行：录制时间（左）+ 操作按钮（右） */}
+                    {/* PC端：单行布局，左侧信息+右侧播放器+操作按钮 */}
                     <div className="recording-first-row">
                       <div className="recording-item-info">
                         <div className="recording-timestamp">{recording.timestamp}</div>
                         <div className="recording-size">{formatTime(recording.duration)} · {getUploadStatusText(recording.id)}</div>
                       </div>
+                      
+                      {/* PC端播放器位置（红色方框区域） */}
+                      <div className="recording-player-pc">
+                        <audio controls src={recording.url} className="mini-audio-player">
+                          您的浏览器不支持音频播放
+                        </audio>
+                      </div>
+                      
                       <div className="recording-actions">
                         <button className="action-btn link-btn" onClick={() => bindRecording(recording)} title="绑定录音">
-                          <img src="/images/link2.svg" width={25} height={25}/>
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
                         </button>
                         {uploadStatus[recording.id] === 'error' && (
                           <button className="action-btn retry-box" onClick={() => retryUpload(recording)} title="重试上传">
-                            <img src="/images/refresh.svg" width={30} height={30}/>
+                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={30} height={30}/>
                           </button>
                         )}
                         <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
-                          <img src="/images/delete2.svg"  width={25} height={25}/>
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
                         </button>
                       </div>
                     </div>
                     
-                    {/* 第二行：播放器（居中） */}
-                    <div className="recording-player-row">
+                    {/* 移动端播放器位置（保持原来的下方居中） */}
+                    <div className="recording-player-row recording-player-mobile">
                       <audio controls src={recording.url} className="mini-audio-player">
                         您的浏览器不支持音频播放
                       </audio>
@@ -774,10 +816,10 @@ const RecordComponent = () => {
                       </div>
                       <div className="recording-actions">
                         <button className="action-btn play-icon" onClick={() => enterPlayerMode(recording)} title="播放录音">
-                          <img src="/images/bf2.svg"  width={20} height={30}/>
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf2.svg"  width={20} height={30}/>
                         </button>
                         <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id, true)} title="删除录音">
-                          <img src="/images/delete2.svg"  width={25} height={25}/>
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
                         </button>
                       </div>
                     </div>
@@ -788,7 +830,7 @@ const RecordComponent = () => {
                   <div className="empty-section-icon">🎤</div>
                   <p>暂无已绑定的录音</p>
                   <span className="empty-section-hint">点击待绑定录音的</span>
-                  <img className="link-btn" src="/images/link2.svg" width={25} height={25}/>
+                  <img className="link-btn" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
                   <span className="empty-section-hint">按钮进行绑定</span>
                 </div>
               )}

@@ -7,18 +7,8 @@ import FamilyPage from './FamilyPage';
 import RecordComponent from './record';
 import PlayerPage from './PlayerPage';
 import AudioLibrary from './AudioLibrary';
-import { validateUserCode } from './utils/userCode';
+import UploadPhotoPage from './UploadPhotoPage';
 import ModernSearchBox from './components/ModernSearchBox';
-
-// 相册图片数据 - 使用占位内容
-const albumImages = [
-  '/images/qz1.png',
-  '/images/qz2.png',
-  '/images/qz3.png',
-  '/images/qz4.png',
-  '/images/qz5.png',
-  '/images/qz6.png'
-];
 
 // 折线图数据
 const chartData = [
@@ -237,6 +227,9 @@ const HomePage = () => {
   // 移动端相册下拉框状态
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
+  // 上传文件状态
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [previewFile, setPreviewFile] = useState(null);
   
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -267,6 +260,48 @@ const HomePage = () => {
     
     return () => window.removeEventListener('resize', checkMobileView);
   }, []);
+
+  // 加载上传的文件
+  useEffect(() => {
+    const loadUploadedFiles = () => {
+      try {
+        const saved = localStorage.getItem('uploadedFiles');
+        if (saved) {
+          const files = JSON.parse(saved);
+          // 按上传时间排序，最新的在前面，只取前6个
+          const sortedFiles = files
+            .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime))
+            .slice(0, 6);
+          setUploadedFiles(sortedFiles);
+        }
+      } catch (error) {
+        console.error('加载上传文件失败:', error);
+      }
+    };
+
+    loadUploadedFiles();
+    
+    // 监听localStorage变化
+    const handleStorageChange = (e) => {
+      if (e.key === 'uploadedFiles') {
+        loadUploadedFiles();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // 也监听自定义事件，用于同页面更新
+    const handleFilesUpdate = () => {
+      loadUploadedFiles();
+    };
+    
+    window.addEventListener('filesUpdated', handleFilesUpdate);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('filesUpdated', handleFilesUpdate);
+    };
+  }, []);
   
   // 跳转到音频库
   const goToAudioLibrary = () => {
@@ -275,16 +310,45 @@ const HomePage = () => {
     }
   };
 
+  // 跳转到录音页面（移动端专用）
+  const goToRecordPage = () => {
+    if (userCode) {
+      navigate(`/${userCode}/record`); 
+    }
+  };
+
   // 大图预览相关函数
-  const openPreview = (idx) => setPreviewIndex(idx);
-  const closePreview = () => setPreviewIndex(null);
+  const openPreview = (idx) => {
+    const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
+      ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
+    
+    setPreviewIndex(idx);
+    setPreviewFile(albumData[idx]);
+  };
+  
+  const closePreview = () => {
+    setPreviewIndex(null);
+    setPreviewFile(null);
+  };
+  
   const showPrev = (e) => {
     e.stopPropagation();
-    setPreviewIndex(previewIndex !== null ? (previewIndex + albumImages.length - 1) % albumImages.length : null);
+    const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
+      ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
+    
+    const newIndex = previewIndex !== null ? (previewIndex + albumData.length - 1) % albumData.length : null;
+    setPreviewIndex(newIndex);
+    setPreviewFile(albumData[newIndex]);
   };
+  
   const showNext = (e) => {
     e.stopPropagation();
-    setPreviewIndex(previewIndex !== null ? (previewIndex + 1) % albumImages.length : null);
+    const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
+      ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
+    
+    const newIndex = previewIndex !== null ? (previewIndex + 1) % albumData.length : null;
+    setPreviewIndex(newIndex);
+    setPreviewFile(albumData[newIndex]);
   };
 
   // 搜索功能
@@ -374,8 +438,18 @@ const HomePage = () => {
     setShowAllPhotos(!showAllPhotos);
   };
 
-  // 计算进度百分比 (假设最大36个月为100%)
-  const progressPercentage = Math.min((babyAgeMonths / 36) * 100, 100);
+  // 处理上传照片
+  const handleUploadPhoto = () => {
+    if (userCode) {
+      navigate(`/${userCode}/upload-photos`);
+    }
+  };
+
+  // 准备相册数据
+  const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
+    ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
+
+
 
   // 如果没有用户ID，显示输入界面
   if (!userid) {
@@ -433,7 +507,7 @@ const HomePage = () => {
       {/* 顶部导航栏 */}
       <div className="memory-navbar">
         <div className="navbar-left">
-          <img src="/images/shouye.png" className="memory-logo" alt="logo" />
+          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/shouye.png" className="memory-logo" alt="logo" />
           <span className="memory-title">Memory</span>
         </div>
         <div className="navbar-center">
@@ -474,11 +548,13 @@ const HomePage = () => {
             </div>
             
             {/* 录制声音功能 - 移动到手机端的左侧区域，位于宝宝信息上方 */}
-            <div className="center-voice-card mobile-voice-card" onClick={goToAudioLibrary}>
+            <div className="center-voice-card mobile-voice-card" onClick={goToRecordPage}>
               <div className="voice-icon">🎤</div>
               <div className="voice-title">录制我的声音</div>
               <div className="voice-desc">智能语音助手，记录您的美好时光</div>
-              <button className="voice-action">开始录制</button>
+              <button className="voice-action">
+                开始录制
+              </button>
             </div>
             
             {/* 宝宝信息 */}
@@ -514,10 +590,10 @@ const HomePage = () => {
               <div className="card-content">
                 <div className="card-title">回忆相册</div>
                 <div className="card-desc">美好时光收藏</div>
-                <img className="card-dont1" src="/images/done1.png"/>
+                <img className="card-dont1" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/done1.png" alt="装饰图案"/>
               </div>
-              <img className="card-img" src="/images/baby1.png"  />
-              <img className="card-dont2" src="/images/done2.png"/>
+              <img className="card-img" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/baby1.png" alt="宝宝图片" />
+              <img className="card-dont2" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/done2.png" alt="装饰图案"/>
             </div>
             <div className="memory-card compact">
               <div className="card-center-dot">
@@ -526,9 +602,9 @@ const HomePage = () => {
               <div className="card-content">
                 <div className="card-title">时间回溯</div>
                 <div className="card-desc">历史记录追踪</div>
-                <img className="card-dont" src="/images/done3.png"/>
+                <img className="card-dont" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/done3.png" alt="装饰图案"/>
               </div>
-              <img className="card-img" src="/images/baby2.png"  />
+              <img className="card-img" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/baby2.png" alt="宝宝图片" />
             </div>
             <div className="memory-card compact">
               <div className="card-center-dot">
@@ -537,9 +613,9 @@ const HomePage = () => {
               <div className="card-content">
                 <div className="card-title">成长档案</div>
                 <div className="card-desc">宝宝成长每一步</div>
-                <img className="card-dont3" src="/images/done4.png"/>
+                <img className="card-dont3" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/done4.png" alt="装饰图案"/>
               </div>
-              <img className="card-img" src="/images/baby3.png"  />
+              <img className="card-img" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/baby3.png" alt="宝宝图片" />
             </div>
           </div>
         </div>
@@ -551,7 +627,11 @@ const HomePage = () => {
             <div className="voice-icon">🎤</div>
             <div className="voice-title">录制我的声音</div>
             <div className="voice-desc">智能语音助手，记录您的美好时光</div>
-            <button className="voice-action">开始录制</button>
+            <button
+              className="voice-action"
+            >
+              开始录制
+            </button>
           </div>
 
           {/* 亲子活动 */}
@@ -610,45 +690,85 @@ const HomePage = () => {
           <div className="activity-board">
             <div className="activity-title-container">
               <div className="activity-title">亲子相册</div>
-              {isMobileView && albumImages.length > 3 && (
-                <button className="photo-toggle-btn" onClick={togglePhotoDisplay}>
-                  {showAllPhotos ? '收起' : `展开(${albumImages.length - 3}+)`}
-                  <span className={`toggle-arrow ${showAllPhotos ? 'up' : 'down'}`}>▼</span>
-                </button>
-              )}
+              <div className="title-right-section">
+                <button className="voice-action upload-photo-btn" onClick={handleUploadPhoto}>上传照片</button>
+                {isMobileView && albumData.length > 3 && (
+                  <button className="photo-toggle-btn" onClick={togglePhotoDisplay}>
+                    {showAllPhotos ? '收起' : `展开(${albumData.length - 3}+)`}
+                    <span className={`toggle-arrow ${showAllPhotos ? 'up' : 'down'}`}>▼</span>
+                  </button>
+                )}
+              </div>
             </div>
             <div className="album-list">
-              {(isMobileView ? 
-                (showAllPhotos ? albumImages : albumImages.slice(0, 3)) : 
-                albumImages
-              ).map((src, idx) => {
-                // 计算真实的索引，用于大图预览
-                const realIndex = isMobileView && !showAllPhotos ? idx : idx;
-                const originalIndex = albumImages.findIndex(img => img === src);
-                
-                return (
-                  <img
-                    key={originalIndex}
-                    src={src}
-                    className="album-img"
-                    alt={`相册图片${originalIndex + 1}`}
-                    onClick={() => openPreview(originalIndex)}
-                  />
-                );
-              })}
+              {albumData.length === 0 ? (
+                <div className="empty-album">
+                  <div className="empty-icon">📷</div>
+                  <div className="empty-text">还没有上传任何照片或视频</div>
+                  <div className="empty-desc">点击"上传照片"开始记录美好时光</div>
+                </div>
+              ) : (
+                (isMobileView ? 
+                  (showAllPhotos ? albumData : albumData.slice(0, 3)) : 
+                  albumData
+                ).map((file, idx) => {
+                  // 计算真实的索引，用于大图预览
+                  const originalIndex = isMobileView && !showAllPhotos ? 
+                    albumData.findIndex(f => f === file) : idx;
+                  
+                  return (
+                    <div
+                      key={file.id || idx}
+                      className="album-item"
+                      onClick={() => openPreview(originalIndex)}
+                    >
+                      <img
+                        src={file.preview}
+                        className="album-img"
+                        alt={file.name || `媒体文件${idx + 1}`}
+                      />
+                      {file.type === 'video' && (
+                        <div className="video-overlay">
+                          <div className="play-icon">▶</div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* 大图预览弹窗 */}
-      {previewIndex !== null && (
+      {previewIndex !== null && previewFile && (
         <div className="album-preview-mask" onClick={closePreview}>
           <div className="album-preview-box" onClick={e => e.stopPropagation()}>
-            <img className="album-preview-img" src={albumImages[previewIndex]} alt="大图预览" />
+            {previewFile.type === 'video' ? (
+              <video 
+                className="album-preview-video" 
+                src={previewFile.preview} 
+                controls 
+                autoPlay
+                onClick={e => e.stopPropagation()}
+              />
+            ) : (
+              <img className="album-preview-img" src={previewFile.preview} alt="大图预览" />
+            )}
             <button className="album-preview-close" onClick={closePreview}>×</button>
             <button className="album-preview-arrow left" onClick={showPrev}>‹</button>
             <button className="album-preview-arrow right" onClick={showNext}>›</button>
+            {previewFile.name && (
+              <div className="preview-info">
+                <div className="preview-filename">{previewFile.name}</div>
+                {previewFile.uploadTime && (
+                  <div className="preview-time">
+                    上传时间: {new Date(previewFile.uploadTime).toLocaleString('zh-CN')}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -663,6 +783,7 @@ function App() {
       <Route path="/:userid" element={<HomePage />} />
       <Route path="/family" element={<FamilyPage />} />
       <Route path="/:userid/audio-library" element={<AudioLibrary />} />
+      <Route path="/:userid/upload-photos" element={<UploadPhotoPage />} />
       <Route path="/:userid/:id" element={<RecordPage />} />
       <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
     </Routes>

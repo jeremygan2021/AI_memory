@@ -41,7 +41,9 @@ const PlayerPage = () => {
       // 获取真实的视口高度
       const vh = window.innerHeight * 0.01;
       // 设置CSS自定义属性
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      if (typeof document !== 'undefined' && document.documentElement && document.documentElement.style) {
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+      }
     };
 
     // 初始设置
@@ -650,7 +652,7 @@ const PlayerPage = () => {
             <div className="control-group">
               <label className="control-label">
                 <span>
-                  <img src="/images/sound.svg"  width={30} height={30}/>
+                  <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/sound.svg"  width={30} height={30}/>
                 </span>
                 <span>音量</span>
               </label>

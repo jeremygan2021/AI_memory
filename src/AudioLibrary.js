@@ -356,7 +356,7 @@ const AudioLibrary = () => {
           <p>{apiError}</p>
           <div className="error-actions">
             <button onClick={refreshFiles} className="retry-btn">
-              🔄 重试
+            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" className="icon-img" width={32} height={32} color='#ffffff'/>重试
             </button>
             <button onClick={() => navigate('/')} className="back-btn">
               ← 返回主页
@@ -397,13 +397,13 @@ const AudioLibrary = () => {
         <div className="header-actions">
           <button onClick={refreshFiles} className="refresh-btn" title="刷新">
             <span className="btn-icon">
-              <img src="/images/sx.svg" className="icon-img" width={32} height={32}/>
+              <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/sx.svg" className="icon-img" width={32} height={32}/>
             </span>
             <span>刷新</span>
           </button>
           <button onClick={createNewSession} className="new-session-btn">
             <span className="btn-icon">
-            <img src="/images/add.svg" className="btn-icon" width={30} height={30}/>
+            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/add.svg" className="btn-icon" width={30} height={30}/>
             </span>
             <span>新建录音</span>
           </button>
@@ -439,7 +439,7 @@ const AudioLibrary = () => {
       <div className="library-stats">
         <div className="stat-item">
           <span className="stat-icon">
-          <img src="/images/files.svg" className="stat-icon" width={50} height={50}/>
+          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/files.svg" className="stat-icon" width={50} height={50}/>
           </span>
           <div className="stat-content">
             <span className="stat-number">{audioSessions.length}</span>
@@ -448,7 +448,7 @@ const AudioLibrary = () => {
         </div>
         <div className="stat-item">
           <span className="stat-icon">
-          <img src="/images/huatong.svg" className="stat-icon" width={50} height={50}/>
+          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="stat-icon" width={50} height={50}/>
           </span>
           <div className="stat-content">
             <span className="stat-number">
@@ -459,7 +459,7 @@ const AudioLibrary = () => {
         </div>
         <div className="stat-item">
           <span className="stat-icon">
-          <img src="/images/save.svg" className="stat-icon" width={50} height={50}/>
+          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/save.svg" className="stat-icon" width={50} height={50}/>
           </span>
           <div className="stat-content">
             <span className="stat-number">
@@ -472,7 +472,7 @@ const AudioLibrary = () => {
         </div>
         <div className="stat-item cloud-indicator">
           <span className="stat-icon">
-          <img src="/images/scyd.svg" className="stat-icon" width={50} height={50}/>
+          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/scyd.svg" className="stat-icon" width={50} height={50}/>
           </span>
           <div className="stat-content">
             <span className="stat-number">云端</span>
@@ -506,15 +506,15 @@ const AudioLibrary = () => {
                       <span className="id-icon">🆔</span>
                       {userCode}/{session.sessionId}
                       <span className="cloud-badge" title="云端存储">
-                      <img src="/images/scyd.svg" className="cloud-badge" width={20} height={20}/>
+                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/scyd.svg" className="cloud-badge" width={20} height={20}/>
                       </span>
                     </h3>
                     <div className="session-meta">
                       <span className="session-count">
-                      <img src="/images/huatong.svg" className="session-count" width={15} height={15}/> {session.count} 个录音
+                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="session-count" width={15} height={15}/> {session.count} 个录音
                       </span>
                       <span className="session-size">
-                      <img src="/images/save.svg" className="session-count" width={15} height={15}/> {formatFileSize(
+                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/save.svg" className="session-count" width={15} height={15}/> {formatFileSize(
                           session.recordings.reduce((total, r) => total + (r.size || 0), 0)
                         )}
                       </span>
@@ -526,7 +526,7 @@ const AudioLibrary = () => {
                     className="delete-session-btn"
                     title="删除会话及云端文件"
                   >
-                    <img src="/images/delete.svg" className="delete-session-btn" width={50} height={50}/>
+                    <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete.svg" className="delete-session-btn" width={50} height={50}/>
                   </button>
                 </div>
 
@@ -548,7 +548,7 @@ const AudioLibrary = () => {
 
                   <div className="session-actions">
                     <div className="action-icon">
-                    <img src="/images/bf.svg" className="action-icon" width={50} height={50}/>
+                    <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf.svg" className="action-icon" width={50} height={50}/>
                       {session.recordings.length > 0 ? '' : ''}
                     </div>
                     <span className="action-text">
@@ -570,10 +570,10 @@ const AudioLibrary = () => {
           </div>
         )}
       </main>
-      {/* 移动端底部大按钮 */}
+      {/* 移动端底部大按钮
       <button className="add-device-btn" onClick={createNewSession} style={{display: 'block'}}>
         新建录音
-      </button>
+      </button> */}
     </div>
   );
 };
