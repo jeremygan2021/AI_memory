@@ -8,7 +8,7 @@
 
 /* 顶部导航 */
 .upload-header {
-  background: #51ccc3;
+  background:#baeeaf;
   box-shadow: 10px 4px 4px 0px rgba(0, 0, 0, 0.25);
   border-radius: 0px 0px 16px 16px;
   height: 82px;
@@ -36,9 +36,9 @@
 }
 
 .back-text {
-  color: #12a4b2;
+  color: #6ebf8e;
   font-size: 24px;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
   font-weight: normal;
   white-space: nowrap;
   line-height: 24px;
@@ -47,13 +47,12 @@
 /* 上传区域 */
 .upload-area {
   background: rgba(255, 255, 255, 0.6);
-  border: 3px solid #28b2a8;
+  border: 3px solid #6ebf8e;
   border-radius: 32px;
-  box-shadow: 5px 5px 4px 0px #28b2a8;
+  box-shadow: 8px 8px 20px 0px #6ebf8e;
   border-style: dashed;
   height: 137px;
-  width: min(calc(100% - 80px), 800px);
-  max-width: 800px;
+  width: 1200px;
   margin: 25px auto 0;
   display: flex;
   align-items: center;
@@ -68,19 +67,19 @@
 .upload-area:hover {
   background: rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
-  box-shadow: 5px 7px 6px 0px #28b2a8;
+  box-shadow: 5px 7px 6px 0px #baeeaf;
 }
 
 .upload-area.drag-over {
   background: rgba(40, 178, 168, 0.1);
-  border-color: #3bb6a6;
+  border-color: #6ebf8e;
   transform: scale(1.02);
 }
 
 .upload-text {
-  color: #12a4b2;
+  color: #6ebf8e;
   font-size: 32px;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
   font-weight: normal;
   text-align: center;
   white-space: nowrap;
@@ -89,17 +88,17 @@
 
 /* 照片容器 */
 .photos-container {
-  width: calc(100% - 122px);
-  margin: 28px auto 36px;
+  width:1500px;
+  margin: 10px auto 10px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
 }
 
 .section-title {
   color: #12a4b2;
   font-size: 28px;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
   font-weight: normal;
   text-align: center;
   margin-bottom: 20px;
@@ -109,10 +108,10 @@
 .all-photos-section {
   background: rgba(255, 255, 255, 0.6);
   border-radius: 32px;
-  box-shadow: 5px 5px 4px 0px #28b2a8;
+  box-shadow: 8px 8px 20px 0px #6ebf8e;
   padding: 30px;
   width: min(calc(100% - 80px), 900px);
-  max-width: 900px;
+  width: 1200px;
   margin: 25px auto 0;
   box-sizing: border-box;
 }
@@ -121,13 +120,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .pagination-info {
   color: #12a4b2;
   font-size: 16px;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
 }
 
 .photos-grid {
@@ -190,7 +189,7 @@
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  color: #12a4b2;
+  color: #6ebf8e;
   transition: all 0.3s ease;
 }
 
@@ -236,16 +235,16 @@
 }
 
 .media-info {
-  padding: 15px;
+  padding: 5px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .media-name {
   font-size: 16px;
   color: #333;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -255,14 +254,14 @@
 .media-time {
   font-size: 12px;
   color: #666;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
 }
 
 /* 空状态 */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #12a4b2;
+  color: #6ebf8e;
 }
 
 .empty-icon {
@@ -287,58 +286,76 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-top: 30px;
+  gap: 18px;
+  margin: 32px 0 0 0;
+  flex-wrap: wrap;
 }
 
 .pagination-btn {
-  background: #3bb6a6;
-  color: white;
+  background: linear-gradient(90deg, #3bb6a6 0%, #6be6c1 100%);
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 14px;
+  border-radius: 24px;
+  padding: 8px 28px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: #2ea087;
-  transform: scale(1.05);
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(59,182,166,0.08);
 }
 
 .pagination-btn:disabled {
-  background: #ccc;
+  background: #e0e0e0;
+  color: #aaa;
   cursor: not-allowed;
-  transform: none;
+  box-shadow: none;
+}
+
+.pagination-btn:not(:disabled):hover {
+  background: linear-gradient(90deg, #2fa18e 0%, #4fd6a8 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(59,182,166,0.15);
+}
+
+.pagination-btn:active {
+  transform: scale(0.96);
 }
 
 .pagination-numbers {
   display: flex;
-  gap: 5px;
+  gap: 6px;
 }
 
 .pagination-number {
-  background: rgba(59, 182, 166, 0.1);
-  color: #3bb6a6;
-  border: 1px solid #3bb6a6;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
-}
-
-.pagination-number:hover {
-  background: rgba(59, 182, 166, 0.2);
-  transform: scale(1.05);
+  display: none !important;
 }
 
 .pagination-number.active {
+  display: none !important;
+}
+
+.pagination-current-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
   background: #3bb6a6;
-  color: white;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 6px;
+  box-shadow: 0 2px 8px rgba(59,182,166,0.10);
+  transform: scale(1.12);
+}
+
+.pagination-total-page {
+  color: #3bb6a6;
+  font-size: 16px;
+  font-weight: 500;
+  margin-left: 2px;
+  opacity: 0.7;
 }
 
 /* 预览弹窗 */
@@ -481,6 +498,7 @@
   }
   
   .back-text {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 20px;
   }
   
@@ -511,6 +529,7 @@
   
   .section-title {
     font-size: 24px;
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
   }
 }
 
@@ -527,6 +546,7 @@
   }
   
   .back-text {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 18px;
   }
   
@@ -555,6 +575,7 @@
   .section-title {
     font-size: 22px;
     margin-bottom: 15px;
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
   }
   
   .section-header {
@@ -588,10 +609,12 @@
   }
   
   .media-name {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 14px;
   }
   
   .media-time {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 11px;
   }
   
@@ -647,6 +670,7 @@
   }
   
   .back-text {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 17px;
   }
   
@@ -677,6 +701,7 @@
   }
   
   .section-title {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 20px;
   }
 }
@@ -694,6 +719,7 @@
   }
   
   .back-text {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 16px;
   }
   
@@ -715,6 +741,7 @@
   }
   
   .section-title {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 18px;
   }
   
@@ -749,10 +776,12 @@
   }
   
   .media-name {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 12px;
   }
   
   .media-time {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 10px;
   }
   
@@ -835,6 +864,7 @@
   }
   
   .back-text {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 15px;
   }
   
@@ -862,6 +892,7 @@
   }
   
   .section-title {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 16px;
     margin-bottom: 12px;
   }
@@ -880,10 +911,12 @@
   }
   
   .media-name {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 11px;
   }
   
   .media-time {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 9px;
   }
   
@@ -933,6 +966,7 @@
   }
   
   .back-text {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 14px;
   }
   
@@ -960,6 +994,7 @@
   }
   
   .section-title {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 15px;
     margin-bottom: 10px;
   }
@@ -978,10 +1013,12 @@
   }
   
   .media-name {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 10px;
   }
   
   .media-time {
+    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
     font-size: 8px;
   }
   
@@ -1094,4 +1131,63 @@
   .back-button {
     border: 2px solid #000;
   }
+}
+
+/* 新增分页控件样式 */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pagination-controls button {
+  background: #3bb6a6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Muyao-Softbrush-2', sans-serif;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background: #2ea087;
+  transform: scale(1.05);
+}
+
+.pagination-controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+}
+
+.page-number {
+  background: rgba(59, 182, 166, 0.1);
+  color: #3bb6a6;
+  border: 1px solid #3bb6a6;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Muyao-Softbrush-2', sans-serif;
+}
+
+.page-number:hover {
+  background: rgba(59, 182, 166, 0.2);
+  transform: scale(1.05);
+}
+
+.page-number.active {
+  background: #3bb6a6;
+  color: white;
 } 

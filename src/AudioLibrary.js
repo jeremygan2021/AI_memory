@@ -21,6 +21,8 @@ const AudioLibrary = () => {
   const [sortBy, setSortBy] = useState('newest'); // newest, oldest, count
   const [apiError, setApiError] = useState(null);
   const [userCode, setUserCode] = useState(''); // 4字符用户代码
+  const [currentPage, setCurrentPage] = useState(1);
+  const sessionsPerPage = 12;
 
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -272,6 +274,11 @@ const AudioLibrary = () => {
     }
   };
 
+  // 监听搜索、排序、数据变化时自动回到第一页
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, sortBy, audioSessions]);
+
   // 创建新录音会话
   const createNewSession = () => {
     if (userCode) {
@@ -483,92 +490,123 @@ const AudioLibrary = () => {
 
       {/* 会话列表 */}
       <main className="sessions-container">
-        {getFilteredAndSortedSessions().length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">☁️</div>
-            <h3>云端暂无录音会话</h3>
-            <p>点击"新建录音"开始您的第一次录音并自动上传到云端</p>
-            <button onClick={createNewSession} className="create-first-btn">
-              🎤 开始录音
-            </button>
-          </div>
-        ) : (
-          <div className="sessions-grid">
-            {getFilteredAndSortedSessions().map((session) => (
-              <div
-                key={session.sessionId}
-                className="session-card cloud-session"
-                onClick={() => enterSession(session)}
-              >
-                <div className="session-header">
-                  <div className="session-info">
-                    <h3 className="session-id">
-                      <span className="id-icon">🆔</span>
-                      {userCode}/{session.sessionId}
-                      <span className="cloud-badge" title="云端存储">
-                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/scyd.svg" className="cloud-badge" width={20} height={20}/>
-                      </span>
-                    </h3>
-                    <div className="session-meta">
-                      <span className="session-count">
-                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="session-count" width={15} height={15}/> {session.count} 个录音
-                      </span>
-                      <span className="session-size">
-                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/save.svg" className="session-count" width={15} height={15}/> {formatFileSize(
-                          session.recordings.reduce((total, r) => total + (r.size || 0), 0)
-                        )}
+        {(() => {
+          const filteredSessions = getFilteredAndSortedSessions();
+          const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
+          const paginatedSessions = filteredSessions.slice(
+            (currentPage - 1) * sessionsPerPage,
+            currentPage * sessionsPerPage
+          );
+          return paginatedSessions.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">☁️</div>
+              <h3>云端暂无录音会话</h3>
+              <p>点击"新建录音"开始您的第一次录音并自动上传到云端</p>
+              <button onClick={createNewSession} className="create-first-btn">
+                🎤 开始录音
+              </button>
+            </div>
+          ) : (
+            <>
+            <div className="sessions-grid">
+              {paginatedSessions.map((session) => (
+                <div
+                  key={session.sessionId}
+                  className="session-card cloud-session"
+                  onClick={() => enterSession(session)}
+                >
+                  <div className="session-header">
+                    <div className="session-info">
+                      <h3 className="session-id">
+                        <span className="id-icon">🆔</span>
+                        {userCode}/{session.sessionId}
+                        <span className="cloud-badge" title="云端存储">
+                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/scyd.svg" className="cloud-badge" width={20} height={20}/>
+                        </span>
+                      </h3>
+                      <div className="session-meta">
+                        <span className="session-count">
+                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="session-count" width={15} height={15}/> {session.count} 个录音
+                        </span>
+                        <span className="session-size">
+                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/save.svg" className="session-count" width={15} height={15}/> {formatFileSize(
+                            session.recordings.reduce((total, r) => total + (r.size || 0), 0)
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={(e) => deleteSession(session.sessionId, e)}
+                      className="delete-session-btn"
+                      title="删除会话及云端文件"
+                    >
+                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete.svg" className="delete-session-btn" width={50} height={50}/>
+                    </button>
+                  </div>
+
+                  <div className="session-content">
+                    <div className="latest-recording">
+                      <h4 className="latest-title">最新录音</h4>
+                      <div className="recording-preview">
+                        <span className="recording-name">
+                          {session.latestRecording.fileName}
+                        </span>
+                        <span className="recording-size">
+                          {formatFileSize(session.latestRecording.size)}
+                        </span>
+                      </div>
+                      <div className="recording-date">
+                        {session.latestRecording.timestamp}
+                      </div>
+                    </div>
+
+                    <div className="session-actions">
+                      <div className="action-icon">
+                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf.svg" className="action-icon" width={50} height={50}/>
+                        {session.recordings.length > 0 ? '' : ''}
+                      </div>
+                      <span className="action-text">
+                        {session.recordings.length > 0 ? '播放' : '录音'}
                       </span>
                     </div>
                   </div>
-                  
-                  <button
-                    onClick={(e) => deleteSession(session.sessionId, e)}
-                    className="delete-session-btn"
-                    title="删除会话及云端文件"
-                  >
-                    <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete.svg" className="delete-session-btn" width={50} height={50}/>
-                  </button>
-                </div>
 
-                <div className="session-content">
-                  <div className="latest-recording">
-                    <h4 className="latest-title">最新录音</h4>
-                    <div className="recording-preview">
-                      <span className="recording-name">
-                        {session.latestRecording.fileName}
-                      </span>
-                      <span className="recording-size">
-                        {formatFileSize(session.latestRecording.size)}
-                      </span>
-                    </div>
-                    <div className="recording-date">
-                      {session.latestRecording.timestamp}
-                    </div>
-                  </div>
-
-                  <div className="session-actions">
-                    <div className="action-icon">
-                    <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf.svg" className="action-icon" width={50} height={50}/>
-                      {session.recordings.length > 0 ? '' : ''}
-                    </div>
-                    <span className="action-text">
-                      {session.recordings.length > 0 ? '播放' : '录音'}
+                  <div className="session-footer">
+                    <span className="created-date">
+                      创建: {formatDateFromString(session.createdAt)}
+                    </span>
+                    <span className="updated-date">
+                      更新: {formatDateFromString(session.updatedAt)}
                     </span>
                   </div>
                 </div>
-
-                <div className="session-footer">
-                  <span className="created-date">
-                    创建: {formatDateFromString(session.createdAt)}
-                  </span>
-                  <span className="updated-date">
-                    更新: {formatDateFromString(session.updatedAt)}
-                  </span>
-                </div>
+              ))}
+            </div>
+            {/* 分页按钮 */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  上一页
+                </button>
+                <span className="pagination-current-page">
+                  {currentPage}
+                </span>
+                <span className="pagination-total-page">/ {totalPages} 页</span>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  下一页
+                </button>
               </div>
-            ))}
-          </div>
-        )}
+            )}
+            </>
+          );
+        })()}
       </main>
       {/* 移动端底部大按钮
       <button className="add-device-btn" onClick={createNewSession} style={{display: 'block'}}>

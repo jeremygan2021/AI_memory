@@ -13,7 +13,7 @@ const UploadPhotoPage = () => {
   const [isMobile, setIsMobile] = useState(false);
   const filesPerPage = 12;
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
 
 
@@ -72,6 +72,8 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
       // const uploadUrl = new URL(`${API_BASE_URL}/upload`);
       // uploadUrl.searchParams.append('folder', folderPath);
 
+      console.log('上传接口地址:', `${API_BASE_URL}/upload`);
+
       const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         body: formData,
@@ -122,11 +124,16 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
     }
     
     mediaFiles.forEach(file => {
-      // 移动端文件大小限制
-      if (isMobile && file.size > 50 * 1024 * 1024) { // 50MB
-        alert(`文件 ${file.name} 过大，移动端单个文件不能超过50MB`);
-        return;
-      }
+     // 文件大小限制
+     if (isMobile && file.size > 50 * 1024 * 1024) { // 50MB
+      alert(`文件 ${file.name} 过大，移动端单个文件不能超过100MB`);
+      return;
+    }
+    
+    if (!isMobile && file.size > 100 * 1024 * 1024) { // 100MB
+      alert(`文件 ${file.name} 过大，单个文件不能超过200MB`);
+      return;
+    }
       
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -149,7 +156,8 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
               name: newFile.name,
               preview: result.cloudUrl, // 用云端URL
               type: newFile.type,
-              uploadTime: newFile.uploadTime
+              uploadTime: newFile.uploadTime,
+              objectKey: result.objectKey // 新增objectKey
             };
             // 追加到本地存储
             const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
@@ -207,14 +215,32 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
     }
   };
 
-  // 删除上传的文件
-  const handleDeleteFile = (fileId) => {
-    setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
-    // 如果删除后当前页没有文件了，回到上一页
-    const remainingFiles = uploadedFiles.filter(file => file.id !== fileId);
-    const totalPages = Math.ceil(remainingFiles.length / filesPerPage);
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(totalPages);
+  // 删除上传的文件（先请求后端删除，再移除本地）
+  const handleDeleteFile = async (fileId) => {
+    const fileToDelete = uploadedFiles.find(file => file.id === fileId);
+    if (!fileToDelete) return;
+    if (!window.confirm('确定要删除这张图片吗？')) return;
+    try {
+      // 先请求后端删除
+      if (fileToDelete.objectKey) {
+        const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(fileToDelete.objectKey)}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) {
+          throw new Error('服务器删除失败');
+        }
+      }
+      // 本地移除
+      const newFiles = uploadedFiles.filter(file => file.id !== fileId);
+      setUploadedFiles(newFiles);
+      localStorage.setItem('uploadedFiles', JSON.stringify(newFiles));
+      // 如果删除后当前页没有文件了，回到上一页
+      const totalPages = Math.ceil(newFiles.length / filesPerPage);
+      if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+      }
+    } catch (err) {
+      alert('删除失败: ' + err.message);
     }
   };
 
@@ -368,19 +394,8 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
                   >
                     上一页
                   </button>
-                  
-                  <div className="pagination-numbers">
-                    {Array.from({ length: totalPages }, (_, index) => (
-                      <button
-                        key={index + 1}
-                        className={`pagination-number ${currentPage === index + 1 ? 'active' : ''}`}
-                        onClick={() => goToPage(index + 1)}
-                      >
-                        {index + 1}
-                      </button>
-                    ))}
-                  </div>
-                  
+                  <span className="pagination-current-page">{currentPage}</span>
+                  <span className="pagination-total-page">/ {totalPages} 页</span>
                   <button 
                     className="pagination-btn"
                     onClick={goToNextPage}
