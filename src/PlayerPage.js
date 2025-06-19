@@ -661,9 +661,9 @@ const PlayerPage = () => {
             {/* 音量控制 */}
             <div className="control-group">
               <label className="control-label">
-                <span>
+                {/* <span>
                   <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/sound.svg"  width={30} height={30}/>
-                </span>
+                </span> */}
                 <span>音量</span>
               </label>
               <div className="volume-container">

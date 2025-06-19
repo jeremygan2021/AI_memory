@@ -37,8 +37,6 @@ label {
 
 /* 背景装饰 */
 .background-decoration {
-  width: 200%;
-  height: 200%;
   position: fixed;
   top: 0;
   left: 0;
@@ -47,14 +45,14 @@ label {
   overflow: hidden;
   pointer-events: none;
   z-index: -10;
-  background-image:url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
+  background-image:url('/public/images/background2.png');
 }
 
 .wave {
   position: absolute;
   width: 200%;
   height: 200%;
-  background-image:url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
+  background-image:url('/public/images/background2.png');
   background-size: 60px 60px;
   animation: backgroundMove 25s linear infinite;
 }
@@ -4589,106 +4587,6 @@ html, body {
   }
 }
 
-@media (max-width: 1024px) {
-  .record-main-layout {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 32px !important;
-    height: auto !important;
-    min-height: 100vh;
-    position: static !important;
-    padding: 30px 10px 30px 10px !important;
-  }
-  .record-left-panel, .record-right-panel {
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    max-width: 100% !important;
-  }
-  .record-left-panel {
-    gap: 24px !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    position: static !important;
-    flex: none !important;
-    flex-basis: auto !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    z-index: auto !important;
-  }
-  .record-right-panel {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    position: static !important;
-    flex: none !important;
-    flex-basis: auto !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    z-index: auto !important;
-  }
-  .record-control-card {
-    min-width: 0 !important;
-    min-height: 320px !important;
-    padding: 32px 12px !important;
-  }
-}
-
-@media (max-width: 1024px) {
-  .record-main-layout {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 32px !important;
-    height: auto !important;
-    min-height: 100vh;
-    position: static !important;
-    padding: 30px 10px 30px 10px !important;
-  }
-  .record-left-panel, .record-right-panel {
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    max-width: 100% !important;
-  }
-  .record-left-panel {
-    gap: 24px !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    position: static !important;
-    flex: none !important;
-    flex-basis: auto !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    z-index: auto !important;
-  }
-  .record-right-panel {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    position: static !important;
-    flex: none !important;
-    flex-basis: auto !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    z-index: auto !important;
-  }
-  .record-control-card {
-    min-width: 0 !important;
-    min-height: 320px !important;
-    padding: 32px 12px !important;
-  }
-}
-
 /* 平板布局优化 */
 @media (min-width: 769px) and (max-width: 1024px) {
   .record-container {
@@ -10168,63 +10066,6 @@ html, body {
       padding: 6px 10px;
       font-size: 11px;
     }
-  }
-}
-
-@media (max-width: 1024px) {
-  .record-main-layout {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 32px !important;
-    height: auto !important;
-    min-height: 100vh;
-    position: static !important;
-    padding: 30px 10px 30px 10px !important;
-  }
-  .record-left-panel, .record-right-panel {
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    max-width: 100% !important;
-  }
-  .record-left-panel {
-    gap: 24px !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    position: static !important;
-    flex: none !important;
-    flex-basis: auto !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    z-index: auto !important;
-  }
-  .record-right-panel {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    position: static !important;
-    flex: none !important;
-    flex-basis: auto !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    z-index: auto !important;
-  }
-  .record-control-card {
-    min-width: 0 !important;
-    min-height: 320px !important;
-    padding: 32px 12px !important;
-  }
-}
-
-/* 超宽屏适配 - 大桌面显示器 */
-@media (min-width: 1440px) {
-  .record-content-center {
-    max-width: 1200px;
   }
 }
 

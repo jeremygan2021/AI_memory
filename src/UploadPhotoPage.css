@@ -1,6 +1,6 @@
 /* 上传照片页面样式 */
 .upload-page {
-  background-image: url('/AI_memory/public/images/background2.png');
+  background-image: url('https:///AI_memory/public/images/background2.png');
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
