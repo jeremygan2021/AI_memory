@@ -598,6 +598,14 @@ const RecordComponent = () => {
     }
   };
 
+  // 检测已绑定录音，自动跳转到播放页面
+  useEffect(() => {
+    if (boundRecordings && boundRecordings.length > 0 && userCode && id) {
+      // 跳转到第一个已绑定录音的播放页面
+      navigate(`/${userCode}/${id}/play/${boundRecordings[0].originalRecordingId || boundRecordings[0].id}`);
+    }
+  }, [boundRecordings, userCode, id, navigate]);
+
   // 如果浏览器不支持录音
   if (!isSupported) {
     return (
