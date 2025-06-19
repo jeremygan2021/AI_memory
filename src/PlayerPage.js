@@ -24,6 +24,58 @@ const PlayerPage = () => {
   const [loading, setLoading] = useState(true);
   const [audioReady, setAudioReady] = useState(false);
   const [userCode, setUserCode] = useState(''); // 4字符用户代码
+  const [userInteracted, setUserInteracted] = useState(false); // 用户交互状态
+  const [isIOS, setIsIOS] = useState(false); // iOS设备检测
+
+  // 检测iOS设备
+  useEffect(() => {
+    const checkIsIOS = () => {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    };
+    setIsIOS(checkIsIOS());
+  }, []);
+
+  // 监听首次用户交互
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (!userInteracted) {
+        console.log('检测到首次用户交互');
+        setUserInteracted(true);
+        
+        // 为iOS设备初始化音频上下文
+        if (isIOS && audioRef.current) {
+          const audio = audioRef.current;
+          // 预加载音频以准备播放
+          audio.load();
+          
+          // 尝试创建一个静音的播放来"解锁"音频播放权限
+          const originalVolume = audio.volume;
+          audio.volume = 0;
+          audio.play().then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.volume = originalVolume;
+            console.log('iOS音频权限已解锁');
+          }).catch((error) => {
+            console.warn('iOS音频权限解锁失败:', error);
+          });
+        }
+      }
+    };
+
+    // 监听多种用户交互事件
+    const events = ['touchstart', 'click', 'tap', 'keydown'];
+    events.forEach(event => {
+      document.addEventListener(event, handleFirstInteraction, { once: true, passive: true });
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleFirstInteraction);
+      });
+    };
+  }, [userInteracted, isIOS]);
 
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -292,6 +344,12 @@ const PlayerPage = () => {
       console.error('音频URL:', audio.src);
       console.error('错误代码:', audio.error?.code);
       console.error('错误信息:', audio.error?.message);
+      
+              // iOS特殊错误处理
+        if (isIOS && audio.error) {
+          console.error('iOS音频播放错误:', audio.error);
+        }
+      
       // 重置播放状态
       setIsPlaying(false);
     };
@@ -313,6 +371,25 @@ const PlayerPage = () => {
       setCurrentTime(0);
     };
 
+    // iOS特殊事件处理
+    const handleSuspend = () => {
+      if (isIOS) {
+        console.log('iOS音频挂起');
+      }
+    };
+
+    const handleStalled = () => {
+      if (isIOS) {
+        console.log('iOS音频停滞，尝试重新加载');
+        // 在iOS上，如果音频停滞，尝试重新加载
+        setTimeout(() => {
+          if (audio.readyState < 2) {
+            audio.load();
+          }
+        }, 1000);
+      }
+    };
+
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('loadeddata', handleLoadedData);
@@ -323,6 +400,8 @@ const PlayerPage = () => {
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('suspend', handleSuspend);
+    audio.addEventListener('stalled', handleStalled);
 
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -335,47 +414,96 @@ const PlayerPage = () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('suspend', handleSuspend);
+      audio.removeEventListener('stalled', handleStalled);
     };
-  }, [recording]);
+  }, [recording, isIOS]);
 
   // 自动播放音频
-  useEffect(() =>{
-    if(audioReady && audioRef.current){
-      audioRef.current.play().catch((err) =>{
-        // 处理自动播放被浏览器拦截的情况
-        console.warn('自动播放失败，可能被浏览器拦截：',err);
-      });
-    }
-  },[audioReady]);
+  // useEffect(() =>{
+  //   if(audioReady && audioRef.current){
+  //     audioRef.current.play().catch((err) =>{
+  //       // 处理自动播放被浏览器拦截的情况
+  //       console.warn('自动播放失败，可能被浏览器拦截：',err);
+  //     });
+  //   }
+  // },[audioReady]);
 
   // 播放/暂停控制
   const togglePlayPause = async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // iOS设备必须在用户交互后才能播放音频
+    if (isIOS && !userInteracted) {
+      alert('请先点击页面任意位置以启用音频播放');
+      return;
+    }
+
     try {
       if (isPlaying) {
         audio.pause();
       } else {
+        // iOS特殊处理
+        if (isIOS) {
+          // 设置适合iOS的音频属性
+          audio.preload = 'auto';
+          audio.defaultMuted = false;
+        }
+
         // 确保音频已经准备好播放
         if (audio.readyState >= 2) { // HAVE_CURRENT_DATA
           await audio.play();
         } else {
           console.log('音频还未准备好，等待加载完成...');
-          // 等待音频准备好后再播放
-          const handleCanPlay = async () => {
-            try {
-              await audio.play();
+          
+          // 创建一个Promise来等待音频准备好
+          const playPromise = new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('音频加载超时'));
+            }, 10000); // 10秒超时
+
+            const handleCanPlay = async () => {
+              clearTimeout(timeout);
+              try {
+                await audio.play();
+                audio.removeEventListener('canplay', handleCanPlay);
+                audio.removeEventListener('error', handleError);
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            };
+
+            const handleError = (error) => {
+              clearTimeout(timeout);
               audio.removeEventListener('canplay', handleCanPlay);
-            } catch (error) {
-              console.error('延迟播放失败:', error);
-            }
-          };
-          audio.addEventListener('canplay', handleCanPlay);
+              audio.removeEventListener('error', handleError);
+              reject(error);
+            };
+
+            audio.addEventListener('canplay', handleCanPlay);
+            audio.addEventListener('error', handleError);
+            
+
+          });
+
+          try {
+            await playPromise;
+          } catch (error) {
+            console.error('延迟播放失败:', error);
+            throw error;
+          }
         }
       }
     } catch (error) {
       console.error('播放控制错误:', error);
+      
+      // iOS特殊错误处理
+      if (isIOS) {
+        console.error('iOS播放错误:', error);
+      }
+      
       // 重置播放状态
       setIsPlaying(false);
     }
@@ -611,7 +739,11 @@ const PlayerPage = () => {
               onClick={togglePlayPause} 
               className={`control-btn play-box ${isPlaying ? 'playing' : ''} ${!audioReady ? 'disabled' : ''}`}
               disabled={!audioReady}
-              title={!audioReady ? '音频加载中...' : isPlaying ? '暂停' : '播放'}
+              title={
+                !audioReady ? '音频加载中...' : 
+                isIOS && !userInteracted ? '需要用户交互才能播放' :
+                isPlaying ? '暂停' : '播放'
+              }
             >
               <img 
                 src={!audioReady ? "/asset/loading.png" : isPlaying ? "/asset/stop_button.png" : "/asset/play_button.png"} 
@@ -620,7 +752,8 @@ const PlayerPage = () => {
                 style={{ 
                   width: '90px', 
                   height: '90px', 
-                  transform: isPlaying ? 'translateY(-2px)' : 'translateY(+2px)' 
+                  transform: isPlaying ? 'translateY(-2px)' : 'translateY(+2px)',
+                  opacity: (!audioReady || (isIOS && !userInteracted)) ? 0.5 : 1
                 }}
               />
             </button>
@@ -661,9 +794,6 @@ const PlayerPage = () => {
             {/* 音量控制 */}
             <div className="control-group">
               <label className="control-label">
-                {/* <span>
-                  <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/sound.svg"  width={30} height={30}/>
-                </span> */}
                 <span>音量</span>
               </label>
               <div className="volume-container">
@@ -685,16 +815,70 @@ const PlayerPage = () => {
       {/* 隐藏的音频元素 */}
       <audio
         ref={audioRef}
-        src={recording.signedUrl || recording.cloudUrl || recording.url}
         preload="auto"
         style={{ display: 'none' }}
         crossOrigin="anonymous"
+        playsInline={isIOS} // iOS需要内联播放
+        webkit-playsinline={isIOS} // 旧版iOS兼容
+        controls={false}
+        muted={false}
+        autoPlay={false} // 禁用自动播放，遵循iOS政策
         onLoadedMetadata={() => console.log('音频URL:', recording.signedUrl || recording.cloudUrl || recording.url)}
         onError={(e) => {
           console.error('音频元素错误:', e);
           console.error('当前src:', e.target.src);
         }}
-      />
+      >
+        {/* 为iOS提供多种音频格式 */}
+        {recording && (recording.signedUrl || recording.cloudUrl || recording.url) && (
+          <>
+            <source src={recording.signedUrl || recording.cloudUrl || recording.url} type="audio/mp4" />
+            <source src={recording.signedUrl || recording.cloudUrl || recording.url} type="audio/mpeg" />
+            <source src={recording.signedUrl || recording.cloudUrl || recording.url} type="audio/wav" />
+            <source src={recording.signedUrl || recording.cloudUrl || recording.url} type="audio/webm" />
+            <source src={recording.signedUrl || recording.cloudUrl || recording.url} type="audio/ogg" />
+          </>
+        )}
+        您的浏览器不支持音频播放
+      </audio>
+
+      {/* iOS用户交互提示 */}
+      {isIOS && !userInteracted && (
+        <div className="ios-interaction-prompt" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          color: 'white',
+          textAlign: 'center',
+          padding: '20px'
+        }}>
+          <div>
+            <h3>音频播放需要用户交互</h3>
+            <p>请点击此处启用音频播放</p>
+            <button 
+              onClick={() => setUserInteracted(true)}
+              style={{
+                backgroundColor: '#007AFF',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                fontSize: '16px',
+                marginTop: '16px'
+              }}
+            >
+              启用音频
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
