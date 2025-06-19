@@ -338,6 +338,16 @@ const PlayerPage = () => {
     };
   }, [recording]);
 
+  // 自动播放音频
+  useEffect(() =>{
+    if(audioReady && audioRef.current){
+      audioRef.current.play().catch((err) =>{
+        // 处理自动播放被浏览器拦截的情况
+        console.warn('自动播放失败，可能被浏览器拦截：',err);
+      });
+    }
+  },[audioReady]);
+
   // 播放/暂停控制
   const togglePlayPause = async () => {
     const audio = audioRef.current;

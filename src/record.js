@@ -642,29 +642,17 @@ const RecordComponent = () => {
           
           <div className="empty-icon">🎤</div>
           <h3>还没有录音</h3>
-          <p>点击"开始录音"按钮开始录制您的第一个录音</p>
+          <p>点击"开始录音"按钮开始录制您的第一个录音；或点击"上传照片"按钮上传图片视频</p>
         </div>
         
-        {/* 未录音时显示上传按钮 */}
-        {!isRecording && recordingTime === 0 && (
-          <div className="upload-box upload-box-initial">
+        {/* 左侧录音控制区 */}
+        <div className="record-left-panel">
+          {/* 上传照片按钮始终显示在左侧栏顶部 */}
+          <div className="upload-box upload-box-recording">
             <button className="upload-button" onClick={goToUploadPhotoPage}> 
               <span>上传照片</span>
             </button>
           </div>
-        )}
-        
-        {/* 左侧录音控制区 */}
-        <div className="record-left-panel">
-          {/* 录音时显示上传按钮在控制区域上方 */}
-          {(isRecording || recordingTime > 0) && (
-            <div className="upload-box upload-box-recording">
-              <button className="upload-button" onClick={goToUploadPhotoPage}> 
-                <span>上传照片</span>
-              </button>
-            </div>
-          )}
-          
           <div className="record-control-card">
             {/* 录音控制区标题 */}
             <div className="record-control-header">
@@ -767,7 +755,7 @@ const RecordComponent = () => {
                         </button>
                         {uploadStatus[recording.id] === 'error' && (
                           <button className="action-btn retry-box" onClick={() => retryUpload(recording)} title="重试上传">
-                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={30} height={30}/>
+                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={25} height={25}/>
                           </button>
                         )}
                         <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
@@ -844,7 +832,7 @@ const RecordComponent = () => {
             <div className="empty-recordings-state">
               <div className="empty-icon">🎤</div>
               <h3>还没有录音</h3>
-              <p>点击"开始录音"按钮开始录制您的第一个录音</p>
+              <p>点击"开始录音"按钮开始录制您的第一个录音；或点击"上传照片"按钮上传图片视频</p>
             </div>
           )}
         </div>

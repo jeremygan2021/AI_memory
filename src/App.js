@@ -320,7 +320,7 @@ const HomePage = () => {
   // 大图预览相关函数
   const openPreview = (idx) => {
     const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
-      ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
+      ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
     
     setPreviewIndex(idx);
     setPreviewFile(albumData[idx]);
@@ -334,7 +334,7 @@ const HomePage = () => {
   const showPrev = (e) => {
     e.stopPropagation();
     const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
-      ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
+      ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
     
     const newIndex = previewIndex !== null ? (previewIndex + albumData.length - 1) % albumData.length : null;
     setPreviewIndex(newIndex);
@@ -344,7 +344,7 @@ const HomePage = () => {
   const showNext = (e) => {
     e.stopPropagation();
     const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
-      ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
+      ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
     
     const newIndex = previewIndex !== null ? (previewIndex + 1) % albumData.length : null;
     setPreviewIndex(newIndex);
@@ -759,16 +759,6 @@ const HomePage = () => {
             <button className="album-preview-close" onClick={closePreview}>×</button>
             <button className="album-preview-arrow left" onClick={showPrev}>‹</button>
             <button className="album-preview-arrow right" onClick={showNext}>›</button>
-            {previewFile.name && (
-              <div className="preview-info">
-                <div className="preview-filename">{previewFile.name}</div>
-                {previewFile.uploadTime && (
-                  <div className="preview-time">
-                    上传时间: {new Date(previewFile.uploadTime).toLocaleString('zh-CN')}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       )}

@@ -37,6 +37,8 @@ label {
 
 /* 背景装饰 */
 .background-decoration {
+  width: 200%;
+  height: 200%;
   position: fixed;
   top: 0;
   left: 0;
@@ -45,14 +47,14 @@ label {
   overflow: hidden;
   pointer-events: none;
   z-index: -10;
-  background-image:url('/public/images/background2.png');
+  background-image:url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
 }
 
 .wave {
   position: absolute;
   width: 200%;
   height: 200%;
-  background-image:url('/public/images/background2.png');
+  background-image:url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
   background-size: 60px 60px;
   animation: backgroundMove 25s linear infinite;
 }
@@ -423,84 +425,38 @@ html, body {
 }
 
 .upload-button{
-  position: relative;
-  width: 500px;
-  height: 50px;
-  z-index: 1002;
-  background: rgba(74, 144, 266, 0.1);
-  border-radius: 40px;
-  border: 1px solid rgba(74, 144, 266, 0.3);
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: 'MUYAO-SOFTBRUSH', 'Inter', sans-serif;
+  background: linear-gradient(135deg, #6ebf8e 0%, #3bb6a6 100%);
+  color: #fff;
+  border: 2px solid #3bb6a6;
+  border-radius: 24px;
+  box-shadow: 0 4px 16px rgba(59, 182, 166, 0.10);
+  font-size: 26px;
+  font-family: 'MUYAO-SOFTBRUSH', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-weight: 500;
+  padding: 12px 48px;
+  cursor: pointer;
+  transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(74, 144, 266, 0.15);
-}
-
-.upload-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  margin: 0 auto;
 }
 
 .upload-button:hover {
-  background: rgba(74, 144, 266, 0.2);
-  border-color: rgba(74, 144, 266, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(74, 144, 266, 0.25);
-}
-
-.upload-button:hover::before {
-  left: 100%;
+  background: linear-gradient(135deg, #3bb6a6 0%, #6ebf8e 100%);
+  color: #fff;
+  border-color: #2d8a7a;
+  box-shadow: 0 6px 24px rgba(59, 182, 166, 0.18);
+  transform: translateY(-2px) scale(1.03);
 }
 
 .upload-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(74, 144, 266, 0.15);
-  transition: all 0.1s ease;
-}
-
-.upload-button span{
-  color: rgba(74, 144, 266, 1);
-  position: relative;
-  z-index: 1003;
-  transition: color 0.3s ease;
-  font-size: 36px;
-}
-
-.upload-button:hover span {
-  color: rgba(74, 144, 266, 0.9);
-  text-shadow: 0 0 8px rgba(74, 144, 266, 0.3);
-}
-
-/* 点击动画效果 */
-.upload-button::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.upload-button:active::after {
-  width: 300px;
-  height: 300px;
-  transition: width 0s, height 0s;
+  background: #3bb6a6;
+  color: #fff;
+  border-color: #2d8a7a;
+  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.18) inset;
+  transform: scale(0.98);
 }
 
 /* 确保上传按钮区域不被遮挡 */
@@ -2361,6 +2317,10 @@ html, body {
 
 /* 时间显示 */
 .record-time-display {
+  display: flex;
+  flex-direction: column; /* 如果你想竖直排列 */
+  align-items: center;    /* 水平居中 */
+  justify-content: center;/* 垂直居中 */
   text-align: center;
   margin: 35px 0;
   padding: 25px 20px;
@@ -2374,7 +2334,6 @@ html, body {
   content: '';
   position: absolute;
   top: 50%;
-  left: 50%;
   transform: translate(-50%, -50%);
   width: calc(100% - 20px);
   height: calc(100% - 20px);
@@ -4627,6 +4586,106 @@ html, body {
     .audio-player:hover, .recording-audio:hover {
       filter: hue-rotate(80deg) saturate(1.4) brightness(1.05);
     }
+  }
+}
+
+@media (max-width: 1024px) {
+  .record-main-layout {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 32px !important;
+    height: auto !important;
+    min-height: 100vh;
+    position: static !important;
+    padding: 30px 10px 30px 10px !important;
+  }
+  .record-left-panel, .record-right-panel {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+  }
+  .record-left-panel {
+    gap: 24px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important;
+    flex: none !important;
+    flex-basis: auto !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    z-index: auto !important;
+  }
+  .record-right-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important;
+    flex: none !important;
+    flex-basis: auto !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    z-index: auto !important;
+  }
+  .record-control-card {
+    min-width: 0 !important;
+    min-height: 320px !important;
+    padding: 32px 12px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .record-main-layout {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 32px !important;
+    height: auto !important;
+    min-height: 100vh;
+    position: static !important;
+    padding: 30px 10px 30px 10px !important;
+  }
+  .record-left-panel, .record-right-panel {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+  }
+  .record-left-panel {
+    gap: 24px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important;
+    flex: none !important;
+    flex-basis: auto !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    z-index: auto !important;
+  }
+  .record-right-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important;
+    flex: none !important;
+    flex-basis: auto !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    z-index: auto !important;
+  }
+  .record-control-card {
+    min-width: 0 !important;
+    min-height: 320px !important;
+    padding: 32px 12px !important;
   }
 }
 
@@ -7765,7 +7824,6 @@ html, body {
   justify-content: flex-start;
   position: absolute;
   top:10%;
-  
 }
 
 .record-left-panel {
@@ -7775,7 +7833,6 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 35px;
-  
 }
 
 .record-control-card {
@@ -7951,21 +8008,6 @@ html, body {
   overflow: hidden;
   font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-/* .record-start-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
-} */
-
-/* .record-start-btn:hover::before {
-  left: 100%;
-} */
 
 .record-start-btn:hover {
   transform: translateY(-3px);
@@ -9097,7 +9139,6 @@ html, body {
   justify-content: flex-start;
   position: absolute;
   top:10%;
-  
 }
 
 .record-left-panel {
@@ -9107,7 +9148,6 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 35px;
-  
 }
 
 .record-control-card {
@@ -9283,21 +9323,6 @@ html, body {
   overflow: hidden;
   font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-/* .record-start-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
-} */
-
-/* .record-start-btn:hover::before {
-  left: 100%;
-} */
 
 .record-start-btn:hover {
   transform: translateY(-3px);
@@ -10143,6 +10168,63 @@ html, body {
       padding: 6px 10px;
       font-size: 11px;
     }
+  }
+}
+
+@media (max-width: 1024px) {
+  .record-main-layout {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 32px !important;
+    height: auto !important;
+    min-height: 100vh;
+    position: static !important;
+    padding: 30px 10px 30px 10px !important;
+  }
+  .record-left-panel, .record-right-panel {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+  }
+  .record-left-panel {
+    gap: 24px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important;
+    flex: none !important;
+    flex-basis: auto !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    z-index: auto !important;
+  }
+  .record-right-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important;
+    flex: none !important;
+    flex-basis: auto !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    z-index: auto !important;
+  }
+  .record-control-card {
+    min-width: 0 !important;
+    min-height: 320px !important;
+    padding: 32px 12px !important;
+  }
+}
+
+/* 超宽屏适配 - 大桌面显示器 */
+@media (min-width: 1440px) {
+  .record-content-center {
+    max-width: 1200px;
   }
 }
 
@@ -13441,8 +13523,8 @@ html, body {
     min-height: 48px;
   }
   
-  .bind-btn, .play-btn, .retry-ox {
-    padding: 10px 18px;
+  .bind-btn, .play-btn, .retry-box {
+    padding: 0;
     font-size: 14px;
   }
 }
@@ -13650,7 +13732,7 @@ html, body {
 
 .record-time-display::before {
   content: '';
-  position: absolute;
+  position: relative;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -13669,7 +13751,6 @@ html, body {
   letter-spacing: 4px;
   text-shadow: 0 2px 4px rgba(59, 182, 166, 0.1);
   position: relative;
-  left:40%;
   z-index: 1;
 }
 
@@ -13767,21 +13848,6 @@ html, body {
   overflow: hidden;
   font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-/* .record-start-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
-} */
-
-/* .record-start-btn:hover::before {
-  left: 100%;
-} */
 
 .record-start-btn:hover {
   transform: translateY(-3px);
@@ -16254,7 +16320,7 @@ html, body {
     margin: 16px 0;
     padding: 16px 12px;
     border-radius: 16px;
-    width :30%;
+    width :40%;
   }
   
   .record-time-large {

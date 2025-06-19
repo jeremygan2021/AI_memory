@@ -779,7 +779,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     display: block; 
     width: 100%;
     height: 100%;
-    background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/public/images/baby4.png'); /* 替换为你的铃铛 Logo 图片路径 */
+    background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/baby4.png'); /* 替换为你的铃铛 Logo 图片路径 */
     background-size: contain; /* 图片适应容器大小 */
     background-position: center; /* 图片居中显示 */
     background-repeat: no-repeat; /* 不重复显示图片 */
