@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import './UploadPhotoPage.css';
+import './UploadPhotoPage.css'; // 复用照片上传页面的样式
 
-const UploadPhotoPage = () => {
+const UploadVideoPage = () => {
   const { userid } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -14,8 +14,6 @@ const UploadPhotoPage = () => {
   const filesPerPage = 12;
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
-
-
 
   // 检测移动设备
   useEffect(() => {
@@ -61,16 +59,11 @@ const UploadPhotoPage = () => {
     navigate(`/${userid}`);
   };
 
-  // 新增：上传图片/视频文件到服务器
-  const uploadMediaFile = async (file) => {
+  // 上传视频文件到服务器
+  const uploadVideoFile = async (file) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-
-      // 可选：自定义文件夹路径
-      // const folderPath = `user/${userid}`;
-      // const uploadUrl = new URL(`${API_BASE_URL}/upload`);
-      // uploadUrl.searchParams.append('folder', folderPath);
 
       console.log('上传接口地址:', `${API_BASE_URL}/upload`);
 
@@ -92,8 +85,7 @@ const UploadPhotoPage = () => {
 
       const result = await response.json();
       if (result.success) {
-        // 上传成功，返回云端URL等
-        console.log('文件上传成功，云端URL:', result.file_url);
+        console.log('视频上传成功，云端URL:', result.file_url);
         return {
           success: true,
           cloudUrl: result.file_url,
@@ -105,7 +97,7 @@ const UploadPhotoPage = () => {
         throw new Error(result.message || '上传失败');
       }
     } catch (error) {
-      alert(`文件上传失败: ${error.message}`);
+      alert(`视频上传失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   };
@@ -113,177 +105,153 @@ const UploadPhotoPage = () => {
   // 处理文件选择
   const handleFileSelect = (files) => {
     const fileList = Array.from(files);
-    const imageFiles = fileList.filter(file => file.type.startsWith('image/'));
+    const videoFiles = fileList.filter(file => file.type.startsWith('video/'));
     
-    if (imageFiles.length === 0) {
-      alert('请选择图片文件');
+    if (videoFiles.length === 0) {
+      alert('请选择视频文件');
       return;
     }
     
     // 移动端限制文件数量和大小
-    if (isMobile && imageFiles.length > 10) {
-      alert('移动端单次最多上传10个图片文件');
+    if (isMobile && videoFiles.length > 5) {
+      alert('移动端单次最多上传5个视频文件');
       return;
     }
     
-    imageFiles.forEach(file => {
-     // 文件大小限制
-     if (isMobile && file.size > 50 * 1024 * 1024) { // 50MB
-      alert(`图片文件 ${file.name} 过大，移动端单个文件不能超过50MB`);
-      return;
-    }
-    
-    if (!isMobile && file.size > 100 * 1024 * 1024) { // 100MB
-      alert(`图片文件 ${file.name} 过大，单个文件不能超过100MB`);
-      return;
-    }
+    videoFiles.forEach(file => {
+      // 文件大小限制
+      if (isMobile && file.size > 100 * 1024 * 1024) { // 100MB
+        alert(`视频文件 ${file.name} 过大，移动端单个文件不能超过100MB`);
+        return;
+      }
       
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const newFile = {
-          id: Date.now() + Math.random(),
-          name: file.name,
-          url: e.target.result,
-          file: file,
-          type: 'image',
-          uploadTime: new Date().toLocaleString(),
-          size: file.size
-        };
-        setUploadedFiles(prev => [...prev, newFile]);
-        // 新增：上传到服务器
-        uploadMediaFile(file).then(result => {
-          if (result.success) {
-            // 存储到localStorage
-            const fileInfo = {
-              id: newFile.id,
-              name: newFile.name,
-              preview: result.cloudUrl, // 用云端URL
-              type: newFile.type,
-              uploadTime: newFile.uploadTime,
-              objectKey: result.objectKey // 新增objectKey
-            };
-            // 追加到本地存储
-            const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
-            localStorage.setItem('uploadedFiles', JSON.stringify([...saved, fileInfo]));
-            // 触发事件通知主页刷新
-            window.dispatchEvent(new Event('filesUpdated'));
-            // 控制台输出云端URL
-            console.log('图片云端URL:', result.cloudUrl);
-          }
-        });
+      if (!isMobile && file.size > 200 * 1024 * 1024) { // 200MB
+        alert(`视频文件 ${file.name} 过大，单个文件不能超过200MB`);
+        return;
+      }
+      
+      // 创建视频URL用于预览
+      const videoUrl = URL.createObjectURL(file);
+      const newFile = {
+        id: Date.now() + Math.random(),
+        name: file.name,
+        url: videoUrl,
+        file: file,
+        type: 'video',
+        uploadTime: new Date().toLocaleString(),
+        size: file.size
       };
-      reader.readAsDataURL(file);
+      setUploadedFiles(prev => [...prev, newFile]);
+      
+      // 上传到服务器
+      uploadVideoFile(file).then(result => {
+        if (result.success) {
+          // 存储到localStorage
+          const fileInfo = {
+            id: newFile.id,
+            name: newFile.name,
+            preview: result.cloudUrl,
+            type: newFile.type,
+            uploadTime: newFile.uploadTime,
+            objectKey: result.objectKey
+          };
+          // 追加到本地存储
+          const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+          localStorage.setItem('uploadedFiles', JSON.stringify([...saved, fileInfo]));
+          // 触发事件通知主页刷新
+          window.dispatchEvent(new Event('filesUpdated'));
+          console.log('视频云端URL:', result.cloudUrl);
+        }
+      });
     });
   };
 
-  // 点击上传区域
+  // 其他函数（复用上传照片页面的逻辑）
   const handleUploadAreaClick = () => {
     fileInputRef.current?.click();
   };
 
-  // 文件输入变化
   const handleFileInputChange = (e) => {
     if (e.target.files.length > 0) {
       handleFileSelect(e.target.files);
     }
   };
 
-  // 拖拽相关事件
   const handleDragOver = (e) => {
     e.preventDefault();
-    if (!isMobile) { // 移动端不支持拖拽
-    setIsDragOver(true);
+    if (!isMobile) {
+      setIsDragOver(true);
     }
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
     if (!isMobile) {
-    setIsDragOver(false);
+      setIsDragOver(false);
     }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    if (!isMobile) {
     setIsDragOver(false);
-    handleFileSelect(e.dataTransfer.files);
+    if (!isMobile && e.dataTransfer.files.length > 0) {
+      handleFileSelect(e.dataTransfer.files);
     }
   };
 
-  // 移动端粘贴功能
   const handlePaste = (e) => {
-    if (isMobile && e.clipboardData && e.clipboardData.files.length > 0) {
-      handleFileSelect(e.clipboardData.files);
-    }
-  };
-
-  // 删除上传的文件（先请求后端删除，再移除本地）
-  const handleDeleteFile = async (fileId) => {
-    const fileToDelete = uploadedFiles.find(file => file.id === fileId);
-    if (!fileToDelete) return;
-    if (!window.confirm('确定要删除这张图片吗？')) return;
-    try {
-      // 先请求后端删除
-      if (fileToDelete.objectKey) {
-        const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(fileToDelete.objectKey)}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) {
-          throw new Error('服务器删除失败');
+    const items = e.clipboardData?.items;
+    if (items) {
+      const files = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file' && items[i].type.startsWith('video/')) {
+          files.push(items[i].getAsFile());
         }
       }
-      // 本地移除
-      const newFiles = uploadedFiles.filter(file => file.id !== fileId);
-      setUploadedFiles(newFiles);
-      localStorage.setItem('uploadedFiles', JSON.stringify(newFiles));
-      // 如果删除后当前页没有文件了，回到上一页
-      const totalPages = Math.ceil(newFiles.length / filesPerPage);
-      if (currentPage > totalPages && totalPages > 0) {
-        setCurrentPage(totalPages);
+      if (files.length > 0) {
+        handleFileSelect(files);
       }
-    } catch (err) {
-      alert('删除失败: ' + err.message);
     }
   };
 
-  // 预览文件
+  const handleDeleteFile = async (fileId) => {
+    try {
+      // 从本地状态中删除
+      setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
+      
+      // 从localStorage中删除
+      const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+      const updated = saved.filter(file => file.id !== fileId);
+      localStorage.setItem('uploadedFiles', JSON.stringify(updated));
+      
+      // 触发事件通知主页刷新
+      window.dispatchEvent(new Event('filesUpdated'));
+    } catch (error) {
+      console.error('删除视频失败:', error);
+      alert('删除视频失败');
+    }
+  };
+
   const handlePreviewFile = (file) => {
     setPreviewFile(file);
   };
 
-  // 关闭预览
   const closePreview = () => {
     setPreviewFile(null);
   };
 
-  // 页面加载时读取所有云端照片和视频
+  // 页面加载时读取所有云端视频
   useEffect(() => {
     const saved = localStorage.getItem('uploadedFiles');
     if (saved) {
       try {
         const allFiles = JSON.parse(saved);
-        const imageFiles = allFiles.filter(file => file.type === 'image');
-        setUploadedFiles(imageFiles);
+        const videoFiles = allFiles.filter(file => file.type === 'video');
+        setUploadedFiles(videoFiles);
       } catch (e) {
         setUploadedFiles([]);
       }
     }
-    // 监听filesUpdated事件，自动刷新
-    const handleFilesUpdated = () => {
-      const updated = localStorage.getItem('uploadedFiles');
-      if (updated) {
-        try {
-          const allFiles = JSON.parse(updated);
-          const imageFiles = allFiles.filter(file => file.type === 'image');
-          setUploadedFiles(imageFiles);
-        } catch (e) {
-          setUploadedFiles([]);
-        }
-      }
-    };
-    window.addEventListener('filesUpdated', handleFilesUpdated);
-    return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
   }, []);
 
   // 分页逻辑
@@ -292,7 +260,6 @@ const UploadPhotoPage = () => {
   const endIndex = startIndex + filesPerPage;
   const currentFiles = uploadedFiles.slice(startIndex, endIndex);
 
-  // 分页导航
   const goToPage = (page) => {
     setCurrentPage(page);
   };
@@ -308,9 +275,6 @@ const UploadPhotoPage = () => {
       setCurrentPage(currentPage + 1);
     }
   };
-
-  const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
-    ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
 
   return (
     <div className="upload-page" onPaste={handlePaste}>
@@ -330,24 +294,24 @@ const UploadPhotoPage = () => {
         onDrop={handleDrop}
       >
         <span className="upload-text">
-          {isMobile ? '点击或粘贴图片到此处开始上传' : '点击、粘贴或拖放图片到此处开始上传'}
+          {isMobile ? '点击或粘贴视频到此处开始上传' : '点击、粘贴或拖放视频到此处开始上传'}
         </span>
         <input
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*"
+          accept="video/*"
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
-          capture={isMobile ? 'environment' : undefined} // 移动端默认后置摄像头
+          capture={isMobile ? 'environment' : undefined}
         />
       </div>
 
-      {/* 所有照片展示区域 */}
+      {/* 所有视频展示区域 */}
       <div className="photos-container">
         <div className="all-photos-section">
           <div className="section-header">
-            <h3 className="section-title">所有照片 ({uploadedFiles.length})</h3>
+            <h3 className="section-title">所有视频 ({uploadedFiles.length})</h3>
             {totalPages > 1 && (
               <div className="pagination-info">
                 第 {currentPage} 页，共 {totalPages} 页
@@ -361,7 +325,20 @@ const UploadPhotoPage = () => {
                 {currentFiles.map(file => (
                   <div key={file.id} className="media-item">
                     <div className="media-content" onClick={() => handlePreviewFile(file)}>
-                      <img src={file.preview} alt={file.name} className="media-preview" />
+                      <div className="video-preview">
+                        <video 
+                          src={file.preview || file.url} 
+                          className="media-preview"
+                          muted
+                          preload="metadata"
+                          onLoadedMetadata={(e) => {
+                            e.target.currentTime = 1;
+                          }}
+                        />
+                        <div className="video-overlay">
+                          <div className="video-play-icon">▶</div>
+                        </div>
+                      </div>
                       <div className="media-overlay">
                         <button 
                           className="delete-media-btn"
@@ -402,8 +379,8 @@ const UploadPhotoPage = () => {
             </>
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">📷</div>
-              <p className="empty-text">还没有上传任何照片</p>
+              <div className="empty-icon">🎬</div>
+              <p className="empty-text">还没有上传任何视频</p>
               <p className="empty-subtext">点击上方区域开始上传</p>
             </div>
           )}
@@ -415,7 +392,12 @@ const UploadPhotoPage = () => {
         <div className="preview-modal" onClick={closePreview}>
           <div className="preview-content" onClick={e => e.stopPropagation()}>
             <button className="preview-close" onClick={closePreview}>×</button>
-            <img src={previewFile.preview} alt={previewFile.name} className="preview-media" />
+            <video 
+              src={previewFile.preview || previewFile.url} 
+              controls 
+              autoPlay 
+              className="preview-media"
+            />
           </div>
         </div>
       )}
@@ -423,4 +405,4 @@ const UploadPhotoPage = () => {
   );
 };
 
-export default UploadPhotoPage; 
+export default UploadVideoPage; 

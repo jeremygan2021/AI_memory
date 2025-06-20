@@ -9,6 +9,9 @@ import PlayerPage from './PlayerPage';
 import AudioLibrary from './AudioLibrary';
 import UploadPhotoPage from './UploadPhotoPage';
 import ModernSearchBox from './components/ModernSearchBox';
+import UploadVideoPage from './UploadVideoPage';
+import VideoPlayerPage from './VideoPlayerPage';
+import GalleryPage from './GalleryPage';
 
 // 折线图数据
 const chartData = [
@@ -226,10 +229,14 @@ const HomePage = () => {
   const [showAddInput, setShowAddInput] = useState(false);
   // 移动端相册下拉框状态
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [showAllVideos, setShowAllVideos] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
   // 上传文件状态
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploadedPhotos, setUploadedPhotos] = useState([]);
+  const [uploadedVideos, setUploadedVideos] = useState([]);
   const [previewFile, setPreviewFile] = useState(null);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
   
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -273,6 +280,12 @@ const HomePage = () => {
             .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime))
             .slice(0, 6);
           setUploadedFiles(sortedFiles);
+          
+          // 分离照片和视频
+          const photos = sortedFiles.filter(file => file.type === 'image').slice(0, 6);
+          const videos = sortedFiles.filter(file => file.type === 'video').slice(0, 6);
+          setUploadedPhotos(photos);
+          setUploadedVideos(videos);
         }
       } catch (error) {
         console.error('加载上传文件失败:', error);
@@ -438,18 +451,78 @@ const HomePage = () => {
     setShowAllPhotos(!showAllPhotos);
   };
 
-  // 处理上传照片
-  const handleUploadPhoto = () => {
+  const toggleVideoDisplay = () => {
+    setShowAllVideos(!showAllVideos);
+  };
+
+  // 处理上传照片和视频
+  const handleUpload = (type) => {
     if (userCode) {
-      navigate(`/${userCode}/upload-photos`);
+      if (type === 'photo') {
+        navigate(`/${userCode}/upload-photos`);
+      } else if (type === 'video') {
+        navigate(`/${userCode}/upload-videos`);
+      }
+    }
+  };
+
+  // 打开照片预览
+  const openPhotoPreview = (idx) => {
+    setPreviewPhoto(uploadedPhotos[idx]);
+    setPreviewIndex(idx);
+  };
+
+  // 关闭照片预览
+  const closePhotoPreview = () => {
+    setPreviewPhoto(null);
+    setPreviewIndex(null);
+  };
+
+  // 照片预览 - 上一张
+  const showPrevPhoto = (e) => {
+    e.stopPropagation();
+    if (previewIndex !== null && uploadedPhotos.length > 0) {
+      const newIndex = (previewIndex + uploadedPhotos.length - 1) % uploadedPhotos.length;
+      setPreviewIndex(newIndex);
+      setPreviewPhoto(uploadedPhotos[newIndex]);
+    }
+  };
+
+  // 照片预览 - 下一张
+  const showNextPhoto = (e) => {
+    e.stopPropagation();
+    if (previewIndex !== null && uploadedPhotos.length > 0) {
+      const newIndex = (previewIndex + 1) % uploadedPhotos.length;
+      setPreviewIndex(newIndex);
+      setPreviewPhoto(uploadedPhotos[newIndex]);
+    }
+  };
+
+  // 打开视频播放器
+  const openVideoPlayer = (idx) => {
+    if (userCode && uploadedVideos[idx]) {
+      const videoFile = uploadedVideos[idx];
+      // 跳转到视频播放页面，传递视频ID
+      navigate(`/${userCode}/video-player/${videoFile.id || idx}`);
+    }
+  };
+
+  // 跳转到相册页面
+  const goToGallery = () => {
+    if (userCode) {
+      navigate(`/${userCode}/gallery`);
     }
   };
 
   // 准备相册数据
+  const photoData = uploadedPhotos.length > 0 ? uploadedPhotos : 
+    ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png'].map(src => ({ preview: src, type: 'image' }));
+  
+  const videoData = uploadedVideos.length > 0 ? uploadedVideos : [];
+
+  // 准备相册数据（保留原有兼容性）
   const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
     ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
-
-
 
   // 如果没有用户ID，显示输入界面
   if (!userid) {
@@ -557,6 +630,35 @@ const HomePage = () => {
               </button>
             </div>
             
+            {/* 移动端相册模块 - 放在录制声音和宝宝信息之间 */}
+            {isMobileView && (
+              <div className="mobile-gallery-entrance mobile-left-gallery">
+                <div className="mobile-gallery-card" onClick={goToGallery}>
+                  <div className="gallery-icon">📸</div>
+                  <div className="gallery-title">查看相册</div>
+                  <div className="gallery-desc">
+                    照片 {uploadedPhotos.length} 张 · 视频 {uploadedVideos.length} 个
+                  </div>
+                  <div className="gallery-preview">
+                    {uploadedPhotos.slice(0, 2).map((photo, idx) => (
+                      <img key={idx} src={photo.preview} className="preview-thumb" alt="预览" />
+                    ))}
+                    {uploadedVideos.slice(0, 2).map((video, idx) => (
+                      <div key={idx} className="preview-video-thumb">
+                        <video src={video.preview} className="preview-thumb" muted />
+                        <div className="mini-play-icon">
+                        <img src="./asset/play_button.png" className="play-icon" alt="播放" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="enter-gallery-btn">
+                    进入相册 →
+                  </button>
+                </div>
+              </div>
+            )}
+            
             {/* 宝宝信息 */}
             <div className="baby-info">
               <div className="baby-info-top">
@@ -634,6 +736,8 @@ const HomePage = () => {
             </button>
           </div>
 
+
+
           {/* 亲子活动 */}
           <div className="parent-activity">
             <div className="activity-title">每天的亲子活动</div>
@@ -685,60 +789,85 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* 右侧：亲子相册 */}
-        <div className="memory-right">
-          <div className="activity-board">
-            <div className="activity-title-container">
-              <div className="activity-title">亲子相册</div>
-              <div className="title-right-section">
-                <button className="voice-action upload-photo-btn" onClick={handleUploadPhoto}>上传照片</button>
-                {isMobileView && albumData.length > 3 && (
-                  <button className="photo-toggle-btn" onClick={togglePhotoDisplay}>
-                    {showAllPhotos ? '收起' : `展开(${albumData.length - 3}+)`}
-                    <span className={`toggle-arrow ${showAllPhotos ? 'up' : 'down'}`}>▼</span>
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="album-list">
-              {albumData.length === 0 ? (
-                <div className="empty-album">
-                  <div className="empty-icon">📷</div>
-                  <div className="empty-text">还没有上传任何照片或视频</div>
-                  <div className="empty-desc">点击"上传照片"开始记录美好时光</div>
+        {/* 右侧：亲子相册 - 仅桌面端显示 */}
+        {!isMobileView && (
+          <div className="memory-right">
+            {/* 亲子照片模块 */}
+            <div className="activity-board photo-board">
+              <div className="activity-title-container">
+                <div className="activity-title">亲子照片</div>
+                <div className="title-right-section">
+                  <button className="voice-action upload-photo-btn" onClick={() => handleUpload('photo')}>上传照片</button>
                 </div>
-              ) : (
-                (isMobileView ? 
-                  (showAllPhotos ? albumData : albumData.slice(0, 3)) : 
-                  albumData
-                ).map((file, idx) => {
-                  // 计算真实的索引，用于大图预览
-                  const originalIndex = isMobileView && !showAllPhotos ? 
-                    albumData.findIndex(f => f === file) : idx;
-                  
-                  return (
+              </div>
+              <div className="album-list">
+                {photoData.length === 0 ? (
+                  <div className="empty-album">
+                    <div className="empty-icon">📷</div>
+                    <div className="empty-text">还没有上传任何照片</div>
+                    <div className="empty-desc">点击"上传照片"开始记录美好时光</div>
+                  </div>
+                ) : (
+                  photoData.slice(0, 6).map((file, idx) => (
                     <div
                       key={file.id || idx}
                       className="album-item"
-                      onClick={() => openPreview(originalIndex)}
+                      onClick={() => openPhotoPreview(idx)}
                     >
                       <img
                         src={file.preview}
                         className="album-img"
-                        alt={file.name || `媒体文件${idx + 1}`}
+                        alt={file.name || `照片${idx + 1}`}
                       />
-                      {file.type === 'video' && (
-                        <div className="video-overlay">
-                          <div className="play-icon">▶</div>
-                        </div>
-                      )}
                     </div>
-                  );
-                })
-              )}
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* 亲子视频模块 */}
+            <div className="activity-board video-board">
+              <div className="activity-title-container">
+                <div className="activity-title">亲子视频</div>
+                <div className="title-right-section">
+                  <button className="voice-action upload-video-btn" onClick={() => handleUpload('video')}>上传视频</button>
+                </div>
+              </div>
+              <div className="album-list">
+                {videoData.length === 0 ? (
+                  <div className="empty-album">
+                    <div className="empty-icon">🎬</div>
+                    <div className="empty-text">还没有上传任何视频</div>
+                    <div className="empty-desc">点击"上传视频"开始记录美好时光</div>
+                  </div>
+                ) : (
+                  videoData.slice(0, 6).map((file, idx) => (
+                    <div
+                      key={file.id || idx}
+                      className="album-item"
+                      onClick={() => openVideoPlayer(idx)}
+                    >
+                      <div className="video-preview-container">
+                        <video
+                          src={file.preview}
+                          className="album-img"
+                          muted
+                          preload="metadata"
+                          onLoadedMetadata={(e) => {
+                            e.target.currentTime = 1;
+                          }}
+                        />
+                        <div className="video-overlay">
+                          <img src="./asset/play_button.png" className="play-icon" alt="播放" />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 大图预览弹窗 */}
@@ -762,6 +891,22 @@ const HomePage = () => {
           </div>
         </div>
       )}
+
+      {/* 照片预览弹窗 */}
+      {previewPhoto && (
+        <div className="album-preview-mask" onClick={closePhotoPreview}>
+          <div className="album-preview-box" onClick={e => e.stopPropagation()}>
+            <img className="album-preview-img" src={previewPhoto.preview} alt="照片预览" />
+            <button className="album-preview-close" onClick={closePhotoPreview}>×</button>
+            {uploadedPhotos.length > 1 && (
+              <>
+                <button className="album-preview-arrow left" onClick={showPrevPhoto}>‹</button>
+                <button className="album-preview-arrow right" onClick={showNextPhoto}>›</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -773,7 +918,10 @@ function App() {
       <Route path="/:userid" element={<HomePage />} />
       <Route path="/family" element={<FamilyPage />} />
       <Route path="/:userid/audio-library" element={<AudioLibrary />} />
+      <Route path="/:userid/gallery" element={<GalleryPage />} />
       <Route path="/:userid/upload-photos" element={<UploadPhotoPage />} />
+      <Route path="/:userid/upload-videos" element={<UploadVideoPage />} />
+      <Route path="/:userid/video-player/:videoId" element={<VideoPlayerPage />} />
       <Route path="/:userid/:id" element={<RecordPage />} />
       <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
     </Routes>

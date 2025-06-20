@@ -54,16 +54,71 @@ img {
   /* 强制所有元素适应屏幕宽度 */
   * {
     max-width: 100% !important;
+    box-sizing: border-box;
   }
   
-  html, body {
+  .memory-app-bg {
     width: 100%;
     max-width: 100vw;
+    padding: 95px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
     overflow-x: hidden;
   }
   
-  * {
+  .memory-main {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .memory-left,
+  .memory-center,
+  .memory-right {
+    width: 100%;
     max-width: 100%;
+    min-width: auto;
+  }
+
+  .memory-right {
+    gap: 16px;
+    flex-direction: column;
+    max-width: 100%;
+    min-width: auto;
+  }
+
+  .photo-board,
+  .video-board {
+    min-height: 300px;
+    padding: 20px;
+    max-width: 100%;
+  }
+
+  .album-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .album-item {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+  
+  .memory-navbar {
+    padding: 8px 12px;
+    height: 56px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(195, 234, 226, 0.95);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
   }
   
   /* 手机端删除按钮优化 - 确保正圆形 */
@@ -442,24 +497,14 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 主体内容区 */
 .memory-main {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
+  width: 100%;
+  max-width: 1600px;
+  margin: 20px auto;
   display: flex;
-  gap: 12px;
-  padding: 50px;
-  min-height: calc(100vh - 140px);
-  position: relative;
-  -webkit-box-align: stretch;
-  -webkit-align-items: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
+  gap: 24px;
+  padding: 24px;
   justify-content: center;
-  max-width: 1400px;
-  margin: 0 auto;
+  align-items: flex-start;
 }
 
 /* 用户账户信息 - 左侧栏 */
@@ -1164,28 +1209,66 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 右侧相册 */
 .memory-right {
-  width: 400px;
-  flex-shrink: 0;
-  max-height: 1025px;
+  flex: 1;
+  max-width: 900px;
+  min-width: 700px;
+  max-height: 1500px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.activity-board {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  height: auto;
   display: flex;
   flex-direction: column;
 }
 
-.activity-board {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+/* 照片模块和视频模块的特定样式 */
+.photo-board {
   flex: 1;
-  display: flex;
-  flex-direction: column;
+  max-height: 1030px;
+  min-height: 1030px;
+  max-width: 430px;
+}
+
+.video-board {
+  flex: 1;
+  max-height: 1030px;
+  min-height: 1030px;
+  max-width: 430px;
+}
+
+.upload-video-btn {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+}
+
+.upload-video-btn:hover {
+  background: linear-gradient(135deg, #357abd 0%, #2868a8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
 }
 
 .album-list {
   max-height:900px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   margin-top: 16px;
   flex: 1;
   overflow-y: auto;
@@ -1344,9 +1427,9 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 相册项目容器 */
 .album-item {
-  position: relative;
-  cursor: pointer;
-  border-radius: 8px;
+  width: 250px;
+  height: 150px;
+  border-radius: 16px;
   overflow: hidden;
   transition: transform 0.2s ease;
 }
@@ -1355,29 +1438,65 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   transform: scale(1.05);
 }
 
+/* 视频预览容器 */
+.video-preview-container {
+  position: relative;
+  width: 100%;
+  height: auto;
+  background: transparent;
+}
+
 /* 视频覆盖层 */
 .video-overlay {
+  width: 100%;
+  height: 150px;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: 12px;
 }
 
 .album-item:hover .video-overlay {
   opacity: 1;
 }
 
+.video-preview-container:hover .video-overlay {
+  opacity: 1;
+}
+
+/* 桌面端视频覆盖层优化 */
+@media (min-width: 769px) {
+  .video-overlay {
+    background: transparent !important;
+  }
+  
+  .album-item:hover .video-overlay,
+  .video-preview-container:hover .video-overlay {
+    opacity: 1 !important;
+  }
+}
+
 .play-icon {
-  color: white;
-  font-size: 24px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+  transition: transform 0.2s ease;
+  opacity: 0.9;
+}
+
+.video-overlay:hover .play-icon {
+  transform: scale(1.1);
+  opacity: 1;
 }
 
 /* 预览视频样式 */
@@ -1463,6 +1582,17 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     left: 0;
     right: 0;
     z-index: 1000;
+  }
+  
+  /* 手机端删除按钮优化 - 确保正圆形 */
+  .delete-btn {
+    min-width: 20px !important;
+    min-height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box;
   }
   
   .navbar-left {
@@ -1611,6 +1741,17 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     max-width: 100%;
     height: auto;
   }
+
+  /* 特别处理移动端相册模块，防止溢出 */
+  .mobile-gallery-entrance,
+  .mobile-gallery-card,
+  .gallery-preview,
+  .preview-thumb,
+  .preview-video-thumb {
+    max-width: 100% !important;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
   
   .album-list {
     grid-template-columns: repeat(2, 1fr);
@@ -1620,6 +1761,82 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   .empty-album {
     padding: 30px 15px;
     min-height: 150px;
+  }
+
+  /* 移动端相册入口适配 */
+  .mobile-gallery-entrance {
+    padding: 12px 16px;
+    min-height: auto;
+  }
+
+  .mobile-center-gallery {
+    min-height: 240px;
+    margin: 12px 0;
+    padding: 0;
+  }
+
+  .mobile-left-gallery {
+    min-height: 180px;
+    margin: 10px 0;
+    padding: 0;
+  }
+
+  .mobile-gallery-card {
+    padding: 16px;
+    max-width: none;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  .gallery-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+
+  .mobile-gallery-card .gallery-title {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+  }
+
+  .gallery-desc {
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+
+  .gallery-preview {
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .preview-thumb {
+    height: 40px;
+  }
+
+  .enter-gallery-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .memory-right {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .photo-board,
+  .video-board {
+    max-width: none;
+    min-height: auto;
+  }
+
+  /* 确保移动端不溢出 */
+  .memory-main {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .memory-center {
+    max-width: 100%;
+    box-sizing: border-box;
   }
   
   .empty-icon {
@@ -1637,7 +1854,9 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   .play-icon {
-    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
   }
   
   .preview-info {
@@ -1941,6 +2160,52 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 /* 中等屏幕手机 (375px-414px) - iPhone 12, iPhone 13, 大多数Android */
+/* 更小屏幕设备的相册优化 */
+@media (max-width: 480px) {
+  .mobile-center-gallery {
+    min-height: 200px;
+    margin: 8px 0;
+  }
+
+  .mobile-left-gallery {
+    min-height: 140px;
+    margin: 6px 0;
+  }
+
+  .mobile-gallery-card {
+    padding: 12px;
+  }
+
+  .gallery-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+  }
+
+  .mobile-gallery-card .gallery-title {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+
+  .gallery-desc {
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+  }
+
+  .gallery-preview {
+    gap: 3px;
+    margin-bottom: 10px;
+  }
+
+  .preview-thumb {
+    height: 35px;
+  }
+
+  .enter-gallery-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
 @media (max-width: 414px) and (min-width: 376px) {
   .memory-app-bg {
     padding: 95px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
@@ -2790,3 +3055,143 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     transform: scale(0.98);
   }
 } 
+
+/* 移动端相册入口样式 */
+.mobile-gallery-entrance {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 400px;
+  width: 100%;
+}
+
+/* 移动端中间区域的相册入口 */
+.mobile-center-gallery {
+  min-height: 280px;
+  margin: 16px 0;
+  padding: 0;
+}
+
+/* 移动端左侧区域的相册入口 */
+.mobile-left-gallery {
+  min-height: 240px;
+  margin: 15px 0;
+  padding: 0;
+}
+
+.mobile-gallery-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-width: 350px;
+  width: 100%;
+}
+
+.mobile-gallery-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+
+.mobile-gallery-card .gallery-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #3bb6a6;
+  margin-bottom: 12px;
+}
+
+.gallery-desc {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.gallery-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.preview-thumb {
+  width: 100%;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.preview-video-thumb {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mini-play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 16px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.mini-play-icon .play-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+}
+
+.enter-gallery-btn {
+  background: linear-gradient(135deg, #3bb6a6 0%, #2ea087 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 182, 166, 0.3);
+}
+
+.enter-gallery-btn:hover {
+  background: linear-gradient(135deg, #2ea087 0%, #238c7a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 182, 166, 0.4);
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .memory-right {
+    max-width: 100%;
+    min-width: auto;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .photo-board,
+  .video-board {
+    max-width: none;
+    min-height: 350px;
+    flex: 1;
+  }
+}

@@ -17,6 +17,23 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
 const RecordComponent = () => {
   const { userid, id } = useParams();
   const navigate = useNavigate();
+
+  // 设备检测和调试信息
+  useEffect(() => {
+    const deviceInfo = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      isAndroid: /Android/i.test(navigator.userAgent),
+      isMobile: /Mobi|Android/i.test(navigator.userAgent),
+      isTablet: /Tablet|iPad/i.test(navigator.userAgent),
+      screenSize: `${window.screen.width}x${window.screen.height}`,
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log('[跳转调试] 设备信息:', deviceInfo);
+    console.log('[跳转调试] 页面参数:', { userid, id, pathname: window.location.pathname });
+  }, [userid, id]);
   
   // 状态管理
   const [isRecording, setIsRecording] = useState(false); // 是否正在录音
@@ -35,6 +52,26 @@ const RecordComponent = () => {
   const [uploadStatus, setUploadStatus] = useState({}); // 上传状态 {recordingId: 'uploading'|'success'|'error'}
   const [uploadProgress, setUploadProgress] = useState({}); // 上传进度
   
+  // 新增：防止无限跳转的状态
+  const [justReturnedFromPlayer, setJustReturnedFromPlayer] = useState(false); // 是否刚从播放页面返回
+  const [isCheckingFiles, setIsCheckingFiles] = useState(false); // 是否正在检查文件存在性
+  
+  // 新增：上传本地录音相关状态
+  const [isUploading, setIsUploading] = useState(false); // 是否正在上传文件
+  const [uploadProgressState, setUploadProgressState] = useState(0); // 上传进度
+
+  // 调试：跟踪关键状态变化
+  useEffect(() => {
+    console.log('[跳转调试] 关键状态变化:', {
+      userCode,
+      id,
+      boundRecordingsCount: boundRecordings?.length || 0,
+      justReturnedFromPlayer,
+      isCheckingFiles,
+      timestamp: new Date().toISOString()
+    });
+  }, [userCode, id, boundRecordings, justReturnedFromPlayer, isCheckingFiles]);
+  
   // 引用
   const mediaRecorderRef = useRef(null); // MediaRecorder实例
   const audioChunksRef = useRef([]); // 音频数据块
@@ -42,16 +79,222 @@ const RecordComponent = () => {
   const streamRef = useRef(null); // 媒体流引用
   const longPressTimerRef = useRef(null); // 长按计时器
   const startBtnRef = useRef(null); // 开始按钮引用
+  const fileInputRef = useRef(null); // 文件输入引用
 
   // 从URL参数获取用户代码
   useEffect(() => {
+    console.log('[跳转调试] URL参数检查 useEffect 触发:', { userid, userAgent: navigator.userAgent });
+    
     if (userid && validateUserCode(userid)) {
+      console.log('[跳转调试] 设置用户代码:', userid.toUpperCase());
       setUserCode(userid.toUpperCase());
     } else {
+      console.log('[跳转调试] 用户代码无效，跳转到首页');
       // 如果用户代码无效，跳转到首页
       navigate('/');
+      return;
+    }
+    
+    // 检查是否是从播放页面删除后返回的
+    const urlParams = new URLSearchParams(window.location.search);
+    const deletedParam = urlParams.get('deleted');
+    console.log('[跳转调试] URL参数检查:', { 
+      fullUrl: window.location.href, 
+      search: window.location.search,
+      deletedParam 
+    });
+    
+    if (deletedParam === 'true') {
+      console.log('[跳转调试] 检测到从播放页面删除返回，设置防跳转标记');
+      setJustReturnedFromPlayer(true);
+      
+      // 清理URL参数
+      const newUrl = window.location.pathname;
+      console.log('[跳转调试] 清理URL参数:', { oldUrl: window.location.href, newUrl });
+      window.history.replaceState({}, '', newUrl);
+      
+      // 3秒后重置标记，允许正常跳转
+      setTimeout(() => {
+        console.log('[跳转调试] 3秒后重置防跳转标记');
+        setJustReturnedFromPlayer(false);
+      }, 3000);
     }
   }, [userid, navigate]);
+
+  // 新增：检查录音文件是否存在于云端
+  const checkRecordingExists = async (recording) => {
+    try {
+      if (!recording.objectKey && !recording.cloudUrl) {
+        return false; // 没有云端信息，认为不存在
+      }
+
+      // 方法1: 通过API检查文件是否存在
+      if (recording.objectKey) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(recording.objectKey)}`, {
+            method: 'HEAD'
+          });
+          if (response.ok) {
+            return true;
+          }
+        } catch (error) {
+          console.warn('API检查文件失败:', error);
+        }
+      }
+
+      // 方法2: 通过cloudUrl直接检查
+      if (recording.cloudUrl) {
+        try {
+          const response = await fetch(recording.cloudUrl, {
+            method: 'HEAD'
+          });
+          if (response.ok) {
+            return true;
+          }
+        } catch (error) {
+          console.warn('cloudUrl检查失败:', error);
+        }
+      }
+
+      // 方法3: 尝试通过文件列表API查找
+      if (recording.objectKey) {
+        try {
+          const prefix = recording.objectKey.substring(0, recording.objectKey.lastIndexOf('/') + 1);
+          const response = await fetch(`${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=100`);
+          
+          if (response.ok) {
+            const result = await response.json();
+            const files = result.files || result.data || result.objects || result.items || result.results || [];
+            
+            // 查找是否存在匹配的文件
+            const fileExists = files.some(file => {
+              const objectKey = file.object_key || file.objectKey || file.key || file.name;
+              return objectKey === recording.objectKey;
+            });
+            
+            if (fileExists) {
+              return true;
+            }
+          }
+        } catch (error) {
+          console.warn('通过文件列表检查失败:', error);
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.warn('检查录音文件存在性失败:', error);
+      return false; // 检查失败时认为文件不存在，避免跳转到空页面
+    }
+  };
+
+  // 新增：清理已删除的录音文件
+  const cleanupDeletedRecordings = async () => {
+    if (boundRecordings.length === 0) {
+      console.log('[跳转调试] 没有绑定录音，跳过清理');
+      return [];
+    }
+    
+    console.log('[跳转调试] 开始清理已删除的录音文件');
+    setIsCheckingFiles(true);
+    
+    try {
+      // 检查所有绑定录音的存在性
+      const existenceChecks = await Promise.all(
+        boundRecordings.map(async (recording, index) => {
+          console.log(`[跳转调试] 检查录音 ${index + 1}/${boundRecordings.length}:`, recording.id);
+          const exists = await checkRecordingExists(recording);
+          return { recording, exists };
+        })
+      );
+
+      // 过滤出仍存在的录音
+      const stillExistingRecordings = existenceChecks
+        .filter(({ exists }) => exists)
+        .map(({ recording }) => recording);
+
+      // 找出已删除的录音
+      const deletedRecordings = existenceChecks
+        .filter(({ exists }) => !exists)
+        .map(({ recording }) => recording);
+
+      console.log('[跳转调试] 文件存在性检查结果:', {
+        总数: boundRecordings.length,
+        存在: stillExistingRecordings.length,
+        已删除: deletedRecordings.length
+      });
+
+      if (deletedRecordings.length > 0) {
+        console.log('[跳转调试] 发现已删除的录音文件:', deletedRecordings);
+        
+        // 只有在确实有文件被删除时才更新状态
+        setBoundRecordings(stillExistingRecordings);
+        
+        // 显示清理提示
+        const deletedCount = deletedRecordings.length;
+        console.log(`[跳转调试] 已清理 ${deletedCount} 个已删除的录音文件`);
+      }
+
+      return stillExistingRecordings;
+    } catch (error) {
+      console.error('[跳转调试] 清理已删除录音时出错:', error);
+      return boundRecordings; // 出错时返回原始列表
+    } finally {
+      console.log('[跳转调试] 文件检查完成，重置状态');
+      setIsCheckingFiles(false);
+    }
+  };
+
+  // 新增：监听来自其他页面的删除通知
+  useEffect(() => {
+    console.log('[跳转调试] 删除通知监听器 useEffect 触发');
+    
+    const handleStorageChange = (e) => {
+      console.log('[跳转调试] Storage 变化事件:', { key: e.key, newValue: e.newValue });
+      
+      if (e.key === 'recordingDeleted' && e.newValue) {
+        const deletedRecordingId = e.newValue;
+        console.log('[跳转调试] 收到录音删除通知:', deletedRecordingId);
+        
+        // 从绑定列表中移除被删除的录音
+        setBoundRecordings(prev => {
+          const filtered = prev.filter(recording => 
+            recording.id !== deletedRecordingId && 
+            recording.originalRecordingId !== deletedRecordingId
+          );
+          
+          console.log('[跳转调试] 更新绑定录音列表:', {
+            删除的ID: deletedRecordingId,
+            原数量: prev.length,
+            新数量: filtered.length
+          });
+          
+          return filtered;
+        });
+        
+        // 清理通知
+        localStorage.removeItem('recordingDeleted');
+        console.log('[跳转调试] 清理删除通知完成');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // 也检查是否有未处理的删除通知
+    const pendingDeletion = localStorage.getItem('recordingDeleted');
+    if (pendingDeletion) {
+      console.log('[跳转调试] 发现未处理的删除通知:', pendingDeletion);
+      handleStorageChange({
+        key: 'recordingDeleted',
+        newValue: pendingDeletion
+      });
+    }
+
+    return () => {
+      console.log('[跳转调试] 移除删除通知监听器');
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   // 新增：上传音频文件到服务器
   const uploadAudioFile = async (audioBlob, recordingId, fileName) => {
@@ -163,13 +406,26 @@ const RecordComponent = () => {
 
   // 从localStorage加载绑定的录音
   useEffect(() => {
+    console.log('[跳转调试] 加载绑定录音 useEffect 触发:', { id, userCode });
+    
     if (id && userCode) {
       const storageKey = buildSessionStorageKey(id, userCode);
+      console.log('[跳转调试] 尝试从localStorage加载:', { storageKey });
+      
       const stored = localStorage.getItem(storageKey);
       if (stored) {
-        const recordings = JSON.parse(stored);
-        setBoundRecordings(recordings);
+        try {
+          const recordings = JSON.parse(stored);
+          console.log('[跳转调试] 成功加载绑定录音:', { count: recordings.length, recordings });
+          setBoundRecordings(recordings);
+        } catch (error) {
+          console.error('[跳转调试] 解析localStorage数据失败:', error);
+        }
+      } else {
+        console.log('[跳转调试] localStorage中没有找到绑定录音数据');
       }
+    } else {
+      console.log('[跳转调试] id或userCode缺失，跳过加载');
     }
   }, [id, userCode]);
 
@@ -410,7 +666,11 @@ const RecordComponent = () => {
       // 如果有objectKey，也保存下来
       objectKey: recording.objectKey || null,
       // 保存云端URL
-      cloudUrl: recording.cloudUrl || null
+      cloudUrl: recording.cloudUrl || null,
+      // 保存视频标识和文件信息
+      isVideo: recording.isVideo || false,
+      fileName: recording.fileName || null,
+      fileType: recording.fileType || null
     };
     
     setBoundRecordings(prev => [boundRecording, ...prev]);
@@ -527,6 +787,8 @@ const RecordComponent = () => {
   // 清理函数
   useEffect(() => {
     return () => {
+      console.log('[跳转调试] 组件卸载，清理资源');
+      
       // 清理计时器
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -535,6 +797,11 @@ const RecordComponent = () => {
       // 清理长按计时器
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
+      }
+      
+      // 清理导航跳转超时器
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
       }
       
       // 停止媒体流
@@ -598,13 +865,241 @@ const RecordComponent = () => {
     }
   };
 
-  // 检测已绑定录音，自动跳转到播放页面
-  useEffect(() => {
-    if (boundRecordings && boundRecordings.length > 0 && userCode && id) {
-      // 跳转到第一个已绑定录音的播放页面
-      navigate(`/${userCode}/${id}/play/${boundRecordings[0].originalRecordingId || boundRecordings[0].id}`);
+  // 手动刷新录音列表
+  const refreshRecordings = async () => {
+    if (isCheckingFiles) return; // 避免重复检查
+    
+    await cleanupDeletedRecordings();
+  };
+
+  // 新增：处理本地文件上传
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 检查文件类型
+    const allowedTypes = [
+      'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/m4a', 'audio/aac', 'audio/ogg', 'audio/webm',
+      'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/flv', 'video/webm', 'video/mkv'
+    ];
+    
+    const isValidType = allowedTypes.some(type => file.type.includes(type.split('/')[1])) || 
+                       file.name.match(/\.(mp3|wav|m4a|aac|ogg|webm|mp4|avi|mov|wmv|flv|mkv)$/i);
+
+    if (!isValidType) {
+      alert('请选择有效的音频或视频文件（支持格式：MP3, WAV, M4A, AAC, OGG, WebM, MP4, AVI, MOV, WMV, FLV, MKV）');
+      return;
     }
-  }, [boundRecordings, userCode, id, navigate]);
+
+    // 检查文件大小（限制为100MB）
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+      alert('文件大小不能超过 100MB');
+      return;
+    }
+
+    uploadLocalFile(file);
+  };
+
+  // 新增：上传本地文件
+  const uploadLocalFile = async (file) => {
+    try {
+      setIsUploading(true);
+      setUploadProgressState(0);
+
+      console.log('开始上传本地文件:', { fileName: file.name, fileSize: file.size, fileType: file.type });
+
+      // 创建录音记录对象
+      const recordingId = Date.now();
+      const fileUrl = URL.createObjectURL(file);
+      
+      // 确定文件类型和扩展名
+      const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i);
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      
+      // 生成上传文件名，保持原始扩展名
+      const uploadFileName = `recording_${recordingId}.${fileExtension}`;
+
+      // 先创建本地录音记录
+      const newRecording = {
+        id: recordingId,
+        url: fileUrl,
+        audioBlob: file, // 保存原始文件用于上传
+        duration: 0, // 将在音频加载后获取
+        timestamp: new Date().toLocaleString('zh-CN'),
+        sessionId: id || 'default',
+        cloudUrl: null,
+        uploaded: false,
+        fileName: file.name,
+        isVideo: isVideo, // 标记是否为视频文件
+        fileType: file.type
+      };
+
+      setRecordings(prev => [newRecording, ...prev]);
+
+      // 如果是音频/视频文件，尝试获取时长
+      if (file.type.startsWith('audio/') || file.type.startsWith('video/')) {
+        try {
+          const duration = await getMediaDuration(fileUrl);
+          setRecordings(prev => prev.map(rec => 
+            rec.id === recordingId ? { ...rec, duration: Math.floor(duration) } : rec
+          ));
+        } catch (error) {
+          console.warn('无法获取媒体时长:', error);
+        }
+      }
+
+      // 上传到云端
+      const uploadResult = await uploadAudioFile(file, recordingId, uploadFileName);
+
+      if (uploadResult.success) {
+        // 更新录音记录，添加云端信息
+        setRecordings(prev => prev.map(recording => 
+          recording.id === recordingId 
+            ? {
+                ...recording,
+                cloudUrl: uploadResult.cloudUrl,
+                objectKey: uploadResult.objectKey,
+                etag: uploadResult.etag,
+                uploaded: true
+              }
+            : recording
+        ));
+
+        console.log('本地文件上传成功:', uploadResult);
+      }
+
+    } catch (error) {
+      console.error('上传本地文件失败:', error);
+      alert(`文件上传失败: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+      setUploadProgressState(0);
+      // 清空文件输入
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // 新增：获取媒体文件时长
+  const getMediaDuration = (url) => {
+    return new Promise((resolve, reject) => {
+      const media = document.createElement('audio');
+      
+      media.onloadedmetadata = () => {
+        resolve(media.duration);
+        media.remove();
+      };
+      
+      media.onerror = (error) => {
+        reject(error);
+        media.remove();
+      };
+      
+      media.src = url;
+    });
+  };
+
+  // 新增：触发文件选择
+  const triggerFileSelect = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+    // 新增：跳转锁定机制 - 防止重复跳转
+  const [navigationLocked, setNavigationLocked] = useState(false);
+  const navigationTimeoutRef = useRef(null);
+
+  // 检测已绑定录音，智能跳转到播放页面
+  useEffect(() => {
+    console.log('[跳转调试] 智能跳转 useEffect 触发:', {
+      boundRecordingsCount: boundRecordings?.length || 0,
+      userCode,
+      id,
+      justReturnedFromPlayer,
+      isCheckingFiles,
+      navigationLocked,
+      timestamp: new Date().toISOString()
+    });
+
+    // 防止无限循环跳转的多重保护
+    if (justReturnedFromPlayer) {
+      console.log('[跳转调试] 刚从播放页面返回，跳过跳转');
+      return;
+    }
+
+    if (isCheckingFiles) {
+      console.log('[跳转调试] 正在检查文件，跳过跳转');
+      return;
+    }
+
+    if (navigationLocked) {
+      console.log('[跳转调试] 导航已锁定，跳过跳转');
+      return;
+    }
+
+    // 只有在有绑定录音且满足基本条件时才进行跳转
+    if (boundRecordings && boundRecordings.length > 0 && userCode && id) {
+      console.log('[跳转调试] 开始处理绑定录音跳转逻辑');
+      
+      // 设置导航锁定，防止重复触发
+      setNavigationLocked(true);
+      
+      // 清理之前的超时器
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+      
+      // 先清理已删除的录音，然后决定是否跳转
+      cleanupDeletedRecordings().then((existingRecordings) => {
+        console.log('[跳转调试] 文件检查完成:', {
+          原始数量: boundRecordings.length,
+          清理后数量: existingRecordings.length,
+          justReturnedFromPlayer,
+          navigationLocked
+        });
+
+        // 如果清理后还有录音存在，且没有刚从播放页面返回，则跳转
+        if (existingRecordings.length > 0 && !justReturnedFromPlayer) {
+          // 跳转到第一个已绑定录音的播放页面
+          const firstRecording = existingRecordings[0];
+          const recordingId = firstRecording.originalRecordingId || firstRecording.id;
+          const targetUrl = `/${userCode}/${id}/play/${recordingId}`;
+          
+          console.log('[跳转调试] 准备跳转到播放页面:', {
+            firstRecording,
+            recordingId,
+            targetUrl
+          });
+          
+          // 使用 setTimeout 延迟跳转，避免状态冲突
+          navigationTimeoutRef.current = setTimeout(() => {
+            navigate(targetUrl);
+          }, 100);
+        } else {
+          console.log('[跳转调试] 不满足跳转条件，解除导航锁定:', {
+            hasRecordings: existingRecordings.length > 0,
+            notJustReturned: !justReturnedFromPlayer
+          });
+          
+          // 解除导航锁定
+          setNavigationLocked(false);
+        }
+      }).catch((error) => {
+        console.error('[跳转调试] 清理已删除录音时出错:', error);
+        // 出错时也要解除导航锁定
+        setNavigationLocked(false);
+      });
+    } else {
+      console.log('[跳转调试] 不满足基本跳转条件:', {
+        hasBoundRecordings: !!(boundRecordings && boundRecordings.length > 0),
+        hasUserCode: !!userCode,
+        hasId: !!id
+      });
+    }
+  }, [boundRecordings, userCode, id, justReturnedFromPlayer, isCheckingFiles]);
 
   // 如果浏览器不支持录音
   if (!isSupported) {
@@ -620,6 +1115,31 @@ const RecordComponent = () => {
 
   return (
     <div>
+      {/* 调试面板 - 仅在开发模式下显示 */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'fixed',
+          top: '10px',
+          right: '10px',
+          background: 'rgba(0,0,0,0.8)',
+          color: 'white',
+          padding: '10px',
+          borderRadius: '5px',
+          fontSize: '12px',
+          zIndex: 9999,
+          maxWidth: '300px'
+        }}>
+          <div>🔍 调试信息</div>
+          <div>用户: {userCode || '无'}</div>
+          <div>会话: {id || '无'}</div>
+          <div>绑定录音: {boundRecordings?.length || 0}</div>
+          <div>刚返回: {justReturnedFromPlayer ? '是' : '否'}</div>
+          <div>检查中: {isCheckingFiles ? '是' : '否'}</div>
+          <div>导航锁定: {navigationLocked ? '是' : '否'}</div>
+          <div>安卓: {/Android/i.test(navigator.userAgent) ? '是' : '否'}</div>
+        </div>
+      )}
+
       {/* 背景装饰 */}
       <div className="background-decoration">
         <div className="wave wave1"></div>
@@ -683,12 +1203,41 @@ const RecordComponent = () => {
             {/* 录音控制按钮 */}
             <div className="record-control-buttons">
               {!isRecording ? (
+                <>
                 <button className="record-start-btn" onClick={startRecording}>
                   <span className="btn-icon">
                   <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="btn-icon" width={32} height={32}/>
                   </span>
                   <span className="btn-text">开始录音</span>
                 </button>
+                  
+                  {/* 上传本地录音按钮 */}
+                  <button 
+                    className="upload-local-btn" 
+                    onClick={triggerFileSelect}
+                    disabled={isUploading}
+                  >
+                    <span className="btn-icon">
+                      {isUploading ? (
+                        <div className="upload-spinner"></div>
+                      ) : (
+                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/files.svg" className="btn-icon" width={28} height={28}/>
+                      )}
+                    </span>
+                    <span className="btn-text">
+                      {isUploading ? `上传中 ${uploadProgressState}%` : '上传本地录音'}
+                    </span>
+                  </button>
+                  
+                  {/* 隐藏的文件输入 */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.webm,.mp4,.avi,.mov,.wmv,.flv,.mkv"
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                  />
+                </>
               ) : (
                 <div className="record-action-buttons">
                   <button className="record-pause-btn" onClick={pauseRecording}>
@@ -746,8 +1295,14 @@ const RecordComponent = () => {
                     {/* PC端：单行布局，左侧信息+右侧播放器+操作按钮 */}
                     <div className="recording-first-row">
                       <div className="recording-item-info">
-                        <div className="recording-timestamp">{recording.timestamp}</div>
-                        <div className="recording-size">{formatTime(recording.duration)} · {getUploadStatusText(recording.id)}</div>
+                        <div className="recording-timestamp">
+                          {recording.timestamp}
+                          {recording.isVideo && <span className="video-badge">🎬</span>}
+                        </div>
+                        <div className="recording-size">
+                          {formatTime(recording.duration)} · {getUploadStatusText(recording.id)}
+                          {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
+                        </div>
                       </div>
                       
                       {/* PC端播放器位置（红色方框区域） */}
@@ -796,6 +1351,17 @@ const RecordComponent = () => {
               <h3>已绑定的录音</h3>
               <span className="section-count">({boundRecordings.length})</span>
               {userCode && id && <span className="session-info">会议: {userCode}/{id}</span>}
+              {isCheckingFiles && <span className="checking-status">🔍 检查中...</span>}
+              {boundRecordings.length > 0 && (
+                <button 
+                  className="refresh-btn" 
+                  onClick={refreshRecordings}
+                  disabled={isCheckingFiles}
+                  title="检查录音文件状态"
+                >
+                  <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={16} height={16}/>
+                </button>
+              )}
             </div>
             <div className="recordings-list-container">
               {boundRecordings.length > 0 ? (
@@ -804,10 +1370,14 @@ const RecordComponent = () => {
                     {/* 只有一行：录制时间（左）+ 操作按钮（右） */}
                     <div className="recording-first-row">
                       <div className="recording-item-info">
-                        <div className="recording-timestamp">{recording.timestamp}</div>
+                        <div className="recording-timestamp">
+                          {recording.timestamp}
+                          {recording.isVideo && <span className="video-badge">🎬</span>}
+                        </div>
                         <div className="recording-size">
                           {formatTime(recording.duration)} · {recording.uploaded ? '已上传' : '本地存储'}
                           {recording.uploaded && <span className="cloud-icon"> ☁️</span>}
+                          {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
                         </div>
                       </div>
                       <div className="recording-actions">

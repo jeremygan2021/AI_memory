@@ -46,20 +46,36 @@ const PlayerPage = () => {
         // 为iOS设备初始化音频上下文
         if (isIOS && audioRef.current) {
           const audio = audioRef.current;
+          
+          // 检查音频元素是否有效
+          if (!audio || typeof audio.play !== 'function') {
+            console.warn('音频元素无效，跳过iOS权限解锁');
+            return;
+          }
+          
           // 预加载音频以准备播放
-          audio.load();
+          try {
+            audio.load();
+          } catch (error) {
+            console.warn('音频加载失败:', error);
+            return;
+          }
           
           // 尝试创建一个静音的播放来"解锁"音频播放权限
-          const originalVolume = audio.volume;
-          audio.volume = 0;
-          audio.play().then(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            audio.volume = originalVolume;
-            console.log('iOS音频权限已解锁');
-          }).catch((error) => {
-            console.warn('iOS音频权限解锁失败:', error);
-          });
+          try {
+            const originalVolume = audio.volume;
+            audio.volume = 0;
+            audio.play().then(() => {
+              audio.pause();
+              audio.currentTime = 0;
+              audio.volume = originalVolume;
+              console.log('iOS音频权限已解锁');
+            }).catch((error) => {
+              console.warn('iOS音频权限解锁失败:', error);
+            });
+          } catch (error) {
+            console.warn('iOS音频权限解锁过程中发生错误:', error);
+          }
         }
       }
     };
@@ -263,6 +279,10 @@ const PlayerPage = () => {
             }
           }
           
+          // 检查是否为视频文件
+          const isVideo = fileName.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i) || 
+                         (targetFile.content_type && targetFile.content_type.startsWith('video/'));
+
           // 构建录音对象
           const recording = {
             id: realUniqueId, // 使用真实的唯一标识符
@@ -274,7 +294,9 @@ const PlayerPage = () => {
             boundAt: formatDateFromString(targetFile.last_modified || targetFile.lastModified || targetFile.modified || new Date().toISOString()),
             duration: 0, // 将在音频加载后获取
             uploaded: true,
-            cloudUrl: signedUrl
+            cloudUrl: signedUrl,
+            isVideo: isVideo, // 标记是否为视频文件
+            fileType: targetFile.content_type || ''
           };
 
           console.log('构建的录音对象:', recording);
@@ -421,7 +443,7 @@ const PlayerPage = () => {
 
   // 自动播放音频
   // useEffect(() =>{
-  //   if(audioReady && audioRef.current){
+  //   if(audioReady && audioRef.current && typeof audioRef.current.play === 'function'){
   //     audioRef.current.play().catch((err) =>{
   //       // 处理自动播放被浏览器拦截的情况
   //       console.warn('自动播放失败，可能被浏览器拦截：',err);
@@ -514,10 +536,30 @@ const PlayerPage = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // 检查 duration 是否有效
+    if (!isFinite(duration) || duration <= 0) {
+      console.warn('音频时长无效，无法设置进度');
+      return;
+    }
+
     const percent = e.target.value / 100;
     const newTime = percent * duration;
-    audio.currentTime = newTime;
-    setCurrentTime(newTime);
+    
+    // 确保 newTime 是有效的有限数值
+    if (!isFinite(newTime) || newTime < 0) {
+      console.warn('计算出的新时间无效:', newTime);
+      return;
+    }
+
+    // 限制时间范围在 [0, duration] 之间
+    const clampedTime = Math.max(0, Math.min(newTime, duration));
+    
+    try {
+      audio.currentTime = clampedTime;
+      setCurrentTime(clampedTime);
+    } catch (error) {
+      console.error('设置音频时间失败:', error);
+    }
   };
 
   // 音量控制
@@ -542,9 +584,31 @@ const PlayerPage = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // 检查 duration 和 currentTime 是否有效
+    if (!isFinite(duration) || duration <= 0) {
+      console.warn('音频时长无效，无法快进/快退');
+      return;
+    }
+    
+    if (!isFinite(currentTime)) {
+      console.warn('当前时间无效，无法快进/快退');
+      return;
+    }
+
     const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
-    audio.currentTime = newTime;
-    setCurrentTime(newTime);
+    
+    // 确保 newTime 是有效的有限数值
+    if (!isFinite(newTime)) {
+      console.warn('计算出的新时间无效:', newTime);
+      return;
+    }
+
+    try {
+      audio.currentTime = newTime;
+      setCurrentTime(newTime);
+    } catch (error) {
+      console.error('快进/快退失败:', error);
+    }
   };
 
   // 删除录音
@@ -563,14 +627,27 @@ const PlayerPage = () => {
 
           console.log('云端录音文件删除成功');
         }
+        
+        // 通知录音页面清理已删除的录音
+        const recordingIdToDelete = extractUniqueId(recording.objectKey) || recording.id || recordingId;
+        localStorage.setItem('recordingDeleted', recordingIdToDelete);
+        
+        // 触发storage事件通知其他页面（同一页面的不同标签页）
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'recordingDeleted',
+          newValue: recordingIdToDelete
+        }));
+        
+        console.log('已通知录音页面清理录音:', recordingIdToDelete);
+        
       } catch (error) {
         console.error('删除云端录音失败:', error);
         alert('删除录音失败，请稍后重试');
         return;
       }
 
-      // 返回会话页面
-      navigate(`/${userCode}/${id}`);
+      // 返回会话页面，添加删除标记防止无限循环跳转
+      navigate(`/${userCode}/${id}?deleted=true`);
     }
   };
 
@@ -606,8 +683,16 @@ const PlayerPage = () => {
 
   // 获取进度百分比
   const getProgressPercent = () => {
-    if (duration === 0) return 0;
-    return (currentTime / duration) * 100;
+    if (!isFinite(duration) || duration <= 0) return 0;
+    if (!isFinite(currentTime) || currentTime < 0) return 0;
+    
+    const percent = (currentTime / duration) * 100;
+    
+    // 确保返回的百分比是有效的有限数值
+    if (!isFinite(percent)) return 0;
+    
+    // 限制在 0-100 之间
+    return Math.max(0, Math.min(100, percent));
   };
 
   if (loading) {
@@ -646,7 +731,7 @@ const PlayerPage = () => {
 
       {/* 顶部导航 */}
       <header className="player-header">
-        <button onClick={() => navigate(`/${userCode}/audio-library`)} className="nav-back-btn">
+        <button onClick={() => navigate(`/${userCode}/app`)} className="nav-back-btn">
           <span className="back-icon">←</span>
           <span>返回</span>
         </button>
@@ -666,7 +751,7 @@ const PlayerPage = () => {
       <main className="player-main">
         <div className="player-container">
           <img src="/asset/elephant.png" alt="背景" className="elephant-icon" />
-          {/* 录音信息 */}
+          {/* 录音信息 - 隐藏详细信息 */}
           <div className="recording-info">
             <div className="recording-avatar">
               <div className="avatar-icon">
@@ -677,23 +762,6 @@ const PlayerPage = () => {
                 <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
                 <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
                 <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
-              </div>
-            </div>
-            
-            <div className="recording-details">
-              <h1 className="recording-title">
-                录音 #{extractUniqueId(recording.objectKey || recording.object_key)}
-              </h1>
-              <div className="recording-metadata">
-                <div className="metadata-item">
-                  <span className="label">录制时间</span>
-                  <span className="value">{recording.timestamp}</span>
-                </div>
-                <div className="metadata-item">
-                  <span className="label">绑定时间</span>
-                  <span className="value">{recording.boundAt}</span>
-                </div>
-
               </div>
             </div>
           </div>

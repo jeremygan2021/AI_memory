@@ -6,6 +6,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+// 修改页面标题
+document.title = "AI回忆录"; 
 root.render(
   <React.StrictMode>
     <BrowserRouter>
