@@ -17,23 +17,6 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
 const RecordComponent = () => {
   const { userid, id } = useParams();
   const navigate = useNavigate();
-
-  // 设备检测和调试信息
-  useEffect(() => {
-    const deviceInfo = {
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      isAndroid: /Android/i.test(navigator.userAgent),
-      isMobile: /Mobi|Android/i.test(navigator.userAgent),
-      isTablet: /Tablet|iPad/i.test(navigator.userAgent),
-      screenSize: `${window.screen.width}x${window.screen.height}`,
-      viewport: `${window.innerWidth}x${window.innerHeight}`,
-      timestamp: new Date().toISOString()
-    };
-    
-    console.log('[跳转调试] 设备信息:', deviceInfo);
-    console.log('[跳转调试] 页面参数:', { userid, id, pathname: window.location.pathname });
-  }, [userid, id]);
   
   // 状态管理
   const [isRecording, setIsRecording] = useState(false); // 是否正在录音
@@ -59,18 +42,6 @@ const RecordComponent = () => {
   // 新增：上传本地录音相关状态
   const [isUploading, setIsUploading] = useState(false); // 是否正在上传文件
   const [uploadProgressState, setUploadProgressState] = useState(0); // 上传进度
-
-  // 调试：跟踪关键状态变化
-  useEffect(() => {
-    console.log('[跳转调试] 关键状态变化:', {
-      userCode,
-      id,
-      boundRecordingsCount: boundRecordings?.length || 0,
-      justReturnedFromPlayer,
-      isCheckingFiles,
-      timestamp: new Date().toISOString()
-    });
-  }, [userCode, id, boundRecordings, justReturnedFromPlayer, isCheckingFiles]);
   
   // 引用
   const mediaRecorderRef = useRef(null); // MediaRecorder实例
@@ -83,39 +54,23 @@ const RecordComponent = () => {
 
   // 从URL参数获取用户代码
   useEffect(() => {
-    console.log('[跳转调试] URL参数检查 useEffect 触发:', { userid, userAgent: navigator.userAgent });
-    
     if (userid && validateUserCode(userid)) {
-      console.log('[跳转调试] 设置用户代码:', userid.toUpperCase());
       setUserCode(userid.toUpperCase());
     } else {
-      console.log('[跳转调试] 用户代码无效，跳转到首页');
       // 如果用户代码无效，跳转到首页
       navigate('/');
-      return;
     }
     
     // 检查是否是从播放页面删除后返回的
     const urlParams = new URLSearchParams(window.location.search);
-    const deletedParam = urlParams.get('deleted');
-    console.log('[跳转调试] URL参数检查:', { 
-      fullUrl: window.location.href, 
-      search: window.location.search,
-      deletedParam 
-    });
-    
-    if (deletedParam === 'true') {
-      console.log('[跳转调试] 检测到从播放页面删除返回，设置防跳转标记');
+    if (urlParams.get('deleted') === 'true') {
       setJustReturnedFromPlayer(true);
-      
       // 清理URL参数
       const newUrl = window.location.pathname;
-      console.log('[跳转调试] 清理URL参数:', { oldUrl: window.location.href, newUrl });
       window.history.replaceState({}, '', newUrl);
       
       // 3秒后重置标记，允许正常跳转
       setTimeout(() => {
-        console.log('[跳转调试] 3秒后重置防跳转标记');
         setJustReturnedFromPlayer(false);
       }, 3000);
     }
@@ -190,19 +145,14 @@ const RecordComponent = () => {
 
   // 新增：清理已删除的录音文件
   const cleanupDeletedRecordings = async () => {
-    if (boundRecordings.length === 0) {
-      console.log('[跳转调试] 没有绑定录音，跳过清理');
-      return [];
-    }
+    if (boundRecordings.length === 0) return;
     
-    console.log('[跳转调试] 开始清理已删除的录音文件');
     setIsCheckingFiles(true);
     
     try {
       // 检查所有绑定录音的存在性
       const existenceChecks = await Promise.all(
-        boundRecordings.map(async (recording, index) => {
-          console.log(`[跳转调试] 检查录音 ${index + 1}/${boundRecordings.length}:`, recording.id);
+        boundRecordings.map(async (recording) => {
           const exists = await checkRecordingExists(recording);
           return { recording, exists };
         })
@@ -218,63 +168,43 @@ const RecordComponent = () => {
         .filter(({ exists }) => !exists)
         .map(({ recording }) => recording);
 
-      console.log('[跳转调试] 文件存在性检查结果:', {
-        总数: boundRecordings.length,
-        存在: stillExistingRecordings.length,
-        已删除: deletedRecordings.length
-      });
-
       if (deletedRecordings.length > 0) {
-        console.log('[跳转调试] 发现已删除的录音文件:', deletedRecordings);
+        console.log('发现已删除的录音文件:', deletedRecordings);
         
-        // 只有在确实有文件被删除时才更新状态
+        // 更新绑定录音列表，移除已删除的文件
         setBoundRecordings(stillExistingRecordings);
         
         // 显示清理提示
         const deletedCount = deletedRecordings.length;
-        console.log(`[跳转调试] 已清理 ${deletedCount} 个已删除的录音文件`);
+        console.log(`已清理 ${deletedCount} 个已删除的录音文件`);
       }
 
       return stillExistingRecordings;
     } catch (error) {
-      console.error('[跳转调试] 清理已删除录音时出错:', error);
+      console.error('清理已删除录音时出错:', error);
       return boundRecordings; // 出错时返回原始列表
     } finally {
-      console.log('[跳转调试] 文件检查完成，重置状态');
       setIsCheckingFiles(false);
     }
   };
 
   // 新增：监听来自其他页面的删除通知
   useEffect(() => {
-    console.log('[跳转调试] 删除通知监听器 useEffect 触发');
-    
     const handleStorageChange = (e) => {
-      console.log('[跳转调试] Storage 变化事件:', { key: e.key, newValue: e.newValue });
-      
       if (e.key === 'recordingDeleted' && e.newValue) {
         const deletedRecordingId = e.newValue;
-        console.log('[跳转调试] 收到录音删除通知:', deletedRecordingId);
+        console.log('收到录音删除通知:', deletedRecordingId);
         
         // 从绑定列表中移除被删除的录音
-        setBoundRecordings(prev => {
-          const filtered = prev.filter(recording => 
+        setBoundRecordings(prev => 
+          prev.filter(recording => 
             recording.id !== deletedRecordingId && 
             recording.originalRecordingId !== deletedRecordingId
-          );
-          
-          console.log('[跳转调试] 更新绑定录音列表:', {
-            删除的ID: deletedRecordingId,
-            原数量: prev.length,
-            新数量: filtered.length
-          });
-          
-          return filtered;
-        });
+          )
+        );
         
         // 清理通知
         localStorage.removeItem('recordingDeleted');
-        console.log('[跳转调试] 清理删除通知完成');
       }
     };
 
@@ -283,7 +213,6 @@ const RecordComponent = () => {
     // 也检查是否有未处理的删除通知
     const pendingDeletion = localStorage.getItem('recordingDeleted');
     if (pendingDeletion) {
-      console.log('[跳转调试] 发现未处理的删除通知:', pendingDeletion);
       handleStorageChange({
         key: 'recordingDeleted',
         newValue: pendingDeletion
@@ -291,7 +220,6 @@ const RecordComponent = () => {
     }
 
     return () => {
-      console.log('[跳转调试] 移除删除通知监听器');
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
@@ -406,26 +334,13 @@ const RecordComponent = () => {
 
   // 从localStorage加载绑定的录音
   useEffect(() => {
-    console.log('[跳转调试] 加载绑定录音 useEffect 触发:', { id, userCode });
-    
     if (id && userCode) {
       const storageKey = buildSessionStorageKey(id, userCode);
-      console.log('[跳转调试] 尝试从localStorage加载:', { storageKey });
-      
       const stored = localStorage.getItem(storageKey);
       if (stored) {
-        try {
-          const recordings = JSON.parse(stored);
-          console.log('[跳转调试] 成功加载绑定录音:', { count: recordings.length, recordings });
-          setBoundRecordings(recordings);
-        } catch (error) {
-          console.error('[跳转调试] 解析localStorage数据失败:', error);
-        }
-      } else {
-        console.log('[跳转调试] localStorage中没有找到绑定录音数据');
+        const recordings = JSON.parse(stored);
+        setBoundRecordings(recordings);
       }
-    } else {
-      console.log('[跳转调试] id或userCode缺失，跳过加载');
     }
   }, [id, userCode]);
 
@@ -787,8 +702,6 @@ const RecordComponent = () => {
   // 清理函数
   useEffect(() => {
     return () => {
-      console.log('[跳转调试] 组件卸载，清理资源');
-      
       // 清理计时器
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -797,11 +710,6 @@ const RecordComponent = () => {
       // 清理长按计时器
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
-      }
-      
-      // 清理导航跳转超时器
-      if (navigationTimeoutRef.current) {
-        clearTimeout(navigationTimeoutRef.current);
       }
       
       // 停止媒体流
@@ -1008,98 +916,26 @@ const RecordComponent = () => {
     }
   };
 
-    // 新增：跳转锁定机制 - 防止重复跳转
-  const [navigationLocked, setNavigationLocked] = useState(false);
-  const navigationTimeoutRef = useRef(null);
-
   // 检测已绑定录音，智能跳转到播放页面
   useEffect(() => {
-    console.log('[跳转调试] 智能跳转 useEffect 触发:', {
-      boundRecordingsCount: boundRecordings?.length || 0,
-      userCode,
-      id,
-      justReturnedFromPlayer,
-      isCheckingFiles,
-      navigationLocked,
-      timestamp: new Date().toISOString()
-    });
-
-    // 防止无限循环跳转的多重保护
-    if (justReturnedFromPlayer) {
-      console.log('[跳转调试] 刚从播放页面返回，跳过跳转');
+    // 防止无限循环跳转
+    if (justReturnedFromPlayer || isCheckingFiles) {
       return;
     }
 
-    if (isCheckingFiles) {
-      console.log('[跳转调试] 正在检查文件，跳过跳转');
-      return;
-    }
-
-    if (navigationLocked) {
-      console.log('[跳转调试] 导航已锁定，跳过跳转');
-      return;
-    }
-
-    // 只有在有绑定录音且满足基本条件时才进行跳转
     if (boundRecordings && boundRecordings.length > 0 && userCode && id) {
-      console.log('[跳转调试] 开始处理绑定录音跳转逻辑');
-      
-      // 设置导航锁定，防止重复触发
-      setNavigationLocked(true);
-      
-      // 清理之前的超时器
-      if (navigationTimeoutRef.current) {
-        clearTimeout(navigationTimeoutRef.current);
-      }
-      
       // 先清理已删除的录音，然后决定是否跳转
       cleanupDeletedRecordings().then((existingRecordings) => {
-        console.log('[跳转调试] 文件检查完成:', {
-          原始数量: boundRecordings.length,
-          清理后数量: existingRecordings.length,
-          justReturnedFromPlayer,
-          navigationLocked
-        });
-
         // 如果清理后还有录音存在，且没有刚从播放页面返回，则跳转
         if (existingRecordings.length > 0 && !justReturnedFromPlayer) {
-          // 跳转到第一个已绑定录音的播放页面
+      // 跳转到第一个已绑定录音的播放页面
           const firstRecording = existingRecordings[0];
           const recordingId = firstRecording.originalRecordingId || firstRecording.id;
-          const targetUrl = `/${userCode}/${id}/play/${recordingId}`;
-          
-          console.log('[跳转调试] 准备跳转到播放页面:', {
-            firstRecording,
-            recordingId,
-            targetUrl
-          });
-          
-          // 使用 setTimeout 延迟跳转，避免状态冲突
-          navigationTimeoutRef.current = setTimeout(() => {
-            navigate(targetUrl);
-          }, 100);
-        } else {
-          console.log('[跳转调试] 不满足跳转条件，解除导航锁定:', {
-            hasRecordings: existingRecordings.length > 0,
-            notJustReturned: !justReturnedFromPlayer
-          });
-          
-          // 解除导航锁定
-          setNavigationLocked(false);
-        }
-      }).catch((error) => {
-        console.error('[跳转调试] 清理已删除录音时出错:', error);
-        // 出错时也要解除导航锁定
-        setNavigationLocked(false);
-      });
-    } else {
-      console.log('[跳转调试] 不满足基本跳转条件:', {
-        hasBoundRecordings: !!(boundRecordings && boundRecordings.length > 0),
-        hasUserCode: !!userCode,
-        hasId: !!id
+          navigate(`/${userCode}/${id}/play/${recordingId}`);
+    }
       });
     }
-  }, [boundRecordings, userCode, id, justReturnedFromPlayer, isCheckingFiles]);
+  }, [boundRecordings, userCode, id, navigate, justReturnedFromPlayer, isCheckingFiles]);
 
   // 如果浏览器不支持录音
   if (!isSupported) {
@@ -1115,31 +951,6 @@ const RecordComponent = () => {
 
   return (
     <div>
-      {/* 调试面板 - 仅在开发模式下显示 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{
-          position: 'fixed',
-          top: '10px',
-          right: '10px',
-          background: 'rgba(0,0,0,0.8)',
-          color: 'white',
-          padding: '10px',
-          borderRadius: '5px',
-          fontSize: '12px',
-          zIndex: 9999,
-          maxWidth: '300px'
-        }}>
-          <div>🔍 调试信息</div>
-          <div>用户: {userCode || '无'}</div>
-          <div>会话: {id || '无'}</div>
-          <div>绑定录音: {boundRecordings?.length || 0}</div>
-          <div>刚返回: {justReturnedFromPlayer ? '是' : '否'}</div>
-          <div>检查中: {isCheckingFiles ? '是' : '否'}</div>
-          <div>导航锁定: {navigationLocked ? '是' : '否'}</div>
-          <div>安卓: {/Android/i.test(navigator.userAgent) ? '是' : '否'}</div>
-        </div>
-      )}
-
       {/* 背景装饰 */}
       <div className="background-decoration">
         <div className="wave wave1"></div>
@@ -1395,9 +1206,7 @@ const RecordComponent = () => {
                 <div className="empty-section-state bound-empty">
                   <div className="empty-section-icon">🎤</div>
                   <p>暂无已绑定的录音</p>
-                  <span className="empty-section-hint">点击待绑定录音的</span>
-                  <img className="link-btn" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
-                  <span className="empty-section-hint">按钮进行绑定</span>
+                  <span className="empty-section-hint">点击待绑定录音按钮进行绑定</span>
                 </div>
               )}
             </div>

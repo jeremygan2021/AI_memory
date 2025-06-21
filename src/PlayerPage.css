@@ -197,8 +197,8 @@
   width: 400.67px;  /* 240 * (16/9) */
   height: 240px;    /* 保持16:9比例 */
   position: absolute;
-  top: -100px;
-  left: 500px;
+  top: -110px;
+  left: 550px;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性动画 */
   cursor: pointer;
   transform-origin: center center;

@@ -288,7 +288,7 @@ const HomePage = () => {
           setUploadedVideos(videos);
         }
       } catch (error) {
-        console.error('加载上传文件失败:', error);
+
       }
     };
 
@@ -367,7 +367,7 @@ const HomePage = () => {
   // 搜索功能
   const handleSearch = () => {
     if (searchValue.trim()) {
-      console.log('搜索内容:', searchValue);
+
       alert(`搜索: ${searchValue}`);
     }
   };
@@ -735,8 +735,6 @@ const HomePage = () => {
               开始录制
             </button>
           </div>
-
-
 
           {/* 亲子活动 */}
           <div className="parent-activity">

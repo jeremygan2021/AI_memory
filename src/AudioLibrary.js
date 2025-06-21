@@ -7,9 +7,7 @@ import ModernSearchBox from './components/ModernSearchBox';
 
 // API配置
 
-
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
-
 
 const AudioLibrary = () => {
   const navigate = useNavigate();
@@ -58,27 +56,21 @@ const AudioLibrary = () => {
 
       const result = await response.json();
       
-      console.log('API返回结果:', result); // 调试信息
-      console.log('结果类型:', typeof result);
-      console.log('结果键名:', Object.keys(result));
-      
-      // 检查不同的成功标识
+
       const isSuccess = result.success === true || result.status === 'success' || response.ok;
       
       if (isSuccess) {
         // 尝试不同的字段名来获取文件列表
         const files = result.files || result.data || result.objects || result.items || result.results || [];
-        console.log('文件列表:', files); // 调试信息
-        console.log('文件列表类型:', typeof files);
-        console.log('文件列表长度:', Array.isArray(files) ? files.length : '不是数组');
-        
+
+
         setCloudFiles(Array.isArray(files) ? files : []);
         processCloudFiles(Array.isArray(files) ? files : []);
       } else {
         throw new Error(result.message || result.error || result.detail || '获取文件列表失败');
       }
     } catch (error) {
-      console.error('加载云端音频文件失败:', error);
+
       setApiError(error.message);
     } finally {
       setLoading(false);
@@ -91,23 +83,21 @@ const AudioLibrary = () => {
     
     // 安全检查文件数组
     if (!Array.isArray(files)) {
-      console.warn('文件列表不是数组:', files);
+
       setAudioSessions([]);
       return;
     }
     
     if (files.length === 0) {
-      console.log('没有找到文件');
+
       setAudioSessions([]);
       return;
     }
 
     files.forEach((file, index) => {
-      console.log(`处理文件 ${index}:`, file); // 调试信息
-      
-      // 安全检查文件对象
+
       if (!file || typeof file !== 'object') {
-        console.warn('无效的文件对象:', file);
+
         return;
       }
       
@@ -115,7 +105,7 @@ const AudioLibrary = () => {
       const objectKey = file.object_key || file.objectKey || file.key || file.name;
       
       if (!objectKey) {
-        console.warn('文件缺少object_key字段:', file);
+
         return;
       }
       
@@ -320,10 +310,10 @@ const AudioLibrary = () => {
           });
           
           if (!response.ok) {
-            console.warn(`删除文件失败: ${recording.objectKey}`);
+
           }
         } catch (error) {
-          console.error(`删除文件时出错: ${recording.objectKey}`, error);
+
         }
       });
 
@@ -333,7 +323,7 @@ const AudioLibrary = () => {
       await loadCloudAudioFiles();
       
     } catch (error) {
-      console.error('删除会话失败:', error);
+
       alert(`删除会话失败: ${error.message}`);
     }
   };

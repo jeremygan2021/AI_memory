@@ -7,7 +7,6 @@ const SearchBoxDemo = () => {
   const [searchValue3, setSearchValue3] = useState('');
 
   const handleSearch = (value) => {
-    console.log('搜索内容:', value);
     // 这里可以添加搜索逻辑
   };
 

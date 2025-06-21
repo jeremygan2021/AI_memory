@@ -36,7 +36,6 @@ const GalleryPage = () => {
           setUploadedVideos(videos);
         }
       } catch (error) {
-        console.error('加载上传文件失败:', error);
       }
     };
 

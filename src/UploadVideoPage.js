@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './UploadPhotoPage.css'; // 复用照片上传页面的样式
+import { validateUserCode } from './utils/userCode';
 
 const UploadVideoPage = () => {
   const { userid } = useParams();
@@ -11,9 +12,21 @@ const UploadVideoPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [previewFile, setPreviewFile] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [userCode, setUserCode] = useState(''); // 4字符用户代码
   const filesPerPage = 12;
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+
+  // 从URL参数获取用户代码
+  useEffect(() => {
+    if (userid && validateUserCode(userid)) {
+      setUserCode(userid.toUpperCase());
+    } else {
+      // 如果用户代码无效，跳转到首页
+      navigate('/');
+      return;
+    }
+  }, [userid, navigate]);
 
   // 检测移动设备
   useEffect(() => {
@@ -56,7 +69,7 @@ const UploadVideoPage = () => {
 
   // 返回主页
   const goBack = () => {
-    navigate(`/${userid}`);
+    navigate(`/${userCode}`);
   };
 
   // 上传视频文件到服务器
@@ -64,9 +77,6 @@ const UploadVideoPage = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-
-      console.log('上传接口地址:', `${API_BASE_URL}/upload`);
-
       const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         body: formData,
@@ -85,7 +95,6 @@ const UploadVideoPage = () => {
 
       const result = await response.json();
       if (result.success) {
-        console.log('视频上传成功，云端URL:', result.file_url);
         return {
           success: true,
           cloudUrl: result.file_url,
@@ -160,7 +169,6 @@ const UploadVideoPage = () => {
           localStorage.setItem('uploadedFiles', JSON.stringify([...saved, fileInfo]));
           // 触发事件通知主页刷新
           window.dispatchEvent(new Event('filesUpdated'));
-          console.log('视频云端URL:', result.cloudUrl);
         }
       });
     });
@@ -227,7 +235,6 @@ const UploadVideoPage = () => {
       // 触发事件通知主页刷新
       window.dispatchEvent(new Event('filesUpdated'));
     } catch (error) {
-      console.error('删除视频失败:', error);
       alert('删除视频失败');
     }
   };

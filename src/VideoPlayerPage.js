@@ -39,7 +39,7 @@ const VideoPlayerPage = () => {
   useEffect(() => {
     const handleFirstInteraction = () => {
       if (!userInteracted) {
-        console.log('检测到首次用户交互');
+
         setUserInteracted(true);
       }
     };
@@ -128,14 +128,14 @@ const VideoPlayerPage = () => {
           setVideo(foundVideo);
           setLoading(false);
         } else {
-          console.error('未找到指定的视频文件');
+
           setLoading(false);
         }
       } else {
         setLoading(false);
       }
     } catch (error) {
-      console.error('加载视频失败:', error);
+
       setLoading(false);
     }
   };
@@ -240,7 +240,7 @@ const VideoPlayerPage = () => {
 
     if (!document.fullscreenElement) {
       videoRef.current.requestFullscreen().catch(err => {
-        console.error('进入全屏失败:', err);
+
       });
     } else {
       document.exitFullscreen();
@@ -439,7 +439,6 @@ const VideoPlayerPage = () => {
           </div>
         </div>
       </div>
-
 
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './UploadPhotoPage.css';
+import { validateUserCode } from './utils/userCode';
 
 const UploadPhotoPage = () => {
   const { userid } = useParams();
@@ -11,11 +12,21 @@ const UploadPhotoPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [previewFile, setPreviewFile] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [userCode, setUserCode] = useState(''); // 4字符用户代码
   const filesPerPage = 12;
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
-
+  // 从URL参数获取用户代码
+  useEffect(() => {
+    if (userid && validateUserCode(userid)) {
+      setUserCode(userid.toUpperCase());
+    } else {
+      // 如果用户代码无效，跳转到首页
+      navigate('/');
+      return;
+    }
+  }, [userid, navigate]);
 
   // 检测移动设备
   useEffect(() => {
@@ -58,7 +69,7 @@ const UploadPhotoPage = () => {
 
   // 返回主页
   const goBack = () => {
-    navigate(`/${userid}`);
+    navigate(`/${userCode}`);
   };
 
   // 新增：上传图片/视频文件到服务器
@@ -71,8 +82,6 @@ const UploadPhotoPage = () => {
       // const folderPath = `user/${userid}`;
       // const uploadUrl = new URL(`${API_BASE_URL}/upload`);
       // uploadUrl.searchParams.append('folder', folderPath);
-
-      console.log('上传接口地址:', `${API_BASE_URL}/upload`);
 
       const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
@@ -93,7 +102,7 @@ const UploadPhotoPage = () => {
       const result = await response.json();
       if (result.success) {
         // 上传成功，返回云端URL等
-        console.log('文件上传成功，云端URL:', result.file_url);
+
         return {
           success: true,
           cloudUrl: result.file_url,
@@ -168,7 +177,7 @@ const UploadPhotoPage = () => {
             // 触发事件通知主页刷新
             window.dispatchEvent(new Event('filesUpdated'));
             // 控制台输出云端URL
-            console.log('图片云端URL:', result.cloudUrl);
+
           }
         });
       };

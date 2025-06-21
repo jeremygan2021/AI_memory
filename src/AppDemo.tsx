@@ -174,7 +174,7 @@ const App: React.FC = () => {
   // 搜索功能
   const handleSearch = () => {
     if (searchValue.trim()) {
-      console.log('搜索内容:', searchValue);
+
       // 这里可以添加实际的搜索逻辑
       alert(`搜索: ${searchValue}`);
     }
