@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './record.css';
-import UploadPhotoPage from './UploadPhotoPage';
+import UploadMediaPage from './UploadMediaPage';
 import { getUserCode, buildRecordingPath, buildSessionStorageKey, validateUserCode } from './utils/userCode';
 import recordButtonImg from './asset/record_button.png';
 import mic_icon from './asset/icon/mic.png'
@@ -762,7 +762,7 @@ const RecordComponent = () => {
   };
 
   // 跳转到上传照片
-  const goToUploadPhotoPage = () => {
+  const goToUploadMediaPage = () => {
     console.log('点击上传照片按钮，userCode:', userCode);
     if (userCode) {
       const targetPath = `/${userCode}/upload-photos`;
@@ -986,7 +986,7 @@ const RecordComponent = () => {
         <div className="record-left-panel">
           {/* 上传照片按钮始终显示在左侧栏顶部 */}
           <div className="upload-box upload-box-recording">
-            <button className="upload-button" onClick={goToUploadPhotoPage}> 
+            <button className="upload-button" onClick={goToUploadMediaPage}> 
               <span>上传照片</span>
             </button>
           </div>

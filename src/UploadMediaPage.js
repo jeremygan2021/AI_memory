@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import './UploadPhotoPage.css';
+import './UploadMediaPage.css'; // 复用现有样式
 import { validateUserCode } from './utils/userCode';
 
-const UploadPhotoPage = () => {
-  const { userid } = useParams();
+const UploadMediaPage = () => {
+  const { userid, sessionid } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -12,21 +12,36 @@ const UploadPhotoPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [previewFile, setPreviewFile] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [userCode, setUserCode] = useState(''); // 4字符用户代码
+  const [userCode, setUserCode] = useState('');
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'photos' 或 'videos'
   const filesPerPage = 12;
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
-  // 从URL参数获取用户代码
+  // 从URL参数获取用户代码和会话ID
   useEffect(() => {
     if (userid && validateUserCode(userid)) {
       setUserCode(userid.toUpperCase());
     } else {
-      // 如果用户代码无效，跳转到首页
       navigate('/');
       return;
     }
-  }, [userid, navigate]);
+    
+    // 如果没有会话ID，生成一个新的
+    if (!sessionid) {
+      const newSessionId = Math.random().toString(36).substr(2, 8);
+      navigate(`/${userid}/upload-media/${newSessionId}`, { replace: true });
+      return;
+    }
+    
+    // 验证会话ID（应该是8位字符）
+    if (sessionid && sessionid.length === 8) {
+      // 会话ID有效
+    } else {
+      navigate('/');
+      return;
+    }
+  }, [userid, sessionid, navigate]);
 
   // 检测移动设备
   useEffect(() => {
@@ -72,17 +87,12 @@ const UploadPhotoPage = () => {
     navigate(`/${userCode}`);
   };
 
-  // 新增：上传图片/视频文件到服务器
-  const uploadMediaFile = async (file) => {
+  // 上传文件到服务器
+  const uploadFile = async (file) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-
-      // 可选：自定义文件夹路径
-      // const folderPath = `user/${userid}`;
-      // const uploadUrl = new URL(`${API_BASE_URL}/upload`);
-      // uploadUrl.searchParams.append('folder', folderPath);
-
+      
       const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         body: formData,
@@ -101,8 +111,6 @@ const UploadPhotoPage = () => {
 
       const result = await response.json();
       if (result.success) {
-        // 上传成功，返回云端URL等
-
         return {
           success: true,
           cloudUrl: result.file_url,
@@ -122,118 +130,171 @@ const UploadPhotoPage = () => {
   // 处理文件选择
   const handleFileSelect = (files) => {
     const fileList = Array.from(files);
-    const imageFiles = fileList.filter(file => file.type.startsWith('image/'));
+    const mediaFiles = fileList.filter(file => 
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+    );
     
-    if (imageFiles.length === 0) {
-      alert('请选择图片文件');
+    if (mediaFiles.length === 0) {
+      alert('请选择图片或视频文件');
       return;
     }
     
     // 移动端限制文件数量和大小
-    if (isMobile && imageFiles.length > 10) {
-      alert('移动端单次最多上传10个图片文件');
+    if (isMobile && mediaFiles.length > 10) {
+      alert('移动端单次最多上传10个文件');
       return;
     }
     
-    imageFiles.forEach(file => {
-     // 文件大小限制
-     if (isMobile && file.size > 50 * 1024 * 1024) { // 50MB
-      alert(`图片文件 ${file.name} 过大，移动端单个文件不能超过50MB`);
-      return;
-    }
-    
-    if (!isMobile && file.size > 100 * 1024 * 1024) { // 100MB
-      alert(`图片文件 ${file.name} 过大，单个文件不能超过100MB`);
-      return;
-    }
+    mediaFiles.forEach(file => {
+      const isVideo = file.type.startsWith('video/');
+      const isImage = file.type.startsWith('image/');
       
-      const reader = new FileReader();
-      reader.onload = (e) => {
+      // 文件大小限制
+      const maxSize = isMobile ? 
+        (isVideo ? 100 * 1024 * 1024 : 50 * 1024 * 1024) : // 移动端：视频100MB，图片50MB
+        (isVideo ? 200 * 1024 * 1024 : 100 * 1024 * 1024); // 桌面端：视频200MB，图片100MB
+      
+      if (file.size > maxSize) {
+        const sizeMB = Math.round(maxSize / 1024 / 1024);
+        alert(`文件 ${file.name} 过大，${isVideo ? '视频' : '图片'}文件不能超过${sizeMB}MB`);
+        return;
+      }
+      
+      if (isImage) {
+        // 处理图片文件
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const newFile = {
+            id: Date.now() + Math.random(),
+            name: file.name,
+            url: e.target.result,
+            file: file,
+            type: 'image',
+            uploadTime: new Date().toLocaleString(),
+            size: file.size,
+            sessionId: sessionid // 添加会话ID
+          };
+          setUploadedFiles(prev => [...prev, newFile]);
+          
+          // 上传到服务器
+          uploadFile(file).then(result => {
+            if (result.success) {
+              const fileInfo = {
+                id: newFile.id,
+                name: newFile.name,
+                preview: result.cloudUrl,
+                type: newFile.type,
+                uploadTime: newFile.uploadTime,
+                objectKey: result.objectKey,
+                sessionId: sessionid
+              };
+              saveToLocalStorage(fileInfo);
+            }
+          });
+        };
+        reader.readAsDataURL(file);
+      } else if (isVideo) {
+        // 处理视频文件
+        const videoUrl = URL.createObjectURL(file);
         const newFile = {
           id: Date.now() + Math.random(),
           name: file.name,
-          url: e.target.result,
+          url: videoUrl,
           file: file,
-          type: 'image',
+          type: 'video',
           uploadTime: new Date().toLocaleString(),
-          size: file.size
+          size: file.size,
+          sessionId: sessionid // 添加会话ID
         };
         setUploadedFiles(prev => [...prev, newFile]);
-        // 新增：上传到服务器
-        uploadMediaFile(file).then(result => {
+        
+        // 上传到服务器
+        uploadFile(file).then(result => {
           if (result.success) {
-            // 存储到localStorage
             const fileInfo = {
               id: newFile.id,
               name: newFile.name,
-              preview: result.cloudUrl, // 用云端URL
+              preview: result.cloudUrl,
               type: newFile.type,
               uploadTime: newFile.uploadTime,
-              objectKey: result.objectKey // 新增objectKey
+              objectKey: result.objectKey,
+              sessionId: sessionid
             };
-            // 追加到本地存储
-            const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
-            localStorage.setItem('uploadedFiles', JSON.stringify([...saved, fileInfo]));
-            // 触发事件通知主页刷新
-            window.dispatchEvent(new Event('filesUpdated'));
-            // 控制台输出云端URL
-
+            saveToLocalStorage(fileInfo);
           }
         });
-      };
-      reader.readAsDataURL(file);
+      }
     });
   };
 
-  // 点击上传区域
+  // 保存到本地存储
+  const saveToLocalStorage = (fileInfo) => {
+    const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+    const updated = [...saved, fileInfo];
+    console.log('保存文件到localStorage:', fileInfo); // 调试信息
+    console.log('更新后的文件列表:', updated); // 调试信息
+    localStorage.setItem('uploadedFiles', JSON.stringify(updated));
+    window.dispatchEvent(new Event('filesUpdated'));
+  };
+
+  // 其他处理函数
   const handleUploadAreaClick = () => {
     fileInputRef.current?.click();
   };
 
-  // 文件输入变化
   const handleFileInputChange = (e) => {
     if (e.target.files.length > 0) {
       handleFileSelect(e.target.files);
     }
   };
 
-  // 拖拽相关事件
   const handleDragOver = (e) => {
     e.preventDefault();
-    if (!isMobile) { // 移动端不支持拖拽
-    setIsDragOver(true);
+    if (!isMobile) {
+      setIsDragOver(true);
     }
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
     if (!isMobile) {
-    setIsDragOver(false);
+      setIsDragOver(false);
     }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    if (!isMobile) {
     setIsDragOver(false);
-    handleFileSelect(e.dataTransfer.files);
+    if (!isMobile && e.dataTransfer.files.length > 0) {
+      handleFileSelect(e.dataTransfer.files);
     }
   };
 
-  // 移动端粘贴功能
   const handlePaste = (e) => {
-    if (isMobile && e.clipboardData && e.clipboardData.files.length > 0) {
-      handleFileSelect(e.clipboardData.files);
+    const items = e.clipboardData?.items;
+    if (items) {
+      const files = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file') {
+          const file = items[i].getAsFile();
+          if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+            files.push(file);
+          }
+        }
+      }
+      if (files.length > 0) {
+        handleFileSelect(files);
+      }
     }
   };
 
-  // 删除上传的文件（先请求后端删除，再移除本地）
   const handleDeleteFile = async (fileId) => {
     const fileToDelete = uploadedFiles.find(file => file.id === fileId);
     if (!fileToDelete) return;
-    if (!window.confirm('确定要删除这张图片吗？')) return;
+    
+    if (!window.confirm('确定要删除这个文件吗？')) return;
+    
     try {
-      // 先请求后端删除
       if (fileToDelete.objectKey) {
         const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(fileToDelete.objectKey)}`, {
           method: 'DELETE'
@@ -242,69 +303,88 @@ const UploadPhotoPage = () => {
           throw new Error('服务器删除失败');
         }
       }
-      // 本地移除
+      
+      // 从本地状态删除
+      setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
+      
+      // 从localStorage删除
+      const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+      const updated = saved.filter(file => file.id !== fileId);
+      localStorage.setItem('uploadedFiles', JSON.stringify(updated));
+      window.dispatchEvent(new Event('filesUpdated'));
+      
+      // 分页处理
       const newFiles = uploadedFiles.filter(file => file.id !== fileId);
-      setUploadedFiles(newFiles);
-      localStorage.setItem('uploadedFiles', JSON.stringify(newFiles));
-      // 如果删除后当前页没有文件了，回到上一页
       const totalPages = Math.ceil(newFiles.length / filesPerPage);
       if (currentPage > totalPages && totalPages > 0) {
         setCurrentPage(totalPages);
       }
-    } catch (err) {
-      alert('删除失败: ' + err.message);
+    } catch (error) {
+      alert('删除失败: ' + error.message);
     }
   };
 
-  // 预览文件
   const handlePreviewFile = (file) => {
-    setPreviewFile(file);
+    if (file.type === 'video') {
+      // 视频跳转到播放页面，带上sessionid和文件ID
+      navigate(`/${userCode}/video-player/${sessionid}/${file.id}`);
+    } else {
+      // 图片显示预览弹窗
+      setPreviewFile(file);
+    }
   };
 
-  // 关闭预览
   const closePreview = () => {
     setPreviewFile(null);
   };
 
-  // 页面加载时读取所有云端照片和视频
+  // 页面加载时读取文件
   useEffect(() => {
     const saved = localStorage.getItem('uploadedFiles');
     if (saved) {
       try {
         const allFiles = JSON.parse(saved);
-        const imageFiles = allFiles.filter(file => file.type === 'image');
-        setUploadedFiles(imageFiles);
+        console.log('加载的历史文件:', allFiles); // 调试信息
+        // 显示所有历史文件，不按会话过滤
+        setUploadedFiles(allFiles);
       } catch (e) {
+        console.error('加载历史文件失败:', e);
         setUploadedFiles([]);
       }
+    } else {
+      console.log('没有找到历史文件'); // 调试信息
     }
-    // 监听filesUpdated事件，自动刷新
+    
     const handleFilesUpdated = () => {
       const updated = localStorage.getItem('uploadedFiles');
       if (updated) {
         try {
           const allFiles = JSON.parse(updated);
-          const imageFiles = allFiles.filter(file => file.type === 'image');
-          setUploadedFiles(imageFiles);
+          // 显示所有历史文件，不按会话过滤
+          setUploadedFiles(allFiles);
         } catch (e) {
           setUploadedFiles([]);
         }
       }
     };
+    
     window.addEventListener('filesUpdated', handleFilesUpdated);
     return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
   }, []);
 
+  // 筛选当前标签页的文件
+  const filteredFiles = uploadedFiles.filter(file => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'photos') return file.type === 'image';
+    if (activeTab === 'videos') return file.type === 'video';
+    return true;
+  });
+
   // 分页逻辑
-  const totalPages = Math.ceil(uploadedFiles.length / filesPerPage);
+  const totalPages = Math.ceil(filteredFiles.length / filesPerPage);
   const startIndex = (currentPage - 1) * filesPerPage;
   const endIndex = startIndex + filesPerPage;
-  const currentFiles = uploadedFiles.slice(startIndex, endIndex);
-
-  // 分页导航
-  const goToPage = (page) => {
-    setCurrentPage(page);
-  };
+  const currentFiles = filteredFiles.slice(startIndex, endIndex);
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
@@ -318,9 +398,6 @@ const UploadPhotoPage = () => {
     }
   };
 
-  const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
-    ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
-
   return (
     <div className="upload-page" onPaste={handlePaste}>
       {/* 顶部导航 */}
@@ -328,7 +405,12 @@ const UploadPhotoPage = () => {
         <div className="back-button" onClick={goBack}>
           <span className="back-text">← 返回主页</span>
         </div>
+        <div className="session-info">
+          <span>用户: {userCode} | 会话: {sessionid}</span>
+        </div>
       </div>
+
+
 
       {/* 上传区域 */}
       <div 
@@ -339,24 +421,55 @@ const UploadPhotoPage = () => {
         onDrop={handleDrop}
       >
         <span className="upload-text">
-          {isMobile ? '点击或粘贴图片到此处开始上传' : '点击、粘贴或拖放图片到此处开始上传'}
+          {isMobile ? '点击、粘贴照片或视频到此处开始上传' : '点击、粘贴或拖放照片和视频到此处开始上传'}
         </span>
         <input
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*"
+          accept="image/*,video/*"
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
-          capture={isMobile ? 'environment' : undefined} // 移动端默认后置摄像头
+          capture={isMobile ? 'environment' : undefined}
         />
       </div>
 
-      {/* 所有照片展示区域 */}
+      {/* 文件展示区域 */}
       <div className="photos-container">
         <div className="all-photos-section">
+          {/* 文件类型标签 */}
+          <div className="file-type-tabs">
+            <button 
+              className={`file-tab ${activeTab === 'all' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('all');
+                setCurrentPage(1);
+              }}
+            >
+              📁 全部 ({uploadedFiles.length})
+            </button>
+            <button 
+              className={`file-tab ${activeTab === 'photos' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('photos');
+                setCurrentPage(1);
+              }}
+            >
+              📷 照片 ({uploadedFiles.filter(f => f.type === 'image').length})
+            </button>
+            <button 
+              className={`file-tab ${activeTab === 'videos' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('videos');
+                setCurrentPage(1);
+              }}
+            >
+              🎬 视频 ({uploadedFiles.filter(f => f.type === 'video').length})
+            </button>
+          </div>
+          
           <div className="section-header">
-            <h3 className="section-title">所有照片 ({uploadedFiles.length})</h3>
+            
             {totalPages > 1 && (
               <div className="pagination-info">
                 第 {currentPage} 页，共 {totalPages} 页
@@ -364,13 +477,30 @@ const UploadPhotoPage = () => {
             )}
           </div>
           
-          {uploadedFiles.length > 0 ? (
+          {filteredFiles.length > 0 ? (
             <>
               <div className="photos-grid">
                 {currentFiles.map(file => (
                   <div key={file.id} className="media-item">
                     <div className="media-content" onClick={() => handlePreviewFile(file)}>
-                      <img src={file.preview} alt={file.name} className="media-preview" />
+                      {file.type === 'image' ? (
+                        <img src={file.preview || file.url} alt={file.name} className="media-preview" />
+                      ) : (
+                        <div className="video-preview">
+                          <video 
+                            src={file.preview || file.url} 
+                            className="media-preview"
+                            muted
+                            preload="metadata"
+                            onLoadedMetadata={(e) => {
+                              e.target.currentTime = 1;
+                            }}
+                          />
+                          <div className="video-overlay">
+                            <div className="video-play-icon">▶</div>
+                          </div>
+                        </div>
+                      )}
                       <div className="media-overlay">
                         <button 
                           className="delete-media-btn"
@@ -411,20 +541,24 @@ const UploadPhotoPage = () => {
             </>
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">📷</div>
-              <p className="empty-text">还没有上传任何照片</p>
+              <div className="empty-icon">
+                {activeTab === 'all' ? '📁' : activeTab === 'photos' ? '📷' : '🎬'}
+              </div>
+              <p className="empty-text">
+                还没有上传任何{activeTab === 'all' ? '文件' : activeTab === 'photos' ? '照片' : '视频'}
+              </p>
               <p className="empty-subtext">点击上方区域开始上传</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* 预览弹窗 */}
-      {previewFile && (
+      {/* 预览弹窗 - 仅用于图片 */}
+      {previewFile && previewFile.type === 'image' && (
         <div className="preview-modal" onClick={closePreview}>
           <div className="preview-content" onClick={e => e.stopPropagation()}>
             <button className="preview-close" onClick={closePreview}>×</button>
-            <img src={previewFile.preview} alt={previewFile.name} className="preview-media" />
+            <img src={previewFile.preview || previewFile.url} alt={previewFile.name} className="preview-media" />
           </div>
         </div>
       )}
@@ -432,4 +566,4 @@ const UploadPhotoPage = () => {
   );
 };
 
-export default UploadPhotoPage; 
+export default UploadMediaPage; 

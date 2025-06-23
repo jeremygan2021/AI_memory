@@ -92,52 +92,6 @@ img {
     max-width: 100%;
   }
 
-  /* 移动设备相册标签样式 */
-  .album-board {
-    padding: 20px;
-    min-height: auto;
-  }
-  
-  .album-tabs {
-    gap: 6px;
-    margin: 15px 0;
-  }
-  
-  .album-tab {
-    padding: 8px 16px;
-    font-size: 14px;
-    flex: 1;
-    justify-content: center;
-  }
-  
-  .upload-btn {
-    padding: 10px 20px;
-    font-size: 13px;
-    width: 100%;
-    max-width: 200px;
-  }
-  
-  .album-content .album-list {
-    max-height: 300px;
-  }
-  
-  .album-content .empty-album {
-    min-height: 200px;
-  }
-  
-  .album-content .empty-icon {
-    font-size: 2.5rem;
-    margin-bottom: 12px;
-  }
-  
-  .album-content .empty-text {
-    font-size: 1rem;
-  }
-  
-  .album-content .empty-desc {
-    font-size: 0.85rem;
-  }
-
   .album-list {
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
@@ -544,13 +498,15 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 /* 主体内容区 */
 .memory-main {
   width: 100%;
-  max-width: 1600px;
+  max-width: min(1600px, 95vw);
   margin: 20px auto;
   display: flex;
-  gap: 24px;
-  padding: 24px;
+  gap: clamp(16px, 2.5vw, 24px);
+  padding: clamp(16px, 2.5vw, 24px);
   justify-content: center;
-  align-items: flex-start;
+  align-items: stretch;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* 用户账户信息 - 左侧栏 */
@@ -581,12 +537,14 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 左侧功能区域 */
 .memory-left {
-  width: 600px;
+  width: clamp(300px, 30vw, 600px);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
   height: 100%;
+  max-width: 35%;
+  min-width: 280px;
 }
 
 /* 新增：让上半区自适应高度 */
@@ -831,13 +789,15 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 中间内容区 */
 .memory-center {
-  width: 800px;
-  flex-shrink: 0;
+  width: clamp(400px, 40vw, 800px);
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
   height: 90%;
   margin: 0;
+  max-width: 45%;
+  min-width: 350px;
 }
 
 /* 宝宝信息 */
@@ -1232,7 +1192,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 .line-chart {
   width: 100%;
-  height: auto;
+  height: 380px;
   min-width: 400px;
 }
 
@@ -1256,11 +1216,13 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 /* 右侧相册 */
 .memory-right {
   flex: 1;
-  max-width: 700px;
-  min-height: 1500px;
+  max-width: min(900px, 40vw);
+  min-width: min(500px, 35vw);
+  height: fit-content;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 20px;
+  overflow: hidden;
 }
 
 .activity-board {
@@ -1273,143 +1235,6 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   height: auto;
   display: flex;
   flex-direction: column;
-}
-
-/* 统一相册模块样式 */
-.album-board {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  min-height: 600px;
-  display: flex;
-  flex-direction: column;
-  max-height: 1030px;
-  max-width: 430px;
-}
-
-/* 相册标签切换样式 */
-.album-tabs {
-  display: flex;
-  gap: 12px;
-  margin: 20px 0;
-  border-bottom: 2px solid rgba(59, 182, 166, 0.1);
-  padding-bottom: 15px;
-}
-
-.album-tab {
-  background: transparent;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  font-size: 20px;
-  font-weight: 500;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.album-tab:hover {
-  background: rgba(59, 182, 166, 0.1);
-  color: #3bb6a6;
-}
-
-.album-tab.active {
-  background: linear-gradient(135deg, #3bb6a6 0%, #4ecdc4 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(59, 182, 166, 0.3);
-}
-
-/* .album-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -17px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 8px solid #3bb6a6;
-} */
-
-/* 上传按钮容器样式 */
-.upload-buttons-container {
-  display: flex;
-  justify-content: center;
-  margin: 15px 0 25px 0;
-}
-
-.upload-btn {
-  background: linear-gradient(135deg, #3bb6a6 0%, #4ecdc4 100%);
-  border: none;
-  border-radius: 25px;
-  padding: 12px 28px;
-  color: white;
-  font-size: 20px;
-  font-weight: 400;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 182, 166, 0.3);
-  min-width: 150px;
-}
-
-.upload-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 182, 166, 0.4);
-  background: linear-gradient(135deg, #339a8a 0%, #45b8b0 100%);
-}
-
-/* 相册内容区域样式 */
-.album-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.album-content .album-list {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 1400px;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-.album-content .empty-album {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  color: #999;
-  text-align: center;
-}
-
-.album-content .empty-icon {
-  font-size: 3rem;
-  margin-bottom: 15px;
-  opacity: 0.6;
-}
-
-.album-content .empty-text {
-  font-size: 1.1rem;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: #666;
-}
-
-.album-content .empty-desc {
-  font-size: 0.9rem;
-  color: #999;
-  line-height: 1.4;
 }
 
 /* 照片模块和视频模块的特定样式 */
@@ -1446,15 +1271,102 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
 }
 
-.album-list {
-  max-height:900px;
+/* 媒体标签样式 */
+.media-board {
+  flex: 1;
+  height: auto;
+  min-height: 1027px;
+  max-height: 600px;
+  width: 100%;
+  max-width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+  padding: clamp(15px, 2.5vw, 25px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.media-tabs {
+  display: flex;
   gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid rgba(59, 182, 166, 0.1);
+  padding-bottom: 0;
+}
+
+.media-tab {
+  padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 24px);
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-size: clamp(16px, 2.2vw, 24px);
+  font-weight: 500;
+  color: rgba(59, 182, 166, 0.7);
+  background: transparent;
+  border: 2px solid transparent;
+  border-bottom: none;
+  transition: all 0.3s ease;
+  position: relative;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.media-tab:hover {
+  color: #3bb6a6;
+  background: rgba(59, 182, 166, 0.05);
+}
+
+.media-tab.active {
+  color: #3bb6a6;
+  background: rgba(59, 182, 166, 0.1);
+  border-color: rgba(59, 182, 166, 0.2);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.9);
+  margin-bottom: -2px;
+  font-weight: 600;
+}
+
+.media-upload-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.upload-media-btn {
+  background: linear-gradient(135deg, #3bb6a6 0%, #4ecdc4 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: clamp(6px, 1vw, 8px) clamp(12px, 2vw, 16px);
+  font-size: clamp(14px, 2vw, 24px);
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 182, 166, 0.3);
+  white-space: nowrap;
+}
+
+.upload-media-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 182, 166, 0.4);
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb6a6 100%);
+}
+
+.media-content {
+  min-height: 300px;
+  max-height: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.album-list {
+  max-height: 100%;
   margin-top: 16px;
   flex: 1;
   overflow-y: auto;
-  padding-right: 8px;
+  padding-right: 12px;
   transition: all 0.3s ease;
 }
 
@@ -1478,14 +1390,16 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .album-img {
-  width: 95%;
-  height: 150px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 210px;
+  padding-bottom: 10px;
   object-fit: cover;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
-  left: 10px;
   animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -1609,10 +1523,12 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 相册项目容器 */
 .album-item {
-  width: 350px;
+  width: 100%;
   height: 150px;
+  padding-bottom: 50%;
+  position: relative;
   border-radius: 16px;
-  
+  overflow: hidden;
   transition: transform 0.2s ease;
 }
 
@@ -1624,7 +1540,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 .video-preview-container {
   position: relative;
   width: 100%;
-  height: auto;
+  height: 150px;
   background: transparent;
 }
 
@@ -3363,6 +3279,19 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 @media (max-width: 1024px) and (min-width: 769px) {
+  .memory-main {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .memory-left,
+  .memory-center,
+  .memory-right {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+  }
+  
   .memory-right {
     max-width: 100%;
     min-width: auto;
@@ -3371,35 +3300,73 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
 
   .photo-board,
-  .video-board {
+  .video-board,
+  .media-board {
     max-width: none;
     min-height: 350px;
     flex: 1;
   }
+  
+  .album-list {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
 
-  /* 平板设备相册标签样式 */
-  .album-board {
-    padding: 20px;
-    min-height: 500px;
-    max-width: 100%;
+/* 大屏幕优化 (1920px+) */
+@media (min-width: 1920px) {
+  .memory-main {
+    max-width: min(2000px, 90vw);
+    gap: clamp(24px, 3vw, 40px);
   }
   
-  .album-tabs {
-    gap: 8px;
-    margin: 15px 0;
+  .memory-left {
+    max-width: 700px;
   }
   
-  .album-tab {
-    padding: 10px 18px;
-    font-size: 14px;
+  .memory-center {
+    max-width: 900px;
   }
   
-  .upload-btn {
-    padding: 10px 24px;
-    font-size: 13px;
+  .memory-right {
+    max-width: 600px;
+  }
+}
+
+/* 中等屏幕优化 (1366px-1919px) */
+@media (min-width: 1366px) and (max-width: 1919px) {
+  .memory-main {
+    max-width: min(1600px, 92vw);
+    gap: clamp(20px, 2.5vw, 30px);
   }
   
-  .album-content .album-list {
-    max-height: 350px;
+  /* .album-list {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  } */
+}
+
+/* 小屏幕桌面优化 (1025px-1365px) */
+@media (min-width: 1025px) and (max-width: 1365px) {
+  .memory-main {
+    max-width: min(1400px, 94vw);
+    gap: clamp(16px, 2vw, 24px);
+  }
+  
+  .memory-left {
+    width: clamp(280px, 28vw, 400px);
+    max-width: 32%;
+  }
+  
+  .memory-center {
+    width: clamp(350px, 38vw, 500px);
+    max-width: 42%;
+  }
+  
+  .memory-right {
+    max-width: 26%;
+    min-width: 300px;
+  }
+  
+  .album-list {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
 }

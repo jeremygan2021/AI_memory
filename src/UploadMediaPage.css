@@ -1,6 +1,14 @@
+@font-face {
+  font-family: 'MUYAO-SOFTBRUSH';
+  src: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/fonts/Muyao-Softbrush-2.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
 /* 上传照片页面样式 */
 .upload-page {
-  background-image: url('https:///AI_memory/public/images/background2.png');
+  background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -42,6 +50,64 @@
   font-weight: normal;
   white-space: nowrap;
   line-height: 24px;
+}
+
+/* 会话信息 */
+.session-info {
+  margin-left: auto;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 20px;
+  padding: 8px 16px;
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.session-info span {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4a90e2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 文件类型标签 */
+.file-type-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.file-tab {
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid #3bb6a6;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  color: #3bb6a6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.file-tab:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 182, 166, 0.3);
+}
+
+.file-tab.active {
+  background: #3bb6a6;
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 182, 166, 0.4);
+}
+
+.file-tab.active:hover {
+  background: #2fa087;
 }
 
 /* 上传区域 */
@@ -95,14 +161,7 @@
   gap: 20px;
 }
 
-.section-title {
-  color: #12a4b2;
-  font-size: 28px;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
-  font-weight: normal;
-  text-align: center;
-  margin-bottom: 20px;
-}
+
 
 /* 所有照片区域 */
 .all-photos-section {
@@ -527,16 +586,38 @@
     height: 180px;
   }
   
-  .section-title {
-    font-size: 24px;
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
-  }
 }
 
 @media (max-width: 768px) {
   .upload-header {
-    height: 70px;
-    padding: 0 16px;
+    height: auto;
+    min-height: 70px;
+    padding: 10px 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .session-info {
+    margin-left: 0;
+    margin-top: 5px;
+    align-self: flex-end;
+  }
+  
+  .session-info span {
+    font-size: 10px;
+  }
+  
+  .file-type-tabs {
+    gap: 10px;
+    margin: 15px 16px 20px;
+    flex-direction: column;
+  }
+  
+  .file-tab {
+    width: 100%;
+    padding: 8px 16px;
+    font-size: 14px;
+    min-width: auto;
   }
   
   .back-button {
@@ -572,11 +653,6 @@
     gap: 20px;
   }
   
-  .section-title {
-    font-size: 22px;
-    margin-bottom: 15px;
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
-  }
   
   .section-header {
     flex-direction: column;
@@ -659,8 +735,19 @@
 /* 中等移动设备 */
 @media (max-width: 600px) {
   .upload-header {
-    height: 65px;
-    padding: 0 14px;
+    height: auto;
+    min-height: 65px;
+    padding: 8px 14px;
+  }
+  
+  .file-type-tabs {
+    margin: 12px 14px 18px;
+    gap: 8px;
+  }
+  
+  .file-tab {
+    font-size: 13px;
+    padding: 7px 14px;
   }
   
   .back-button {
@@ -700,16 +787,24 @@
     height: 130px;
   }
   
-  .section-title {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
-    font-size: 20px;
-  }
+  
 }
 
 @media (max-width: 480px) {
   .upload-header {
-    height: 60px;
-    padding: 0 12px;
+    height: auto;
+    min-height: 60px;
+    padding: 8px 12px;
+  }
+  
+  .file-type-tabs {
+    margin: 10px 12px 16px;
+    gap: 8px;
+  }
+  
+  .file-tab {
+    font-size: 12px;
+    padding: 6px 12px;
   }
   
   .back-button {
@@ -740,10 +835,7 @@
     width: calc(100% - 24px);
   }
   
-  .section-title {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
-    font-size: 18px;
-  }
+  
   
   .section-header {
     flex-direction: column;
@@ -853,8 +945,19 @@
 /* 超小屏设备优化 */
 @media (max-width: 360px) {
   .upload-header {
-    height: 55px;
-    padding: 0 10px;
+    height: auto;
+    min-height: 55px;
+    padding: 6px 10px;
+  }
+  
+  .file-type-tabs {
+    margin: 8px 10px 14px;
+    gap: 6px;
+  }
+  
+  .file-tab {
+    font-size: 11px;
+    padding: 5px 10px;
   }
   
   .back-button {
@@ -891,11 +994,7 @@
     border-radius: 14px;
   }
   
-  .section-title {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
-    font-size: 16px;
-    margin-bottom: 12px;
-  }
+  
   
   .photos-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -993,11 +1092,7 @@
     border-radius: 12px;
   }
   
-  .section-title {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
-    font-size: 15px;
-    margin-bottom: 10px;
-  }
+  
   
   .photos-grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));

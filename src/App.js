@@ -7,11 +7,9 @@ import FamilyPage from './FamilyPage';
 import RecordComponent from './record';
 import PlayerPage from './PlayerPage';
 import AudioLibrary from './AudioLibrary';
-import UploadPhotoPage from './UploadPhotoPage';
 import ModernSearchBox from './components/ModernSearchBox';
-import UploadVideoPage from './UploadVideoPage';
 import VideoPlayerPage from './VideoPlayerPage';
-import GalleryPage from './GalleryPage';
+import UploadMediaPage from './UploadMediaPage';
 
 // 折线图数据
 const chartData = [
@@ -56,7 +54,6 @@ const LineChart = () => {
             <path d="M 50 0 L 0 0 0 35" fill="none" stroke="#e3f6f2" strokeWidth="1"/>
           </pattern>
         </defs>
-        <rect width="80%" height="100%" fill="url(#grid)" />
         
         {/* Y轴刻度线 */}
         {[0, 25, 50, 75, 100].map(value => {
@@ -231,8 +228,8 @@ const HomePage = () => {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [showAllVideos, setShowAllVideos] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
-  // 添加相册标签切换状态
-  const [activeAlbumTab, setActiveAlbumTab] = useState('photo'); // 'photo' 或 'video'
+  // 标签切换状态 - 添加这个新状态
+  const [activeMediaTab, setActiveMediaTab] = useState('photos');
   // 上传文件状态
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
@@ -462,11 +459,9 @@ const HomePage = () => {
   // 处理上传照片和视频
   const handleUpload = (type) => {
     if (userCode) {
-      if (type === 'photo') {
-        navigate(`/${userCode}/upload-photos`);
-      } else if (type === 'video') {
-        navigate(`/${userCode}/upload-videos`);
-      }
+      // 生成唯一的会话ID（8位随机字符）
+      const sessionId = Math.random().toString(36).substr(2, 8);
+      navigate(`/${userCode}/upload-media/${sessionId}`);
     }
   };
 
@@ -506,27 +501,31 @@ const HomePage = () => {
   const openVideoPlayer = (idx) => {
     if (userCode && uploadedVideos[idx]) {
       const videoFile = uploadedVideos[idx];
-      // 跳转到视频播放页面，传递视频ID
-      navigate(`/${userCode}/video-player/${videoFile.id || idx}`);
+      // 为首页视频生成一个默认的sessionid
+      const defaultSessionId = 'homepage';
+      // 跳转到视频播放页面，传递sessionid和视频ID
+      navigate(`/${userCode}/video-player/${defaultSessionId}/${videoFile.id || idx}`);
     }
   };
 
   // 跳转到相册页面
   const goToGallery = () => {
     if (userCode) {
-      navigate(`/${userCode}/gallery`);
+      // 生成唯一的会话ID（8位随机字符）
+      const sessionId = Math.random().toString(36).substr(2, 8);
+      navigate(`/${userCode}/upload-media/${sessionId}`);
     }
   };
 
   // 准备相册数据
   const photoData = uploadedPhotos.length > 0 ? uploadedPhotos : 
-    ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png'].map(src => ({ preview: src, type: 'image' }));
+    [].map(src => ({ preview: src, type: 'image' }));
   
   const videoData = uploadedVideos.length > 0 ? uploadedVideos : [];
 
   // 准备相册数据（保留原有兼容性）
   const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
-    ['/images/qz1.png', '/images/qz2.png', '/images/qz3.png', '/images/qz4.png', '/images/qz5.png', '/images/qz6.png'].map(src => ({ preview: src, type: 'image' }));
+    [].map(src => ({ preview: src, type: 'image' }));
 
   // 如果没有用户ID，显示输入界面
   if (!userid) {
@@ -651,7 +650,7 @@ const HomePage = () => {
                       <div key={idx} className="preview-video-thumb">
                         <video src={video.preview} className="preview-thumb" muted />
                         <div className="mini-play-icon">
-                        <img src="./asset/play_button.png" className="play-icon" alt="播放" />
+                        {/* <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/play_button.png" className="play-icon" alt="播放" /> */}
                         </div>
                       </div>
                     ))}
@@ -794,41 +793,38 @@ const HomePage = () => {
         {/* 右侧：亲子相册 - 仅桌面端显示 */}
         {!isMobileView && (
           <div className="memory-right">
-            {/* 统一的亲子相册模块 */}
-            <div className="activity-board album-board">
-              <div className="activity-title-container">
-                <div className="activity-title">亲子相册</div>
+            {/* 合并的亲子媒体模块 */}
+            <div className="activity-board media-board">
+              {/* 标签导航 */}
+              <div className="media-tabs">
+                <div 
+                  className={`media-tab ${activeMediaTab === 'photos' ? 'active' : ''}`}
+                  onClick={() => setActiveMediaTab('photos')}
+                >
+                  亲子照片
+                </div>
+                <div 
+                  className={`media-tab ${activeMediaTab === 'videos' ? 'active' : ''}`}
+                  onClick={() => setActiveMediaTab('videos')}
+                >
+                  亲子视频
+                </div>
               </div>
               
-              {/* 标签切换区域 */}
-              <div className="album-tabs">
+              {/* 上传按钮 */}
+              <div className="media-upload-section">
                 <button 
-                  className={`album-tab ${activeAlbumTab === 'photo' ? 'active' : ''}`}
-                  onClick={() => setActiveAlbumTab('photo')}
+                  className="voice-action upload-media-btn" 
+                  onClick={() => handleUpload(activeMediaTab === 'photos' ? 'photo' : 'video')}
                 >
-                  📷 照片
-                </button>
-                <button 
-                  className={`album-tab ${activeAlbumTab === 'video' ? 'active' : ''}`}
-                  onClick={() => setActiveAlbumTab('video')}
-                >
-                  🎬 视频
-                </button>
-              </div>
-              
-              {/* 上传按钮区域 */}
-              <div className="upload-buttons-container">
-                <button 
-                  className="voice-action upload-btn" 
-                  onClick={() => handleUpload(activeAlbumTab === 'photo' ? 'photo' : 'video')}
-                >
-                  {activeAlbumTab === 'photo' ? '上传照片' : '上传视频'}
+                  {activeMediaTab === 'photos' ? '上传照片' : '上传视频'}
                 </button>
               </div>
               
-              {/* 内容显示区域 */}
-              <div className="album-content">
-                {activeAlbumTab === 'photo' && (
+              {/* 内容区域 */}
+              <div className="media-content">
+                {activeMediaTab === 'photos' ? (
+                  /* 照片内容 */
                   <div className="album-list">
                     {photoData.length === 0 ? (
                       <div className="empty-album">
@@ -852,9 +848,8 @@ const HomePage = () => {
                       ))
                     )}
                   </div>
-                )}
-                
-                {activeAlbumTab === 'video' && (
+                ) : (
+                  /* 视频内容 */
                   <div className="album-list">
                     {videoData.length === 0 ? (
                       <div className="empty-album">
@@ -942,10 +937,9 @@ function App() {
       <Route path="/:userid" element={<HomePage />} />
       <Route path="/family" element={<FamilyPage />} />
       <Route path="/:userid/audio-library" element={<AudioLibrary />} />
-      <Route path="/:userid/gallery" element={<GalleryPage />} />
-      <Route path="/:userid/upload-photos" element={<UploadPhotoPage />} />
-      <Route path="/:userid/upload-videos" element={<UploadVideoPage />} />
-      <Route path="/:userid/video-player/:videoId" element={<VideoPlayerPage />} />
+      <Route path="/:userid/gallery" element={<UploadMediaPage />} />
+      <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
+      <Route path="/:userid/video-player/:sessionid/:videoId" element={<VideoPlayerPage />} />
       <Route path="/:userid/:id" element={<RecordPage />} />
       <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
     </Routes>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './VideoPlayerPage.css';
 
 const VideoPlayerPage = () => {
-  const { userid, videoId } = useParams();
+  const { userid, sessionid, videoId } = useParams();
   const navigate = useNavigate();
   const videoRef = useRef(null);
   
@@ -260,7 +260,13 @@ const VideoPlayerPage = () => {
   };
 
   const goBack = () => {
-    navigate(`/${userCode}`);
+    if (sessionid) {
+      // 如果有sessionid，返回到对应的上传页面
+      navigate(`/${userCode}/upload-media/${sessionid}`);
+    } else {
+      // 否则返回主页
+      navigate(`/${userCode}`);
+    }
   };
 
   if (loading) {
@@ -307,6 +313,12 @@ const VideoPlayerPage = () => {
         <div className="session-info">
           <span className="session-label">用户:</span>
           <span className="session-id">{userCode}</span>
+          {sessionid && sessionid !== 'homepage' && (
+            <>
+              <span className="session-label"> | 会话:</span>
+              <span className="session-id">{sessionid}</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -396,7 +408,7 @@ const VideoPlayerPage = () => {
 
             {/* 简化的控制面板 */}
             <div className="compact-controls">
-              {/* 倍速控制 */}
+              {/* 倍速控制和全屏按钮并排 */}
               <div className="control-row">
                 <div className="speed-control">
                   <label className="control-label">播放速度</label>
@@ -425,16 +437,17 @@ const VideoPlayerPage = () => {
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* 全屏按钮 */}
-              {!isMobile && (
-                <div className="fullscreen-control">
-                  <button className="fullscreen-btn" onClick={toggleFullscreen}>
-                    {isFullscreen ? '退出全屏' : '全屏播放'}
-                  </button>
-                </div>
-              )}
+                {/* 全屏按钮 */}
+                {!isMobile && (
+                  <div className="fullscreen-control">
+                    <label className="control-label">屏幕控制</label>
+                    <button className="fullscreen-btn" onClick={toggleFullscreen}>
+                      {isFullscreen ? '退出全屏' : '全屏播放'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

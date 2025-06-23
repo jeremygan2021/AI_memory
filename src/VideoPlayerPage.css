@@ -439,7 +439,10 @@
 
 /* 全屏控制 */
 .fullscreen-control {
-  text-align: center;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .fullscreen-btn {
