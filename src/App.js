@@ -231,6 +231,8 @@ const HomePage = () => {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [showAllVideos, setShowAllVideos] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
+  // 添加相册标签切换状态
+  const [activeAlbumTab, setActiveAlbumTab] = useState('photo'); // 'photo' 或 'video'
   // 上传文件状态
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
@@ -326,7 +328,9 @@ const HomePage = () => {
   // 跳转到录音页面（移动端专用）
   const goToRecordPage = () => {
     if (userCode) {
-      navigate(`/${userCode}/record`); 
+      // 生成唯一的会话ID（8位随机字符）
+      const randomId = Math.random().toString(36).substr(2, 8);
+      navigate(`/${userCode}/${randomId}`); 
     }
   };
 
@@ -790,77 +794,99 @@ const HomePage = () => {
         {/* 右侧：亲子相册 - 仅桌面端显示 */}
         {!isMobileView && (
           <div className="memory-right">
-            {/* 亲子照片模块 */}
-            <div className="activity-board photo-board">
+            {/* 统一的亲子相册模块 */}
+            <div className="activity-board album-board">
               <div className="activity-title-container">
-                <div className="activity-title">亲子照片</div>
-                <div className="title-right-section">
-                  <button className="voice-action upload-photo-btn" onClick={() => handleUpload('photo')}>上传照片</button>
-                </div>
+                <div className="activity-title">亲子相册</div>
               </div>
-              <div className="album-list">
-                {photoData.length === 0 ? (
-                  <div className="empty-album">
-                    <div className="empty-icon">📷</div>
-                    <div className="empty-text">还没有上传任何照片</div>
-                    <div className="empty-desc">点击"上传照片"开始记录美好时光</div>
-                  </div>
-                ) : (
-                  photoData.slice(0, 6).map((file, idx) => (
-                    <div
-                      key={file.id || idx}
-                      className="album-item"
-                      onClick={() => openPhotoPreview(idx)}
-                    >
-                      <img
-                        src={file.preview}
-                        className="album-img"
-                        alt={file.name || `照片${idx + 1}`}
-                      />
-                    </div>
-                  ))
-                )}
+              
+              {/* 标签切换区域 */}
+              <div className="album-tabs">
+                <button 
+                  className={`album-tab ${activeAlbumTab === 'photo' ? 'active' : ''}`}
+                  onClick={() => setActiveAlbumTab('photo')}
+                >
+                  📷 照片
+                </button>
+                <button 
+                  className={`album-tab ${activeAlbumTab === 'video' ? 'active' : ''}`}
+                  onClick={() => setActiveAlbumTab('video')}
+                >
+                  🎬 视频
+                </button>
               </div>
-            </div>
-
-            {/* 亲子视频模块 */}
-            <div className="activity-board video-board">
-              <div className="activity-title-container">
-                <div className="activity-title">亲子视频</div>
-                <div className="title-right-section">
-                  <button className="voice-action upload-video-btn" onClick={() => handleUpload('video')}>上传视频</button>
-                </div>
+              
+              {/* 上传按钮区域 */}
+              <div className="upload-buttons-container">
+                <button 
+                  className="voice-action upload-btn" 
+                  onClick={() => handleUpload(activeAlbumTab === 'photo' ? 'photo' : 'video')}
+                >
+                  {activeAlbumTab === 'photo' ? '上传照片' : '上传视频'}
+                </button>
               </div>
-              <div className="album-list">
-                {videoData.length === 0 ? (
-                  <div className="empty-album">
-                    <div className="empty-icon">🎬</div>
-                    <div className="empty-text">还没有上传任何视频</div>
-                    <div className="empty-desc">点击"上传视频"开始记录美好时光</div>
-                  </div>
-                ) : (
-                  videoData.slice(0, 6).map((file, idx) => (
-                    <div
-                      key={file.id || idx}
-                      className="album-item"
-                      onClick={() => openVideoPlayer(idx)}
-                    >
-                      <div className="video-preview-container">
-                        <video
-                          src={file.preview}
-                          className="album-img"
-                          muted
-                          preload="metadata"
-                          onLoadedMetadata={(e) => {
-                            e.target.currentTime = 1;
-                          }}
-                        />
-                        <div className="video-overlay">
-                          <img src="./asset/play_button.png" className="play-icon" alt="播放" />
-                        </div>
+              
+              {/* 内容显示区域 */}
+              <div className="album-content">
+                {activeAlbumTab === 'photo' && (
+                  <div className="album-list">
+                    {photoData.length === 0 ? (
+                      <div className="empty-album">
+                        <div className="empty-icon">📷</div>
+                        <div className="empty-text">还没有上传任何照片</div>
+                        <div className="empty-desc">点击"上传照片"开始记录美好时光</div>
                       </div>
-                    </div>
-                  ))
+                    ) : (
+                      photoData.slice(0, 6).map((file, idx) => (
+                        <div
+                          key={file.id || idx}
+                          className="album-item"
+                          onClick={() => openPhotoPreview(idx)}
+                        >
+                          <img
+                            src={file.preview}
+                            className="album-img"
+                            alt={file.name || `照片${idx + 1}`}
+                          />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+                
+                {activeAlbumTab === 'video' && (
+                  <div className="album-list">
+                    {videoData.length === 0 ? (
+                      <div className="empty-album">
+                        <div className="empty-icon">🎬</div>
+                        <div className="empty-text">还没有上传任何视频</div>
+                        <div className="empty-desc">点击"上传视频"开始记录美好时光</div>
+                      </div>
+                    ) : (
+                      videoData.slice(0, 6).map((file, idx) => (
+                        <div
+                          key={file.id || idx}
+                          className="album-item"
+                          onClick={() => openVideoPlayer(idx)}
+                        >
+                          <div className="video-preview-container">
+                            <video
+                              src={file.preview}
+                              className="album-img"
+                              muted
+                              preload="metadata"
+                              onLoadedMetadata={(e) => {
+                                e.target.currentTime = 1;
+                              }}
+                            />
+                            <div className="video-overlay">
+                              <img src="./asset/play_button.png" className="play-icon" alt="播放" />
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 )}
               </div>
             </div>

@@ -953,9 +953,7 @@ const RecordComponent = () => {
     <div>
       {/* 背景装饰 */}
       <div className="background-decoration">
-        <div className="wave wave1"></div>
-        <div className="wave wave2"></div>
-        <div className="wave wave3"></div>
+        
       </div>
       
       {/* 顶部导航栏 */}

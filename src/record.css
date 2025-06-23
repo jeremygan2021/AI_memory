@@ -45,7 +45,7 @@ label {
   overflow: hidden;
   pointer-events: none;
   z-index: -10;
-  background-image:url('/public/images/background2.png');
+  background-image:url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
 }
 
 .wave {
@@ -3623,6 +3623,399 @@ html, body {
   }
 }
 
+/* 平板尺寸专用纵向布局 - 1024px 和 912px */
+@media (min-width: 912px) and (max-width: 1024px) {
+  /* 顶部导航栏适配 */
+  .top-navigation-bar {
+    width: 100%;
+    height: 70px;
+    padding: 12px 16px;
+    margin: 0 0 12px 0;
+    font-size: 14px;
+  }
+  
+  .user-info {
+    width: 200px;
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  /* 主布局改为纵向排列 */
+  .record-main-layout {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+    padding: 16px !important;
+    max-width: 100%;
+    min-height: calc(100vh - 100px);
+  }
+  
+  /* 上传照片按钮区域 */
+  .upload-box,
+  .upload-box-initial,
+  .upload-box-recording {
+    
+    width: 100%;
+    max-width: 600px;
+    height: 55px;
+    margin: 0 0 12px 0;
+    z-index: 1002;
+  }
+  
+  .upload-button {
+    padding: 12px 24px;
+    font-size: 15px;
+    min-height: 45px;
+  }
+  
+  /* 录音控制区域 */
+  .record-left-panel {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin-left: 20% !important;
+  }
+  
+  .record-control-card {
+    width: 100%;
+    min-height: 280px;
+    padding: 20px;
+    margin: 0;
+  }
+  
+  .record-control-header h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .record-time-display {
+    margin: 16px 0;
+  }
+  
+  .record-time-large {
+    font-size: 36px;
+  }
+  
+  .record-status-indicator {
+    margin: 12px 0;
+  }
+  
+  .status-text {
+    font-size: 14px;
+  }
+  
+  .record-control-buttons {
+    gap: 12px;
+    margin: 16px 0;
+  }
+  
+  .record-start-btn {
+    padding: 14px 28px;
+    font-size: 16px;
+    min-height: 50px;
+  }
+  
+  .record-action-buttons {
+    gap: 12px;
+  }
+  
+  .record-pause-btn,
+  .record-stop-btn,
+  .record-reset-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  
+  .upload-local-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  
+  /* 当前录音播放器 */
+  .current-recording-player {
+    margin: 16px 0 0 0;
+    padding: 12px;
+  }
+  
+  .current-recording-player-header {
+    margin-bottom: 8px;
+  }
+  
+  .player-title {
+    font-size: 14px;
+  }
+  
+  .audio-player-control {
+    width: 100%;
+    max-width: 500px;
+  }
+  
+  /* 录音文件列表区域 */
+  .record-right-panel {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin-top: 65% !important;
+    margin-left: 20% !important;
+  }
+  
+  .record-right-panel.visible {
+    display: block !important;
+  }
+  
+  .record-right-panel.hidden {
+    display: none !important;
+  }
+  
+  /* 录音section */
+  .recordings-section {
+    margin-bottom: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+  }
+  
+  .section-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .section-header h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  
+  .section-count {
+    font-size: 12px;
+  }
+  
+  .session-info {
+    font-size: 11px;
+  }
+  
+  /* 录音列表容器 */
+  .recordings-list-container {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 8px;
+    
+  }
+  
+  /* 录音列表项 */
+  .recording-list-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  
+  .recording-first-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .recording-item-info {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .recording-timestamp {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  
+  .recording-size {
+    font-size: 11px;
+  }
+  
+  /* 播放器区域 */
+  .recording-player-row {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .mini-audio-player {
+    width: 100%;
+    max-width: 400px;
+    height: 35px;
+  }
+  
+  /* 操作按钮 */
+  .recording-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  
+  .action-btn {
+    padding: 6px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  
+  .action-btn img {
+    width: 18px;
+    height: 18px;
+  }
+  
+  /* 已绑定录音的特殊样式 */
+  .recording-list-item.bound-item {
+    background: rgba(76, 175, 80, 0.1);
+  }
+  
+  .recording-list-item.bound-item .recording-player-row {
+    display: none;
+  }
+  
+  /* 空状态 */
+  .empty-recordings-state {
+    padding: 24px;
+    text-align: center;
+  }
+  
+  .empty-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+  
+  .empty-recordings-state h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .empty-recordings-state p {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  
+  .empty-section-state {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .empty-section-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  
+  .empty-section-state p {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .empty-section-hint {
+    font-size: 11px;
+  }
+  
+  /* 视频徽章和提示 */
+  .video-badge {
+    font-size: 11px;
+    padding: 1px 4px;
+  }
+  
+  .audio-only-hint {
+    font-size: 10px;
+  }
+  
+  /* 云端图标和状态 */
+  .cloud-icon {
+    font-size: 11px;
+  }
+  
+  /* 刷新按钮 */
+  .refresh-btn {
+    padding: 4px;
+    min-width: 24px;
+    min-height: 24px;
+  }
+  
+  .refresh-btn img {
+    width: 12px;
+    height: 12px;
+  }
+  
+  /* 检查状态 */
+  .checking-status {
+    font-size: 11px;
+  }
+}
+
+/* 912px 特定的微调 */
+@media (min-width: 912px) and (max-width: 950px) {
+  .record-main-layout {
+    gap: 14px !important;
+    padding: 14px !important;
+  }
+  
+  .record-control-card {
+    min-height: 260px;
+    padding: 18px;
+  }
+  
+  .record-time-large {
+    font-size: 32px;
+  }
+  
+  .recordings-list-container {
+    max-height: 280px;
+  }
+  
+  .recording-list-item {
+    padding: 10px;
+    font-size: 12px;
+  }
+  
+  .mini-audio-player {
+    height: 32px;
+  }
+}
+
+/* 1024px 特定的微调 */
+@media (min-width: 951px) and (max-width: 1024px) {
+  .record-main-layout {
+    gap: 18px !important;
+    padding: 18px !important;
+  }
+  
+  .record-control-card {
+    min-height: 300px;
+    padding: 22px;
+  }
+  
+  .record-time-large {
+    font-size: 40px;
+  }
+  
+  .recordings-list-container {
+    max-height: 320px;
+  }
+  
+  .recording-list-item {
+    padding: 14px;
+    font-size: 14px;
+  }
+  
+  .mini-audio-player {
+    height: 38px;
+  }
+  
+  .action-btn {
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  
+  .action-btn img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
 /* 超宽屏幕布局优化 */
 @media (min-width: 1920px) {
   .record-container {
@@ -5215,34 +5608,11 @@ label {
   bottom: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 0;
+  z-index: -10;
+  background-image:url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
 }
 
-.wave {
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.08) 2px, transparent 2px);
-  background-size: 60px 60px;
-  animation: backgroundMove 25s linear infinite;
-}
 
-.wave1 {
-  animation-delay: 0s;
-  background-size: 40px 40px;
-}
-
-.wave2 {
-  animation-delay: -8s;
-  background-size: 80px 80px;
-  opacity: 0.5;
-}
-
-.wave3 {
-  animation-delay: -16s;
-  background-size: 120px 120px;
-  opacity: 0.3;
-}
 
 @keyframes backgroundMove {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
@@ -6185,7 +6555,8 @@ label {
   bottom: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 0;
+  z-index: -10;
+  background-image:url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
 }
 
 .wave {
@@ -10644,7 +11015,8 @@ label {
   bottom: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 0;
+  z-index: -10;
+  background-image:url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
 }
 
 .wave {
@@ -12564,7 +12936,7 @@ html, body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow:
+  box-shadow: 
     0 8px 32px 0 rgba(74, 201, 103, 0.18),
     0 2px 8px 0 rgba(74, 201, 103, 0.10);
   border: 2px solid #e2f5c2;
@@ -12590,7 +12962,7 @@ html, body {
 
 .record-start-btn:hover {
   transform: translateY(-3px);
-  box-shadow:
+  box-shadow: 
     0 16px 40px 0 rgba(74, 201, 103, 0.22),
     0 0 0 8px #eaf7d0,
     0 0 0 20px #f3fadf;
@@ -16871,7 +17243,7 @@ html, body {
   
   .empty-icon {
     font-size: 48px;
-  margin-bottom: 16px;
+    margin-bottom: 16px;
   }
   
   .empty-recordings-state h3 {
@@ -16880,7 +17252,7 @@ html, body {
   }
   
   .empty-recordings-state p {
-  font-size: 16px;
+    font-size: 16px;
     line-height: 1.5;
     max-width: 280px;
   }
