@@ -42,7 +42,7 @@ const RecordComponent = () => {
   // 新增：上传本地录音相关状态
   const [isUploading, setIsUploading] = useState(false); // 是否正在上传文件
   const [uploadProgressState, setUploadProgressState] = useState(0); // 上传进度
-
+  
   // 新增：上传媒体弹窗相关状态
   const [showUploadModal, setShowUploadModal] = useState(false); // 是否显示上传弹窗
   const [wasRecordingBeforeModal, setWasRecordingBeforeModal] = useState(false); // 弹窗前是否在录音
@@ -74,7 +74,7 @@ const RecordComponent = () => {
       navigate('/');
     }
     
-    // 检查是否是从播放页面删除后返回的
+    // 检查是否是从播放页面返回的
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('deleted') === 'true') {
       setJustReturnedFromPlayer(true);
@@ -86,6 +86,14 @@ const RecordComponent = () => {
       setTimeout(() => {
         setJustReturnedFromPlayer(false);
       }, 3000);
+    } else if (urlParams.get('fromPlayer') === 'true') {
+      // 从播放页面正常返回，永久停止智能跳转
+      setJustReturnedFromPlayer(true);
+      // 清理URL参数
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+      
+      // 不再重置标记，永久停止智能跳转功能
     }
   }, [userid, navigate]);
 
@@ -826,9 +834,9 @@ const RecordComponent = () => {
   // 加载已上传的媒体文件
   const loadUploadedMediaFiles = async () => {
     try {
-      // 从localStorage获取已上传的媒体文件
-      const storageKey = `uploadedMedia_${userCode}_${id}`;
-      const stored = localStorage.getItem(storageKey);
+      // 从会话专用存储获取已上传的媒体文件
+      const sessionStorageKey = `uploadedMedia_${userCode}_${id}`;
+      const stored = localStorage.getItem(sessionStorageKey);
       if (stored) {
         const files = JSON.parse(stored);
         setUploadedMediaFiles(files);
@@ -841,15 +849,25 @@ const RecordComponent = () => {
     }
   };
 
-  // 保存媒体文件到localStorage
+  // 保存媒体文件到localStorage（统一存储）
   const saveMediaFileToStorage = (fileInfo) => {
-    const storageKey = `uploadedMedia_${userCode}_${id}`;
-    const updatedFiles = [fileInfo, ...uploadedMediaFiles];
-    localStorage.setItem(storageKey, JSON.stringify(updatedFiles));
-    setUploadedMediaFiles(updatedFiles);
+    // 保存到录音会话专用的存储中
+    const sessionStorageKey = `uploadedMedia_${userCode}_${id}`;
+    const sessionFiles = JSON.parse(localStorage.getItem(sessionStorageKey) || '[]');
+    const updatedSessionFiles = [fileInfo, ...sessionFiles];
+    localStorage.setItem(sessionStorageKey, JSON.stringify(updatedSessionFiles));
+    setUploadedMediaFiles(updatedSessionFiles);
+
+    // 同时保存到全局存储中（供主页和媒体页面使用）
+    const globalFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+    const updatedGlobalFiles = [fileInfo, ...globalFiles];
+    localStorage.setItem('uploadedFiles', JSON.stringify(updatedGlobalFiles));
+    
+    // 触发全局文件更新事件
+    window.dispatchEvent(new Event('filesUpdated'));
   };
 
-  // 生成唯一的媒体文件ID
+  // 生成唯一的媒体文件ID（包含会话信息用于区分来源）
   const generateUniqueMediaId = (isVideo = false) => {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substr(2, 4);
@@ -894,22 +912,12 @@ const RecordComponent = () => {
             try {
               const result = JSON.parse(xhr.responseText);
               if (result.success) {
-                // 上传成功
-                setMediaUploadingFiles(prev => new Map(prev.set(tempId, {
-                  ...prev.get(tempId),
-                  progress: 100,
-                  uploading: false,
-                  success: true
-                })));
-                
-                // 2秒后移除进度显示
-                setTimeout(() => {
-                  setMediaUploadingFiles(prev => {
-                    const newMap = new Map(prev);
-                    newMap.delete(tempId);
-                    return newMap;
-                  });
-                }, 2000);
+                // 上传成功，立即移除进度显示
+                setMediaUploadingFiles(prev => {
+                  const newMap = new Map(prev);
+                  newMap.delete(tempId);
+                  return newMap;
+                });
                 
                 resolve({
                   success: true,
@@ -938,6 +946,15 @@ const RecordComponent = () => {
           reject(new Error('网络错误'));
         });
         
+        xhr.addEventListener('abort', () => {
+          setMediaUploadingFiles(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(tempId);
+            return newMap;
+          });
+          reject(new Error('上传被取消'));
+        });
+        
         // 构建URL，将folder作为查询参数，格式为 userCode/sessionId
         const uploadUrl = new URL(`${API_BASE_URL}/upload`);
         const folderPath = buildRecordingPath(id || 'default', userCode);
@@ -952,6 +969,11 @@ const RecordComponent = () => {
       
     } catch (error) {
       console.error('上传媒体文件失败:', error);
+      setMediaUploadingFiles(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(tempId);
+        return newMap;
+      });
       return {
         success: false,
         error: error.message
@@ -996,11 +1018,12 @@ const RecordComponent = () => {
         preview: previewUrl,
         url: previewUrl,
         timestamp: new Date().toLocaleString('zh-CN'),
-        sessionId: id,
+        sessionId: id, // 录音会话ID
         userCode: userCode,
         uploaded: false,
         cloudUrl: null,
-        objectKey: null
+        objectKey: null,
+        fromRecordPage: true // 标记来源于录音页面
       };
       
       // 先添加到本地列表
@@ -1009,17 +1032,27 @@ const RecordComponent = () => {
       
       // 上传到云端
       try {
+        console.log('开始上传媒体文件到云端...', { fileName: file.name, fileSize: file.size });
         const uploadResult = await uploadMediaFile(file, tempId);
         
-        if (uploadResult.success) {
+        console.log('媒体文件上传结果:', uploadResult);
+        
+        if (uploadResult && uploadResult.success) {
           // 更新文件信息
           const finalFileInfo = {
             ...fileInfo,
             uploaded: true,
             cloudUrl: uploadResult.cloudUrl,
             objectKey: uploadResult.objectKey,
-            etag: uploadResult.etag
+            etag: uploadResult.etag,
+            preview: uploadResult.cloudUrl, // 使用云端URL作为预览
+            url: uploadResult.cloudUrl // 使用云端URL作为访问地址
           };
+          
+          // 释放本地blob URL以节省内存
+          if (fileInfo.preview && fileInfo.preview.startsWith('blob:')) {
+            URL.revokeObjectURL(fileInfo.preview);
+          }
           
           // 更新文件列表
           setUploadedMediaFiles(prev => 
@@ -1029,12 +1062,34 @@ const RecordComponent = () => {
           // 保存到localStorage
           saveMediaFileToStorage(finalFileInfo);
           
+          // 显示上传成功提示
+          alert(`${isVideo ? '视频' : '图片'}上传成功！`);
+          
           console.log('媒体文件上传成功:', finalFileInfo);
         } else {
-          console.error('媒体文件上传失败:', uploadResult.error);
+          const errorMsg = uploadResult?.error || '未知错误';
+          console.error('媒体文件上传失败:', errorMsg);
+          alert(`${isVideo ? '视频' : '图片'}上传失败: ${errorMsg}`);
+          
+          // 释放本地blob URL
+          if (fileInfo.preview && fileInfo.preview.startsWith('blob:')) {
+            URL.revokeObjectURL(fileInfo.preview);
+          }
+          
+          // 从本地列表中移除失败的文件
+          setUploadedMediaFiles(prev => prev.filter(f => f.id !== uniqueId));
         }
       } catch (error) {
         console.error('媒体文件处理失败:', error);
+        alert(`${isVideo ? '视频' : '图片'}处理失败: ${error.message}`);
+        
+        // 释放本地blob URL
+        if (fileInfo.preview && fileInfo.preview.startsWith('blob:')) {
+          URL.revokeObjectURL(fileInfo.preview);
+        }
+        
+        // 从本地列表中移除失败的文件
+        setUploadedMediaFiles(prev => prev.filter(f => f.id !== uniqueId));
       }
     }
   };
@@ -1124,13 +1179,20 @@ const RecordComponent = () => {
       }
     }
     
-    // 删除本地记录
-    const updatedFiles = uploadedMediaFiles.filter(f => f.id !== fileId);
-    setUploadedMediaFiles(updatedFiles);
+    // 从会话存储中删除
+    const updatedSessionFiles = uploadedMediaFiles.filter(f => f.id !== fileId);
+    setUploadedMediaFiles(updatedSessionFiles);
     
-    // 更新localStorage
-    const storageKey = `uploadedMedia_${userCode}_${id}`;
-    localStorage.setItem(storageKey, JSON.stringify(updatedFiles));
+    const sessionStorageKey = `uploadedMedia_${userCode}_${id}`;
+    localStorage.setItem(sessionStorageKey, JSON.stringify(updatedSessionFiles));
+
+    // 从全局存储中删除
+    const globalFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+    const updatedGlobalFiles = globalFiles.filter(f => f.id !== fileId);
+    localStorage.setItem('uploadedFiles', JSON.stringify(updatedGlobalFiles));
+    
+    // 触发全局文件更新事件
+    window.dispatchEvent(new Event('filesUpdated'));
   };
 
   const handlePreviewMediaFile = (file) => {
@@ -1320,9 +1382,9 @@ const RecordComponent = () => {
     }
   };
 
-  // 检测已绑定录音，智能跳转到播放页面
+  // 检测已绑定录音，智能跳转到播放页面（用户从播放页面返回后永久停止此功能）
   useEffect(() => {
-    // 防止无限循环跳转
+    // 防止无限循环跳转：如果用户曾从播放页面返回或正在检查文件，则永久停止自动跳转
     if (justReturnedFromPlayer || isCheckingFiles) {
       return;
     }
@@ -1332,11 +1394,11 @@ const RecordComponent = () => {
       cleanupDeletedRecordings().then((existingRecordings) => {
         // 如果清理后还有录音存在，且没有刚从播放页面返回，则跳转
         if (existingRecordings.length > 0 && !justReturnedFromPlayer) {
-      // 跳转到第一个已绑定录音的播放页面
+          // 跳转到第一个已绑定录音的播放页面
           const firstRecording = existingRecordings[0];
           const recordingId = firstRecording.originalRecordingId || firstRecording.id;
           navigate(`/${userCode}/${id}/play/${recordingId}`);
-    }
+        }
       });
     }
   }, [boundRecordings, userCode, id, navigate, justReturnedFromPlayer, isCheckingFiles]);
@@ -1436,29 +1498,46 @@ const RecordComponent = () => {
                   {currentFiles.map(file => (
                     <div key={file.id} className="upload-modal-media-item">
                       <div className="upload-modal-media-content" onClick={() => handlePreviewMediaFile(file)}>
-                        {file.type === 'image' ? (
-                          <img src={file.preview || file.url} alt={file.name} className="upload-modal-media-preview" />
-                        ) : (
-                          <div className="upload-modal-video-preview">
-                            <video 
-                              src={file.preview || file.url} 
-                              className="upload-modal-media-preview"
-                              muted
-                              preload="metadata"
-                              onLoadedMetadata={(e) => {
-                                e.target.currentTime = 1;
-                              }}
-                            />
-                            <div className="upload-modal-video-overlay">
-                              <div className="upload-modal-video-play-icon">▶</div>
-                            </div>
-                            {file.id && file.id.includes('vid_') && (
-                              <div className="upload-modal-video-id-display">
-                                ID: {file.id.split('_').pop()}
-                              </div>
+                                            {file.type === 'image' ? (
+                      <div className="upload-modal-image-preview">
+                        <img src={file.preview || file.url} alt={file.name} className="upload-modal-media-preview" />
+                        {file.id && file.id.includes('img_') && (
+                          <div className="upload-modal-image-id-display">
+                            {/* 检查是否包含会话ID（从录音页面上传的文件） */}
+                            {file.id.split('_').length >= 3 && file.id.split('_')[1] === id ? (
+                              <>会话: {file.id.split('_')[1]} | ID: {file.id.split('_').slice(-1)[0]}</>
+                            ) : (
+                              <>ID: {file.id.split('_').slice(-1)[0]}</>
                             )}
                           </div>
                         )}
+                      </div>
+                    ) : (
+                      <div className="upload-modal-video-preview">
+                        <video 
+                          src={file.preview || file.url} 
+                          className="upload-modal-media-preview"
+                          muted
+                          preload="metadata"
+                          onLoadedMetadata={(e) => {
+                            e.target.currentTime = 1;
+                          }}
+                        />
+                        <div className="upload-modal-video-overlay">
+                          <div className="upload-modal-video-play-icon">▶</div>
+                        </div>
+                        {file.id && file.id.includes('vid_') && (
+                          <div className="upload-modal-video-id-display">
+                            {/* 检查是否包含会话ID（从录音页面上传的文件） */}
+                            {file.id.split('_').length >= 3 && file.id.split('_')[1] === id ? (
+                              <>会话: {file.id.split('_')[1]} | ID: {file.id.split('_').slice(-1)[0]}</>
+                            ) : (
+                              <>ID: {file.id.split('_').slice(-1)[0]}</>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                         <div className="upload-modal-media-overlay">
                           <button 
                             className="upload-modal-delete-media-btn"
@@ -1485,7 +1564,7 @@ const RecordComponent = () => {
                                 className="upload-modal-progress-ring-background"
                                 cx="60"
                                 cy="60"
-                                r="54"
+                                r="30"
                               />
                               <circle
                                 className="upload-modal-progress-ring-progress"

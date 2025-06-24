@@ -149,22 +149,12 @@ const UploadMediaPage = () => {
             try {
               const result = JSON.parse(xhr.responseText);
               if (result.success) {
-                // 上传成功，显示成功状态
-                setUploadingFiles(prev => new Map(prev.set(tempId, {
-                  ...prev.get(tempId),
-                  progress: 100,
-                  uploading: false,
-                  success: true
-                })));
-                
-                // 2秒后移除进度显示
-                setTimeout(() => {
+                // 上传成功，立即移除进度显示
                   setUploadingFiles(prev => {
                     const newMap = new Map(prev);
                     newMap.delete(tempId);
                     return newMap;
                   });
-                }, 2000);
                 
                 resolve({
                   success: true,
@@ -274,10 +264,16 @@ const UploadMediaPage = () => {
                 type: newFile.type,
                 uploadTime: newFile.uploadTime,
                 objectKey: result.objectKey,
-                sessionId: sessionid
+                sessionId: sessionid,
+                fromRecordPage: false // 从UploadMediaPage上传的标记为false
               };
               saveToLocalStorage(fileInfo);
+              
+              // 显示上传成功提示
+              alert(`图片上传成功！`);
             }
+          }).catch(error => {
+            alert(`图片上传失败: ${error.message}`);
           });
         };
         reader.readAsDataURL(file);
@@ -310,10 +306,16 @@ const UploadMediaPage = () => {
               type: newFile.type,
               uploadTime: newFile.uploadTime,
               objectKey: result.objectKey,
-              sessionId: sessionid
+              sessionId: sessionid,
+              fromRecordPage: false // 从UploadMediaPage上传的标记为false
             };
             saveToLocalStorage(fileInfo);
+            
+            // 显示上传成功提示
+            alert(`视频上传成功！`);
           }
+        }).catch(error => {
+          alert(`视频上传失败: ${error.message}`);
         });
       }
     });
@@ -581,7 +583,20 @@ const UploadMediaPage = () => {
                 <div key={file.id} className="media-item">
                   <div className="media-content" onClick={() => handlePreviewFile(file)}>
                     {file.type === 'image' ? (
+                      <div className="image-preview">
                       <img src={file.preview || file.url} alt={file.name} className="media-preview" />
+                        {/* 显示图片ID，区分是否从录音页面上传 */}
+                        {file.id && file.id.startsWith('img_') && (
+                          <div className="image-id-display">
+                            {/* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */}
+                            {file.sessionId && file.fromRecordPage ? (
+                              <>会话: {file.sessionId} | ID: {file.id.split('_').slice(-1)[0]}</>
+                            ) : (
+                              <>ID: {file.id.split('_').slice(-1)[0]}</>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <div className="video-preview">
                         <video 
@@ -596,10 +611,15 @@ const UploadMediaPage = () => {
                         <div className="video-overlay">
                           <div className="video-play-icon">▶</div>
                         </div>
-                        {/* 显示视频唯一ID */}
+                        {/* 显示视频ID，区分是否从录音页面上传 */}
                         {file.id && file.id.startsWith('vid_') && (
                           <div className="video-id-display">
-                            ID: {file.id.split('_').pop()}
+                            {/* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */}
+                            {file.sessionId && file.fromRecordPage ? (
+                              <>会话: {file.sessionId} | ID: {file.id.split('_').slice(-1)[0]}</>
+                            ) : (
+                              <>ID: {file.id.split('_').slice(-1)[0]}</>
+                            )}
                           </div>
                         )}
                       </div>
@@ -644,18 +664,11 @@ const UploadMediaPage = () => {
                           />
                         </svg>
                         <div className="progress-text">
-                          {uploadInfo.success ? (
-                            <div className="success-icon">✓</div>
-                          ) : (
                             <div className="progress-percentage">{Math.round(uploadInfo.progress)}%</div>
-                          )}
                         </div>
                       </div>
                     </div>
                     <div className="upload-file-name">{uploadInfo.fileName}</div>
-                    {uploadInfo.success && (
-                      <div className="upload-success-message">上传成功！</div>
-                    )}
                   </div>
                 </div>
               ))}

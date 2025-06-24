@@ -842,9 +842,9 @@ const PlayerPage = () => {
 
       {/* 顶部导航 */}
       <header className="player-header">
-        <button onClick={() => navigate(`/${userCode}/app`)} className="nav-back-btn">
+        <button onClick={() => navigate(`/${userCode}/${id}?fromPlayer=true`)} className="nav-back-btn">
           <span className="back-icon">←</span>
-          <span>返回</span>
+          <span>返回录音页面</span>
         </button>
         
         <div className="session-info">
