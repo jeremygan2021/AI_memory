@@ -294,7 +294,7 @@
 /* 录音信息区域 */
 .recording-info {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 0;
 }
 
 .recording-avatar {
@@ -1805,5 +1805,424 @@
 @media (prefers-color-scheme: dark) {
   .ios-interaction-prompt {
     background-color: rgba(28, 28, 30, 0.95);
+  }
+}
+
+/* 轮播图区域样式 */
+.media-carousel-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.carousel-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.carousel-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+}
+
+.media-carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-container {
+  width: 400px;
+  height: 240px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  position: relative;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.carousel-item {
+  flex: 0 0 100%;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.carousel-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+}
+
+.carousel-video {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.video-play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.play-icon {
+  color: white;
+  font-size: 14px;
+  margin-left: 2px;
+}
+
+.media-type-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.carousel-nav {
+  background: rgba(255, 255, 255, 0);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  /* align-items: center; */
+  justify-content: center;
+  color: #5fce70;
+  font-size: 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  margin: 0 16px;
+}
+
+.carousel-nav:hover {
+  background: rgba(118, 200, 149, 0.3);
+  transform: scale(1.1);
+}
+
+.carousel-nav.prev {
+  margin-right: 16px;
+}
+
+.carousel-nav.next {
+  margin-left: 16px;
+}
+
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.2);
+}
+
+/* 图片预览弹窗样式 */
+.preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+}
+
+.preview-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.preview-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10000;
+}
+
+.preview-close:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.preview-image {
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+}
+
+.preview-info {
+  padding: 20px;
+  background: white;
+}
+
+.preview-info h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #333;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+}
+
+.preview-info p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .media-carousel-section {
+    margin: 0;
+    padding: 0;
+  }
+
+  .carousel-title {
+    font-size: 16px;
+  }
+
+  .carousel-container {
+    width: 320px;
+    height: 200px;
+  }
+
+  .carousel-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    margin: 0 12px;
+  }
+
+  .video-play-overlay {
+    width: 32px;
+    height: 32px;
+  }
+
+  .play-icon {
+    font-size: 12px;
+  }
+
+  .preview-content {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .preview-close {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    top: 12px;
+    right: 12px;
+  }
+
+  .preview-image {
+    max-height: 60vh;
+  }
+
+  .preview-info {
+    padding: 16px;
+  }
+
+  .preview-info h4 {
+    font-size: 16px;
+  }
+
+  .preview-info p {
+    font-size: 13px;
+  }
+
+  /* 主播放器区域最大高度限制 */
+  .player-main {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+
+  .player-container {
+    max-height: calc(100vh - 140px);
+  }
+}
+
+@media (max-width: 480px) {
+  .media-carousel-section {
+    margin: 0;
+    padding: 0;
+  }
+
+  .carousel-title {
+    font-size: 14px;
+  }
+
+  .carousel-container {
+    width: 280px;
+    height: 168px;
+  }
+
+  .carousel-nav {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    margin: 0 8px;
+  }
+
+  .video-play-overlay {
+    width: 28px;
+    height: 28px;
+  }
+
+  .play-icon {
+    font-size: 10px;
+  }
+
+  .media-type-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .preview-info h4 {
+    font-size: 14px;
+  }
+
+  .preview-info p {
+    font-size: 12px;
+  }
+
+  /* 超小屏设备主播放器区域优化 */
+  .player-main {
+    max-height: calc(100vh - 100px);
+  }
+
+  .player-container {
+    max-height: calc(100vh - 120px);
+  }
+}
+
+@media (max-width: 375px) {
+  .carousel-container {
+    width: 240px;
+    height: 144px;
+  }
+
+  .carousel-nav {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    margin: 0 6px;
+  }
+
+  .video-play-overlay {
+    width: 24px;
+    height: 24px;
+  }
+
+  .play-icon {
+    font-size: 8px;
+  }
+}
+
+/* 横屏模式优化 */
+@media (max-width: 900px) and (orientation: landscape) {
+  .media-carousel-section {
+    margin: 0;
+    padding: 0;
+  }
+
+  .carousel-container {
+    width: 240px;
+    height: 144px;
+  }
+
+  .player-main {
+    max-height: calc(100vh - 80px);
+  }
+
+  .player-container {
+    max-height: calc(100vh - 100px);
+  }
+}
+
+/* 高度受限设备优化 */
+@media screen and (max-height: 600px) {
+  .player-main {
+    max-height: calc(100vh - 60px);
+    padding: 8px 20px;
+  }
+
+  .player-container {
+    max-height: calc(100vh - 80px);
+    padding: 16px;
+  }
+
+  .media-carousel-section {
+    margin: 0;
+    padding: 0;
+  }
+
+  .carousel-container {
+    width: 200px;
+    height: 120px;
   }
 } 

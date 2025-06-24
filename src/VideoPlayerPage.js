@@ -119,23 +119,31 @@ const VideoPlayerPage = () => {
         const videoFiles = files.filter(file => file.type === 'video');
         
         // 查找指定的视频文件
-        const foundVideo = videoFiles.find(file => 
-          file.id.toString() === videoId || 
-          videoFiles.indexOf(file).toString() === videoId
-        );
+        let foundVideo = null;
+        
+        // 优先通过唯一ID查找（新系统）
+        if (videoId && videoId.startsWith('vid_')) {
+          foundVideo = videoFiles.find(file => file.id === videoId);
+        } else {
+          // 兼容旧系统的查找方式
+          foundVideo = videoFiles.find(file => 
+            file.id.toString() === videoId || 
+            videoFiles.indexOf(file).toString() === videoId
+          );
+        }
         
         if (foundVideo) {
           setVideo(foundVideo);
           setLoading(false);
         } else {
-
+          console.log('未找到指定的视频文件，videoId:', videoId);
           setLoading(false);
         }
       } else {
         setLoading(false);
       }
     } catch (error) {
-
+      console.error('加载视频数据失败:', error);
       setLoading(false);
     }
   };
@@ -179,6 +187,15 @@ const VideoPlayerPage = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
 
+    const handleCanPlay = () => {
+      // 视频可以播放时自动开始播放
+      if (userInteracted) {
+        videoElement.play().catch(err => {
+          console.log('自动播放失败:', err);
+        });
+      }
+    };
+
     videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
     videoElement.addEventListener('timeupdate', handleTimeUpdate);
     videoElement.addEventListener('play', handlePlay);
@@ -186,6 +203,7 @@ const VideoPlayerPage = () => {
     videoElement.addEventListener('ended', handleEnded);
     videoElement.addEventListener('volumechange', handleVolumeChange);
     videoElement.addEventListener('ratechange', handleRateChange);
+    videoElement.addEventListener('canplay', handleCanPlay);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
@@ -196,6 +214,7 @@ const VideoPlayerPage = () => {
       videoElement.removeEventListener('ended', handleEnded);
       videoElement.removeEventListener('volumechange', handleVolumeChange);
       videoElement.removeEventListener('ratechange', handleRateChange);
+      videoElement.removeEventListener('canplay', handleCanPlay);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [video]);
@@ -260,12 +279,52 @@ const VideoPlayerPage = () => {
   };
 
   const goBack = () => {
-    if (sessionid) {
-      // 如果有sessionid，返回到对应的上传页面
+    // 检查URL参数中是否有from=player标识
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromPlayer = urlParams.get('from');
+    
+    if (fromPlayer === 'player') {
+      // 从播放页面进入的，返回播放页面
+      const recordingId = urlParams.get('recordingId') || 'default';
+      navigate(`/${userCode}/${sessionid}/play/${recordingId}`);
+    } else if (sessionid && sessionid !== 'homepage') {
+      // 有具体的sessionid，返回到对应的上传页面
       navigate(`/${userCode}/upload-media/${sessionid}`);
     } else {
-      // 否则返回主页
+      // 如果是从主页进入的视频或没有sessionid，返回主页
       navigate(`/${userCode}`);
+    }
+  };
+
+  const deleteVideo = async () => {
+    if (!video) return;
+    
+    if (!window.confirm('确定要删除这个视频吗？删除后无法恢复。')) {
+      return;
+    }
+
+    try {
+      // 如果有服务器objectKey，尝试从服务器删除
+      if (video.objectKey) {
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+        const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(video.objectKey)}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) {
+          console.warn('服务器删除失败，但继续删除本地记录');
+        }
+      }
+      
+      // 从localStorage删除
+      const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+      const updated = saved.filter(file => file.id !== video.id);
+      localStorage.setItem('uploadedFiles', JSON.stringify(updated));
+      window.dispatchEvent(new Event('filesUpdated'));
+      
+      // 删除成功后跳转回来源页面
+      goBack();
+    } catch (error) {
+      alert('删除失败: ' + error.message);
     }
   };
 
@@ -286,10 +345,10 @@ const VideoPlayerPage = () => {
         <div className="error-content">
           <h2>视频未找到</h2>
           <p>无法找到指定的视频文件</p>
-          <button className="nav-back-btn" onClick={goBack}>
-            <span className="back-icon">←</span>
-            返回主页
-          </button>
+                  <button className="nav-back-btn" onClick={goBack}>
+          <span className="back-icon">←</span>
+          返回
+        </button>
         </div>
       </div>
     );
@@ -308,18 +367,15 @@ const VideoPlayerPage = () => {
       <div className="player-header">
         <button className="nav-back-btn" onClick={goBack}>
           <span className="back-icon">←</span>
-          返回主页
+          返回
         </button>
         <div className="session-info">
-          <span className="session-label">用户:</span>
-          <span className="session-id">{userCode}</span>
-          {sessionid && sessionid !== 'homepage' && (
-            <>
-              <span className="session-label"> | 会话:</span>
-              <span className="session-id">{sessionid}</span>
-            </>
-          )}
+          <span>用户: {userCode} | 视频ID: {video.id.split('_').pop()}</span>
         </div>
+        <button className="delete-video-btn" onClick={deleteVideo} title="删除视频">
+          <span className="delete-icon">🗑️</span>
+          删除
+        </button>
       </div>
 
       {/* 主播放区域 */}

@@ -501,10 +501,15 @@ const HomePage = () => {
   const openVideoPlayer = (idx) => {
     if (userCode && uploadedVideos[idx]) {
       const videoFile = uploadedVideos[idx];
-      // 为首页视频生成一个默认的sessionid
-      const defaultSessionId = 'homepage';
-      // 跳转到视频播放页面，传递sessionid和视频ID
-      navigate(`/${userCode}/video-player/${defaultSessionId}/${videoFile.id || idx}`);
+      
+      // 使用新的独立视频ID路由
+      if (videoFile.id && videoFile.id.startsWith('vid_')) {
+        navigate(`/${userCode}/video-player/${videoFile.id}`);
+      } else {
+        // 兼容旧系统，使用默认sessionid
+        const defaultSessionId = 'homepage';
+        navigate(`/${userCode}/video-player/${defaultSessionId}/${videoFile.id || idx}`);
+      }
     }
   };
 
@@ -939,7 +944,8 @@ function App() {
       <Route path="/:userid/audio-library" element={<AudioLibrary />} />
       <Route path="/:userid/gallery" element={<UploadMediaPage />} />
       <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
-      <Route path="/:userid/video-player/:sessionid/:videoId" element={<VideoPlayerPage />} />
+                      <Route path="/:userid/video-player/:sessionid/:videoId" element={<VideoPlayerPage />} />
+                <Route path="/:userid/video-player/:videoId" element={<VideoPlayerPage />} />
       <Route path="/:userid/:id" element={<RecordPage />} />
       <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
     </Routes>

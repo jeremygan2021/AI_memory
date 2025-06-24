@@ -26,6 +26,11 @@ const PlayerPage = () => {
   const [userCode, setUserCode] = useState(''); // 4字符用户代码
   const [userInteracted, setUserInteracted] = useState(false); // 用户交互状态
   const [isIOS, setIsIOS] = useState(false); // iOS设备检测
+  const [mediaFiles, setMediaFiles] = useState([]); // 关联的照片和视频文件
+  const [previewFile, setPreviewFile] = useState(null); // 预览文件
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0); // 当前轮播索引
+  const [isCarouselHovered, setIsCarouselHovered] = useState(false); // 轮播图悬停状态
+  const carouselTimerRef = useRef(null); // 轮播定时器引用
 
   // 检测iOS设备
   useEffect(() => {
@@ -135,8 +140,37 @@ const PlayerPage = () => {
   useEffect(() => {
     if (id && recordingId && userCode) {
       loadRecordingFromCloud();
+      loadMediaFiles();
     }
   }, [id, recordingId, userCode, navigate]);
+
+  // 加载与当前会话相关的照片和视频
+  const loadMediaFiles = () => {
+    try {
+      const saved = localStorage.getItem('uploadedFiles');
+      if (saved) {
+        const allFiles = JSON.parse(saved);
+        // 过滤出与当前会话ID相关的照片和视频文件
+        const sessionFiles = allFiles.filter(file => 
+          file.sessionId === id && (file.type === 'image' || file.type === 'video')
+        );
+        console.log('加载到的会话相关媒体文件:', sessionFiles);
+        setMediaFiles(sessionFiles);
+      }
+    } catch (error) {
+      console.error('加载媒体文件失败:', error);
+    }
+  };
+
+  // 监听localStorage变化，实时更新媒体文件
+  useEffect(() => {
+    const handleFilesUpdated = () => {
+      loadMediaFiles();
+    };
+    
+    window.addEventListener('filesUpdated', handleFilesUpdated);
+    return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
+  }, [id]);
 
   const loadRecordingFromCloud = async () => {
     try {
@@ -442,14 +476,14 @@ const PlayerPage = () => {
   }, [recording, isIOS]);
 
   // 自动播放音频
-  // useEffect(() =>{
-  //   if(audioReady && audioRef.current && typeof audioRef.current.play === 'function'){
-  //     audioRef.current.play().catch((err) =>{
-  //       // 处理自动播放被浏览器拦截的情况
-  //       console.warn('自动播放失败，可能被浏览器拦截：',err);
-  //     });
-  //   }
-  // },[audioReady]);
+  useEffect(() =>{
+    if(audioReady && audioRef.current && typeof audioRef.current.play === 'function'){
+      audioRef.current.play().catch((err) =>{
+        // 处理自动播放被浏览器拦截的情况
+        console.warn('自动播放失败，可能被浏览器拦截：',err);
+      });
+    }
+  },[audioReady]);
 
   // 播放/暂停控制
   const togglePlayPause = async () => {
@@ -695,6 +729,83 @@ const PlayerPage = () => {
     return Math.max(0, Math.min(100, percent));
   };
 
+  // 轮播图相关函数
+  const goToPrevMedia = () => {
+    setCurrentMediaIndex(prev => 
+      prev === 0 ? mediaFiles.length - 1 : prev - 1
+    );
+    // 用户手动操作时重置定时器
+    resetCarouselTimer();
+  };
+
+  const goToNextMedia = () => {
+    setCurrentMediaIndex(prev => 
+      prev === mediaFiles.length - 1 ? 0 : prev + 1
+    );
+    // 用户手动操作时重置定时器
+    resetCarouselTimer();
+  };
+
+  // 开始自动轮播
+  const startCarouselTimer = () => {
+    if (mediaFiles.length > 1 && !isCarouselHovered) {
+      carouselTimerRef.current = setInterval(() => {
+        setCurrentMediaIndex(prev => 
+          prev === mediaFiles.length - 1 ? 0 : prev + 1
+        );
+      }, 3000); // 每3秒切换一次
+    }
+  };
+
+  // 停止自动轮播
+  const stopCarouselTimer = () => {
+    if (carouselTimerRef.current) {
+      clearInterval(carouselTimerRef.current);
+      carouselTimerRef.current = null;
+    }
+  };
+
+  // 重置自动轮播定时器
+  const resetCarouselTimer = () => {
+    stopCarouselTimer();
+    startCarouselTimer();
+  };
+
+  // 自动轮播控制
+  useEffect(() => {
+    if (mediaFiles.length > 1) {
+      if (isCarouselHovered) {
+        stopCarouselTimer();
+      } else {
+        startCarouselTimer();
+      }
+    }
+
+    return () => stopCarouselTimer();
+  }, [mediaFiles.length, isCarouselHovered]);
+
+  // 清理定时器
+  useEffect(() => {
+    return () => stopCarouselTimer();
+  }, []);
+
+  const handleMediaClick = (file) => {
+    if (file.type === 'image') {
+      // 图片预览
+      setPreviewFile(file);
+    } else if (file.type === 'video') {
+      // 跳转到视频播放页面，使用来源标识
+      const videoId = file.id || file.uniqueId;
+      if (videoId) {
+        navigate(`/${userCode}/video-player/${id}/${videoId}?from=player&recordingId=${recordingId}`);
+      }
+    }
+  };
+
+  const closePreview = () => {
+    setPreviewFile(null);
+  };
+
   if (loading) {
     return (
       <div className="player-page loading">
@@ -737,8 +848,7 @@ const PlayerPage = () => {
         </button>
         
         <div className="session-info">
-          <span className="session-label">会话ID</span>
-          <span className="session-id">{userCode ? `${userCode}/${id}` : id}</span>
+          <span className="session-label">会话ID:{userCode ? `${userCode}/${id}` : id}</span>  
         </div>
         
         <button onClick={deleteRecording} className="delete-recording-btn">
@@ -765,6 +875,87 @@ const PlayerPage = () => {
               </div>
             </div>
           </div>
+
+          {/* 轮播图区域 - 只有上传了照片或视频才显示 */}
+          {mediaFiles.length > 0 && (
+            <div className="media-carousel-section">
+              
+              <div 
+                className="media-carousel"
+                onMouseEnter={() => setIsCarouselHovered(true)}
+                onMouseLeave={() => setIsCarouselHovered(false)}
+              >
+                {mediaFiles.length > 1 && (
+                  <button className="carousel-nav prev" onClick={goToPrevMedia}>
+                    ‹
+                  </button>
+                )}
+                
+                <div className="carousel-container">
+                  <div 
+                    className="carousel-track"
+                    style={{
+                      transform: `translateX(-${currentMediaIndex * 100}%)`,
+                      width: `${mediaFiles.length * 100}%`
+                    }}
+                  >
+                    {mediaFiles.map((file, index) => (
+                      <div 
+                        key={file.id || index} 
+                        className="carousel-item"
+                        onClick={() => handleMediaClick(file)}
+                      >
+                        {file.type === 'image' ? (
+                          <img 
+                            src={file.preview || file.url} 
+                            alt={file.name}
+                            className="carousel-media"
+                          />
+                        ) : (
+                          <div className="carousel-video">
+                            <video 
+                              src={file.preview || file.url}
+                              className="carousel-media"
+                              muted
+                              preload="metadata"
+                            />
+                            {/* <div className="video-play-overlay">
+                              <div className="play-icon">▶</div>
+                            </div> */}
+                          </div>
+                        )}
+                        <div className="media-type-badge">
+                          {file.type === 'image' ? '📷' : '🎬'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {mediaFiles.length > 1 && (
+                  <button className="carousel-nav next" onClick={goToNextMedia}>
+                    ›
+                  </button>
+                )}
+              </div>
+              
+              {/* 指示器
+              {mediaFiles.length > 1 && (
+                <div className="carousel-indicators">
+                  {mediaFiles.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`indicator ${index === currentMediaIndex ? 'active' : ''}`}
+                      onClick={() => {
+                        setCurrentMediaIndex(index);
+                        resetCarouselTimer();
+                      }}
+                    />
+                  ))}
+                </div>
+              )} */}
+            </div>
+          )}
 
           {/* 进度条 */}
           <div className="progress-section">
@@ -944,6 +1135,24 @@ const PlayerPage = () => {
             >
               启用音频
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 图片预览弹窗 */}
+      {previewFile && (
+        <div className="preview-overlay" onClick={closePreview}>
+          <div className="preview-content" onClick={(e) => e.stopPropagation()}>
+            <button className="preview-close" onClick={closePreview}>×</button>
+            <img 
+              src={previewFile.preview || previewFile.url} 
+              alt={previewFile.name}
+              className="preview-image"
+            />
+            <div className="preview-info">
+              <h4>{previewFile.name}</h4>
+              <p>上传时间: {previewFile.uploadTime}</p>
+            </div>
           </div>
         </div>
       )}

@@ -14,9 +14,27 @@ const UploadMediaPage = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [userCode, setUserCode] = useState('');
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'photos' 或 'videos'
+  const [uploadingFiles, setUploadingFiles] = useState(new Map()); // 跟踪上传进度的文件
+  const [fromSource, setFromSource] = useState(''); // 来源页面标识
   const filesPerPage = 12;
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+
+  // 生成唯一的视频标识码
+  const generateUniqueVideoId = () => {
+    const timestamp = Date.now().toString();
+    const random = Math.random().toString(36).substr(2, 4);
+    const uniqueId = Math.random().toString(36).substr(2, 8); // 8位唯一ID
+    return `vid_${timestamp}_${random}_${uniqueId}`;
+  };
+
+  // 生成唯一的图片标识码
+  const generateUniqueImageId = () => {
+    const timestamp = Date.now().toString();
+    const random = Math.random().toString(36).substr(2, 4);
+    const uniqueId = Math.random().toString(36).substr(2, 8); // 8位唯一ID
+    return `img_${timestamp}_${random}_${uniqueId}`;
+  };
 
   // 从URL参数获取用户代码和会话ID
   useEffect(() => {
@@ -41,6 +59,11 @@ const UploadMediaPage = () => {
       navigate('/');
       return;
     }
+
+    // 检查来源参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const source = urlParams.get('from');
+    setFromSource(source || '');
   }, [userid, sessionid, navigate]);
 
   // 检测移动设备
@@ -82,45 +105,106 @@ const UploadMediaPage = () => {
     };
   }, [isMobile]);
 
-  // 返回主页
+  // 返回逻辑 - 根据来源决定返回哪里
   const goBack = () => {
-    navigate(`/${userCode}`);
+    if (fromSource === 'record') {
+      // 从录音页面跳转过来的，返回录音页面
+      navigate(`/${userCode}/${sessionid}`);
+    } else {
+      // 其他情况返回主页
+      navigate(`/${userCode}`);
+    }
   };
 
-  // 上传文件到服务器
-  const uploadFile = async (file) => {
+  // 上传文件到服务器，支持进度跟踪
+  const uploadFile = async (file, tempId) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${API_BASE_URL}/upload`, {
-        method: 'POST',
-        body: formData,
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        // 设置上传进度监听
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            setUploadingFiles(prev => new Map(prev.set(tempId, {
+              ...prev.get(tempId),
+              progress: percentComplete
+            })));
+          }
+        });
+        
+        xhr.addEventListener('loadstart', () => {
+          setUploadingFiles(prev => new Map(prev.set(tempId, {
+            fileName: file.name,
+            progress: 0,
+            uploading: true
+          })));
+        });
+        
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const result = JSON.parse(xhr.responseText);
+              if (result.success) {
+                // 上传成功，显示成功状态
+                setUploadingFiles(prev => new Map(prev.set(tempId, {
+                  ...prev.get(tempId),
+                  progress: 100,
+                  uploading: false,
+                  success: true
+                })));
+                
+                // 2秒后移除进度显示
+                setTimeout(() => {
+                  setUploadingFiles(prev => {
+                    const newMap = new Map(prev);
+                    newMap.delete(tempId);
+                    return newMap;
+                  });
+                }, 2000);
+                
+                resolve({
+                  success: true,
+                  cloudUrl: result.file_url,
+                  objectKey: result.object_key,
+                  etag: result.etag,
+                  requestId: result.request_id
+                });
+              } else {
+                throw new Error(result.message || '上传失败');
+              }
+            } catch (parseError) {
+              reject(new Error('响应解析失败'));
+            }
+          } else {
+            reject(new Error(`上传失败: ${xhr.status} - ${xhr.statusText}`));
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          setUploadingFiles(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(tempId);
+            return newMap;
+          });
+          reject(new Error('网络错误'));
+        });
+        
+        xhr.addEventListener('abort', () => {
+          setUploadingFiles(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(tempId);
+            return newMap;
+          });
+          reject(new Error('上传被取消'));
+        });
+        
+        xhr.open('POST', `${API_BASE_URL}/upload`);
+        xhr.send(formData);
       });
-
-      if (!response.ok) {
-        let errorDetail = '';
-        try {
-          const errorData = await response.json();
-          errorDetail = errorData.detail || errorData.message || response.statusText;
-        } catch {
-          errorDetail = response.statusText;
-        }
-        throw new Error(`上传失败: ${response.status} - ${errorDetail}`);
-      }
-
-      const result = await response.json();
-      if (result.success) {
-        return {
-          success: true,
-          cloudUrl: result.file_url,
-          objectKey: result.object_key,
-          etag: result.etag,
-          requestId: result.request_id
-        };
-      } else {
-        throw new Error(result.message || '上传失败');
-      }
     } catch (error) {
       alert(`文件上传失败: ${error.message}`);
       return { success: false, error: error.message };
@@ -164,8 +248,12 @@ const UploadMediaPage = () => {
         // 处理图片文件
         const reader = new FileReader();
         reader.onload = (e) => {
+          const uniqueId = generateUniqueImageId(); // 生成唯一图片ID
+          const tempId = Date.now() + Math.random(); // 临时ID用于跟踪上传进度
+          
           const newFile = {
-            id: Date.now() + Math.random(),
+            id: uniqueId,
+            tempId: tempId,
             name: file.name,
             url: e.target.result,
             file: file,
@@ -177,10 +265,10 @@ const UploadMediaPage = () => {
           setUploadedFiles(prev => [...prev, newFile]);
           
           // 上传到服务器
-          uploadFile(file).then(result => {
+          uploadFile(file, tempId).then(result => {
             if (result.success) {
               const fileInfo = {
-                id: newFile.id,
+                id: uniqueId,
                 name: newFile.name,
                 preview: result.cloudUrl,
                 type: newFile.type,
@@ -195,9 +283,13 @@ const UploadMediaPage = () => {
         reader.readAsDataURL(file);
       } else if (isVideo) {
         // 处理视频文件
+        const uniqueId = generateUniqueVideoId(); // 生成唯一视频ID
+        const tempId = Date.now() + Math.random(); // 临时ID用于跟踪上传进度
         const videoUrl = URL.createObjectURL(file);
+        
         const newFile = {
-          id: Date.now() + Math.random(),
+          id: uniqueId,
+          tempId: tempId,
           name: file.name,
           url: videoUrl,
           file: file,
@@ -209,10 +301,10 @@ const UploadMediaPage = () => {
         setUploadedFiles(prev => [...prev, newFile]);
         
         // 上传到服务器
-        uploadFile(file).then(result => {
+        uploadFile(file, tempId).then(result => {
           if (result.success) {
             const fileInfo = {
-              id: newFile.id,
+              id: uniqueId,
               name: newFile.name,
               preview: result.cloudUrl,
               type: newFile.type,
@@ -326,8 +418,14 @@ const UploadMediaPage = () => {
 
   const handlePreviewFile = (file) => {
     if (file.type === 'video') {
-      // 视频跳转到播放页面，带上sessionid和文件ID
-      navigate(`/${userCode}/video-player/${sessionid}/${file.id}`);
+      // // 视频跳转到播放页面，使用新的独立路由
+      // if (file.id && file.id.startsWith('vid_')) {
+      //   // 新的独立视频ID，无需sessionid
+      //   navigate(`/${userCode}/video-player/${file.id}`);
+      // } else {
+        // 兼容旧的视频ID，使用sessionid路由
+        navigate(`/${userCode}/video-player/${sessionid}/${file.id}`);
+      // }
     } else {
       // 图片显示预览弹窗
       setPreviewFile(file);
@@ -403,14 +501,14 @@ const UploadMediaPage = () => {
       {/* 顶部导航 */}
       <div className="upload-header">
         <div className="back-button" onClick={goBack}>
-          <span className="back-text">← 返回主页</span>
+          <span className="back-text">
+            ← {fromSource === 'record' ? '返回录音页面' : '返回主页'}
+          </span>
         </div>
         <div className="session-info">
           <span>用户: {userCode} | 会话: {sessionid}</span>
         </div>
       </div>
-
-
 
       {/* 上传区域 */}
       <div 
@@ -469,7 +567,6 @@ const UploadMediaPage = () => {
           </div>
           
           <div className="section-header">
-            
             {totalPages > 1 && (
               <div className="pagination-info">
                 第 {currentPage} 页，共 {totalPages} 页
@@ -480,41 +577,88 @@ const UploadMediaPage = () => {
           {filteredFiles.length > 0 ? (
             <>
               <div className="photos-grid">
-                {currentFiles.map(file => (
-                  <div key={file.id} className="media-item">
-                    <div className="media-content" onClick={() => handlePreviewFile(file)}>
-                      {file.type === 'image' ? (
-                        <img src={file.preview || file.url} alt={file.name} className="media-preview" />
-                      ) : (
-                        <div className="video-preview">
-                          <video 
-                            src={file.preview || file.url} 
-                            className="media-preview"
-                            muted
-                            preload="metadata"
-                            onLoadedMetadata={(e) => {
-                              e.target.currentTime = 1;
-                            }}
-                          />
-                          <div className="video-overlay">
-                            <div className="video-play-icon">▶</div>
-                          </div>
-                        </div>
-                      )}
-                      <div className="media-overlay">
-                        <button 
-                          className="delete-media-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteFile(file.id);
+                              {currentFiles.map(file => (
+                <div key={file.id} className="media-item">
+                  <div className="media-content" onClick={() => handlePreviewFile(file)}>
+                    {file.type === 'image' ? (
+                      <img src={file.preview || file.url} alt={file.name} className="media-preview" />
+                    ) : (
+                      <div className="video-preview">
+                        <video 
+                          src={file.preview || file.url} 
+                          className="media-preview"
+                          muted
+                          preload="metadata"
+                          onLoadedMetadata={(e) => {
+                            e.target.currentTime = 1;
                           }}
-                        >
-                          ×
-                        </button>
+                        />
+                        <div className="video-overlay">
+                          <div className="video-play-icon">▶</div>
+                        </div>
+                        {/* 显示视频唯一ID */}
+                        {file.id && file.id.startsWith('vid_') && (
+                          <div className="video-id-display">
+                            ID: {file.id.split('_').pop()}
+                          </div>
+                        )}
                       </div>
+                    )}
+                    <div className="media-overlay">
+                      <button 
+                        className="delete-media-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteFile(file.id);
+                        }}
+                      >
+                        ×
+                      </button>
                     </div>
                   </div>
-                ))}
+                </div>
+              ))}
+              
+              {/* 上传进度显示 */}
+              {Array.from(uploadingFiles.entries()).map(([tempId, uploadInfo]) => (
+                <div key={tempId} className="media-item uploading-item">
+                  <div className="upload-progress-container">
+                    <div className="upload-progress-circle">
+                      <div className="progress-ring">
+                        <svg className="progress-ring-svg" width="120" height="120">
+                          <circle
+                            className="progress-ring-background"
+                            cx="60"
+                            cy="60"
+                            r="54"
+                          />
+                          <circle
+                            className="progress-ring-progress"
+                            cx="60"
+                            cy="60"
+                            r="54"
+                            style={{
+                              strokeDasharray: `${2 * Math.PI * 54}`,
+                              strokeDashoffset: `${2 * Math.PI * 54 * (1 - uploadInfo.progress / 100)}`
+                            }}
+                          />
+                        </svg>
+                        <div className="progress-text">
+                          {uploadInfo.success ? (
+                            <div className="success-icon">✓</div>
+                          ) : (
+                            <div className="progress-percentage">{Math.round(uploadInfo.progress)}%</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="upload-file-name">{uploadInfo.fileName}</div>
+                    {uploadInfo.success && (
+                      <div className="upload-success-message">上传成功！</div>
+                    )}
+                  </div>
+                </div>
+              ))}
               </div>
 
               {/* 分页控件 */}

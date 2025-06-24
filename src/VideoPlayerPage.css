@@ -200,6 +200,35 @@
   font-weight: bold;
 }
 
+/* 删除视频按钮 */
+.delete-video-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 69, 58, 0.9);
+  border: none;
+  border-radius: 25px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.delete-video-btn:hover {
+  background: rgba(255, 69, 58, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3);
+}
+
+.delete-icon {
+  font-size: 16px;
+}
+
 .session-info {
   display: flex;
   align-items: center;
@@ -469,6 +498,30 @@
     padding: 10px;
   }
 
+  .player-header {
+    padding: 15px 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .nav-back-btn {
+    font-size: 12px;
+    padding: 10px 16px;
+    min-height: 40px;
+  }
+
+  .delete-video-btn {
+    font-size: 12px;
+    padding: 10px 16px;
+    min-height: 40px;
+  }
+
+  .session-info {
+    font-size: 11px;
+    flex-basis: 100%;
+    text-align: center;
+  }
+
   .player-main {
     min-height: calc(calc(var(--vh, 1vh) * 100) - 60px);
     padding: 20px 15px;
@@ -556,6 +609,27 @@
 @media (max-width: 480px) {
   .video-player-page {
     padding: 8px;
+  }
+
+  .player-header {
+    padding: 12px 15px;
+    gap: 8px;
+  }
+
+  .nav-back-btn {
+    font-size: 11px;
+    padding: 8px 12px;
+    min-height: 36px;
+  }
+
+  .delete-video-btn {
+    font-size: 11px;
+    padding: 8px 12px;
+    min-height: 36px;
+  }
+
+  .session-info {
+    font-size: 10px;
   }
 
   .player-main {

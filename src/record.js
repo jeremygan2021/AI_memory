@@ -42,6 +42,18 @@ const RecordComponent = () => {
   // 新增：上传本地录音相关状态
   const [isUploading, setIsUploading] = useState(false); // 是否正在上传文件
   const [uploadProgressState, setUploadProgressState] = useState(0); // 上传进度
+
+  // 新增：上传媒体弹窗相关状态
+  const [showUploadModal, setShowUploadModal] = useState(false); // 是否显示上传弹窗
+  const [wasRecordingBeforeModal, setWasRecordingBeforeModal] = useState(false); // 弹窗前是否在录音
+  const [wasRecordingPausedBeforeModal, setWasRecordingPausedBeforeModal] = useState(false); // 弹窗前录音是否暂停
+  const [uploadedMediaFiles, setUploadedMediaFiles] = useState([]); // 弹窗内上传的媒体文件
+  const [mediaUploadingFiles, setMediaUploadingFiles] = useState(new Map()); // 媒体文件上传进度
+  const [isDragOver, setIsDragOver] = useState(false); // 拖拽状态
+  const [activeTab, setActiveTab] = useState('all'); // 媒体文件标签页
+  const [currentPage, setCurrentPage] = useState(1); // 当前页码
+  const [previewFile, setPreviewFile] = useState(null); // 预览文件
+  const [isMobile, setIsMobile] = useState(false); // 是否移动设备
   
   // 引用
   const mediaRecorderRef = useRef(null); // MediaRecorder实例
@@ -51,6 +63,7 @@ const RecordComponent = () => {
   const longPressTimerRef = useRef(null); // 长按计时器
   const startBtnRef = useRef(null); // 开始按钮引用
   const fileInputRef = useRef(null); // 文件输入引用
+  const mediaFileInputRef = useRef(null); // 媒体文件输入引用
 
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -761,15 +774,268 @@ const RecordComponent = () => {
     }
   };
 
-  // 跳转到上传照片
-  const goToUploadMediaPage = () => {
-    console.log('点击上传照片按钮，userCode:', userCode);
-    if (userCode) {
-      const targetPath = `/${userCode}/upload-photos`;
-      console.log('准备跳转到:', targetPath);
-      navigate(targetPath);
+  // 弹出上传照片和视频弹窗
+  const goToUploadMediaPage = async () => {
+    console.log('点击上传照片和视频按钮，userCode:', userCode);
+    if (!userCode || !id) {
+      console.error('userCode 或 sessionId 为空，无法弹出弹窗');
+      return;
+    }
+
+    // 如果正在录音，先暂停录音
+    if (isRecording && !isPaused) {
+      setWasRecordingBeforeModal(true);
+      setWasRecordingPausedBeforeModal(false);
+      console.log('录音中，先暂停录音再弹出弹窗');
+      pauseRecording();
+    } else if (isRecording && isPaused) {
+      setWasRecordingBeforeModal(true);
+      setWasRecordingPausedBeforeModal(true);
     } else {
-      console.error('userCode 为空，无法跳转');
+      setWasRecordingBeforeModal(false);
+      setWasRecordingPausedBeforeModal(false);
+    }
+
+    // 加载已上传的媒体文件
+    await loadUploadedMediaFiles();
+    
+    // 弹出弹窗
+    setShowUploadModal(true);
+  };
+
+  // 关闭上传弹窗
+  const closeUploadModal = () => {
+    setShowUploadModal(false);
+    setPreviewFile(null);
+    
+    // 如果弹窗前正在录音且未暂停，恢复录音
+    if (wasRecordingBeforeModal && !wasRecordingPausedBeforeModal) {
+      console.log('关闭弹窗，恢复录音');
+      if (mediaRecorderRef.current && isPaused) {
+        mediaRecorderRef.current.resume();
+        startTimer();
+        setIsPaused(false);
+      }
+    }
+    
+    // 重置状态
+    setWasRecordingBeforeModal(false);
+    setWasRecordingPausedBeforeModal(false);
+  };
+
+  // 加载已上传的媒体文件
+  const loadUploadedMediaFiles = async () => {
+    try {
+      // 从localStorage获取已上传的媒体文件
+      const storageKey = `uploadedMedia_${userCode}_${id}`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const files = JSON.parse(stored);
+        setUploadedMediaFiles(files);
+      } else {
+        setUploadedMediaFiles([]);
+      }
+    } catch (error) {
+      console.error('加载媒体文件失败:', error);
+      setUploadedMediaFiles([]);
+    }
+  };
+
+  // 保存媒体文件到localStorage
+  const saveMediaFileToStorage = (fileInfo) => {
+    const storageKey = `uploadedMedia_${userCode}_${id}`;
+    const updatedFiles = [fileInfo, ...uploadedMediaFiles];
+    localStorage.setItem(storageKey, JSON.stringify(updatedFiles));
+    setUploadedMediaFiles(updatedFiles);
+  };
+
+  // 生成唯一的媒体文件ID
+  const generateUniqueMediaId = (isVideo = false) => {
+    const timestamp = Date.now().toString();
+    const random = Math.random().toString(36).substr(2, 4);
+    const uniqueId = Math.random().toString(36).substr(2, 8);
+    const sessionId = id || 'default';
+    const prefix = isVideo ? 'vid' : 'img';
+    return `${prefix}_${sessionId}_${timestamp}_${random}_${uniqueId}`;
+  };
+
+  // 上传媒体文件到服务器
+  const uploadMediaFile = async (file, tempId) => {
+    try {
+      console.log('开始上传媒体文件:', { fileName: file.name, tempId, blobSize: file.size });
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        // 设置上传进度监听
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            setMediaUploadingFiles(prev => new Map(prev.set(tempId, {
+              ...prev.get(tempId),
+              progress: percentComplete
+            })));
+          }
+        });
+        
+        xhr.addEventListener('loadstart', () => {
+          setMediaUploadingFiles(prev => new Map(prev.set(tempId, {
+            fileName: file.name,
+            progress: 0,
+            uploading: true
+          })));
+        });
+        
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const result = JSON.parse(xhr.responseText);
+              if (result.success) {
+                // 上传成功
+                setMediaUploadingFiles(prev => new Map(prev.set(tempId, {
+                  ...prev.get(tempId),
+                  progress: 100,
+                  uploading: false,
+                  success: true
+                })));
+                
+                // 2秒后移除进度显示
+                setTimeout(() => {
+                  setMediaUploadingFiles(prev => {
+                    const newMap = new Map(prev);
+                    newMap.delete(tempId);
+                    return newMap;
+                  });
+                }, 2000);
+                
+                resolve({
+                  success: true,
+                  cloudUrl: result.file_url,
+                  objectKey: result.object_key,
+                  etag: result.etag,
+                  requestId: result.request_id
+                });
+              } else {
+                throw new Error(result.message || '上传失败');
+              }
+            } catch (parseError) {
+              reject(new Error('响应解析失败'));
+            }
+          } else {
+            reject(new Error(`上传失败: ${xhr.status} - ${xhr.statusText}`));
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          setMediaUploadingFiles(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(tempId);
+            return newMap;
+          });
+          reject(new Error('网络错误'));
+        });
+        
+        // 构建URL，将folder作为查询参数，格式为 userCode/sessionId
+        const uploadUrl = new URL(`${API_BASE_URL}/upload`);
+        const folderPath = buildRecordingPath(id || 'default', userCode);
+        uploadUrl.searchParams.append('folder', folderPath);
+        
+        console.log('媒体文件上传URL:', uploadUrl.toString());
+        console.log('文件夹路径:', folderPath);
+        
+        xhr.open('POST', uploadUrl);
+        xhr.send(formData);
+      });
+      
+    } catch (error) {
+      console.error('上传媒体文件失败:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  };
+
+  // 处理媒体文件选择
+  const handleMediaFileSelect = async (files) => {
+    const fileArray = Array.from(files);
+    
+    for (const file of fileArray) {
+      // 检查文件类型
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      
+      if (!isImage && !isVideo) {
+        alert(`不支持的文件类型: ${file.name}`);
+        continue;
+      }
+      
+      // 检查文件大小（限制为100MB）
+      const maxSize = 100 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert(`文件 ${file.name} 大小超过100MB限制`);
+        continue;
+      }
+      
+      // 生成唯一ID（包含会话ID）
+      const uniqueId = generateUniqueMediaId(isVideo);
+      const tempId = Date.now() + Math.random();
+      
+      // 创建预览URL
+      const previewUrl = URL.createObjectURL(file);
+      
+      // 创建文件信息对象
+      const fileInfo = {
+        id: uniqueId,
+        name: file.name,
+        type: isVideo ? 'video' : 'image',
+        size: file.size,
+        preview: previewUrl,
+        url: previewUrl,
+        timestamp: new Date().toLocaleString('zh-CN'),
+        sessionId: id,
+        userCode: userCode,
+        uploaded: false,
+        cloudUrl: null,
+        objectKey: null
+      };
+      
+      // 先添加到本地列表
+      const updatedFiles = [fileInfo, ...uploadedMediaFiles];
+      setUploadedMediaFiles(updatedFiles);
+      
+      // 上传到云端
+      try {
+        const uploadResult = await uploadMediaFile(file, tempId);
+        
+        if (uploadResult.success) {
+          // 更新文件信息
+          const finalFileInfo = {
+            ...fileInfo,
+            uploaded: true,
+            cloudUrl: uploadResult.cloudUrl,
+            objectKey: uploadResult.objectKey,
+            etag: uploadResult.etag
+          };
+          
+          // 更新文件列表
+          setUploadedMediaFiles(prev => 
+            prev.map(f => f.id === uniqueId ? finalFileInfo : f)
+          );
+          
+          // 保存到localStorage
+          saveMediaFileToStorage(finalFileInfo);
+          
+          console.log('媒体文件上传成功:', finalFileInfo);
+        } else {
+          console.error('媒体文件上传失败:', uploadResult.error);
+        }
+      } catch (error) {
+        console.error('媒体文件处理失败:', error);
+      }
     }
   };
 
@@ -778,6 +1044,144 @@ const RecordComponent = () => {
     if (isCheckingFiles) return; // 避免重复检查
     
     await cleanupDeletedRecordings();
+  };
+
+  // 媒体弹窗相关处理函数
+  const handleMediaUploadAreaClick = () => {
+    if (mediaFileInputRef.current) {
+      mediaFileInputRef.current.click();
+    }
+  };
+
+  const handleMediaFileInputChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleMediaFileSelect(files);
+    }
+  };
+
+  const handleMediaDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleMediaDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragOver(false);
+    }
+  };
+
+  const handleMediaDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleMediaFileSelect(files);
+    }
+  };
+
+  const handleMediaPaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
+        const file = item.getAsFile();
+        if (file) {
+          handleMediaFileSelect([file]);
+        }
+      }
+    }
+  };
+
+  const handleDeleteMediaFile = async (fileId) => {
+    const file = uploadedMediaFiles.find(f => f.id === fileId);
+    
+    if (file && file.objectKey) {
+      // 如果有云端文件，询问是否同时删除
+      const deleteCloud = window.confirm('是否同时删除云端文件？');
+      
+      if (deleteCloud) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(file.objectKey)}`, {
+            method: 'DELETE'
+          });
+          
+          if (response.ok) {
+            console.log('云端媒体文件删除成功');
+          } else {
+            console.warn('云端媒体文件删除失败');
+          }
+        } catch (error) {
+          console.error('删除云端媒体文件时出错:', error);
+        }
+      }
+    }
+    
+    // 删除本地记录
+    const updatedFiles = uploadedMediaFiles.filter(f => f.id !== fileId);
+    setUploadedMediaFiles(updatedFiles);
+    
+    // 更新localStorage
+    const storageKey = `uploadedMedia_${userCode}_${id}`;
+    localStorage.setItem(storageKey, JSON.stringify(updatedFiles));
+  };
+
+  const handlePreviewMediaFile = (file) => {
+    if (file.type === 'image') {
+      setPreviewFile(file);
+    } else if (file.type === 'video') {
+      // 视频文件跳转到专门的播放页面
+      const videoId = file.id.split('_').pop();
+      navigate(`/${userCode}/video-player/${id}/${videoId}`);
+    }
+  };
+
+  const closeMediaPreview = () => {
+    setPreviewFile(null);
+  };
+
+  // 检测移动设备
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768 || 
+                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 计算分页数据
+  const filesPerPage = 12;
+  const filteredFiles = uploadedMediaFiles.filter(file => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'photos') return file.type === 'image';
+    if (activeTab === 'videos') return file.type === 'video';
+    return false;
+  });
+  const totalPages = Math.ceil(filteredFiles.length / filesPerPage);
+  const currentFiles = filteredFiles.slice((currentPage - 1) * filesPerPage, currentPage * filesPerPage);
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
   };
 
   // 新增：处理本地文件上传
@@ -949,6 +1353,218 @@ const RecordComponent = () => {
     );
   }
 
+  // 上传媒体弹窗组件
+  const renderUploadMediaModal = () => {
+    if (!showUploadModal) return null;
+
+    return (
+      <div className="upload-modal-overlay" onClick={closeUploadModal} onPaste={handleMediaPaste}>
+        <div className="upload-modal-content" onClick={(e) => e.stopPropagation()}>
+          {/* 弹窗头部 */}
+          <div className="upload-modal-header">
+            <h2>上传照片和视频</h2>
+            <div className="upload-modal-session-info">
+              <span>用户: {userCode} | 会话: {id}</span>
+            </div>
+            <button className="upload-modal-close" onClick={closeUploadModal}>×</button>
+          </div>
+
+          {/* 上传区域 */}
+          <div 
+            className={`upload-modal-area ${isDragOver ? 'drag-over' : ''}`}
+            onClick={handleMediaUploadAreaClick}
+            onDragOver={handleMediaDragOver}
+            onDragLeave={handleMediaDragLeave}
+            onDrop={handleMediaDrop}
+          >
+            <span className="upload-modal-text">
+              {isMobile ? '点击、粘贴照片或视频到此处开始上传' : '点击、粘贴或拖放照片和视频到此处开始上传'}
+            </span>
+            <input
+              ref={mediaFileInputRef}
+              type="file"
+              multiple
+              accept="image/*,video/*"
+              onChange={handleMediaFileInputChange}
+              style={{ display: 'none' }}
+              capture={isMobile ? 'environment' : undefined}
+            />
+          </div>
+
+          {/* 文件展示区域 */}
+          <div className="upload-modal-files-container">
+            {/* 文件类型标签 */}
+            <div className="upload-modal-file-tabs">
+              <button 
+                className={`upload-modal-file-tab ${activeTab === 'all' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('all');
+                  setCurrentPage(1);
+                }}
+              >
+                📁 全部 ({uploadedMediaFiles.length})
+              </button>
+              <button 
+                className={`upload-modal-file-tab ${activeTab === 'photos' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('photos');
+                  setCurrentPage(1);
+                }}
+              >
+                📷 照片 ({uploadedMediaFiles.filter(f => f.type === 'image').length})
+              </button>
+              <button 
+                className={`upload-modal-file-tab ${activeTab === 'videos' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('videos');
+                  setCurrentPage(1);
+                }}
+              >
+                🎬 视频 ({uploadedMediaFiles.filter(f => f.type === 'video').length})
+              </button>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="upload-modal-pagination-info">
+                第 {currentPage} 页，共 {totalPages} 页
+              </div>
+            )}
+
+            {filteredFiles.length > 0 ? (
+              <>
+                <div className="upload-modal-files-grid">
+                  {currentFiles.map(file => (
+                    <div key={file.id} className="upload-modal-media-item">
+                      <div className="upload-modal-media-content" onClick={() => handlePreviewMediaFile(file)}>
+                        {file.type === 'image' ? (
+                          <img src={file.preview || file.url} alt={file.name} className="upload-modal-media-preview" />
+                        ) : (
+                          <div className="upload-modal-video-preview">
+                            <video 
+                              src={file.preview || file.url} 
+                              className="upload-modal-media-preview"
+                              muted
+                              preload="metadata"
+                              onLoadedMetadata={(e) => {
+                                e.target.currentTime = 1;
+                              }}
+                            />
+                            <div className="upload-modal-video-overlay">
+                              <div className="upload-modal-video-play-icon">▶</div>
+                            </div>
+                            {file.id && file.id.includes('vid_') && (
+                              <div className="upload-modal-video-id-display">
+                                ID: {file.id.split('_').pop()}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <div className="upload-modal-media-overlay">
+                          <button 
+                            className="upload-modal-delete-media-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteMediaFile(file.id);
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* 上传进度显示 */}
+                  {Array.from(mediaUploadingFiles.entries()).map(([tempId, uploadInfo]) => (
+                    <div key={tempId} className="upload-modal-media-item uploading-item">
+                      <div className="upload-modal-upload-progress-container">
+                        <div className="upload-modal-upload-progress-circle">
+                          <div className="upload-modal-progress-ring">
+                            <svg className="upload-modal-progress-ring-svg" width="120" height="120">
+                              <circle
+                                className="upload-modal-progress-ring-background"
+                                cx="60"
+                                cy="60"
+                                r="54"
+                              />
+                              <circle
+                                className="upload-modal-progress-ring-progress"
+                                cx="60"
+                                cy="60"
+                                r="54"
+                                style={{
+                                  strokeDasharray: `${2 * Math.PI * 54}`,
+                                  strokeDashoffset: `${2 * Math.PI * 54 * (1 - uploadInfo.progress / 100)}`
+                                }}
+                              />
+                            </svg>
+                            <div className="upload-modal-progress-text">
+                              {uploadInfo.success ? (
+                                <div className="upload-modal-success-icon">✓</div>
+                              ) : (
+                                <div className="upload-modal-progress-percentage">{Math.round(uploadInfo.progress)}%</div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="upload-modal-upload-file-name">{uploadInfo.fileName}</div>
+                        {uploadInfo.success && (
+                          <div className="upload-modal-upload-success-message">上传成功！</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 分页控件 */}
+                {totalPages > 1 && (
+                  <div className="upload-modal-pagination">
+                    <button 
+                      className="upload-modal-pagination-btn"
+                      onClick={goToPrevPage}
+                      disabled={currentPage === 1}
+                    >
+                      上一页
+                    </button>
+                    <span className="upload-modal-pagination-current-page">{currentPage}</span>
+                    <span className="upload-modal-pagination-total-page">/ {totalPages} 页</span>
+                    <button 
+                      className="upload-modal-pagination-btn"
+                      onClick={goToNextPage}
+                      disabled={currentPage === totalPages}
+                    >
+                      下一页
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="upload-modal-empty-state">
+                <div className="upload-modal-empty-icon">
+                  {activeTab === 'all' ? '📁' : activeTab === 'photos' ? '📷' : '🎬'}
+                </div>
+                <p className="upload-modal-empty-text">
+                  还没有上传任何{activeTab === 'all' ? '文件' : activeTab === 'photos' ? '照片' : '视频'}
+                </p>
+                <p className="upload-modal-empty-subtext">点击上方区域开始上传</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 预览弹窗 - 仅用于图片 */}
+        {previewFile && previewFile.type === 'image' && (
+          <div className="upload-modal-preview-modal" onClick={closeMediaPreview}>
+            <div className="upload-modal-preview-content" onClick={e => e.stopPropagation()}>
+              <button className="upload-modal-preview-close" onClick={closeMediaPreview}>×</button>
+              <img src={previewFile.preview || previewFile.url} alt={previewFile.name} className="upload-modal-preview-media" />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div>
       {/* 背景装饰 */}
@@ -987,7 +1603,7 @@ const RecordComponent = () => {
           {/* 上传照片按钮始终显示在左侧栏顶部 */}
           <div className="upload-box upload-box-recording">
             <button className="upload-button" onClick={goToUploadMediaPage}> 
-              <span>上传照片</span>
+              <span>上传照片和视频</span>
             </button>
           </div>
           <div className="record-control-card">
@@ -1222,6 +1838,9 @@ const RecordComponent = () => {
           )}
         </div>
       </div>
+
+      {/* 上传媒体弹窗 */}
+      {renderUploadMediaModal()}
     </div>
   );
 };
