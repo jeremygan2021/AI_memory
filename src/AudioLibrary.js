@@ -140,7 +140,7 @@ const AudioLibrary = () => {
           fileUrl: file.file_url || file.fileUrl || file.url,
           size: file.size || 0,
           lastModified: file.last_modified || file.lastModified || file.modified || new Date().toISOString(),
-          contentType: file.content_type || file.contentType || 'audio/webm',
+          contentType: file.content_type || file.contentType || 'audio/mp3',
           etag: file.etag || file.hash || '',
           duration: recordingInfo.duration || 0, // 如果无法从文件名获取，默认0
           timestamp: formatDateFromString(file.last_modified || file.lastModified || file.modified || new Date().toISOString()),

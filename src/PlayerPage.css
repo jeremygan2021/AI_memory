@@ -197,11 +197,12 @@
   width: 400.67px;  /* 240 * (16/9) */
   height: 240px;    /* 保持16:9比例 */
   position: absolute;
-  top: -110px;
-  left: 550px;
+  top: 20px;        /* 从负值改为正值，避免与导航栏重叠 */
+  right: 20px;      /* 改为right定位，更直观 */
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性动画 */
   cursor: pointer;
   transform-origin: center center;
+  z-index: 2;       /* 设置适当的z-index，但低于导航栏 */
 }
 
 .elephant-icon:hover {
@@ -266,8 +267,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(calc(var(--vh, 1vh) * 100) - 80px);
-  padding: 40px 20px;
+  min-height: calc(calc(var(--vh, 1vh) * 100) - 120px); /* 增加导航栏预留空间 */
+  padding: 60px 20px 40px; /* 增加顶部padding */
   padding-left: max(20px, var(--safe-area-inset-left));
   padding-right: max(20px, var(--safe-area-inset-right));
   padding-bottom: max(40px, var(--safe-area-inset-bottom));
@@ -284,11 +285,12 @@
   background: #ffffe6;
   backdrop-filter: blur(20px);
   border-radius: 30px;
-  padding: 50px 40px;
+  padding: 60px 40px 50px; /* 增加顶部padding为avatar-icon预留空间 */
   box-shadow: 
     0 25px 80px rgba(45, 80, 22, 0.15),
     0 10px 35px rgba(45, 80, 22, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.4);
+  position: relative; /* 为avatar-icon提供定位参考 */
 }
 
 /* 录音信息区域 */
@@ -322,9 +324,9 @@
     0 0 0 20px #f7fbe9;
   position: absolute;
   left: 50%;
-  top: -50px;
-  transform: translate(-50%, -50%);
-  z-index: 10;
+  top: -60px; /* 调整为-60px确保有足够空间不被遮挡 */
+  transform: translate(-50%, 0); /* 简化transform */
+  z-index: 11; /* 确保在其他元素之上但低于导航栏 */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   user-select: none;
@@ -333,7 +335,7 @@
 }
 
 .avatar-icon:hover {
-  transform: translate(-50%, -50%) scale(1.05);
+  transform: translate(-50%, 0) scale(1.05);
   box-shadow:
     0 16px 40px 0 rgba(74, 201, 103, 0.22),
     0 0 0 8px #eaf7d0,
@@ -342,7 +344,7 @@
 }
 
 .avatar-icon:active {
-  transform: translate(-50%, -50%) scale(0.95);
+  transform: translate(-50%, 0) scale(0.95);
   box-shadow:
     0 8px 20px 0 rgba(74, 201, 103, 0.12),
     0 0 0 8px #e2f5c2,
@@ -656,34 +658,34 @@
     width: 320px;  /* 比默认稍小，适合中等平板 */
     height: 192px; /* 保持16:9比例 */
     position: absolute;
-    top: -65px;
-    left: 90%;     /* 稍微左移 */
-    transform: translateX(-50%);
+    top: 15px;     /* 确保不与导航栏重叠 */
+    right: 15px;   /* 使用right定位 */
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
     transform-origin: center center;
-    z-index: 1;
+    z-index: 2;
   }
 
   .elephant-icon:hover {
-    transform: translateX(-50%) scale(1.05) rotate(3deg);
+    transform: scale(1.05) rotate(3deg);
     filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
   }
 
   .elephant-icon:active {
-    transform: translateX(-50%) scale(0.97) rotate(-2deg);
+    transform: scale(0.97) rotate(-2deg);
     filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
   }
 
   .player-container {
     max-width: 500px;
-    padding: 40px 30px;
+    padding: 50px 30px 40px; /* 调整padding */
   }
   
   .avatar-icon {
     width: 75px;
     height: 75px;
     font-size: 50px;
+    top: -40px; /* 调整位置 */
   }
   
   .recording-title {
@@ -699,26 +701,25 @@
   }
 
   .elephant-icon {
-    width: 280px;  /* 适中尺寸适合768px屏幕 */
-    height: 168px; /* 保持16:9比例 */
+    width: 240px;  /* 进一步缩小适合移动端 */
+    height: 144px; /* 保持16:9比例 */
     position: absolute;
-    top: -70px;
-    left: 80%;     /* 左移至60%位置 */
-    transform: translateX(-50%);
+    top: 10px;     /* 紧贴导航栏下方 */
+    right: 10px;   /* 右侧对齐 */
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
     transform-origin: center center;
-    z-index: 1;
+    z-index: 2;
   }
 
   .elephant-icon:hover {
-    transform: translateX(-50%) scale(1.08) rotate(3deg);
-    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+    transform: scale(1.05) rotate(2deg); /* 减小旋转角度 */
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
   }
 
   .elephant-icon:active {
-    transform: translateX(-50%) scale(0.96) rotate(-2deg);
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
+    transform: scale(0.98) rotate(-1deg);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
   }
 
   .player-header {
@@ -728,6 +729,7 @@
     padding-right: max(20px, var(--safe-area-inset-right));
     flex-wrap: wrap;
     gap: 10px;
+    z-index: 15; /* 确保导航栏在最上层 */
   }
 
   .nav-back-btn,
@@ -744,23 +746,24 @@
   }
 
   .player-main {
-    padding: 20px 15px;
+    padding: 30px 15px 20px; /* 增加顶部padding确保不与elephant-icon重叠 */
     padding-left: max(15px, var(--safe-area-inset-left));
     padding-right: max(15px, var(--safe-area-inset-right));
     padding-bottom: max(20px, var(--safe-area-inset-bottom));
-    min-height: calc(calc(var(--vh, 1vh) * 100) - 120px);
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 140px); /* 调整高度计算 */
   }
 
   .player-container {
-    padding: 30px 25px;
+    padding: 40px 25px 30px; /* 为avatar-icon预留更多空间 */
     border-radius: 25px;
     max-width: 400px;
   }
 
   .avatar-icon {
-    width: 75px;
-    height: 75px;
-    font-size: 45px;
+    width: 70px;
+    height: 70px;
+    font-size: 35px;
+    top: -35px; /* 适当调整位置 */
   }
 
   .recording-title {
@@ -855,26 +858,25 @@
   }
 
   .elephant-icon {
-    width: 200px;  /* 缩小尺寸以适应窄屏 */
-    height: 120px; /* 保持16:9比例 */
+    width: 180px;  /* 适合小屏幕的尺寸 */
+    height: 108px; /* 保持16:9比例 */
     position: absolute;
-    top: -50px;    /* 调整位置 */
-    left: 83%;     /* 水平居中 */
-    transform: translateX(-50%); /* 确保完全居中 */
+    top: -40px;      /* 更小的边距 */
+    right: -30px;    /* 右侧对齐 */
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
     transform-origin: center center;
-    z-index: 1;    /* 确保显示在其他元素上方 */
+    z-index: 2;
   }
 
   .elephant-icon:hover {
-    transform: translateX(-50%) scale(1.1) rotate(5deg); /* 保持水平居中同时缩放旋转 */
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+    transform: scale(1.03) rotate(1deg); /* 减小缩放和旋转 */
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
   }
 
   .elephant-icon:active {
-    transform: translateX(-50%) scale(0.95) rotate(-3deg); /* 保持水平居中同时缩放旋转 */
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+    transform: scale(0.99) rotate(-0.5deg);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
   }
 
   .player-header {
@@ -882,6 +884,7 @@
     padding-top: max(12px, var(--safe-area-inset-top));
     padding-left: max(15px, var(--safe-area-inset-left));
     padding-right: max(15px, var(--safe-area-inset-right));
+    z-index: 15;
   }
 
   .nav-back-btn,
@@ -892,24 +895,25 @@
   }
 
   .player-main {
-    padding: 15px 10px;
+    padding: 25px 10px 15px; /* 调整padding避免重叠 */
     padding-left: max(10px, var(--safe-area-inset-left));
     padding-right: max(10px, var(--safe-area-inset-right));
     padding-bottom: max(15px, var(--safe-area-inset-bottom));
-    min-height: calc(calc(var(--vh, 1vh) * 100) - 70px);
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 120px);
   }
 
   .player-container {
-    padding: 25px 15px;
+    padding: 35px 15px 25px; /* 为avatar-icon预留空间 */
     border-radius: 20px;
     max-width: 320px;
     margin-bottom: var(--safe-area-inset-bottom);
   }
 
   .avatar-icon {
-    width: 75px;
-    height: 75px;
-    font-size: 38px;
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    top: -30px; /* 调整位置确保不被遮挡 */
   }
 
   .recording-title {
@@ -1015,13 +1019,12 @@
   }
 
   .elephant-icon {
-    width: 150px;  /* 进一步缩小大象图标 */
-    height: 90px;
+    width: 140px;  /* 进一步缩小 */
+    height: 84px;
     position: absolute;
-    top: -15px;
-    left: 82%;
-    transform: translateX(-50%);
-    z-index: 1;
+    top: 5px;      /* 最小边距 */
+    right: 5px;
+    z-index: 2;
   }
 
   .player-header {
@@ -1031,6 +1034,7 @@
     padding-right: max(12px, var(--safe-area-inset-right));
     flex-wrap: wrap;
     gap: 8px;
+    z-index: 15;
   }
 
   .nav-back-btn,
@@ -1048,31 +1052,31 @@
   }
 
   .player-main {
-    padding: 10px 8px;
+    padding: 20px 8px 10px; /* 优化padding */
     padding-left: max(8px, var(--safe-area-inset-left));
     padding-right: max(8px, var(--safe-area-inset-right));
     padding-bottom: max(10px, var(--safe-area-inset-bottom));
-    min-height: calc(calc(var(--vh, 1vh) * 100) - 65px);
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 100px);
   }
 
   .player-container {
-    padding: 20px 12px;
+    padding: 30px 12px 20px; /* 为avatar-icon预留足够空间 */
     border-radius: 18px;
     max-width: 300px;
     margin-bottom: var(--safe-area-inset-bottom);
   }
 
   .recording-avatar {
-    width: 65px;
-    height: 65px;
+    width: 55px;
+    height: 55px;
     margin-bottom: 3px;
   }
 
   .avatar-icon {
-    width: 65px;
-    height: 65px;
-    font-size: 32px;
-    top: -45px;
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+    top: -28px; /* 调整位置 */
   }
 
   .sound-waves {
@@ -1101,241 +1105,6 @@
   .metadata-item .value {
     font-size: 11px;
   }
-
-  .progress-section {
-    margin-bottom: 20px;
-  }
-
-  .time-display {
-    font-size: 12px;
-    margin-bottom: 8px;
-  }
-
-  .progress-container {
-    height: 5px;
-  }
-
-  .progress-slider::-webkit-slider-thumb {
-    width: 16px;
-    height: 16px;
-  }
-
-  .main-controls {
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .control-btn {
-    padding: 8px;
-    min-height: 45px;
-  }
-
-  .play-box {
-    padding: 10px;
-    border-radius: 50%;
-  }
-
-  .play-box .btn-icon {
-    font-size: 22px;
-  }
-
-  .skip-btn .btn-icon {
-    font-size: 16px;
-  }
-
-  .skip-btn .btn-label {
-    font-size: 9px;
-  }
-
-  .advanced-controls {
-    gap: 12px;
-  }
-
-  .control-label {
-    font-size: 11px;
-    margin-bottom: 6px;
-  }
-
-  .speed-buttons {
-    gap: 3px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .speed-btn {
-    padding: 5px 10px;
-    font-size: 9px;
-    min-height: 28px;
-    border-width: 1px;
-  }
-
-  .control-group {
-    gap: 6px;
-  }
-
-  .volume-container {
-    gap: 8px;
-  }
-
-  .volume-slider {
-    height: 2px;
-  }
-
-  .volume-slider::-webkit-slider-thumb {
-    width: 12px;
-    height: 12px;
-  }
-
-  .volume-value {
-    font-size: 9px;
-    min-width: 25px;
-  }
-}
-
-/* 极小屏幕优化 (320px及以下) */
-@media (max-width: 320px) {
-  .elephant-icon {
-    width: 120px;  /* 更小的大象图标 */
-    height: 72px;
-    top: -10px;
-    left: 80%;
-  }
-
-  .player-header {
-    padding: 6px 10px;
-    padding-top: max(6px, var(--safe-area-inset-top));
-    padding-left: max(10px, var(--safe-area-inset-left));
-    padding-right: max(10px, var(--safe-area-inset-right));
-  }
-
-  .nav-back-btn,
-  .delete-recording-btn {
-    font-size: 9px;
-    padding: 5px 8px;
-    min-height: 28px;
-  }
-
-  .player-main {
-    padding: 8px 6px;
-    padding-left: max(6px, var(--safe-area-inset-left));
-    padding-right: max(6px, var(--safe-area-inset-right));
-    padding-bottom: max(8px, var(--safe-area-inset-bottom));
-    min-height: calc(calc(var(--vh, 1vh) * 100) - 60px);
-  }
-
-  .player-container {
-    padding: 16px 10px;
-    border-radius: 16px;
-    max-width: 280px;
-  }
-
-  .recording-avatar {
-    width: 55px;
-    height: 55px;
-    margin-bottom: 2px;
-  }
-
-  .avatar-icon {
-    width: 55px;
-    height: 55px;
-    font-size: 28px;
-    top: -40px;
-  }
-
-  .wave-bar {
-    width: 2px;
-    height: 14px;
-    gap: 2px;
-  }
-
-  .recording-title {
-    font-size: 16px;
-    margin-bottom: 10px;
-    line-height: 1.1;
-  }
-
-  .metadata-item {
-    padding: 4px 6px;
-    font-size: 10px;
-    margin-bottom: 3px;
-  }
-
-  .metadata-item .label,
-  .metadata-item .value {
-    font-size: 10px;
-  }
-
-  .progress-section {
-    margin-bottom: 16px;
-  }
-
-  .time-display {
-    font-size: 11px;
-    margin-bottom: 6px;
-  }
-
-  .progress-container {
-    height: 4px;
-  }
-
-  .main-controls {
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .control-btn {
-    padding: 6px;
-    min-height: 40px;
-  }
-
-  .play-box {
-    padding: 8px;
-  }
-
-  .play-box .btn-icon {
-    font-size: 20px;
-  }
-
-  .skip-btn .btn-icon {
-    font-size: 14px;
-  }
-
-  .skip-btn .btn-label {
-    font-size: 8px;
-  }
-
-  .advanced-controls {
-    gap: 10px;
-  }
-
-  .control-label {
-    font-size: 10px;
-    margin-bottom: 4px;
-  }
-
-  .speed-buttons {
-    gap: 2px;
-  }
-
-  .speed-btn {
-    padding: 4px 8px;
-    font-size: 8px;
-    min-height: 24px;
-  }
-
-  .volume-container {
-    gap: 6px;
-  }
-
-  .volume-slider::-webkit-slider-thumb {
-    width: 10px;
-    height: 10px;
-  }
-
-  .volume-value {
-    font-size: 8px;
-    min-width: 20px;
-  }
 }
 
 /* 横屏模式优化 */
@@ -1343,9 +1112,18 @@
   .player-page {
     min-height: calc(var(--vh, 1vh) * 100);
   }
+
+  .elephant-icon {
+    width: 120px;
+    height: 72px;
+    top: 8px;  /* 避免与导航栏重叠 */
+    right: 8px; /* 使用right定位 */
+    z-index: 2;
+  }
   
   .player-header {
     padding: 10px 20px;
+    z-index: 15; /* 确保导航栏在最上层 */
   }
 
   .player-main {
@@ -1429,8 +1207,9 @@
   .elephant-icon {
     width: 100px;
     height: 60px;
-    top: -8px;
-    left: 75%;
+    top: 5px;  /* 避免与导航栏重叠 */
+    right: 5px; /* 改为right定位 */
+    z-index: 2;
   }
 
   .player-header {

@@ -74,7 +74,7 @@ const RecordComponent = () => {
       navigate('/');
     }
     
-    // 检查是否是从播放页面返回的
+    // 检查是否是从播放页面返回的或播放页面加载失败
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('deleted') === 'true') {
       setJustReturnedFromPlayer(true);
@@ -94,6 +94,19 @@ const RecordComponent = () => {
       window.history.replaceState({}, '', newUrl);
       
       // 不再重置标记，永久停止智能跳转功能
+    } else if (urlParams.get('recordingNotFound') === 'true' || urlParams.get('loadError') === 'true') {
+      // 播放页面加载失败返回，暂停智能跳转5分钟防止循环
+      console.log('检测到播放页面加载失败，暂停智能跳转5分钟');
+      setJustReturnedFromPlayer(true);
+      // 清理URL参数
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+      
+      // 5分钟后重置标记
+      setTimeout(() => {
+        console.log('播放页面加载失败保护期结束，恢复智能跳转');
+        setJustReturnedFromPlayer(false);
+      }, 5 * 60 * 1000); // 5分钟
     }
   }, [userid, navigate]);
 
@@ -259,9 +272,9 @@ const RecordComponent = () => {
       // 创建FormData
       const formData = new FormData();
       
-      // 创建文件对象，使用Blob的实际MIME类型
+      // 创建文件对象，统一使用MP3 MIME类型
       const audioFile = new File([audioBlob], fileName, { 
-        type: audioBlob.type || 'audio/webm'
+        type: 'audio/mpeg' // 使用MP3的标准MIME类型
       });
       
       formData.append('file', audioFile);
@@ -338,17 +351,8 @@ const RecordComponent = () => {
   // 重试上传
   const retryUpload = async (recording) => {
     if (recording.audioBlob) {
-      // 根据MIME类型确定文件扩展名
-      let extension = 'webm';
-      if (recording.audioBlob.type.includes('mp4')) {
-        extension = 'mp4';
-      } else if (recording.audioBlob.type.includes('wav')) {
-        extension = 'wav';
-      } else if (recording.audioBlob.type.includes('ogg')) {
-        extension = 'ogg';
-      }
-      
-      const fileName = `recording_${recording.id}.${extension}`;
+      // 统一使用mp3扩展名以提高兼容性
+      const fileName = `recording_${recording.id}.mp3`;
       await uploadAudioFile(recording.audioBlob, recording.id, fileName);
     }
   };
@@ -413,15 +417,33 @@ const RecordComponent = () => {
       
       streamRef.current = stream;
       
-      // 创建MediaRecorder实例，优先使用WebM，如果不支持则使用其他格式
-      let mimeType = 'audio/webm;codecs=opus';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'audio/webm';
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'audio/mp4';
-          if (!MediaRecorder.isTypeSupported(mimeType)) {
-            mimeType = ''; // 使用默认格式
+      // 创建MediaRecorder实例，优先使用MP3兼容格式
+      let mimeType = '';
+      let extension = 'mp3';
+      
+      // 尝试使用音频格式，优先选择MP3兼容的格式
+      const supportedTypes = [
+        'audio/mp4',
+        'audio/mpeg', 
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/wav'
+      ];
+      
+      for (const type of supportedTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          mimeType = type;
+          // 根据MIME类型设置扩展名
+          if (type.includes('mp4')) {
+            extension = 'mp3'; // 使用mp3扩展名以便更好的兼容性
+          } else if (type.includes('mpeg')) {
+            extension = 'mp3';
+          } else if (type.includes('webm')) {
+            extension = 'mp3'; // 统一使用mp3扩展名
+          } else if (type.includes('wav')) {
+            extension = 'mp3'; // 统一使用mp3扩展名
           }
+          break;
         }
       }
       
@@ -468,18 +490,8 @@ const RecordComponent = () => {
         setRecordings(prev => [newRecording, ...prev]);
         
         // 自动上传到云端
-        // 根据MIME类型确定文件扩展名
-        let extension = 'webm';
-        if (audioBlob.type.includes('mp4')) {
-          extension = 'mp4';
-        } else if (audioBlob.type.includes('wav')) {
-          extension = 'wav';
-        } else if (audioBlob.type.includes('ogg')) {
-          extension = 'ogg';
-        }
-        
-        // 使用recordingId作为文件名的一部分，确保能够匹配
-        const fileName = `recording_${newRecording.id}.${extension}`;
+        // 统一使用mp3扩展名以提高兼容性
+        const fileName = `recording_${newRecording.id}.mp3`;
         const uploadResult = await uploadAudioFile(audioBlob, newRecording.id, fileName);
         
         if (uploadResult.success) {
@@ -1289,10 +1301,16 @@ const RecordComponent = () => {
       
       // 确定文件类型和扩展名
       const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i);
-      const fileExtension = file.name.split('.').pop().toLowerCase();
       
-      // 生成上传文件名，保持原始扩展名
-      const uploadFileName = `recording_${recordingId}.${fileExtension}`;
+      // 如果是音频文件，统一使用mp3扩展名；如果是视频文件，保持原扩展名
+      let uploadFileName;
+      if (isVideo) {
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        uploadFileName = `recording_${recordingId}.${fileExtension}`;
+      } else {
+        // 音频文件统一使用mp3扩展名
+        uploadFileName = `recording_${recordingId}.mp3`;
+      }
 
       // 先创建本地录音记录
       const newRecording = {

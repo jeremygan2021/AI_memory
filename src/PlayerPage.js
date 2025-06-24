@@ -27,7 +27,6 @@ const PlayerPage = () => {
   const [userInteracted, setUserInteracted] = useState(false); // 用户交互状态
   const [isIOS, setIsIOS] = useState(false); // iOS设备检测
   const [mediaFiles, setMediaFiles] = useState([]); // 关联的照片和视频文件
-  const [previewFile, setPreviewFile] = useState(null); // 预览文件
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0); // 当前轮播索引
   const [isCarouselHovered, setIsCarouselHovered] = useState(false); // 轮播图悬停状态
   const carouselTimerRef = useRef(null); // 轮播定时器引用
@@ -195,16 +194,57 @@ const PlayerPage = () => {
         const files = result.files || result.data || result.objects || result.items || result.results || [];
         console.log('会话录音文件列表:', files);
 
-        // 查找指定的录音文件
-        const foundFile = files.find(file => {
+        // 先过滤出音频文件（排除图片和视频文件）
+        const audioFiles = files.filter(file => {
           const objectKey = file.object_key || file.objectKey || file.key || file.name;
           if (!objectKey) return false;
 
-          // 从object_key提取文件名
+          const fileName = objectKey.split('/').pop();
+          
+          // 优先检查Content-Type，更准确地判断文件类型
+          const contentType = file.content_type || '';
+          
+          // 基于Content-Type的准确判断
+          const isImageByType = contentType.startsWith('image/');
+          const isVideoByType = contentType.startsWith('video/');
+          const isAudioByType = contentType.startsWith('audio/');
+          
+          // 基于文件扩展名的判断（作为备选）
+          const isImageByExt = fileName.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i);
+          const isVideoByExt = fileName.match(/\.(mp4|avi|mov|wmv|flv|mkv)$/i); // 移除webm，因为webm可能是音频
+          const isAudioByExt = fileName.match(/\.(mp3|wav|ogg|m4a|aac|flac|wma|amr|3gp|opus|webm)$/i); // 确保mp3和webm都被识别为音频
+          
+          // webm文件需要特殊处理，优先看Content-Type
+          const isWebm = fileName.match(/\.webm$/i);
+          
+          // 综合判断 - 更宽松的音频文件识别
+          const isImage = isImageByType || (!contentType && isImageByExt);
+          const isVideo = isVideoByType && !isAudioByType; // 只有明确是video且不是audio才算视频
+          const isAudio = isAudioByType || 
+                         isAudioByExt ||
+                         fileName.includes('recording') || // 包含recording关键词的文件
+                         (!isImageByType && !isImageByExt && !isVideoByType); // 既不是图片也不是明确的视频，当作音频处理
+                         
+          // 只排除明确的图片文件，其他都当作音频处理
+          if (isImage) {
+            console.log(`排除图片文件: ${fileName}, Content-Type: ${contentType}`);
+            return false;
+          }
+          
+          console.log(`文件类型检查: ${fileName} - 音频: ${isAudio}, Content-Type: ${file.content_type || 'unknown'}`);
+          
+          return isAudio;
+        });
+
+        console.log('过滤后的音频文件列表:', audioFiles);
+
+        // 在音频文件中查找指定的录音文件
+        const foundFile = audioFiles.find(file => {
+          const objectKey = file.object_key || file.objectKey || file.key || file.name;
           const fileName = objectKey.split('/').pop();
           const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
           
-          console.log(`检查文件 ${fileName}:`);
+          console.log(`检查音频文件 ${fileName}:`);
           console.log(`  文件名（无扩展名）: ${nameWithoutExt}`);
           console.log(`  查找的recordingId: ${recordingId}`);
           
@@ -260,19 +300,19 @@ const PlayerPage = () => {
           return false;
         });
 
-        // 如果找到匹配的文件，或者会话中只有一个文件就使用它
-        let targetFile = foundFile || (files.length === 1 ? files[0] : null);
+        // 如果找到匹配的文件，或者只有一个音频文件就使用它
+        let targetFile = foundFile || (audioFiles.length === 1 ? audioFiles[0] : null);
         
-        // 如果还是没找到，尝试按时间排序找最新的文件作为备选
-        if (!targetFile && files.length > 0) {
-          console.log('未找到精确匹配，尝试使用最新的录音文件');
-          const sortedFiles = [...files].sort((a, b) => {
+        // 如果还是没找到，尝试按时间排序找最新的音频文件作为备选
+        if (!targetFile && audioFiles.length > 0) {
+          console.log('未找到精确匹配，尝试使用最新的音频文件');
+          const sortedAudioFiles = [...audioFiles].sort((a, b) => {
             const timeA = new Date(a.last_modified || a.lastModified || a.modified || 0);
             const timeB = new Date(b.last_modified || b.lastModified || b.modified || 0);
             return timeB - timeA; // 降序排列，最新的在前
           });
-          targetFile = sortedFiles[0];
-          console.log('使用最新文件作为备选:', targetFile);
+          targetFile = sortedAudioFiles[0];
+          console.log('使用最新音频文件作为备选:', targetFile);
         }
 
         if (targetFile) {
@@ -341,14 +381,14 @@ const PlayerPage = () => {
         } else {
           console.log('未找到指定的录音文件，recordingId:', recordingId);
           console.log('会话中的所有文件:', files);
-          navigate(`/${userCode}/${id}`);
+          navigate(`/${userCode}/${id}?recordingNotFound=true`);
         }
       } else {
         throw new Error(result.message || result.error || result.detail || '获取录音文件失败');
       }
     } catch (error) {
       console.error('加载云端录音失败:', error);
-      navigate(`/${userCode}/${id}`);
+      navigate(`/${userCode}/${id}?loadError=true`);
     } finally {
       setLoading(false);
     }
@@ -476,14 +516,14 @@ const PlayerPage = () => {
   }, [recording, isIOS]);
 
   // 自动播放音频
-  useEffect(() =>{
-    if(audioReady && audioRef.current && typeof audioRef.current.play === 'function'){
-      audioRef.current.play().catch((err) =>{
-        // 处理自动播放被浏览器拦截的情况
-        console.warn('自动播放失败，可能被浏览器拦截：',err);
-      });
-    }
-  },[audioReady]);
+  // useEffect(() =>{
+  //   if(audioReady && audioRef.current && typeof audioRef.current.play === 'function'){
+  //     audioRef.current.play().catch((err) =>{
+  //       // 处理自动播放被浏览器拦截的情况
+  //       console.warn('自动播放失败，可能被浏览器拦截：',err);
+  //     });
+  //   }
+  // },[audioReady]);
 
   // 播放/暂停控制
   const togglePlayPause = async () => {
@@ -790,20 +830,14 @@ const PlayerPage = () => {
   }, []);
 
   const handleMediaClick = (file) => {
-    if (file.type === 'image') {
-      // 图片预览
-      setPreviewFile(file);
-    } else if (file.type === 'video') {
+    if (file.type === 'video') {
       // 跳转到视频播放页面，使用来源标识
       const videoId = file.id || file.uniqueId;
       if (videoId) {
         navigate(`/${userCode}/video-player/${id}/${videoId}?from=player&recordingId=${recordingId}`);
       }
     }
-  };
-
-  const closePreview = () => {
-    setPreviewFile(null);
+    // 图片点击不做任何操作，移除了大图预览功能
   };
 
   if (loading) {
@@ -1139,23 +1173,7 @@ const PlayerPage = () => {
         </div>
       )}
 
-      {/* 图片预览弹窗 */}
-      {previewFile && (
-        <div className="preview-overlay" onClick={closePreview}>
-          <div className="preview-content" onClick={(e) => e.stopPropagation()}>
-            <button className="preview-close" onClick={closePreview}>×</button>
-            <img 
-              src={previewFile.preview || previewFile.url} 
-              alt={previewFile.name}
-              className="preview-image"
-            />
-            <div className="preview-info">
-              <h4>{previewFile.name}</h4>
-              <p>上传时间: {previewFile.uploadTime}</p>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };
