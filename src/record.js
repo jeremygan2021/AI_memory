@@ -39,9 +39,7 @@ const RecordComponent = () => {
   const [justReturnedFromPlayer, setJustReturnedFromPlayer] = useState(false); // 是否刚从播放页面返回
   const [isCheckingFiles, setIsCheckingFiles] = useState(false); // 是否正在检查文件存在性
   
-  // 新增：上传本地录音相关状态
-  const [isUploading, setIsUploading] = useState(false); // 是否正在上传文件
-  const [uploadProgressState, setUploadProgressState] = useState(0); // 上传进度
+
   
   // 新增：上传媒体弹窗相关状态
   const [showUploadModal, setShowUploadModal] = useState(false); // 是否显示上传弹窗
@@ -55,6 +53,11 @@ const RecordComponent = () => {
   const [previewFile, setPreviewFile] = useState(null); // 预览文件
   const [isMobile, setIsMobile] = useState(false); // 是否移动设备
   
+  // 移动端录音相关状态
+  const [isMobileRecording, setIsMobileRecording] = useState(false); // 是否正在移动端录音
+  const [isMobileRecordingPaused, setIsMobileRecordingPaused] = useState(false); // 移动端录音是否暂停
+  const [mobileRecordingTime, setMobileRecordingTime] = useState(0); // 移动端录音时长
+  
   // 引用
   const mediaRecorderRef = useRef(null); // MediaRecorder实例
   const audioChunksRef = useRef([]); // 音频数据块
@@ -62,8 +65,12 @@ const RecordComponent = () => {
   const streamRef = useRef(null); // 媒体流引用
   const longPressTimerRef = useRef(null); // 长按计时器
   const startBtnRef = useRef(null); // 开始按钮引用
-  const fileInputRef = useRef(null); // 文件输入引用
   const mediaFileInputRef = useRef(null); // 媒体文件输入引用
+  const mobileAudioFileInputRef = useRef(null); // 移动端音频文件输入引用
+  const mobileMediaRecorderRef = useRef(null); // 移动端录音器引用
+  const mobileAudioChunksRef = useRef([]); // 移动端音频数据块
+  const mobileStreamRef = useRef(null); // 移动端媒体流引用
+  const mobileTimerRef = useRef(null); // 移动端录音计时器
 
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -754,6 +761,19 @@ const RecordComponent = () => {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
       }
+      
+      // 清理移动端录音相关资源
+      if (mobileTimerRef.current) {
+        clearInterval(mobileTimerRef.current);
+      }
+      
+      if (mobileStreamRef.current) {
+        mobileStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+      
+      if (mobileMediaRecorderRef.current && mobileMediaRecorderRef.current.state !== 'inactive') {
+        mobileMediaRecorderRef.current.stop();
+      }
     };
   }, []);
 
@@ -880,12 +900,12 @@ const RecordComponent = () => {
   };
 
   // 生成唯一的媒体文件ID（包含会话信息用于区分来源）
-  const generateUniqueMediaId = (isVideo = false) => {
+  const generateUniqueMediaId = (isVideoOrAudio = false) => {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substr(2, 4);
     const uniqueId = Math.random().toString(36).substr(2, 8);
     const sessionId = id || 'default';
-    const prefix = isVideo ? 'vid' : 'img';
+    const prefix = isVideoOrAudio ? 'vid' : 'img';
     return `${prefix}_${sessionId}_${timestamp}_${random}_${uniqueId}`;
   };
 
@@ -994,16 +1014,25 @@ const RecordComponent = () => {
   };
 
   // 处理媒体文件选择
-  const handleMediaFileSelect = async (files) => {
+  const handleMediaFileSelect = async (files, options = {}) => {
     const fileArray = Array.from(files);
+    const { audioOnly: forceAudioOnly = false } = options; // 是否强制仅音频模式
+    
+    // 检测iOS设备
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
     for (const file of fileArray) {
-      // 检查文件类型
+      // 检查文件类型 - 增强iOS格式支持
       const isImage = file.type.startsWith('image/');
       const isVideo = file.type.startsWith('video/');
+      const isAudio = file.type.startsWith('audio/') || 
+                     file.name.match(/\.(mp3|wav|m4a|aac|ogg|webm|caf|amr|3gp)$/i) ||
+                     file.type === 'audio/x-m4a' || 
+                     file.type === 'audio/mp4' ||
+                     file.type === '' && file.name.match(/\.(m4a|aac|caf)$/i); // 处理MIME类型为空的情况
       
-      if (!isImage && !isVideo) {
-        alert(`不支持的文件类型: ${file.name}`);
+      if (!isImage && !isVideo && !isAudio) {
+        alert(`不支持的文件类型: ${file.name}. 支持的格式：图片、视频、音频`);
         continue;
       }
       
@@ -1014,19 +1043,163 @@ const RecordComponent = () => {
         continue;
       }
       
+      // iOS设备mov格式转换处理
+      let processedFile = file;
+      let originalFormat = '';
+      let convertedFormat = '';
+      
+      if (isVideo && isIOS && (file.type === 'video/quicktime' || file.name.toLowerCase().endsWith('.mov'))) {
+        console.log('检测到iOS设备的mov格式视频，准备转换为mp4格式');
+        originalFormat = file.name.toLowerCase().endsWith('.mov') ? 'mov' : file.type;
+        
+        // 创建新的文件名（将.mov改为.mp4）
+        const newFileName = file.name.replace(/\.mov$/i, '.mp4');
+        
+        // 创建新的File对象，修改MIME类型为video/mp4
+        processedFile = new File([file], newFileName, {
+          type: 'video/mp4',
+          lastModified: file.lastModified
+        });
+        
+        convertedFormat = 'mp4';
+        console.log(`iOS视频格式转换: ${originalFormat} -> ${convertedFormat}`);
+        console.log(`文件名转换: ${file.name} -> ${newFileName}`);
+        console.log(`MIME类型转换: ${file.type} -> video/mp4`);
+      }
+      
+      // 增强的视频格式兼容性检查
+      if (isVideo) {
+        const supportedVideoFormats = ['mp4', 'webm', 'mov']; // mov会被转换为mp4
+        const fileExtension = processedFile.name.split('.').pop().toLowerCase();
+        
+        if (!supportedVideoFormats.includes(fileExtension) && !processedFile.type.startsWith('video/')) {
+          alert(`不支持的视频格式: ${processedFile.name}. 支持的格式：MP4, WebM, MOV（iOS自动转换）`);
+          continue;
+        }
+        
+        // 显示转换信息
+        if (originalFormat && convertedFormat) {
+          console.log(`✅ iOS视频格式自动转换成功: ${originalFormat} → ${convertedFormat}`);
+        }
+      }
+      
+      // 询问视频播放模式（仅对视频文件）
+      let audioOnly = false;
+      if (isVideo) {
+        if (forceAudioOnly) {
+          // 如果是从"上传本地录音"按钮进入，默认仅播放音频
+          audioOnly = true;
+          console.log('从上传本地录音按钮选择视频文件，默认仅播放音频');
+        } else {
+          // 从其他入口进入，询问用户
+          audioOnly = window.confirm('是否只播放声音？点击"确定"仅播放声音，点击"取消"播放视频+声音。');
+        }
+      }
+      
       // 生成唯一ID（包含会话ID）
-      const uniqueId = generateUniqueMediaId(isVideo);
+      const uniqueId = generateUniqueMediaId(isVideo || isAudio);
       const tempId = Date.now() + Math.random();
       
       // 创建预览URL
-      const previewUrl = URL.createObjectURL(file);
+      const previewUrl = URL.createObjectURL(processedFile);
       
-      // 创建文件信息对象
+      // 如果是音频文件或仅播放声音的视频，创建录音记录；否则创建媒体文件记录
+      if (isAudio || audioOnly) {
+        // 创建录音记录对象
+        const recordingId = Date.now() + Math.random();
+        
+        // 确定上传文件名
+        let uploadFileName;
+        if (isAudio) {
+          // 音频文件统一使用mp3扩展名
+          uploadFileName = `recording_${recordingId}.mp3`;
+        } else if (audioOnly) {
+          // 仅音频的视频文件，保持原扩展名但标记为音频
+          const fileExtension = processedFile.name.split('.').pop().toLowerCase();
+          uploadFileName = `recording_${recordingId}.${fileExtension}`;
+        }
+
+        // 创建录音记录
+        const newRecording = {
+          id: recordingId,
+          url: previewUrl,
+          audioBlob: processedFile,
+          duration: 0, // 将在音频加载后获取
+          timestamp: new Date().toLocaleString('zh-CN'),
+          sessionId: id || 'default',
+          cloudUrl: null,
+          uploaded: false,
+          fileName: processedFile.name,
+          isVideo: isVideo && !audioOnly, // 只有视频且不是仅音频模式时为true
+          fileType: processedFile.type,
+          audioOnly: audioOnly // 标记是否为仅音频模式
+        };
+
+        // 添加到录音列表
+        setRecordings(prev => [newRecording, ...prev]);
+
+        // 获取时长
+        try {
+          const duration = await getMediaDuration(previewUrl, isVideo);
+          setRecordings(prev => prev.map(rec => 
+            rec.id === recordingId ? { ...rec, duration: Math.floor(duration) } : rec
+          ));
+        } catch (error) {
+          console.warn('无法获取媒体时长:', error);
+        }
+
+        // 上传到云端
+        try {
+          const uploadResult = await uploadAudioFile(processedFile, recordingId, uploadFileName);
+
+          if (uploadResult && uploadResult.success) {
+            // 更新录音记录，添加云端信息
+            setRecordings(prev => prev.map(recording => 
+              recording.id === recordingId 
+                ? {
+                    ...recording,
+                    cloudUrl: uploadResult.cloudUrl,
+                    objectKey: uploadResult.objectKey,
+                    etag: uploadResult.etag,
+                    uploaded: true
+                  }
+                : recording
+            ));
+
+            // 显示上传成功提示
+            const successMessage = audioOnly ? 
+              `视频(仅音频)上传成功！` : 
+              `录音上传成功！`;
+            alert(successMessage);
+
+            console.log('录音文件上传成功:', uploadResult);
+          } else {
+            const errorMsg = uploadResult?.error || '未知错误';
+            console.error('录音文件上传失败:', errorMsg);
+            alert(`录音上传失败: ${errorMsg}`);
+            
+            // 从录音列表中移除失败的文件
+            setRecordings(prev => prev.filter(r => r.id !== recordingId));
+          }
+        } catch (error) {
+          console.error('录音文件处理失败:', error);
+          alert(`录音处理失败: ${error.message}`);
+          
+          // 从录音列表中移除失败的文件
+          setRecordings(prev => prev.filter(r => r.id !== recordingId));
+        }
+        
+        // 关闭弹窗
+        closeUploadModal();
+        continue; // 继续处理下一个文件
+      }
+      
+      // 创建媒体文件信息对象（图片和完整视频）
       const fileInfo = {
         id: uniqueId,
-        name: file.name,
+        name: processedFile.name,
         type: isVideo ? 'video' : 'image',
-        size: file.size,
+        size: processedFile.size,
         preview: previewUrl,
         url: previewUrl,
         timestamp: new Date().toLocaleString('zh-CN'),
@@ -1035,7 +1208,10 @@ const RecordComponent = () => {
         uploaded: false,
         cloudUrl: null,
         objectKey: null,
-        fromRecordPage: true // 标记来源于录音页面
+        fromRecordPage: true, // 标记来源于录音页面
+        originalFormat: originalFormat, // 记录原始格式
+        convertedFormat: convertedFormat, // 记录转换后格式
+        isConverted: !!(originalFormat && convertedFormat) // 是否经过转换
       };
       
       // 先添加到本地列表
@@ -1044,8 +1220,8 @@ const RecordComponent = () => {
       
       // 上传到云端
       try {
-        console.log('开始上传媒体文件到云端...', { fileName: file.name, fileSize: file.size });
-        const uploadResult = await uploadMediaFile(file, tempId);
+        console.log('开始上传媒体文件到云端...', { fileName: processedFile.name, fileSize: processedFile.size });
+        const uploadResult = await uploadMediaFile(processedFile, tempId);
         
         console.log('媒体文件上传结果:', uploadResult);
         
@@ -1074,8 +1250,11 @@ const RecordComponent = () => {
           // 保存到localStorage
           saveMediaFileToStorage(finalFileInfo);
           
-          // 显示上传成功提示
-          alert(`${isVideo ? '视频' : '图片'}上传成功！`);
+          // 显示上传成功提示，包含转换信息
+          const successMessage = convertedFormat ? 
+            `${isVideo ? '视频' : '图片'}上传成功！(${originalFormat} → ${convertedFormat} 格式转换)` : 
+            `${isVideo ? '视频' : '图片'}上传成功！`;
+          alert(successMessage);
           
           console.log('媒体文件上传成功:', finalFileInfo);
         } else {
@@ -1158,7 +1337,7 @@ const RecordComponent = () => {
     
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
+      if (item.type.startsWith('image/') || item.type.startsWith('video/') || item.type.startsWith('audio/')) {
         const file = item.getAsFile();
         if (file) {
           handleMediaFileSelect([file]);
@@ -1258,126 +1437,184 @@ const RecordComponent = () => {
     }
   };
 
-  // 新增：处理本地文件上传
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
 
-    // 检查文件类型
-    const allowedTypes = [
-      'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/m4a', 'audio/aac', 'audio/ogg', 'audio/webm',
-      'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/flv', 'video/webm', 'video/mkv'
-    ];
-    
-    const isValidType = allowedTypes.some(type => file.type.includes(type.split('/')[1])) || 
-                       file.name.match(/\.(mp3|wav|m4a|aac|ogg|webm|mp4|avi|mov|wmv|flv|mkv)$/i);
 
-    if (!isValidType) {
-      alert('请选择有效的音频或视频文件（支持格式：MP3, WAV, M4A, AAC, OGG, WebM, MP4, AVI, MOV, WMV, FLV, MKV）');
-      return;
-    }
 
-    // 检查文件大小（限制为100MB）
-    const maxSize = 100 * 1024 * 1024; // 100MB
-    if (file.size > maxSize) {
-      alert('文件大小不能超过 100MB');
-      return;
-    }
 
-    uploadLocalFile(file);
-  };
-
-  // 新增：上传本地文件
-  const uploadLocalFile = async (file) => {
+  // 移动端录音功能
+  const handleMobileRecordingStart = async () => {
     try {
-      setIsUploading(true);
-      setUploadProgressState(0);
-
-      console.log('开始上传本地文件:', { fileName: file.name, fileSize: file.size, fileType: file.type });
-
-      // 创建录音记录对象
-      const recordingId = Date.now();
-      const fileUrl = URL.createObjectURL(file);
+      // 获取麦克风权限
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        } 
+      });
       
-      // 确定文件类型和扩展名
-      const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i);
+      mobileStreamRef.current = stream;
       
-      // 如果是音频文件，统一使用mp3扩展名；如果是视频文件，保持原扩展名
-      let uploadFileName;
-      if (isVideo) {
-        const fileExtension = file.name.split('.').pop().toLowerCase();
-        uploadFileName = `recording_${recordingId}.${fileExtension}`;
-      } else {
-        // 音频文件统一使用mp3扩展名
-        uploadFileName = `recording_${recordingId}.mp3`;
-      }
-
-      // 先创建本地录音记录
-      const newRecording = {
-        id: recordingId,
-        url: fileUrl,
-        audioBlob: file, // 保存原始文件用于上传
-        duration: 0, // 将在音频加载后获取
-        timestamp: new Date().toLocaleString('zh-CN'),
-        sessionId: id || 'default',
-        cloudUrl: null,
-        uploaded: false,
-        fileName: file.name,
-        isVideo: isVideo, // 标记是否为视频文件
-        fileType: file.type
-      };
-
-      setRecordings(prev => [newRecording, ...prev]);
-
-      // 如果是音频/视频文件，尝试获取时长
-      if (file.type.startsWith('audio/') || file.type.startsWith('video/')) {
-        try {
-          const duration = await getMediaDuration(fileUrl);
-          setRecordings(prev => prev.map(rec => 
-            rec.id === recordingId ? { ...rec, duration: Math.floor(duration) } : rec
-          ));
-        } catch (error) {
-          console.warn('无法获取媒体时长:', error);
+      // 创建MediaRecorder实例
+      let mimeType = '';
+      const supportedTypes = [
+        'audio/mp4',
+        'audio/mpeg', 
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/wav'
+      ];
+      
+      for (const type of supportedTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          mimeType = type;
+          break;
         }
       }
-
-      // 上传到云端
-      const uploadResult = await uploadAudioFile(file, recordingId, uploadFileName);
-
-      if (uploadResult.success) {
-        // 更新录音记录，添加云端信息
-        setRecordings(prev => prev.map(recording => 
-          recording.id === recordingId 
-            ? {
-                ...recording,
-                cloudUrl: uploadResult.cloudUrl,
-                objectKey: uploadResult.objectKey,
-                etag: uploadResult.etag,
-                uploaded: true
-              }
-            : recording
-        ));
-
-        console.log('本地文件上传成功:', uploadResult);
-      }
-
+      
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: mimeType
+      });
+      
+      mobileMediaRecorderRef.current = mediaRecorder;
+      mobileAudioChunksRef.current = [];
+      
+      // 监听数据可用事件
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          mobileAudioChunksRef.current.push(event.data);
+        }
+      };
+      
+      // 监听录音停止事件
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(mobileAudioChunksRef.current, { type: mimeType || 'audio/webm' });
+        
+        // 创建录音记录
+        const recordingId = Date.now() + Math.random();
+        const fileName = `mobile_recording_${recordingId}.mp3`;
+        const previewUrl = URL.createObjectURL(audioBlob);
+        
+        const newRecording = {
+          id: recordingId,
+          url: previewUrl,
+          audioBlob: audioBlob,
+          duration: mobileRecordingTime,
+          timestamp: new Date().toLocaleString('zh-CN'),
+          sessionId: id || 'default',
+          cloudUrl: null,
+          uploaded: false,
+          fileName: fileName,
+          isVideo: false,
+          fileType: mimeType
+        };
+        
+        // 添加到录音列表
+        setRecordings(prev => [newRecording, ...prev]);
+        
+        // 上传到云端
+        const uploadResult = await uploadAudioFile(audioBlob, recordingId, fileName);
+        
+        if (uploadResult && uploadResult.success) {
+          setRecordings(prev => prev.map(recording => 
+            recording.id === recordingId 
+              ? {
+                  ...recording,
+                  cloudUrl: uploadResult.cloudUrl,
+                  objectKey: uploadResult.objectKey,
+                  etag: uploadResult.etag,
+                  uploaded: true
+                }
+              : recording
+          ));
+          
+          alert('移动端录音上传成功！');
+        }
+        
+        // 重置状态
+        setIsMobileRecording(false);
+        setIsMobileRecordingPaused(false);
+        setMobileRecordingTime(0);
+        
+        // 关闭弹窗
+        closeUploadModal();
+      };
+      
+      // 开始录音
+      mediaRecorder.start(1000);
+      setIsMobileRecording(true);
+      setIsMobileRecordingPaused(false);
+      
+      // 开始计时
+      startMobileTimer();
+      
     } catch (error) {
-      console.error('上传本地文件失败:', error);
-      alert(`文件上传失败: ${error.message}`);
-    } finally {
-      setIsUploading(false);
-      setUploadProgressState(0);
-      // 清空文件输入
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      console.error('移动端录音启动失败:', error);
+      alert('无法访问麦克风，请检查权限设置');
+    }
+  };
+
+  const handleMobileRecordingPause = () => {
+    if (mobileMediaRecorderRef.current && isMobileRecording) {
+      if (isMobileRecordingPaused) {
+        mobileMediaRecorderRef.current.resume();
+        startMobileTimer();
+        setIsMobileRecordingPaused(false);
+      } else {
+        mobileMediaRecorderRef.current.pause();
+        stopMobileTimer();
+        setIsMobileRecordingPaused(true);
       }
     }
   };
 
-  // 新增：获取媒体文件时长
-  const getMediaDuration = (url) => {
+  const handleMobileRecordingStop = () => {
+    stopMobileTimer();
+    
+    if (mobileMediaRecorderRef.current && mobileMediaRecorderRef.current.state !== 'inactive') {
+      mobileMediaRecorderRef.current.stop();
+    }
+    
+    // 停止媒体流
+    if (mobileStreamRef.current) {
+      mobileStreamRef.current.getTracks().forEach(track => track.stop());
+      mobileStreamRef.current = null;
+    }
+  };
+
+  const startMobileTimer = () => {
+    stopMobileTimer();
+    mobileTimerRef.current = setInterval(() => {
+      setMobileRecordingTime(prev => prev + 1);
+    }, 1000);
+  };
+
+  const stopMobileTimer = () => {
+    if (mobileTimerRef.current) {
+      clearInterval(mobileTimerRef.current);
+      mobileTimerRef.current = null;
+    }
+  };
+
+  const handleMobileAudioFileSelect = () => {
+    if (mobileAudioFileInputRef.current) {
+      mobileAudioFileInputRef.current.click();
+    }
+  };
+
+  const handleMobileAudioFileInputChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleMediaFileSelect(files, { audioOnly: true }); // 标记为仅音频模式
+      // 清空输入
+      e.target.value = '';
+    }
+  };
+
+  // 获取媒体文件时长
+  const getMediaDuration = (url, isVideo = false) => {
     return new Promise((resolve, reject) => {
-      const media = document.createElement('audio');
+      const media = document.createElement(isVideo ? 'video' : 'audio');
       
       media.onloadedmetadata = () => {
         resolve(media.duration);
@@ -1391,13 +1628,6 @@ const RecordComponent = () => {
       
       media.src = url;
     });
-  };
-
-  // 新增：触发文件选择
-  const triggerFileSelect = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
   };
 
   // 检测已绑定录音，智能跳转到播放页面（用户从播放页面返回后永久停止此功能）
@@ -1442,7 +1672,7 @@ const RecordComponent = () => {
         <div className="upload-modal-content" onClick={(e) => e.stopPropagation()}>
           {/* 弹窗头部 */}
           <div className="upload-modal-header">
-            <h2>上传照片和视频</h2>
+            <h2>上传照片、视频和本地录音</h2>
             <div className="upload-modal-session-info">
               <span>用户: {userCode} | 会话: {id}</span>
             </div>
@@ -1458,16 +1688,15 @@ const RecordComponent = () => {
             onDrop={handleMediaDrop}
           >
             <span className="upload-modal-text">
-              {isMobile ? '点击、粘贴照片或视频到此处开始上传' : '点击、粘贴或拖放照片和视频到此处开始上传'}
+              {isMobile ? '点击、粘贴照片、视频或录音到此处开始上传' : '点击、粘贴或拖放照片、视频和录音到此处开始上传'}
             </span>
             <input
               ref={mediaFileInputRef}
               type="file"
               multiple
-              accept="image/*,video/*"
+              accept="image/*,video/*,audio/*"
               onChange={handleMediaFileInputChange}
               style={{ display: 'none' }}
-              capture={isMobile ? 'environment' : undefined}
             />
           </div>
 
@@ -1571,46 +1800,7 @@ const RecordComponent = () => {
                     </div>
                   ))}
 
-                  {/* 上传进度显示 */}
-                  {Array.from(mediaUploadingFiles.entries()).map(([tempId, uploadInfo]) => (
-                    <div key={tempId} className="upload-modal-media-item uploading-item">
-                      <div className="upload-modal-upload-progress-container">
-                        <div className="upload-modal-upload-progress-circle">
-                          <div className="upload-modal-progress-ring">
-                            <svg className="upload-modal-progress-ring-svg" width="120" height="120">
-                              <circle
-                                className="upload-modal-progress-ring-background"
-                                cx="60"
-                                cy="60"
-                                r="30"
-                              />
-                              <circle
-                                className="upload-modal-progress-ring-progress"
-                                cx="60"
-                                cy="60"
-                                r="54"
-                                style={{
-                                  strokeDasharray: `${2 * Math.PI * 54}`,
-                                  strokeDashoffset: `${2 * Math.PI * 54 * (1 - uploadInfo.progress / 100)}`
-                                }}
-                              />
-                            </svg>
-                            <div className="upload-modal-progress-text">
-                              {uploadInfo.success ? (
-                                <div className="upload-modal-success-icon">✓</div>
-                              ) : (
-                                <div className="upload-modal-progress-percentage">{Math.round(uploadInfo.progress)}%</div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="upload-modal-upload-file-name">{uploadInfo.fileName}</div>
-                        {uploadInfo.success && (
-                          <div className="upload-modal-upload-success-message">上传成功！</div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                  
                 </div>
 
                 {/* 分页控件 */}
@@ -1641,9 +1831,9 @@ const RecordComponent = () => {
                   {activeTab === 'all' ? '📁' : activeTab === 'photos' ? '📷' : '🎬'}
                 </div>
                 <p className="upload-modal-empty-text">
-                  还没有上传任何{activeTab === 'all' ? '文件' : activeTab === 'photos' ? '照片' : '视频'}
+                  还没有上传任何{activeTab === 'all' ? '媒体文件' : activeTab === 'photos' ? '照片' : '视频'}
                 </p>
-                <p className="upload-modal-empty-subtext">点击上方区域开始上传</p>
+                <p className="upload-modal-empty-subtext">点击上方区域上传照片、视频或录音</p>
               </div>
             )}
           </div>
@@ -1666,43 +1856,32 @@ const RecordComponent = () => {
     <div>
       {/* 背景装饰 */}
       <div className="background-decoration">
-        
+        <style jsx global>{`
+          .background-decoration {
+            background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            background-attachment: scroll !important; /* iOS优化 */
+          }
+        `}</style>
       </div>
       
       {/* 顶部导航栏 */}
       <div className="top-navigation-bar">
           
-        {/* <div className="nav-left">
-          
-        </div>
-        <div className="nav-right">
-          <span className="user-info">会议{userCode}/{id}</span>
-        </div> */}
+       
       </div>
+       
        
       {/* 主内容区：动态布局 */}
       <div className={`record-main-layout ${recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0 ? 'centered-layout' : 'side-layout'}`}>
         {/* 全部为空时的状态提示 - 只在居中布局时显示 */}
-        <div className="empty-recordings-state" style={{
-          display: (recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0) ? 'flex' : 'none',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          
-          <div className="empty-icon">🎤</div>
-          <h3>还没有录音</h3>
-          <p>点击"开始录音"按钮开始录制您的第一个录音；或点击"上传照片"按钮上传图片视频</p>
-        </div>
+       
         
         {/* 左侧录音控制区 */}
         <div className="record-left-panel">
-          {/* 上传照片按钮始终显示在左侧栏顶部 */}
-          <div className="upload-box upload-box-recording">
-            <button className="upload-button" onClick={goToUploadMediaPage}> 
-              <span>上传照片和视频</span>
-            </button>
-          </div>
+          
           <div className="record-control-card">
             {/* 录音控制区标题 */}
             <div className="record-control-header">
@@ -1732,33 +1911,37 @@ const RecordComponent = () => {
                   </span>
                   <span className="btn-text">开始录音</span>
                 </button>
-                  
-                  {/* 上传本地录音按钮 */}
-                  <button 
-                    className="upload-local-btn" 
-                    onClick={triggerFileSelect}
-                    disabled={isUploading}
-                  >
-                    <span className="btn-icon">
-                      {isUploading ? (
-                        <div className="upload-spinner"></div>
-                      ) : (
-                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/files.svg" className="btn-icon" width={28} height={28}/>
-                      )}
-                    </span>
-                    <span className="btn-text">
-                      {isUploading ? `上传中 ${uploadProgressState}%` : '上传本地录音'}
-                    </span>
+                
+                {/* 移动端显示两个分开的按钮，PC端显示合并的按钮 */}
+                {isMobile ? (
+                  <>
+                    <button className="record-start-btn mobile-upload-audio-btn" onClick={handleMobileAudioFileSelect}>
+                      <span className="btn-icon">🎵</span>
+                      <span className="btn-text">上传本地录音</span>
+                    </button>
+                    <button className="record-start-btn mobile-upload-media-btn" onClick={goToUploadMediaPage}> 
+                      <span className="btn-icon">📷</span>
+                      <span className="btn-text">上传照片视频</span>
+                    </button>
+                    
+                    {/* iOS用户提示 */}
+                    {/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+                      <div className="ios-recording-tip">
+                        <div className="tip-content">
+                          <span className="tip-icon">💡</span>
+                          <span className="tip-text">
+                            iOS用户：如需上传语音备忘录，请先在语音备忘录app中选择录音→分享→存储到文件，然后再选择上传！
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <button className="record-start-btn" onClick={goToUploadMediaPage}> 
+                    <span className="btn-text">上传照片、视频和本地录音</span>
                   </button>
-                  
-                  {/* 隐藏的文件输入 */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.webm,.mp4,.avi,.mov,.wmv,.flv,.mkv"
-                    onChange={handleFileUpload}
-                    style={{ display: 'none' }}
-                  />
+                )}
+
                 </>
               ) : (
                 <div className="record-action-buttons">
@@ -1930,7 +2113,6 @@ const RecordComponent = () => {
             <div className="empty-recordings-state">
               <div className="empty-icon">🎤</div>
               <h3>还没有录音</h3>
-              <p>点击"开始录音"按钮开始录制您的第一个录音；或点击"上传照片"按钮上传图片视频</p>
             </div>
           )}
         </div>
@@ -1938,6 +2120,15 @@ const RecordComponent = () => {
 
       {/* 上传媒体弹窗 */}
       {renderUploadMediaModal()}
+
+      {/* 移动端专用的本地录音文件输入 */}
+      <input
+        ref={mobileAudioFileInputRef}
+        type="file"
+        accept="audio/*,.m4a,.aac,.mp3,.wav,.ogg,.webm,.caf"
+        onChange={handleMobileAudioFileInputChange}
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };

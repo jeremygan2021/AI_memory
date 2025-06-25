@@ -244,55 +244,6 @@ html, body {
   font-family: 'SF Mono', monospace;
 } */
 
-/* 上传按钮容器的基础样式 */
-.upload-box{
-  width: 100%;
-  height: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 5px 0 15px 0;
-  position: relative;
-  z-index: 1001
-}
-
-/* 未录音时的上传按钮位置（原位置） */
-.upload-box-initial {
-  width: 100%;
-  height: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 5px 0 15px 0;
-  position: relative;
-  z-index: 1001;
-}
-
-/* 录音时的上传按钮位置（录音控制区域上方） */
-.upload-box-recording {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 0 20px 0;
-  position: relative;
-  z-index: 1001;
-  animation: slideInFromTop 0.3s ease-out;
-}
-
-/* 录音时上传按钮的滑入动画 */
-@keyframes slideInFromTop {
-  0% {
-    transform: translateY(-30px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
 /* PC端播放器位置 - 在录音项右侧 */
 .recording-player-pc {
   display: none; /* 默认隐藏，PC端显示 */
@@ -354,39 +305,8 @@ html, body {
   }
 }
 
-/* PC端专用样式 - 确保在PC端有更好的效果 */
-@media (min-width: 769px) {
-  .upload-box-recording {
-    margin: 0 0 25px 0;
-    height: 65px;
-  }
-  
-  .upload-box-recording .upload-button {
-    width: 400px;
-    height: 45px;
-    font-size: 18px;
-  }
-  
-  /* 录音时的按钮稍微小一点，不抢夺录音控制的视觉焦点 */
-  .upload-box-recording .upload-button span {
-    font-size: 30px;
-  }
-}
-
 /* 移动端保持原样式 */
 @media (max-width: 768px) {
-  .upload-box-initial,
-  .upload-box-recording {
-    width: 100%;
-    height: 60px;
-    margin: 3px 0 12px 0;
-    padding: 0 16px;
-  }
-  
-  .upload-box-recording {
-    margin: 0 0 16px 0;
-  }
-  
   /* 移动端隐藏PC播放器，显示移动端播放器 */
   .recording-player-pc {
     display: none !important;
@@ -422,298 +342,9 @@ html, body {
   }
 }
 
-.upload-button{
-  background: linear-gradient(135deg, #6ebf8e 0%, #3bb6a6 100%);
-  color: #fff;
-  border: 2px solid #3bb6a6;
-  border-radius: 24px;
-  box-shadow: 0 4px 16px rgba(59, 182, 166, 0.10);
-  font-size: 26px;
-  font-family: 'MUYAO-SOFTBRUSH', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  font-weight: 500;
-  padding: 12px 48px;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  outline: none;
-  margin: 0 auto;
-}
 
-.upload-button:hover {
-  background: linear-gradient(135deg, #3bb6a6 0%, #6ebf8e 100%);
-  color: #fff;
-  border-color: #2d8a7a;
-  box-shadow: 0 6px 24px rgba(59, 182, 166, 0.18);
-  transform: translateY(-2px) scale(1.03);
-}
 
-.upload-button:active {
-  background: #3bb6a6;
-  color: #fff;
-  border-color: #2d8a7a;
-  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.18) inset;
-  transform: scale(0.98);
-}
 
-/* 确保上传按钮区域不被遮挡 */
-.upload-box, .upload-button {
-  pointer-events: auto !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: flex !important;
-}
-
-/* iOS安全区域适配 */
-@supports (padding: max(0px)) {
-  .upload-box {
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
-  }
-}
-
-/* 可访问性优化 */
-@media (prefers-reduced-motion: reduce) {
-  .upload-button {
-    transition: none;
-  }
-  
-  .upload-button::before,
-  .upload-button::after {
-    animation: none;
-  }
-}
-
-/* 高对比度模式 */
-@media (prefers-contrast: high) {
-  .upload-button {
-    border-width: 2px;
-    border-color: rgba(74, 144, 266, 0.8);
-    background: rgba(74, 144, 266, 0.15);
-  }
-  
-  .upload-button span {
-    color: rgba(74, 144, 266, 1);
-    font-weight: 700;
-  }
-}
-
-/* 暗色主题适配 */
-@media (prefers-color-scheme: dark) {
-  .upload-button {
-    background: rgba(74, 144, 266, 0.2);
-    border-color: rgba(74, 144, 266, 0.5);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-  
-  .upload-button:hover {
-    background: rgba(74, 144, 266, 0.3);
-    border-color: rgba(74, 144, 266, 0.7);
-  }
-  
-  .upload-button span {
-    color: rgba(74, 144, 266, 0.9);
-  }
-}
-
-/* 移动端适配和触摸友好 */
-@media (max-width: 768px) {
-  .upload-box {
-    width: 100%;
-    height: 60px;
-    margin: 3px 0 12px 0;
-    padding: 0 16px;
-  }
-  
-  .upload-button {
-    width: min(320px, 90vw);
-    height: 44px;
-    min-height: 44px; /* 确保触摸友好 */
-    border-radius: 22px;
-    box-shadow: 0 4px 12px rgba(74, 144, 266, 0.2);
-  }
-  
-  .upload-button span {
-    font-size: 22px;
-    font-weight: 600;
-  }
-}
-
-/* 中等移动设备 (481px - 600px) */
-@media (max-width: 600px) and (min-width: 481px) {
-  .upload-box {
-    height: 56px;
-    margin: 4px 0 14px 0;
-    padding: 0 20px;
-  }
-  
-  .upload-button {
-    width: min(280px, 85vw);
-    height: 42px;
-    min-height: 44px;
-  }
-  
-  .upload-button span {
-    font-size: 20px;
-  }
-}
-
-/* 小屏移动设备 (361px - 480px) */
-@media (max-width: 480px) and (min-width: 361px) {
-  .upload-box {
-    width: 100%;
-    height: 52px;
-    margin: 2px 0 10px 0;
-    padding: 0 12px;
-  }
-  
-  .upload-button {
-    width: min(260px, 88vw);
-    height: 40px;
-    min-height: 44px;
-    border-radius: 20px;
-  }
-  
-  .upload-button span {
-    font-size: 18px;
-    font-weight: 600;
-  }
-}
-
-/* 超小屏设备 (≤360px) */
-@media (max-width: 360px) {
-  .upload-box {
-    width: 100%;
-    height: 48px;
-    margin: 1px 0 8px 0;
-    padding: 0 8px;
-  }
-  
-  .upload-button {
-    width: min(240px, 92vw);
-    height: 38px;
-    min-height: 44px;
-    border-radius: 19px;
-    font-size: 14px;
-  }
-  
-  .upload-button span {
-    font-size: 16px;
-    font-weight: 600;
-  }
-}
-
-/* 极小屏设备 (≤320px) */
-@media (max-width: 320px) {
-  .upload-box {
-    width: 100%;
-    height: 46px;
-    margin: 1px 0 6px 0;
-    padding: 0 6px;
-  }
-  
-  .upload-button {
-    width: min(220px, 95vw);
-    height: 36px;
-    min-height: 44px;
-    border-radius: 18px;
-  }
-  
-  .upload-button span {
-    font-size: 15px;
-    font-weight: 600;
-  }
-}
-
-/* 触摸设备优化 */
-@media (hover: none) and (pointer: coarse) {
-  .upload-button {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .upload-button:hover {
-    transform: none;
-    background: rgba(74, 144, 266, 0.1);
-    border-color: rgba(74, 144, 266, 0.3);
-    box-shadow: 0 2px 8px rgba(74, 144, 266, 0.15);
-  }
-  
-  .upload-button:active {
-    background: rgba(74, 144, 266, 0.3);
-    border-color: rgba(74, 144, 266, 0.6);
-    transform: scale(0.96);
-    box-shadow: 0 1px 4px rgba(74, 144, 266, 0.3);
-  }
-  
-  .upload-button:focus {
-    outline: 2px solid rgba(74, 144, 266, 0.5);
-    outline-offset: 2px;
-  }
-}
-
-/* 横屏模式优化 */
-@media (max-width: 900px) and (orientation: landscape) {
-  .upload-box {
-    height: 50px;
-    margin: 2px 0 8px 0;
-  }
-  
-  .upload-button {
-    height: 38px;
-    min-height: 44px;
-  }
-  
-  .upload-button span {
-    font-size: 18px;
-  }
-}
-
-/* 高DPI屏幕优化 */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .upload-button {
-    border-width: 0.5px;
-  }
-}
-
-/* 移动端涟漪效果增强 */
-@media (max-width: 768px) {
-  .upload-button::after {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  
-  .upload-button:active::after {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) scale(1);
-    transition: opacity 0.1s ease, transform 0.3s ease;
-  }
-}
-
-/* 移动端文字选择禁用 */
-@media (max-width: 768px) {
-  .upload-button,
-  .upload-button span {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-  }
-}
-
-/* 移动端焦点优化 */
-@media (max-width: 768px) {
-  .upload-button:focus-visible {
-    outline: 3px solid rgba(74, 144, 266, 0.6);
-    outline-offset: 3px;
-  }
-  
-  .upload-button:focus:not(:focus-visible) {
-    outline: none;
-  }
-}
 
 .record-container {
   height: auto;
@@ -3640,23 +3271,9 @@ html, body {
     min-height: calc(100vh - 100px);
   }
   
-  /* 上传照片按钮区域 */
-  .upload-box,
-  .upload-box-initial,
-  .upload-box-recording {
-    
-    width: 100%;
-    max-width: 600px;
-    height: 55px;
-    margin: 0 0 12px 0;
-    z-index: 1002;
-  }
+
   
-  .upload-button {
-    padding: 12px 24px;
-    font-size: 15px;
-    min-height: 45px;
-  }
+
   
   /* 录音控制区域 */
   .record-left-panel {
@@ -6520,7 +6137,7 @@ label {
 /* 字体配置 */
 @font-face {
   font-family: 'MUYAO-SOFTBRUSH';
-  src: url('./fonts/Muyao-Softbrush-2.ttf') format('truetype');
+  src: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/fonts/Muyao-Softbrush-2.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -10355,53 +9972,7 @@ html, body {
 } */
 
 /* 上传按钮容器的基础样式 */
-.upload-box{
-  width: 100%;
-  height: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 5px 0 15px 0;
-  position: relative;
-  z-index: 1001
-}
 
-/* 未录音时的上传按钮位置（原位置） */
-.upload-box-initial {
-  width: 100%;
-  height: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 5px 0 15px 0;
-  position: relative;
-  z-index: 1001;
-}
-
-/* 录音时的上传按钮位置（录音控制区域上方） */
-.upload-box-recording {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 0 20px 0;
-  position: relative;
-  z-index: 1001;
-  animation: slideInFromTop 0.3s ease-out;
-}
-
-/* 录音时上传按钮的滑入动画 */
-@keyframes slideInFromTop {
-  0% {
-    transform: translateY(-30px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
 
 /* PC端播放器位置 - 在录音项右侧 */
 .recording-player-pc {
@@ -10464,39 +10035,8 @@ html, body {
   }
 }
 
-/* PC端专用样式 - 确保在PC端有更好的效果 */
-@media (min-width: 769px) {
-  .upload-box-recording {
-    margin: 0 0 25px 0;
-    height: 65px;
-  }
-  
-  .upload-box-recording .upload-button {
-    width: 400px;
-    height: 45px;
-    font-size: 18px;
-  }
-  
-  /* 录音时的按钮稍微小一点，不抢夺录音控制的视觉焦点 */
-  .upload-box-recording .upload-button span {
-    font-size: 30px;
-  }
-}
-
 /* 移动端保持原样式 */
 @media (max-width: 768px) {
-  .upload-box-initial,
-  .upload-box-recording {
-    width: 100%;
-    height: 60px;
-    margin: 3px 0 12px 0;
-    padding: 0 16px;
-  }
-  
-  .upload-box-recording {
-    margin: 0 0 16px 0;
-  }
-  
   /* 移动端隐藏PC播放器，显示移动端播放器 */
   .recording-player-pc {
     display: none !important;
@@ -10532,298 +10072,13 @@ html, body {
   }
 }
 
-.upload-button{
-  background: linear-gradient(135deg, #6ebf8e 0%, #3bb6a6 100%);
-  color: #fff;
-  border: 2px solid #3bb6a6;
-  border-radius: 24px;
-  box-shadow: 0 4px 16px rgba(59, 182, 166, 0.10);
-  font-size: 26px;
-  font-family: 'MUYAO-SOFTBRUSH', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  font-weight: 500;
-  padding: 12px 48px;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  outline: none;
-  margin: 0 auto;
-}
 
-.upload-button:hover {
-  background: linear-gradient(135deg, #3bb6a6 0%, #6ebf8e 100%);
-  color: #fff;
-  border-color: #2d8a7a;
-  box-shadow: 0 6px 24px rgba(59, 182, 166, 0.18);
-  transform: translateY(-2px) scale(1.03);
-}
 
-.upload-button:active {
-  background: #3bb6a6;
-  color: #fff;
-  border-color: #2d8a7a;
-  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.18) inset;
-  transform: scale(0.98);
-}
 
-/* 确保上传按钮区域不被遮挡 */
-.upload-box, .upload-button {
-  pointer-events: auto !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: flex !important;
-}
 
-/* iOS安全区域适配 */
-@supports (padding: max(0px)) {
-  .upload-box {
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
-  }
-}
 
-/* 可访问性优化 */
-@media (prefers-reduced-motion: reduce) {
-  .upload-button {
-    transition: none;
-  }
-  
-  .upload-button::before,
-  .upload-button::after {
-    animation: none;
-  }
-}
 
-/* 高对比度模式 */
-@media (prefers-contrast: high) {
-  .upload-button {
-    border-width: 2px;
-    border-color: rgba(74, 144, 266, 0.8);
-    background: rgba(74, 144, 266, 0.15);
-  }
-  
-  .upload-button span {
-    color: rgba(74, 144, 266, 1);
-    font-weight: 700;
-  }
-}
 
-/* 暗色主题适配 */
-@media (prefers-color-scheme: dark) {
-  .upload-button {
-    background: rgba(74, 144, 266, 0.2);
-    border-color: rgba(74, 144, 266, 0.5);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-  
-  .upload-button:hover {
-    background: rgba(74, 144, 266, 0.3);
-    border-color: rgba(74, 144, 266, 0.7);
-  }
-  
-  .upload-button span {
-    color: rgba(74, 144, 266, 0.9);
-  }
-}
-
-/* 移动端适配和触摸友好 */
-@media (max-width: 768px) {
-  .upload-box {
-    width: 100%;
-    height: 60px;
-    margin: 3px 0 12px 0;
-    padding: 0 16px;
-  }
-  
-  .upload-button {
-    width: min(320px, 90vw);
-    height: 44px;
-    min-height: 44px; /* 确保触摸友好 */
-    border-radius: 22px;
-    box-shadow: 0 4px 12px rgba(74, 144, 266, 0.2);
-  }
-  
-  .upload-button span {
-    font-size: 22px;
-    font-weight: 600;
-  }
-}
-
-/* 中等移动设备 (481px - 600px) */
-@media (max-width: 600px) and (min-width: 481px) {
-  .upload-box {
-    height: 56px;
-    margin: 4px 0 14px 0;
-    padding: 0 20px;
-  }
-  
-  .upload-button {
-    width: min(280px, 85vw);
-    height: 42px;
-    min-height: 44px;
-  }
-  
-  .upload-button span {
-    font-size: 20px;
-  }
-}
-
-/* 小屏移动设备 (361px - 480px) */
-@media (max-width: 480px) and (min-width: 361px) {
-  .upload-box {
-    width: 100%;
-    height: 52px;
-    margin: 2px 0 10px 0;
-    padding: 0 12px;
-  }
-  
-  .upload-button {
-    width: min(260px, 88vw);
-    height: 40px;
-    min-height: 44px;
-    border-radius: 20px;
-  }
-  
-  .upload-button span {
-    font-size: 18px;
-    font-weight: 600;
-  }
-}
-
-/* 超小屏设备 (≤360px) */
-@media (max-width: 360px) {
-  .upload-box {
-    width: 100%;
-    height: 48px;
-    margin: 1px 0 8px 0;
-    padding: 0 8px;
-  }
-  
-  .upload-button {
-    width: min(240px, 92vw);
-    height: 38px;
-    min-height: 44px;
-    border-radius: 19px;
-    font-size: 14px;
-  }
-  
-  .upload-button span {
-    font-size: 16px;
-    font-weight: 600;
-  }
-}
-
-/* 极小屏设备 (≤320px) */
-@media (max-width: 320px) {
-  .upload-box {
-    width: 100%;
-    height: 46px;
-    margin: 1px 0 6px 0;
-    padding: 0 6px;
-  }
-  
-  .upload-button {
-    width: min(220px, 95vw);
-    height: 36px;
-    min-height: 44px;
-    border-radius: 18px;
-  }
-  
-  .upload-button span {
-    font-size: 15px;
-    font-weight: 600;
-  }
-}
-
-/* 触摸设备优化 */
-@media (hover: none) and (pointer: coarse) {
-  .upload-button {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .upload-button:hover {
-    transform: none;
-    background: rgba(74, 144, 266, 0.1);
-    border-color: rgba(74, 144, 266, 0.3);
-    box-shadow: 0 2px 8px rgba(74, 144, 266, 0.15);
-  }
-  
-  .upload-button:active {
-    background: rgba(74, 144, 266, 0.3);
-    border-color: rgba(74, 144, 266, 0.6);
-    transform: scale(0.96);
-    box-shadow: 0 1px 4px rgba(74, 144, 266, 0.3);
-  }
-  
-  .upload-button:focus {
-    outline: 2px solid rgba(74, 144, 266, 0.5);
-    outline-offset: 2px;
-  }
-}
-
-/* 横屏模式优化 */
-@media (max-width: 900px) and (orientation: landscape) {
-  .upload-box {
-    height: 50px;
-    margin: 2px 0 8px 0;
-  }
-  
-  .upload-button {
-    height: 38px;
-    min-height: 44px;
-  }
-  
-  .upload-button span {
-    font-size: 18px;
-  }
-}
-
-/* 高DPI屏幕优化 */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .upload-button {
-    border-width: 0.5px;
-  }
-}
-
-/* 移动端涟漪效果增强 */
-@media (max-width: 768px) {
-  .upload-button::after {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  
-  .upload-button:active::after {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) scale(1);
-    transition: opacity 0.1s ease, transform 0.3s ease;
-  }
-}
-
-/* 移动端文字选择禁用 */
-@media (max-width: 768px) {
-  .upload-button,
-  .upload-button span {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-  }
-}
-
-/* 移动端焦点优化 */
-@media (max-width: 768px) {
-  .upload-button:focus-visible {
-    outline: 3px solid rgba(74, 144, 266, 0.6);
-    outline-offset: 3px;
-  }
-  
-  .upload-button:focus:not(:focus-visible) {
-    outline: none;
-  }
-}
 
 .record-container {
   height: auto;
@@ -13750,23 +13005,7 @@ html, body {
     min-height: calc(100vh - 100px);
   }
   
-  /* 上传照片按钮区域 */
-  .upload-box,
-  .upload-box-initial,
-  .upload-box-recording {
-    
-    width: 100%;
-    max-width: 600px;
-    height: 55px;
-    margin: 0 0 12px 0;
-    z-index: 1002;
-  }
   
-  .upload-button {
-    padding: 12px 24px;
-    font-size: 15px;
-    min-height: 45px;
-  }
   
   /* 录音控制区域 */
   .record-left-panel {
@@ -16630,7 +15869,7 @@ label {
 /* 字体配置 */
 @font-face {
   font-family: 'MUYAO-SOFTBRUSH';
-  src: url('./fonts/Muyao-Softbrush-2.ttf') format('truetype');
+  src: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/fonts/Muyao-Softbrush-2.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -29161,3 +28400,184 @@ html, body {
     padding: 2px 3px;
   }
 }
+
+/* 移动端专用上传按钮样式 */
+.mobile-upload-audio-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.mobile-upload-audio-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 201, 103, 0.4);
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+}
+
+.mobile-upload-audio-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+}
+
+.mobile-upload-audio-btn .btn-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-upload-media-btn {
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+  width: 100%;
+  margin: 8px 0;
+}
+
+.mobile-upload-media-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(116, 185, 255, 0.4);
+  background: linear-gradient(135deg, #5a9bd4, #2d3436);
+}
+
+.mobile-upload-media-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(116, 185, 255, 0.3);
+}
+
+.mobile-upload-media-btn .btn-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 移动端按钮容器样式 */
+@media (max-width: 768px) {
+  .record-control-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .mobile-upload-audio-btn,
+  .mobile-upload-media-btn {
+    min-height: 45px;
+    font-size: 15px;
+  }
+  
+  .mobile-upload-audio-btn .btn-text,
+  .mobile-upload-media-btn .btn-text {
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-upload-audio-btn,
+  .mobile-upload-media-btn {
+    padding: 10px 16px;
+    min-height: 42px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 375px) {
+  .mobile-upload-audio-btn,
+  .mobile-upload-media-btn {
+    padding: 9px 14px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+}
+
+/* iOS用户提示样式 */
+.ios-recording-tip {
+  background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+  border: 1px solid rgba(253, 203, 110, 0.3);
+  border-radius: 12px;
+  margin: 12px 0;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(253, 203, 110, 0.2);
+}
+
+.tip-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tip-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tip-text {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #b8860b;
+  font-weight: 500;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .ios-recording-tip {
+    margin: 10px 0;
+    padding: 10px 14px;
+  }
+  
+  .tip-text {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ios-recording-tip {
+    margin: 8px 0;
+    padding: 8px 12px;
+  }
+  
+  .tip-icon {
+    font-size: 14px;
+  }
+  
+  .tip-text {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 375px) {
+  .ios-recording-tip {
+    padding: 6px 10px;
+  }
+  
+  .tip-text {
+    font-size: 10px;
+    line-height: 1.3;
+  }
+}
+

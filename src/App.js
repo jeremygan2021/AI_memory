@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import './common.css';
 import './browser-compatibility.css';
@@ -22,28 +22,33 @@ const chartData = [
   { day: '周日', time: 75 }
 ];
 
-// 折线图组件
-const LineChart = () => {
+// 折线图组件 - 添加React.memo优化
+const LineChart = React.memo(() => {
   const width = 320;
   const height = 150;
   const padding = 40;
   const bottomPadding = 50;
-  // 移动端增加左边距以确保y轴文字显示完整
-  const isMobile = window.innerWidth <= 768;
-  const leftPadding = isMobile ? 90 : 80;
-  const maxTime = Math.max(...chartData.map(d => d.time));
   
-  // 计算点的坐标
-  const points = chartData.map((data, index) => {
-    const x = leftPadding + (index * (width - leftPadding - padding)) / (chartData.length - 1);
-    const y = padding + ((maxTime - data.time) / maxTime) * (height - padding - bottomPadding);
-    return { x, y, ...data };
-  });
-  
-  // 生成路径字符串
-  const pathData = points.map((point, index) => 
-    `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
-  ).join(' ');
+  // 使用useMemo缓存计算结果
+  const { isMobile, leftPadding, maxTime, points, pathData } = useMemo(() => {
+    const isMobile = window.innerWidth <= 768;
+    const leftPadding = isMobile ? 90 : 80;
+    const maxTime = Math.max(...chartData.map(d => d.time));
+    
+    // 计算点的坐标
+    const points = chartData.map((data, index) => {
+      const x = leftPadding + (index * (width - leftPadding - padding)) / (chartData.length - 1);
+      const y = padding + ((maxTime - data.time) / maxTime) * (height - padding - bottomPadding);
+      return { x, y, ...data };
+    });
+    
+    // 生成路径字符串
+    const pathData = points.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+    ).join(' ');
+
+    return { isMobile, leftPadding, maxTime, points, pathData };
+  }, []); // 空依赖数组，因为chartData是静态的
 
   return (
     <div className="line-chart-container">
@@ -144,7 +149,7 @@ const LineChart = () => {
   </svg>
     </div>
 );
-};
+});
 
 // 录音页面组件
 const RecordPage = () => {
@@ -203,7 +208,7 @@ const RecordPage = () => {
   );
 };
 
-// 主页组件
+// 主页组件 - 添加性能优化
 const HomePage = () => {
   const navigate = useNavigate();
   const { userid } = useParams();
@@ -236,6 +241,34 @@ const HomePage = () => {
   const [uploadedVideos, setUploadedVideos] = useState([]);
   const [previewFile, setPreviewFile] = useState(null);
   const [previewPhoto, setPreviewPhoto] = useState(null);
+
+  // 移动端滚动性能优化
+  useEffect(() => {
+    // 添加移动端滚动保护
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      const memoryAppBg = document.querySelector('.memory-app-bg');
+      const memoryMain = document.querySelector('.memory-main');
+      
+      if (memoryAppBg) {
+        memoryAppBg.style.touchAction = 'pan-y';
+        memoryAppBg.style.overflowY = 'auto'; // 允许垂直滚动
+        memoryAppBg.style.overflowX = 'auto'; // 允许水平滚动
+        memoryAppBg.style.webkitOverflowScrolling = 'touch';
+        memoryAppBg.style.transform = 'translateZ(0)';
+      }
+      
+      if (memoryMain) {
+        memoryMain.style.touchAction = 'pan-y';
+        memoryMain.style.overflow = 'visible';
+        memoryMain.style.transform = 'translateZ(0)';
+      }
+      
+      // 确保body和html允许滚动
+      document.body.style.overflowY = 'auto';
+      document.documentElement.style.overflowY = 'auto';
+    }
+  }, []);
   
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -255,42 +288,57 @@ const HomePage = () => {
     }
   }, [userid, navigate]);
 
-  // 监听窗口大小变化，检测移动端
+  // 优化窗口大小监听 - 使用防抖
   useEffect(() => {
+    let resizeTimer;
+    
     const checkMobileView = () => {
-      setIsMobileView(window.innerWidth <= 768);
+      // 防抖处理，避免频繁更新
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const newIsMobileView = window.innerWidth <= 768;
+        if (newIsMobileView !== isMobileView) {
+          setIsMobileView(newIsMobileView);
+        }
+      }, 100);
     };
     
-    checkMobileView();
+    // 初始检查
+    setIsMobileView(window.innerWidth <= 768);
+    
     window.addEventListener('resize', checkMobileView);
     
-    return () => window.removeEventListener('resize', checkMobileView);
+    return () => {
+      window.removeEventListener('resize', checkMobileView);
+      clearTimeout(resizeTimer);
+    };
+  }, [isMobileView]);
+
+  // 优化文件加载 - 使用useCallback
+  const loadUploadedFiles = useCallback(() => {
+    try {
+      const saved = localStorage.getItem('uploadedFiles');
+      if (saved) {
+        const files = JSON.parse(saved);
+        // 按上传时间排序，最新的在前面，只取前6个
+        const sortedFiles = files
+          .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime))
+          .slice(0, 6);
+        setUploadedFiles(sortedFiles);
+        
+        // 分离照片和视频
+        const photos = sortedFiles.filter(file => file.type === 'image').slice(0, 6);
+        const videos = sortedFiles.filter(file => file.type === 'video').slice(0, 6);
+        setUploadedPhotos(photos);
+        setUploadedVideos(videos);
+      }
+    } catch (error) {
+      console.error('加载文件失败:', error);
+    }
   }, []);
 
-  // 加载上传的文件
+  // 优化事件监听
   useEffect(() => {
-    const loadUploadedFiles = () => {
-      try {
-        const saved = localStorage.getItem('uploadedFiles');
-        if (saved) {
-          const files = JSON.parse(saved);
-          // 按上传时间排序，最新的在前面，只取前6个
-          const sortedFiles = files
-            .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime))
-            .slice(0, 6);
-          setUploadedFiles(sortedFiles);
-          
-          // 分离照片和视频
-          const photos = sortedFiles.filter(file => file.type === 'image').slice(0, 6);
-          const videos = sortedFiles.filter(file => file.type === 'video').slice(0, 6);
-          setUploadedPhotos(photos);
-          setUploadedVideos(videos);
-        }
-      } catch (error) {
-
-      }
-    };
-
     loadUploadedFiles();
     
     // 监听localStorage变化
@@ -300,52 +348,51 @@ const HomePage = () => {
       }
     };
     
-    window.addEventListener('storage', handleStorageChange);
-    
     // 也监听自定义事件，用于同页面更新
     const handleFilesUpdate = () => {
       loadUploadedFiles();
     };
     
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('filesUpdated', handleFilesUpdate);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('filesUpdated', handleFilesUpdate);
     };
-  }, []);
+  }, [loadUploadedFiles]);
   
-  // 跳转到音频库
-  const goToAudioLibrary = () => {
+  // 使用useCallback优化函数
+  const goToAudioLibrary = useCallback(() => {
     if (userCode) {
       navigate(`/${userCode}/audio-library`);
     }
-  };
+  }, [userCode, navigate]);
 
   // 跳转到录音页面（移动端专用）
-  const goToRecordPage = () => {
+  const goToRecordPage = useCallback(() => {
     if (userCode) {
       // 生成唯一的会话ID（8位随机字符）
       const randomId = Math.random().toString(36).substr(2, 8);
       navigate(`/${userCode}/${randomId}`); 
     }
-  };
+  }, [userCode, navigate]);
 
-  // 大图预览相关函数
-  const openPreview = (idx) => {
+  // 大图预览相关函数 - 使用useCallback优化
+  const openPreview = useCallback((idx) => {
     const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
       ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
     
     setPreviewIndex(idx);
     setPreviewFile(albumData[idx]);
-  };
+  }, [uploadedFiles]);
   
-  const closePreview = () => {
+  const closePreview = useCallback(() => {
     setPreviewIndex(null);
     setPreviewFile(null);
-  };
+  }, []);
   
-  const showPrev = (e) => {
+  const showPrev = useCallback((e) => {
     e.stopPropagation();
     const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
       ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
@@ -353,9 +400,9 @@ const HomePage = () => {
     const newIndex = previewIndex !== null ? (previewIndex + albumData.length - 1) % albumData.length : null;
     setPreviewIndex(newIndex);
     setPreviewFile(albumData[newIndex]);
-  };
+  }, [uploadedFiles, previewIndex]);
   
-  const showNext = (e) => {
+  const showNext = useCallback((e) => {
     e.stopPropagation();
     const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
       ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
@@ -363,46 +410,46 @@ const HomePage = () => {
     const newIndex = previewIndex !== null ? (previewIndex + 1) % albumData.length : null;
     setPreviewIndex(newIndex);
     setPreviewFile(albumData[newIndex]);
-  };
+  }, [uploadedFiles, previewIndex]);
 
   // 搜索功能
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     if (searchValue.trim()) {
-
+      console.log(`搜索: ${searchValue}`);
       alert(`搜索: ${searchValue}`);
     }
-  };
+  }, [searchValue]);
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
-  };
+  }, [handleSearch]);
 
   // 处理年龄调节
-  const handleAgeChange = (e) => {
+  const handleAgeChange = useCallback((e) => {
     setBabyAgeMonths(parseInt(e.target.value));
-  };
+  }, []);
 
-  // 格式化年龄显示
-  const formatAge = (months) => {
-    if (months < 12) {
-      return `${months}月`;
-    } else if (months === 12) {
+  // 格式化年龄显示 - 使用useMemo缓存
+  const formattedAge = useMemo(() => {
+    if (babyAgeMonths < 12) {
+      return `${babyAgeMonths}月`;
+    } else if (babyAgeMonths === 12) {
       return '1岁';
     } else {
-      const years = Math.floor(months / 12);
-      const remainingMonths = months % 12;
+      const years = Math.floor(babyAgeMonths / 12);
+      const remainingMonths = babyAgeMonths % 12;
       if (remainingMonths === 0) {
         return `${years}岁`;
       } else {
         return `${years}岁${remainingMonths}月`;
       }
     }
-  };
+  }, [babyAgeMonths]);
 
   // 添加新活动
-  const handleAddActivity = () => {
+  const handleAddActivity = useCallback(() => {
     if (newActivity.trim()) {
       const newItem = {
         id: Math.max(...activities.map(a => a.id), 0) + 1,
@@ -413,97 +460,97 @@ const HomePage = () => {
       setNewActivity('');
       setShowAddInput(false);
     }
-  };
+  }, [newActivity, activities]);
 
   // 显示添加输入框
-  const showAddActivityInput = () => {
+  const showAddActivityInput = useCallback(() => {
     setShowAddInput(true);
-  };
+  }, []);
 
   // 取消添加
-  const cancelAddActivity = () => {
+  const cancelAddActivity = useCallback(() => {
     setNewActivity('');
     setShowAddInput(false);
-  };
+  }, []);
 
   // 处理活动状态变化
-  const handleActivityToggle = (id) => {
+  const handleActivityToggle = useCallback((id) => {
     setActivities(activities.map(activity => 
       activity.id === id ? { ...activity, completed: !activity.completed } : activity
     ));
-  };
+  }, [activities]);
 
   // 删除活动
-  const handleActivityDelete = (id) => {
+  const handleActivityDelete = useCallback((id) => {
     setActivities(activities.filter(activity => activity.id !== id));
-  };
+  }, [activities]);
 
   // 处理输入框回车
-  const handleActivityInputKeyPress = (e) => {
+  const handleActivityInputKeyPress = useCallback((e) => {
     if (e.key === 'Enter') {
       handleAddActivity();
     } else if (e.key === 'Escape') {
       cancelAddActivity();
     }
-  };
+  }, [handleAddActivity, cancelAddActivity]);
 
   // 切换相册显示状态
-  const togglePhotoDisplay = () => {
+  const togglePhotoDisplay = useCallback(() => {
     setShowAllPhotos(!showAllPhotos);
-  };
+  }, [showAllPhotos]);
 
-  const toggleVideoDisplay = () => {
+  const toggleVideoDisplay = useCallback(() => {
     setShowAllVideos(!showAllVideos);
-  };
+  }, [showAllVideos]);
 
   // 处理上传照片和视频
-  const handleUpload = (type) => {
+  const handleUpload = useCallback((type) => {
     if (userCode) {
       // 生成唯一的会话ID（8位随机字符）
       const sessionId = Math.random().toString(36).substr(2, 8);
       navigate(`/${userCode}/upload-media/${sessionId}`);
     }
-  };
+  }, [userCode, navigate]);
 
   // 打开照片预览
-  const openPhotoPreview = (idx) => {
+  const openPhotoPreview = useCallback((idx) => {
     setPreviewPhoto(uploadedPhotos[idx]);
     setPreviewIndex(idx);
-  };
+  }, [uploadedPhotos]);
 
   // 关闭照片预览
-  const closePhotoPreview = () => {
+  const closePhotoPreview = useCallback(() => {
     setPreviewPhoto(null);
     setPreviewIndex(null);
-  };
+  }, []);
 
   // 照片预览 - 上一张
-  const showPrevPhoto = (e) => {
+  const showPrevPhoto = useCallback((e) => {
     e.stopPropagation();
     if (previewIndex !== null && uploadedPhotos.length > 0) {
       const newIndex = (previewIndex + uploadedPhotos.length - 1) % uploadedPhotos.length;
       setPreviewIndex(newIndex);
       setPreviewPhoto(uploadedPhotos[newIndex]);
     }
-  };
+  }, [previewIndex, uploadedPhotos]);
 
   // 照片预览 - 下一张
-  const showNextPhoto = (e) => {
+  const showNextPhoto = useCallback((e) => {
     e.stopPropagation();
     if (previewIndex !== null && uploadedPhotos.length > 0) {
       const newIndex = (previewIndex + 1) % uploadedPhotos.length;
       setPreviewIndex(newIndex);
       setPreviewPhoto(uploadedPhotos[newIndex]);
     }
-  };
+  }, [previewIndex, uploadedPhotos]);
 
   // 打开视频播放器
-  const openVideoPlayer = (idx) => {
+  const openVideoPlayer = useCallback((idx) => {
     if (userCode && uploadedVideos[idx]) {
       const videoFile = uploadedVideos[idx];
       
       // 使用新的独立视频ID路由
-      if (videoFile.id && videoFile.id.startsWith('vid_')) {
+      if (videoFile.id && typeof videoFile.id === 'string' && videoFile.id.startsWith('vid_')) {
         navigate(`/${userCode}/video-player/${videoFile.id}`);
       } else {
         // 兼容旧系统，使用默认sessionid
@@ -511,26 +558,30 @@ const HomePage = () => {
         navigate(`/${userCode}/video-player/${defaultSessionId}/${videoFile.id || idx}`);
       }
     }
-  };
+  }, [userCode, uploadedVideos, navigate]);
 
   // 跳转到相册页面
-  const goToGallery = () => {
+  const goToGallery = useCallback(() => {
     if (userCode) {
       // 生成唯一的会话ID（8位随机字符）
       const sessionId = Math.random().toString(36).substr(2, 8);
       navigate(`/${userCode}/upload-media/${sessionId}`);
     }
-  };
+  }, [userCode, navigate]);
 
-  // 准备相册数据
-  const photoData = uploadedPhotos.length > 0 ? uploadedPhotos : 
-    [].map(src => ({ preview: src, type: 'image' }));
+  // 准备相册数据 - 使用useMemo优化
+  const photoData = useMemo(() => {
+    return uploadedPhotos.length > 0 ? uploadedPhotos : [];
+  }, [uploadedPhotos]);
   
-  const videoData = uploadedVideos.length > 0 ? uploadedVideos : [];
+  const videoData = useMemo(() => {
+    return uploadedVideos.length > 0 ? uploadedVideos : [];
+  }, [uploadedVideos]);
 
   // 准备相册数据（保留原有兼容性）
-  const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
-    [].map(src => ({ preview: src, type: 'image' }));
+  const albumData = useMemo(() => {
+    return uploadedFiles.length > 0 ? uploadedFiles : [];
+  }, [uploadedFiles]);
 
   // 如果没有用户ID，显示输入界面
   if (!userid) {
@@ -643,25 +694,12 @@ const HomePage = () => {
               <div className="mobile-gallery-entrance mobile-left-gallery">
                 <div className="mobile-gallery-card" onClick={goToGallery}>
                   <div className="gallery-icon">📸</div>
-                  <div className="gallery-title">查看相册</div>
+                  <div className="gallery-title">亲子相册</div>
                   <div className="gallery-desc">
-                    照片 {uploadedPhotos.length} 张 · 视频 {uploadedVideos.length} 个
-                  </div>
-                  <div className="gallery-preview">
-                    {uploadedPhotos.slice(0, 2).map((photo, idx) => (
-                      <img key={idx} src={photo.preview} className="preview-thumb" alt="预览" />
-                    ))}
-                    {uploadedVideos.slice(0, 2).map((video, idx) => (
-                      <div key={idx} className="preview-video-thumb">
-                        <video src={video.preview} className="preview-thumb" muted />
-                        <div className="mini-play-icon">
-                        {/* <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/play_button.png" className="play-icon" alt="播放" /> */}
-                        </div>
-                      </div>
-                    ))}
+                    点击可查看相册和上传照片和视频
                   </div>
                   <button className="enter-gallery-btn">
-                    进入相册 →
+                    上传照片和视频
                   </button>
                 </div>
               </div>
@@ -671,7 +709,7 @@ const HomePage = () => {
             <div className="baby-info">
               <div className="baby-info-top">
                 <div className="baby-avatar" />
-                <div className="baby-age">{formatAge(babyAgeMonths)}BABY</div>
+                <div className="baby-age">{formattedAge}BABY</div>
               </div>
               <div className="baby-progress">
                 <input

@@ -17,6 +17,9 @@ const UploadMediaPage = () => {
   const [uploadingFiles, setUploadingFiles] = useState(new Map()); // 跟踪上传进度的文件
   const [fromSource, setFromSource] = useState(''); // 来源页面标识
   const filesPerPage = 12;
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const videoRef = useRef(null);
+  const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
@@ -219,6 +222,9 @@ const UploadMediaPage = () => {
       return;
     }
     
+    // 检测iOS设备
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
     mediaFiles.forEach(file => {
       const isVideo = file.type.startsWith('video/');
       const isImage = file.type.startsWith('image/');
@@ -234,6 +240,46 @@ const UploadMediaPage = () => {
         return;
       }
       
+      // iOS设备mov格式转换处理
+      let processedFile = file;
+      let originalFormat = '';
+      let convertedFormat = '';
+      
+      if (isVideo && isIOS && (file.type === 'video/quicktime' || file.name.toLowerCase().endsWith('.mov'))) {
+        console.log('检测到iOS设备的mov格式视频，准备转换为mp4格式');
+        originalFormat = file.name.toLowerCase().endsWith('.mov') ? 'mov' : file.type;
+        
+        // 创建新的文件名（将.mov改为.mp4）
+        const newFileName = file.name.replace(/\.mov$/i, '.mp4');
+        
+        // 创建新的File对象，修改MIME类型为video/mp4
+        processedFile = new File([file], newFileName, {
+          type: 'video/mp4',
+          lastModified: file.lastModified
+        });
+        
+        convertedFormat = 'mp4';
+        console.log(`iOS视频格式转换: ${originalFormat} -> ${convertedFormat}`);
+        console.log(`文件名转换: ${file.name} -> ${newFileName}`);
+        console.log(`MIME类型转换: ${file.type} -> video/mp4`);
+      }
+      
+      // 增强的视频格式兼容性检查
+      if (isVideo) {
+        const supportedVideoFormats = ['mp4', 'webm', 'mov']; // mov会被转换为mp4
+        const fileExtension = processedFile.name.split('.').pop().toLowerCase();
+        
+        if (!supportedVideoFormats.includes(fileExtension) && !processedFile.type.startsWith('video/')) {
+          alert(`不支持的视频格式: ${processedFile.name}. 支持的格式：MP4, WebM, MOV（iOS自动转换）`);
+          return;
+        }
+        
+        // 显示转换信息
+        if (originalFormat && convertedFormat) {
+          console.log(`✅ iOS视频格式自动转换成功: ${originalFormat} → ${convertedFormat}`);
+        }
+      }
+      
       if (isImage) {
         // 处理图片文件
         const reader = new FileReader();
@@ -244,18 +290,18 @@ const UploadMediaPage = () => {
           const newFile = {
             id: uniqueId,
             tempId: tempId,
-            name: file.name,
+            name: processedFile.name,
             url: e.target.result,
-            file: file,
+            file: processedFile,
             type: 'image',
             uploadTime: new Date().toLocaleString(),
-            size: file.size,
+            size: processedFile.size,
             sessionId: sessionid // 添加会话ID
           };
           setUploadedFiles(prev => [...prev, newFile]);
           
           // 上传到服务器
-          uploadFile(file, tempId).then(result => {
+          uploadFile(processedFile, tempId).then(result => {
             if (result.success) {
               const fileInfo = {
                 id: uniqueId,
@@ -276,28 +322,31 @@ const UploadMediaPage = () => {
             alert(`图片上传失败: ${error.message}`);
           });
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(processedFile);
       } else if (isVideo) {
         // 处理视频文件
         const uniqueId = generateUniqueVideoId(); // 生成唯一视频ID
         const tempId = Date.now() + Math.random(); // 临时ID用于跟踪上传进度
-        const videoUrl = URL.createObjectURL(file);
+        const videoUrl = URL.createObjectURL(processedFile);
         
         const newFile = {
           id: uniqueId,
           tempId: tempId,
-          name: file.name,
+          name: processedFile.name,
           url: videoUrl,
-          file: file,
+          file: processedFile,
           type: 'video',
           uploadTime: new Date().toLocaleString(),
-          size: file.size,
-          sessionId: sessionid // 添加会话ID
+          size: processedFile.size,
+          sessionId: sessionid, // 添加会话ID
+          originalFormat: originalFormat, // 记录原始格式
+          convertedFormat: convertedFormat, // 记录转换后格式
+          isConverted: !!(originalFormat && convertedFormat) // 是否经过转换
         };
         setUploadedFiles(prev => [...prev, newFile]);
         
         // 上传到服务器
-        uploadFile(file, tempId).then(result => {
+        uploadFile(processedFile, tempId).then(result => {
           if (result.success) {
             const fileInfo = {
               id: uniqueId,
@@ -307,12 +356,18 @@ const UploadMediaPage = () => {
               uploadTime: newFile.uploadTime,
               objectKey: result.objectKey,
               sessionId: sessionid,
-              fromRecordPage: false // 从UploadMediaPage上传的标记为false
+              fromRecordPage: false, // 从UploadMediaPage上传的标记为false
+              originalFormat: originalFormat,
+              convertedFormat: convertedFormat,
+              isConverted: !!(originalFormat && convertedFormat)
             };
             saveToLocalStorage(fileInfo);
             
-            // 显示上传成功提示
-            alert(`视频上传成功！`);
+            // 显示上传成功提示，包含转换信息
+            const successMessage = convertedFormat ? 
+              `视频上传成功！(${originalFormat} → ${convertedFormat} 格式转换)` : 
+              `视频上传成功！`;
+            alert(successMessage);
           }
         }).catch(error => {
           alert(`视频上传失败: ${error.message}`);
@@ -419,23 +474,93 @@ const UploadMediaPage = () => {
   };
 
   const handlePreviewFile = (file) => {
-    if (file.type === 'video') {
-      // // 视频跳转到播放页面，使用新的独立路由
-      // if (file.id && file.id.startsWith('vid_')) {
-      //   // 新的独立视频ID，无需sessionid
-      //   navigate(`/${userCode}/video-player/${file.id}`);
-      // } else {
-        // 兼容旧的视频ID，使用sessionid路由
-        navigate(`/${userCode}/video-player/${sessionid}/${file.id}`);
-      // }
-    } else {
-      // 图片显示预览弹窗
+    if (isMobile) {
+      // 移动端：图片和视频都弹窗全屏预览
       setPreviewFile(file);
+    } else {
+      // PC端：图片弹窗，视频跳转
+      if (file.type === 'video') {
+        navigate(`/${userCode}/video-player/${sessionid}/${file.id}`);
+      } else {
+        setPreviewFile(file);
+      }
     }
   };
 
   const closePreview = () => {
     setPreviewFile(null);
+    setVideoPlaying(false);
+    setVideoAutoFullscreenTried(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      // 退出全屏（兼容各平台）
+      if (videoRef.current._fullscreenCleanup) {
+        videoRef.current._fullscreenCleanup();
+        videoRef.current._fullscreenCleanup = null;
+      }
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+      if (videoRef.current.webkitExitFullscreen) {
+        videoRef.current.webkitExitFullscreen();
+      }
+    }
+  };
+
+  // 自动全屏播放（仅移动端视频弹窗，且只尝试一次）
+  useEffect(() => {
+    if (!(isMobile && previewFile && previewFile.type === 'video')) {
+      setVideoAutoFullscreenTried(false); // 关闭弹窗时重置
+    }
+  }, [isMobile, previewFile]);
+
+  // 视频 loadedmetadata 后自动播放（不自动全屏）
+  const handleVideoLoadedMetadata = () => {
+    if (isMobile && previewFile && previewFile.type === 'video' && videoRef.current && !videoAutoFullscreenTried) {
+      setVideoAutoFullscreenTried(true);
+      const video = videoRef.current;
+      // 只自动播放，不自动全屏
+      video.play().catch(() => {});
+      // 清理全屏监听
+      if (video._fullscreenCleanup) {
+        video._fullscreenCleanup();
+        video._fullscreenCleanup = null;
+      }
+    }
+  };
+
+  // 用户点击播放时再自动全屏
+  const handleVideoPlay = () => {
+    if (isMobile && previewFile && previewFile.type === 'video' && videoRef.current) {
+      const video = videoRef.current;
+      try {
+        if (video.requestFullscreen) {
+          video.requestFullscreen().catch(() => {});
+        } else if (video.webkitRequestFullscreen) {
+          video.webkitRequestFullscreen();
+        } else if (video.webkitEnterFullscreen) {
+          video.webkitEnterFullscreen();
+        }
+      } catch (e) {}
+      // 监听全屏变化，退出全屏时自动关闭弹窗
+      const handleFullscreenChange = () => {
+        const isFull = document.fullscreenElement === video || (video.webkitDisplayingFullscreen || false);
+        if (!isFull) {
+          setTimeout(() => {
+            setPreviewFile(null);
+            setVideoPlaying(false);
+          }, 200);
+        }
+      };
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      video.addEventListener('webkitendfullscreen', handleFullscreenChange);
+      // 清理
+      video._fullscreenCleanup = () => {
+        document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        video.removeEventListener('webkitendfullscreen', handleFullscreenChange);
+      };
+    }
   };
 
   // 页面加载时读取文件
@@ -445,6 +570,19 @@ const UploadMediaPage = () => {
       try {
         const allFiles = JSON.parse(saved);
         console.log('加载的历史文件:', allFiles); // 调试信息
+        
+        // 检查并报告非字符串类型的文件ID
+        allFiles.forEach((file, index) => {
+          if (file.id && typeof file.id !== 'string') {
+            console.warn(`文件 ${index} 的ID不是字符串类型:`, {
+              id: file.id,
+              type: typeof file.id,
+              name: file.name,
+              file: file
+            });
+          }
+        });
+        
         // 显示所有历史文件，不按会话过滤
         setUploadedFiles(allFiles);
       } catch (e) {
@@ -530,7 +668,6 @@ const UploadMediaPage = () => {
           accept="image/*,video/*"
           onChange={handleFileInputChange}
           style={{ display: 'none' }}
-          capture={isMobile ? 'environment' : undefined}
         />
       </div>
 
@@ -586,7 +723,7 @@ const UploadMediaPage = () => {
                       <div className="image-preview">
                       <img src={file.preview || file.url} alt={file.name} className="media-preview" />
                         {/* 显示图片ID，区分是否从录音页面上传 */}
-                        {file.id && file.id.startsWith('img_') && (
+                        {file.id && typeof file.id === 'string' && file.id.startsWith('img_') && (
                           <div className="image-id-display">
                             {/* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */}
                             {file.sessionId && file.fromRecordPage ? (
@@ -612,7 +749,7 @@ const UploadMediaPage = () => {
                           <div className="video-play-icon">▶</div>
                         </div>
                         {/* 显示视频ID，区分是否从录音页面上传 */}
-                        {file.id && file.id.startsWith('vid_') && (
+                        {file.id && typeof file.id === 'string' && file.id.startsWith('vid_') && (
                           <div className="video-id-display">
                             {/* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */}
                             {file.sessionId && file.fromRecordPage ? (
@@ -635,40 +772,6 @@ const UploadMediaPage = () => {
                         ×
                       </button>
                     </div>
-                  </div>
-                </div>
-              ))}
-              
-              {/* 上传进度显示 */}
-              {Array.from(uploadingFiles.entries()).map(([tempId, uploadInfo]) => (
-                <div key={tempId} className="media-item uploading-item">
-                  <div className="upload-progress-container">
-                    <div className="upload-progress-circle">
-                      <div className="progress-ring">
-                        <svg className="progress-ring-svg" width="120" height="120">
-                          <circle
-                            className="progress-ring-background"
-                            cx="60"
-                            cy="60"
-                            r="54"
-                          />
-                          <circle
-                            className="progress-ring-progress"
-                            cx="60"
-                            cy="60"
-                            r="54"
-                            style={{
-                              strokeDasharray: `${2 * Math.PI * 54}`,
-                              strokeDashoffset: `${2 * Math.PI * 54 * (1 - uploadInfo.progress / 100)}`
-                            }}
-                          />
-                        </svg>
-                        <div className="progress-text">
-                            <div className="progress-percentage">{Math.round(uploadInfo.progress)}%</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="upload-file-name">{uploadInfo.fileName}</div>
                   </div>
                 </div>
               ))}
@@ -710,12 +813,38 @@ const UploadMediaPage = () => {
         </div>
       </div>
 
-      {/* 预览弹窗 - 仅用于图片 */}
-      {previewFile && previewFile.type === 'image' && (
-        <div className="preview-modal" onClick={closePreview}>
+      {/* 预览弹窗 - 移动端全屏，PC端图片 */}
+      {previewFile && (
+        <div className={`preview-modal${isMobile ? ' fullscreen' : ''}`} onClick={closePreview}>
           <div className="preview-content" onClick={e => e.stopPropagation()}>
             <button className="preview-close" onClick={closePreview}>×</button>
-            <img src={previewFile.preview || previewFile.url} alt={previewFile.name} className="preview-media" />
+            {/* 顶部信息栏（移动端全屏） */}
+            {isMobile && (
+              <div className="fullscreen-header">
+                <span>用户: {userCode} | 会话: {sessionid}</span>
+                <span className="file-id-info">ID: {previewFile.id && typeof previewFile.id === 'string' ? previewFile.id.split('_').slice(-1)[0] : ''}</span>
+              </div>
+            )}
+            {previewFile.type === 'image' ? (
+              <img src={previewFile.preview || previewFile.url} alt={previewFile.name} className={`preview-media${isMobile ? ' fullscreen-media' : ''}`} />
+            ) : (
+              // 视频全屏预览（移动端弹窗）
+              <div className={`fullscreen-video-wrapper${isMobile ? ' mobile' : ''}`}>
+                <video
+                  ref={videoRef}
+                  src={previewFile.preview || previewFile.url}
+                  className={`preview-media${isMobile ? ' fullscreen-media' : ''}`}
+                  controls
+                  autoPlay
+                  playsInline
+                  onPlay={e => { setVideoPlaying(true); handleVideoPlay(); }}
+                  onPause={() => setVideoPlaying(false)}
+                  onClick={e => e.stopPropagation()}
+                  style={{ maxHeight: isMobile ? '70vh' : undefined }}
+                  onLoadedMetadata={handleVideoLoadedMetadata}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
