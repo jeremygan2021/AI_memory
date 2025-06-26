@@ -3,6 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import './UploadMediaPage.css'; // 复用现有样式
 import { validateUserCode } from './utils/userCode';
 
+const buildRecordingPath = (sessionId, userCode) => {
+  return `recordings/${userCode}/${sessionId}`;
+};
+
 const UploadMediaPage = () => {
   const { userid, sessionid } = useParams();
   const navigate = useNavigate();
@@ -108,6 +112,15 @@ const UploadMediaPage = () => {
     };
   }, [isMobile]);
 
+  // 组件卸载时清理全屏预览状态
+  useEffect(() => {
+    return () => {
+      // 确保组件卸载时恢复页面滚动
+      document.body.classList.remove('fullscreen-preview-open');
+      document.documentElement.classList.remove('fullscreen-preview-open');
+    };
+  }, []);
+
   // 返回逻辑 - 根据来源决定返回哪里
   const goBack = () => {
     if (fromSource === 'record') {
@@ -119,9 +132,11 @@ const UploadMediaPage = () => {
     }
   };
 
-  // 上传文件到服务器，支持进度跟踪
-  const uploadFile = async (file, tempId) => {
+  // 上传媒体文件到服务器
+  const uploadMediaFile = async (file, tempId) => {
     try {
+      console.log('开始上传媒体文件:', { fileName: file.name, tempId, blobSize: file.size });
+      
       const formData = new FormData();
       formData.append('file', file);
       
@@ -153,11 +168,11 @@ const UploadMediaPage = () => {
               const result = JSON.parse(xhr.responseText);
               if (result.success) {
                 // 上传成功，立即移除进度显示
-                  setUploadingFiles(prev => {
-                    const newMap = new Map(prev);
-                    newMap.delete(tempId);
-                    return newMap;
-                  });
+                setUploadingFiles(prev => {
+                  const newMap = new Map(prev);
+                  newMap.delete(tempId);
+                  return newMap;
+                });
                 
                 resolve({
                   success: true,
@@ -195,12 +210,29 @@ const UploadMediaPage = () => {
           reject(new Error('上传被取消'));
         });
         
-        xhr.open('POST', `${API_BASE_URL}/upload`);
+        // 构建URL，将folder作为查询参数，格式为 userCode/sessionId
+        const uploadUrl = new URL(`${API_BASE_URL}/upload`);
+        const folderPath = buildRecordingPath(sessionid || 'default', userCode);
+        uploadUrl.searchParams.append('folder', folderPath);
+        
+        console.log('媒体文件上传URL:', uploadUrl.toString());
+        console.log('文件夹路径:', folderPath);
+        
+        xhr.open('POST', uploadUrl);
         xhr.send(formData);
       });
+      
     } catch (error) {
-      alert(`文件上传失败: ${error.message}`);
-      return { success: false, error: error.message };
+      console.error('上传媒体文件失败:', error);
+      setUploadingFiles(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(tempId);
+        return newMap;
+      });
+      return {
+        success: false,
+        error: error.message
+      };
     }
   };
 
@@ -296,12 +328,13 @@ const UploadMediaPage = () => {
             type: 'image',
             uploadTime: new Date().toLocaleString(),
             size: processedFile.size,
-            sessionId: sessionid // 添加会话ID
+            sessionId: sessionid, // 添加会话ID
+            userCode: userCode // 添加userCode
           };
           setUploadedFiles(prev => [...prev, newFile]);
           
           // 上传到服务器
-          uploadFile(processedFile, tempId).then(result => {
+          uploadMediaFile(processedFile, tempId).then(result => {
             if (result.success) {
               const fileInfo = {
                 id: uniqueId,
@@ -311,7 +344,8 @@ const UploadMediaPage = () => {
                 uploadTime: newFile.uploadTime,
                 objectKey: result.objectKey,
                 sessionId: sessionid,
-                fromRecordPage: false // 从UploadMediaPage上传的标记为false
+                fromRecordPage: false, // 从UploadMediaPage上传的标记为false
+                userCode: userCode // 添加userCode
               };
               saveToLocalStorage(fileInfo);
               
@@ -341,12 +375,13 @@ const UploadMediaPage = () => {
           sessionId: sessionid, // 添加会话ID
           originalFormat: originalFormat, // 记录原始格式
           convertedFormat: convertedFormat, // 记录转换后格式
-          isConverted: !!(originalFormat && convertedFormat) // 是否经过转换
+          isConverted: !!(originalFormat && convertedFormat), // 是否经过转换
+          userCode: userCode // 添加userCode
         };
         setUploadedFiles(prev => [...prev, newFile]);
         
         // 上传到服务器
-        uploadFile(processedFile, tempId).then(result => {
+        uploadMediaFile(processedFile, tempId).then(result => {
           if (result.success) {
             const fileInfo = {
               id: uniqueId,
@@ -359,7 +394,8 @@ const UploadMediaPage = () => {
               fromRecordPage: false, // 从UploadMediaPage上传的标记为false
               originalFormat: originalFormat,
               convertedFormat: convertedFormat,
-              isConverted: !!(originalFormat && convertedFormat)
+              isConverted: !!(originalFormat && convertedFormat),
+              userCode: userCode // 添加userCode
             };
             saveToLocalStorage(fileInfo);
             
@@ -477,6 +513,11 @@ const UploadMediaPage = () => {
     if (isMobile) {
       // 移动端：图片和视频都弹窗全屏预览
       setPreviewFile(file);
+      // 延迟添加CSS类，确保组件状态更新完成
+      setTimeout(() => {
+        document.body.classList.add('fullscreen-preview-open');
+        document.documentElement.classList.add('fullscreen-preview-open');
+      }, 10);
     } else {
       // PC端：图片弹窗，视频跳转
       if (file.type === 'video') {
@@ -491,6 +532,21 @@ const UploadMediaPage = () => {
     setPreviewFile(null);
     setVideoPlaying(false);
     setVideoAutoFullscreenTried(false);
+    
+    // 立即移除CSS类恢复页面滚动
+    document.body.classList.remove('fullscreen-preview-open');
+    document.documentElement.classList.remove('fullscreen-preview-open');
+    
+    // 确保滚动恢复正常（添加小延迟让CSS变化生效）
+    setTimeout(() => {
+      // 强制重置滚动相关样式
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.documentElement.style.overflow = '';
+    }, 50);
+    
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
@@ -534,18 +590,38 @@ const UploadMediaPage = () => {
   const handleVideoPlay = () => {
     if (isMobile && previewFile && previewFile.type === 'video' && videoRef.current) {
       const video = videoRef.current;
+      
+      // 检测iOS设备
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      
       try {
-        if (video.requestFullscreen) {
-          video.requestFullscreen().catch(() => {});
-        } else if (video.webkitRequestFullscreen) {
-          video.webkitRequestFullscreen();
-        } else if (video.webkitEnterFullscreen) {
-          video.webkitEnterFullscreen();
+        if (isIOS) {
+          // iOS设备使用特殊的全屏API
+          if (video.webkitEnterFullscreen) {
+            // 确保视频已开始播放再进入全屏
+            setTimeout(() => {
+              video.webkitEnterFullscreen();
+            }, 100);
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          }
+        } else {
+          // 非iOS设备使用标准全屏API
+          if (video.requestFullscreen) {
+            video.requestFullscreen().catch(() => {});
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.log('全屏播放失败:', e);
+      }
+      
       // 监听全屏变化，退出全屏时自动关闭弹窗
       const handleFullscreenChange = () => {
-        const isFull = document.fullscreenElement === video || (video.webkitDisplayingFullscreen || false);
+        const isFull = document.fullscreenElement === video || 
+                      video.webkitDisplayingFullscreen || 
+                      document.webkitFullscreenElement === video;
         if (!isFull) {
           setTimeout(() => {
             setPreviewFile(null);
@@ -553,12 +629,26 @@ const UploadMediaPage = () => {
           }, 200);
         }
       };
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
-      video.addEventListener('webkitendfullscreen', handleFullscreenChange);
-      // 清理
+      
+      // iOS需要监听不同的全屏事件
+      if (isIOS) {
+        video.addEventListener('webkitbeginfullscreen', () => {
+          console.log('iOS视频进入全屏');
+        });
+        video.addEventListener('webkitendfullscreen', handleFullscreenChange);
+      } else {
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      }
+      
+      // 清理函数
       video._fullscreenCleanup = () => {
-        document.removeEventListener('fullscreenchange', handleFullscreenChange);
-        video.removeEventListener('webkitendfullscreen', handleFullscreenChange);
+        if (isIOS) {
+          video.removeEventListener('webkitendfullscreen', handleFullscreenChange);
+        } else {
+          document.removeEventListener('fullscreenchange', handleFullscreenChange);
+          document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        }
       };
     }
   };
@@ -569,46 +659,35 @@ const UploadMediaPage = () => {
     if (saved) {
       try {
         const allFiles = JSON.parse(saved);
-        console.log('加载的历史文件:', allFiles); // 调试信息
-        
-        // 检查并报告非字符串类型的文件ID
-        allFiles.forEach((file, index) => {
-          if (file.id && typeof file.id !== 'string') {
-            console.warn(`文件 ${index} 的ID不是字符串类型:`, {
-              id: file.id,
-              type: typeof file.id,
-              name: file.name,
-              file: file
-            });
-          }
-        });
-        
-        // 显示所有历史文件，不按会话过滤
-        setUploadedFiles(allFiles);
+        // 只加载当前userCode的文件
+        const filteredFiles = allFiles.filter(file => file.userCode === userCode);
+        setUploadedFiles(filteredFiles);
       } catch (e) {
-        console.error('加载历史文件失败:', e);
         setUploadedFiles([]);
       }
     } else {
-      console.log('没有找到历史文件'); // 调试信息
+      setUploadedFiles([]);
     }
-    
+
     const handleFilesUpdated = () => {
       const updated = localStorage.getItem('uploadedFiles');
       if (updated) {
         try {
           const allFiles = JSON.parse(updated);
-          // 显示所有历史文件，不按会话过滤
-          setUploadedFiles(allFiles);
+          // 只加载当前userCode的文件
+          const filteredFiles = allFiles.filter(file => file.userCode === userCode);
+          setUploadedFiles(filteredFiles);
         } catch (e) {
           setUploadedFiles([]);
         }
+      } else {
+        setUploadedFiles([]);
       }
     };
-    
+
     window.addEventListener('filesUpdated', handleFilesUpdated);
     return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
-  }, []);
+  }, [userCode]);
 
   // 筛选当前标签页的文件
   const filteredFiles = uploadedFiles.filter(file => {
@@ -817,16 +896,14 @@ const UploadMediaPage = () => {
       {previewFile && (
         <div className={`preview-modal${isMobile ? ' fullscreen' : ''}`} onClick={closePreview}>
           <div className="preview-content" onClick={e => e.stopPropagation()}>
-            <button className="preview-close" onClick={closePreview}>×</button>
-            {/* 顶部信息栏（移动端全屏） */}
-            {isMobile && (
-              <div className="fullscreen-header">
-                <span>用户: {userCode} | 会话: {sessionid}</span>
-                <span className="file-id-info">ID: {previewFile.id && typeof previewFile.id === 'string' ? previewFile.id.split('_').slice(-1)[0] : ''}</span>
-              </div>
-            )}
             {previewFile.type === 'image' ? (
-              <img src={previewFile.preview || previewFile.url} alt={previewFile.name} className={`preview-media${isMobile ? ' fullscreen-media' : ''}`} />
+              <img 
+                src={previewFile.preview || previewFile.url} 
+                alt={previewFile.name} 
+                className={`preview-media${isMobile ? ' fullscreen-media' : ''}`} 
+                onClick={closePreview}
+                style={{ cursor: 'pointer' }}
+              />
             ) : (
               // 视频全屏预览（移动端弹窗）
               <div className={`fullscreen-video-wrapper${isMobile ? ' mobile' : ''}`}>
@@ -836,12 +913,23 @@ const UploadMediaPage = () => {
                   className={`preview-media${isMobile ? ' fullscreen-media' : ''}`}
                   controls
                   autoPlay
-                  playsInline
+                  playsInline={!isMobile} // iOS全屏时不使用playsInline
+                  webkit-playsinline={!isMobile} // 旧版iOS兼容
+                  crossOrigin="anonymous"
+                  preload="metadata"
                   onPlay={e => { setVideoPlaying(true); handleVideoPlay(); }}
                   onPause={() => setVideoPlaying(false)}
                   onClick={e => e.stopPropagation()}
-                  style={{ maxHeight: isMobile ? '70vh' : undefined }}
+                  style={{ 
+                    maxHeight: isMobile ? '70vh' : undefined,
+                    backgroundColor: '#000', // 确保视频背景是黑色
+                    objectFit: 'contain' // 确保视频正确显示
+                  }}
                   onLoadedMetadata={handleVideoLoadedMetadata}
+                  onError={(e) => {
+                    console.error('视频加载错误:', e);
+                    console.error('视频源:', e.target.src);
+                  }}
                 />
               </div>
             )}

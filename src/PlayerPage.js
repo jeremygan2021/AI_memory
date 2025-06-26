@@ -30,6 +30,11 @@ const PlayerPage = () => {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0); // 当前轮播索引
   const [isCarouselHovered, setIsCarouselHovered] = useState(false); // 轮播图悬停状态
   const carouselTimerRef = useRef(null); // 轮播定时器引用
+  const [previewFile, setPreviewFile] = useState(null); // 预览文件
+  const [isMobile, setIsMobile] = useState(false); // 是否移动设备
+  const [videoPlaying, setVideoPlaying] = useState(false); // 视频播放状态
+  const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false); // 是否已尝试自动全屏
+  const videoPreviewRef = useRef(null); // 视频预览引用
 
   // 检测iOS设备
   useEffect(() => {
@@ -38,6 +43,20 @@ const PlayerPage = () => {
              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     };
     setIsIOS(checkIsIOS());
+  }, []);
+
+  // 检测移动设备
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768 || 
+                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // 监听首次用户交互
@@ -198,42 +217,18 @@ const PlayerPage = () => {
         const audioFiles = files.filter(file => {
           const objectKey = file.object_key || file.objectKey || file.key || file.name;
           if (!objectKey) return false;
-
           const fileName = objectKey.split('/').pop();
-          
-          // 优先检查Content-Type，更准确地判断文件类型
           const contentType = file.content_type || '';
-          
-          // 基于Content-Type的准确判断
-          const isImageByType = contentType.startsWith('image/');
-          const isVideoByType = contentType.startsWith('video/');
-          const isAudioByType = contentType.startsWith('audio/');
-          
-          // 基于文件扩展名的判断（作为备选）
-          const isImageByExt = fileName.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i);
-          const isVideoByExt = fileName.match(/\.(mp4|avi|mov|wmv|flv|mkv)$/i); // 移除webm，因为webm可能是音频
-          const isAudioByExt = fileName.match(/\.(mp3|wav|ogg|m4a|aac|flac|wma|amr|3gp|opus|webm)$/i); // 确保mp3和webm都被识别为音频
-          
-          // webm文件需要特殊处理，优先看Content-Type
-          const isWebm = fileName.match(/\.webm$/i);
-          
-          // 综合判断 - 更宽松的音频文件识别
-          const isImage = isImageByType || (!contentType && isImageByExt);
-          const isVideo = isVideoByType && !isAudioByType; // 只有明确是video且不是audio才算视频
-          const isAudio = isAudioByType || 
-                         isAudioByExt ||
-                         fileName.includes('recording') || // 包含recording关键词的文件
-                         (!isImageByType && !isImageByExt && !isVideoByType); // 既不是图片也不是明确的视频，当作音频处理
-                         
-          // 只排除明确的图片文件，其他都当作音频处理
-          if (isImage) {
-            console.log(`排除图片文件: ${fileName}, Content-Type: ${contentType}`);
-            return false;
-          }
-          
-          console.log(`文件类型检查: ${fileName} - 音频: ${isAudio}, Content-Type: ${file.content_type || 'unknown'}`);
-          
-          return isAudio;
+
+          // 判断是否为图片
+          const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(fileName);
+          // 判断是否为视频
+          const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
+          // 判断是否为音频
+          const isAudio = contentType.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac|flac|wma|amr|3gp|opus)$/i.test(fileName);
+
+          // 只保留音频，排除图片和视频
+          return isAudio && !isImage && !isVideo;
         });
 
         console.log('过滤后的音频文件列表:', audioFiles);
@@ -830,14 +825,151 @@ const PlayerPage = () => {
   }, []);
 
   const handleMediaClick = (file) => {
-    if (file.type === 'video') {
-      // 跳转到视频播放页面，使用来源标识
-      const videoId = file.id || file.uniqueId;
-      if (videoId) {
-        navigate(`/${userCode}/video-player/${id}/${videoId}?from=player&recordingId=${recordingId}`);
+    if (isMobile) {
+      // 移动端：图片和视频都弹窗全屏预览
+      setPreviewFile(file);
+      // 延迟添加CSS类，确保组件状态更新完成
+      setTimeout(() => {
+        document.body.classList.add('fullscreen-preview-open');
+        document.documentElement.classList.add('fullscreen-preview-open');
+      }, 10);
+    } else {
+      // PC端：图片弹窗，视频跳转
+      if (file.type === 'video') {
+        const videoId = file.id || file.uniqueId;
+        if (videoId) {
+          navigate(`/${userCode}/video-player/${id}/${videoId}?from=player&recordingId=${recordingId}`);
+        }
+      } else {
+        setPreviewFile(file);
       }
     }
-    // 图片点击不做任何操作，移除了大图预览功能
+  };
+
+  // 关闭预览
+  const closePreview = () => {
+    setPreviewFile(null);
+    setVideoPlaying(false);
+    setVideoAutoFullscreenTried(false);
+    
+    // 立即移除CSS类恢复页面滚动
+    document.body.classList.remove('fullscreen-preview-open');
+    document.documentElement.classList.remove('fullscreen-preview-open');
+    
+    // 确保滚动恢复正常（添加小延迟让CSS变化生效）
+    setTimeout(() => {
+      // 强制重置滚动相关样式
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.documentElement.style.overflow = '';
+    }, 50);
+    
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.pause();
+      videoPreviewRef.current.currentTime = 0;
+      // 退出全屏（兼容各平台）
+      if (videoPreviewRef.current._fullscreenCleanup) {
+        videoPreviewRef.current._fullscreenCleanup();
+        videoPreviewRef.current._fullscreenCleanup = null;
+      }
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+      if (videoPreviewRef.current.webkitExitFullscreen) {
+        videoPreviewRef.current.webkitExitFullscreen();
+      }
+    }
+  };
+
+  // 自动全屏播放（仅移动端视频弹窗，且只尝试一次）
+  useEffect(() => {
+    if (!(isMobile && previewFile && previewFile.type === 'video')) {
+      setVideoAutoFullscreenTried(false); // 关闭弹窗时重置
+    }
+  }, [isMobile, previewFile]);
+
+  // 视频 loadedmetadata 后自动播放（不自动全屏）
+  const handleVideoLoadedMetadata = () => {
+    if (isMobile && previewFile && previewFile.type === 'video' && videoPreviewRef.current && !videoAutoFullscreenTried) {
+      setVideoAutoFullscreenTried(true);
+      const video = videoPreviewRef.current;
+      // 只自动播放，不自动全屏
+      video.play().catch(() => {});
+      // 清理全屏监听
+      if (video._fullscreenCleanup) {
+        video._fullscreenCleanup();
+        video._fullscreenCleanup = null;
+      }
+    }
+  };
+
+  // 用户点击播放时再自动全屏
+  const handleVideoPlay = () => {
+    if (isMobile && previewFile && previewFile.type === 'video' && videoPreviewRef.current) {
+      const video = videoPreviewRef.current;
+      
+      // 检测iOS设备
+      const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      
+      try {
+        if (isIOSDevice) {
+          // iOS设备使用特殊的全屏API
+          if (video.webkitEnterFullscreen) {
+            // 确保视频已开始播放再进入全屏
+            setTimeout(() => {
+              video.webkitEnterFullscreen();
+            }, 100);
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          }
+        } else {
+          // 非iOS设备使用标准全屏API
+          if (video.requestFullscreen) {
+            video.requestFullscreen().catch(() => {});
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          }
+        }
+      } catch (e) {
+        console.log('全屏播放失败:', e);
+      }
+      
+      // 监听全屏变化，退出全屏时自动关闭弹窗
+      const handleFullscreenChange = () => {
+        const isFull = document.fullscreenElement === video || 
+                      video.webkitDisplayingFullscreen || 
+                      document.webkitFullscreenElement === video;
+        if (!isFull) {
+          setTimeout(() => {
+            setPreviewFile(null);
+            setVideoPlaying(false);
+          }, 200);
+        }
+      };
+      
+      // iOS需要监听不同的全屏事件
+      if (isIOSDevice) {
+        video.addEventListener('webkitbeginfullscreen', () => {
+          console.log('iOS视频进入全屏');
+        });
+        video.addEventListener('webkitendfullscreen', handleFullscreenChange);
+      } else {
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      }
+      
+      // 清理函数
+      video._fullscreenCleanup = () => {
+        if (isIOSDevice) {
+          video.removeEventListener('webkitendfullscreen', handleFullscreenChange);
+        } else {
+          document.removeEventListener('fullscreenchange', handleFullscreenChange);
+          document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        }
+      };
+    }
   };
 
   if (loading) {
@@ -949,13 +1081,11 @@ const PlayerPage = () => {
                           <div className="carousel-video">
                             <video 
                               src={file.preview || file.url}
+                              poster={file.preview || '/asset/video.svg'}
                               className="carousel-media"
                               muted
                               preload="metadata"
                             />
-                            {/* <div className="video-play-overlay">
-                              <div className="play-icon">▶</div>
-                            </div> */}
                           </div>
                         )}
                         <div className="media-type-badge">
@@ -1085,7 +1215,7 @@ const PlayerPage = () => {
             </div>
 
             {/* 音量控制 */}
-            <div className="control-group">
+            {/* <div className="control-group">
               <label className="control-label">
                 <span>音量</span>
               </label>
@@ -1100,7 +1230,7 @@ const PlayerPage = () => {
                 />
                 <span className="volume-value">{Math.round(volume * 100)}%</span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </main>
@@ -1135,6 +1265,42 @@ const PlayerPage = () => {
         您的浏览器不支持音频播放
       </audio>
 
+      {/* 预览弹窗 - 支持图片和视频 */}
+      {previewFile && (
+        <div className={`preview-modal ${isMobile ? 'fullscreen' : ''} ${previewFile.type === 'video' ? 'video-preview' : 'image-preview'}`} onClick={closePreview}>
+          <div className="preview-content" onClick={e => e.stopPropagation()}>
+            <button className="preview-close" onClick={closePreview}>×</button>
+            {previewFile.type === 'image' ? (
+              <img 
+                src={previewFile.preview || previewFile.url} 
+                alt={previewFile.name} 
+                className="upload-modal-preview-media" 
+              />
+            ) : (
+              <video 
+                ref={videoPreviewRef}
+                src={previewFile.preview || previewFile.url}
+                poster={previewFile.preview || '/asset/video.svg'}
+                className="upload-modal-preview-media fullscreen-media"
+                controls
+                playsInline={!isMobile}
+                webkit-playsinline={!isMobile}
+                onLoadedMetadata={handleVideoLoadedMetadata}
+                onPlay={handleVideoPlay}
+                crossOrigin="anonymous"
+                style={{
+                  backgroundColor: '#000',
+                  objectFit: 'contain'
+                }}
+                onError={(e) => {
+                  console.error('视频播放错误:', e);
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       {/* iOS用户交互提示 */}
       {isIOS && !userInteracted && (
         <div className="ios-interaction-prompt" style={{
@@ -1164,7 +1330,7 @@ const PlayerPage = () => {
                 borderRadius: '8px',
                 padding: '12px 24px',
                 fontSize: '16px',
-                marginTop: '16px'
+                marginTop: '-10px'
               }}
             >
               启用音频

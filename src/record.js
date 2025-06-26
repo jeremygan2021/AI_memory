@@ -52,6 +52,9 @@ const RecordComponent = () => {
   const [currentPage, setCurrentPage] = useState(1); // 当前页码
   const [previewFile, setPreviewFile] = useState(null); // 预览文件
   const [isMobile, setIsMobile] = useState(false); // 是否移动设备
+  const [videoPlaying, setVideoPlaying] = useState(false); // 视频播放状态
+  const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false); // 是否已尝试自动全屏
+  const videoRef = useRef(null); // 视频引用
   
   // 移动端录音相关状态
   const [isMobileRecording, setIsMobileRecording] = useState(false); // 是否正在移动端录音
@@ -1387,17 +1390,148 @@ const RecordComponent = () => {
   };
 
   const handlePreviewMediaFile = (file) => {
-    if (file.type === 'image') {
+    if (isMobile) {
+      // 移动端：图片和视频都弹窗全屏预览
       setPreviewFile(file);
-    } else if (file.type === 'video') {
-      // 视频文件跳转到专门的播放页面
-      const videoId = file.id.split('_').pop();
-      navigate(`/${userCode}/video-player/${id}/${videoId}`);
+      // 延迟添加CSS类，确保组件状态更新完成
+      setTimeout(() => {
+        document.body.classList.add('fullscreen-preview-open');
+        document.documentElement.classList.add('fullscreen-preview-open');
+      }, 10);
+    } else {
+      // PC端：图片弹窗，视频跳转
+      if (file.type === 'video') {
+        const videoId = file.id.split('_').pop();
+        navigate(`/${userCode}/video-player/${id}/${videoId}`);
+      } else {
+        setPreviewFile(file);
+      }
     }
   };
 
   const closeMediaPreview = () => {
     setPreviewFile(null);
+    setVideoPlaying(false);
+    setVideoAutoFullscreenTried(false);
+    
+    // 立即移除CSS类恢复页面滚动
+    document.body.classList.remove('fullscreen-preview-open');
+    document.documentElement.classList.remove('fullscreen-preview-open');
+    
+    // 确保滚动恢复正常（添加小延迟让CSS变化生效）
+    setTimeout(() => {
+      // 强制重置滚动相关样式
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.documentElement.style.overflow = '';
+    }, 50);
+    
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      // 退出全屏（兼容各平台）
+      if (videoRef.current._fullscreenCleanup) {
+        videoRef.current._fullscreenCleanup();
+        videoRef.current._fullscreenCleanup = null;
+      }
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+      if (videoRef.current.webkitExitFullscreen) {
+        videoRef.current.webkitExitFullscreen();
+      }
+    }
+  };
+
+  // 自动全屏播放（仅移动端视频弹窗，且只尝试一次）
+  useEffect(() => {
+    if (!(isMobile && previewFile && previewFile.type === 'video')) {
+      setVideoAutoFullscreenTried(false); // 关闭弹窗时重置
+    }
+  }, [isMobile, previewFile]);
+
+  // 视频 loadedmetadata 后自动播放（不自动全屏）
+  const handleVideoLoadedMetadata = () => {
+    if (isMobile && previewFile && previewFile.type === 'video' && videoRef.current && !videoAutoFullscreenTried) {
+      setVideoAutoFullscreenTried(true);
+      const video = videoRef.current;
+      // 只自动播放，不自动全屏
+      video.play().catch(() => {});
+      // 清理全屏监听
+      if (video._fullscreenCleanup) {
+        video._fullscreenCleanup();
+        video._fullscreenCleanup = null;
+      }
+    }
+  };
+
+  // 用户点击播放时再自动全屏
+  const handleVideoPlay = () => {
+    if (isMobile && previewFile && previewFile.type === 'video' && videoRef.current) {
+      const video = videoRef.current;
+      
+      // 检测iOS设备
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      
+      try {
+        if (isIOS) {
+          // iOS设备使用特殊的全屏API
+          if (video.webkitEnterFullscreen) {
+            // 确保视频已开始播放再进入全屏
+            setTimeout(() => {
+              video.webkitEnterFullscreen();
+            }, 100);
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          }
+        } else {
+          // 非iOS设备使用标准全屏API
+          if (video.requestFullscreen) {
+            video.requestFullscreen().catch(() => {});
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          }
+        }
+      } catch (e) {
+        console.log('全屏播放失败:', e);
+      }
+      
+      // 监听全屏变化，退出全屏时自动关闭弹窗
+      const handleFullscreenChange = () => {
+        const isFull = document.fullscreenElement === video || 
+                      video.webkitDisplayingFullscreen || 
+                      document.webkitFullscreenElement === video;
+        if (!isFull) {
+          setTimeout(() => {
+            setPreviewFile(null);
+            setVideoPlaying(false);
+          }, 200);
+        }
+      };
+      
+      // iOS需要监听不同的全屏事件
+      if (isIOS) {
+        video.addEventListener('webkitbeginfullscreen', () => {
+          console.log('iOS视频进入全屏');
+        });
+        video.addEventListener('webkitendfullscreen', handleFullscreenChange);
+      } else {
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      }
+      
+      // 清理函数
+      video._fullscreenCleanup = () => {
+        if (isIOS) {
+          video.removeEventListener('webkitendfullscreen', handleFullscreenChange);
+        } else {
+          document.removeEventListener('fullscreenchange', handleFullscreenChange);
+          document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        }
+      };
+    }
   };
 
   // 检测移动设备
@@ -1839,12 +1973,37 @@ const RecordComponent = () => {
           </div>
         </div>
 
-        {/* 预览弹窗 - 仅用于图片 */}
-        {previewFile && previewFile.type === 'image' && (
-          <div className="upload-modal-preview-modal" onClick={closeMediaPreview}>
+        {/* 预览弹窗 - 支持图片和视频 */}
+        {previewFile && (
+          <div className={`upload-modal-preview-modal ${isMobile ? 'fullscreen' : ''} ${previewFile.type === 'video' ? 'video-preview' : 'image-preview'}`} onClick={closeMediaPreview}>
             <div className="upload-modal-preview-content" onClick={e => e.stopPropagation()}>
               <button className="upload-modal-preview-close" onClick={closeMediaPreview}>×</button>
-              <img src={previewFile.preview || previewFile.url} alt={previewFile.name} className="upload-modal-preview-media" />
+              {previewFile.type === 'image' ? (
+                <img 
+                  src={previewFile.preview || previewFile.url} 
+                  alt={previewFile.name} 
+                  className="upload-modal-preview-media" 
+                />
+              ) : (
+                <video 
+                  ref={videoRef}
+                  src={previewFile.preview || previewFile.url}
+                  className="upload-modal-preview-media fullscreen-media"
+                  controls
+                  playsInline={!isMobile}
+                  webkit-playsinline={!isMobile}
+                  onLoadedMetadata={handleVideoLoadedMetadata}
+                  onPlay={handleVideoPlay}
+                  crossOrigin="anonymous"
+                  style={{
+                    backgroundColor: '#000',
+                    objectFit: 'contain'
+                  }}
+                  onError={(e) => {
+                    console.error('视频播放错误:', e);
+                  }}
+                />
+              )}
             </div>
           </div>
         )}

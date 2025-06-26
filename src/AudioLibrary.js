@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './AudioLibrary.css';
 import { getUserCode, validateUserCode } from './utils/userCode';
@@ -21,6 +21,20 @@ const AudioLibrary = () => {
   const [userCode, setUserCode] = useState(''); // 4字符用户代码
   const [currentPage, setCurrentPage] = useState(1);
   const sessionsPerPage = 12;
+  
+  // 标签页状态
+  const [activeMainTab, setActiveMainTab] = useState('sessions'); // 'sessions' 或 'media'
+  
+  // 媒体文件相关状态
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [mediaActiveTab, setMediaActiveTab] = useState('all'); // 'all', 'photos' 或 'videos'
+  const [mediaCurrentPage, setMediaCurrentPage] = useState(1);
+  const [previewFile, setPreviewFile] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const videoRef = useRef(null);
+  const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false);
+  const mediaFilesPerPage = 12;
 
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -32,11 +46,53 @@ const AudioLibrary = () => {
     }
   }, [userid, navigate]);
 
+  // 检测移动设备
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768 || 
+                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // 加载云端音频文件
   useEffect(() => {
-    if (userCode) {
+    if (userCode) { 
       loadCloudAudioFiles();
+      loadMediaFiles();
     }
+  }, [userCode]);
+
+  // 加载媒体文件
+  const loadMediaFiles = () => {
+    const saved = localStorage.getItem('uploadedFiles');
+    if (saved) {
+      try {
+        const allFiles = JSON.parse(saved);
+        // 只加载当前userCode的文件
+        const filteredFiles = allFiles.filter(file => file.userCode === userCode);
+        setUploadedFiles(filteredFiles);
+      } catch (e) {
+        setUploadedFiles([]);
+      }
+    } else {
+      setUploadedFiles([]);
+    }
+  };
+
+  // 监听文件更新
+  useEffect(() => {
+    const handleFilesUpdated = () => {
+      loadMediaFiles();
+    };
+
+    window.addEventListener('filesUpdated', handleFilesUpdated);
+    return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
   }, [userCode]);
 
   const loadCloudAudioFiles = async () => {
@@ -269,6 +325,27 @@ const AudioLibrary = () => {
     setCurrentPage(1);
   }, [searchTerm, sortBy, audioSessions]);
 
+  // 监听媒体文件标签变化时回到第一页
+  useEffect(() => {
+    setMediaCurrentPage(1);
+  }, [mediaActiveTab, uploadedFiles]);
+
+  // 自动全屏播放（仅移动端视频弹窗，且只尝试一次）
+  useEffect(() => {
+    if (!(isMobile && previewFile && previewFile.type === 'video')) {
+      setVideoAutoFullscreenTried(false); // 关闭弹窗时重置
+    }
+  }, [isMobile, previewFile]);
+
+  // 组件卸载时清理全屏预览状态
+  useEffect(() => {
+    return () => {
+      // 确保组件卸载时恢复页面滚动
+      document.body.classList.remove('fullscreen-preview-open');
+      document.documentElement.classList.remove('fullscreen-preview-open');
+    };
+  }, []);
+
   // 创建新录音会话
   const createNewSession = () => {
     if (userCode) {
@@ -331,6 +408,193 @@ const AudioLibrary = () => {
   // 刷新文件列表
   const refreshFiles = () => {
     loadCloudAudioFiles();
+    loadMediaFiles();
+  };
+
+  // 媒体文件预览
+  const handlePreviewFile = (file) => {
+    if (isMobile) {
+      // 移动端：图片和视频都弹窗全屏预览
+      setPreviewFile(file);
+      // 延迟添加CSS类，确保组件状态更新完成
+      setTimeout(() => {
+        document.body.classList.add('fullscreen-preview-open');
+        document.documentElement.classList.add('fullscreen-preview-open');
+      }, 10);
+    } else {
+      // PC端：图片弹窗，视频跳转
+      if (file.type === 'video') {
+        navigate(`/${userCode}/video-player/${file.sessionId || 'default'}/${file.id}`);
+      } else {
+        setPreviewFile(file);
+      }
+    }
+  };
+
+  // 关闭预览
+  const closePreview = () => {
+    setPreviewFile(null);
+    setVideoPlaying(false);
+    setVideoAutoFullscreenTried(false);
+    
+    // 立即移除CSS类恢复页面滚动
+    document.body.classList.remove('fullscreen-preview-open');
+    document.documentElement.classList.remove('fullscreen-preview-open');
+    
+    // 确保滚动恢复正常（添加小延迟让CSS变化生效）
+    setTimeout(() => {
+      // 强制重置滚动相关样式
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.documentElement.style.overflow = '';
+    }, 50);
+    
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      // 退出全屏（兼容各平台）
+      if (videoRef.current._fullscreenCleanup) {
+        videoRef.current._fullscreenCleanup();
+        videoRef.current._fullscreenCleanup = null;
+      }
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+      if (videoRef.current.webkitExitFullscreen) {
+        videoRef.current.webkitExitFullscreen();
+      }
+    }
+  };
+
+  // 删除媒体文件
+  const handleDeleteMediaFile = async (fileId) => {
+    const fileToDelete = uploadedFiles.find(file => file.id === fileId);
+    if (!fileToDelete) return;
+    
+    if (!window.confirm('确定要删除这个文件吗？')) return;
+    
+    try {
+      if (fileToDelete.objectKey) {
+        const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(fileToDelete.objectKey)}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) {
+          throw new Error('服务器删除失败');
+        }
+      }
+      
+      // 从本地状态删除
+      setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
+      
+      // 从localStorage删除
+      const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+      const updated = saved.filter(file => file.id !== fileId);
+      localStorage.setItem('uploadedFiles', JSON.stringify(updated));
+      window.dispatchEvent(new Event('filesUpdated'));
+      
+      // 分页处理
+      const newFiles = uploadedFiles.filter(file => file.id !== fileId);
+      const totalPages = Math.ceil(newFiles.length / mediaFilesPerPage);
+      if (mediaCurrentPage > totalPages && totalPages > 0) {
+        setMediaCurrentPage(totalPages);
+      }
+    } catch (error) {
+      alert('删除失败: ' + error.message);
+    }
+  };
+
+  // 视频加载元数据处理
+  const handleVideoLoadedMetadata = () => {
+    if (isMobile && previewFile && previewFile.type === 'video' && videoRef.current && !videoAutoFullscreenTried) {
+      setVideoAutoFullscreenTried(true);
+      const video = videoRef.current;
+      // 只自动播放，不自动全屏
+      video.play().catch(() => {});
+      // 清理全屏监听
+      if (video._fullscreenCleanup) {
+        video._fullscreenCleanup();
+        video._fullscreenCleanup = null;
+      }
+    }
+  };
+
+  // 视频播放处理
+  const handleVideoPlay = () => {
+    if (isMobile && previewFile && previewFile.type === 'video' && videoRef.current) {
+      const video = videoRef.current;
+      
+      // 检测iOS设备
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      
+      try {
+        if (isIOS) {
+          // iOS设备使用特殊的全屏API
+          if (video.webkitEnterFullscreen) {
+            // 确保视频已开始播放再进入全屏
+            setTimeout(() => {
+              video.webkitEnterFullscreen();
+            }, 100);
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          }
+        } else {
+          // 非iOS设备使用标准全屏API
+          if (video.requestFullscreen) {
+            video.requestFullscreen().catch(() => {});
+          } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+          }
+        }
+      } catch (e) {
+        console.log('全屏播放失败:', e);
+      }
+      
+      // 监听全屏变化，退出全屏时自动关闭弹窗
+      const handleFullscreenChange = () => {
+        const isFull = document.fullscreenElement === video || 
+                      video.webkitDisplayingFullscreen || 
+                      document.webkitFullscreenElement === video;
+        if (!isFull) {
+          setTimeout(() => {
+            setPreviewFile(null);
+            setVideoPlaying(false);
+          }, 200);
+        }
+      };
+      
+      // iOS需要监听不同的全屏事件
+      if (isIOS) {
+        video.addEventListener('webkitbeginfullscreen', () => {
+          console.log('iOS视频进入全屏');
+        });
+        video.addEventListener('webkitendfullscreen', handleFullscreenChange);
+      } else {
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      }
+      
+      // 清理函数
+      video._fullscreenCleanup = () => {
+        if (isIOS) {
+          video.removeEventListener('webkitendfullscreen', handleFullscreenChange);
+        } else {
+          document.removeEventListener('fullscreenchange', handleFullscreenChange);
+          document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        }
+      };
+    }
+  };
+
+  // 筛选媒体文件
+  const getFilteredMediaFiles = () => {
+    return uploadedFiles.filter(file => {
+      if (mediaActiveTab === 'all') return true;
+      if (mediaActiveTab === 'photos') return file.type === 'image';
+      if (mediaActiveTab === 'videos') return file.type === 'video';
+      return true;
+    });
   };
 
   if (loading) {
@@ -407,197 +671,469 @@ const AudioLibrary = () => {
         </div>
       </header>
 
-      {/* 控制栏 */}
-      <div className="library-controls">
-        <ModernSearchBox
-          placeholder="搜索会话ID..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          size="medium"
-          width="400px"
-          theme="gradient"
-        />
-        
-        <div className="sort-container">
-          <label className="sort-label">排序:</label>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="sort-select"
-          >
-            <option value="newest">最新更新</option>
-            <option value="oldest">最早创建</option>
-            <option value="count">录音数量</option>
-          </select>
-        </div>
+      {/* 主标签页 */}
+      <div className="main-tabs">
+        <button 
+          className={`main-tab ${activeMainTab === 'sessions' ? 'active' : ''}`}
+          onClick={() => setActiveMainTab('sessions')}
+        >
+          🎵 音频会话
+        </button>
+        <button 
+          className={`main-tab ${activeMainTab === 'media' ? 'active' : ''}`}
+          onClick={() => setActiveMainTab('media')}
+        >
+          📁 媒体文件
+        </button>
       </div>
+
+      {/* 控制栏 */}
+      {activeMainTab === 'sessions' && (
+        <div className="library-controls">
+          <ModernSearchBox
+            placeholder="搜索会话ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            size="medium"
+            width="400px"
+            theme="gradient"
+          />
+          
+          <div className="sort-container">
+            <label className="sort-label">排序:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="sort-select"
+            >
+              <option value="newest">最新更新</option>
+              <option value="oldest">最早创建</option>
+              <option value="count">录音数量</option>
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* 统计信息 */}
       <div className="library-stats">
-        <div className="stat-item">
-          <span className="stat-icon">
-          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/files.svg" className="stat-icon" width={50} height={50}/>
-          </span>
-          <div className="stat-content">
-            <span className="stat-number">{audioSessions.length}</span>
-            <span className="stat-label">会话</span>
-          </div>
-        </div>
-        <div className="stat-item">
-          <span className="stat-icon">
-          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="stat-icon" width={50} height={50}/>
-          </span>
-          <div className="stat-content">
-            <span className="stat-number">
-              {audioSessions.reduce((total, session) => total + session.count, 0)}
-            </span>
-            <span className="stat-label">录音</span>
-          </div>
-        </div>
-        <div className="stat-item">
-          <span className="stat-icon">
-          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/save.svg" className="stat-icon" width={50} height={50}/>
-          </span>
-          <div className="stat-content">
-            <span className="stat-number">
-              {formatFileSize(
-                cloudFiles.reduce((total, file) => total + (file.size || 0), 0)
-              )}
-            </span>
-            <span className="stat-label">总大小</span>
-          </div>
-        </div>
-        <div className="stat-item cloud-indicator">
-          <span className="stat-icon">
-          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/scyd.svg" className="stat-icon" width={50} height={50}/>
-          </span>
-          <div className="stat-content">
-            <span className="stat-number">云端</span>
-            <span className="stat-label">存储</span>
-          </div>
-        </div>
+        {activeMainTab === 'sessions' ? (
+          <>
+            <div className="stat-item">
+              <span className="stat-icon">
+              <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/files.svg" className="stat-icon" width={50} height={50}/>
+              </span>
+              <div className="stat-content">
+                <span className="stat-number">{audioSessions.length}</span>
+                <span className="stat-label">会话</span>
+              </div>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">
+              <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="stat-icon" width={50} height={50}/>
+              </span>
+              <div className="stat-content">
+                <span className="stat-number">
+                  {audioSessions.reduce((total, session) => total + session.count, 0)}
+                </span>
+                <span className="stat-label">录音</span>
+              </div>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">
+              <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/save.svg" className="stat-icon" width={50} height={50}/>
+              </span>
+              <div className="stat-content">
+                <span className="stat-number">
+                  {formatFileSize(
+                    cloudFiles.reduce((total, file) => total + (file.size || 0), 0)
+                  )}
+                </span>
+                <span className="stat-label">总大小</span>
+              </div>
+            </div>
+            <div className="stat-item cloud-indicator">
+              <span className="stat-icon">
+              <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/scyd.svg" className="stat-icon" width={50} height={50}/>
+              </span>
+              <div className="stat-content">
+                <span className="stat-number">云端</span>
+                <span className="stat-label">存储</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="stat-item">
+              <span className="stat-icon">📁</span>
+              <div className="stat-content">
+                <span className="stat-number">{uploadedFiles.length}</span>
+                <span className="stat-label">文件</span>
+              </div>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">📷</span>
+              <div className="stat-content">
+                <span className="stat-number">
+                  {uploadedFiles.filter(f => f.type === 'image').length}
+                </span>
+                <span className="stat-label">照片</span>
+              </div>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">🎬</span>
+              <div className="stat-content">
+                <span className="stat-number">
+                  {uploadedFiles.filter(f => f.type === 'video').length}
+                </span>
+                <span className="stat-label">视频</span>
+              </div>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">💾</span>
+              <div className="stat-content">
+                <span className="stat-number">本地</span>
+                <span className="stat-label">存储</span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* 会话列表 */}
-      <main className="sessions-container">
-        {(() => {
-          const filteredSessions = getFilteredAndSortedSessions();
-          const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
-          const paginatedSessions = filteredSessions.slice(
-            (currentPage - 1) * sessionsPerPage,
-            currentPage * sessionsPerPage
-          );
-          return paginatedSessions.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">☁️</div>
-              <h3>云端暂无录音会话</h3>
-              <p>点击"新建录音"开始您的第一次录音并自动上传到云端</p>
-              <button onClick={createNewSession} className="create-first-btn">
-                🎤 开始录音
-              </button>
-            </div>
-          ) : (
-            <>
-            <div className="sessions-grid">
-              {paginatedSessions.map((session) => (
-                <div
-                  key={session.sessionId}
-                  className="session-card cloud-session"
-                  onClick={() => enterSession(session)}
-                >
-                  <div className="session-header">
-                    <div className="session-info">
-                      <h3 className="session-id">
-                        <span className="id-icon">🆔</span>
-                        {userCode}/{session.sessionId}
-                        <span className="cloud-badge" title="云端存储">
-                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/scyd.svg" className="cloud-badge" width={20} height={20}/>
-                        </span>
-                      </h3>
-                      <div className="session-meta">
-                        <span className="session-count">
-                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="session-count" width={15} height={15}/> {session.count} 个录音
-                        </span>
-                        <span className="session-size">
-                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/save.svg" className="session-count" width={15} height={15}/> {formatFileSize(
-                            session.recordings.reduce((total, r) => total + (r.size || 0), 0)
-                          )}
+      {/* 主要内容区域 */}
+      <main className={activeMainTab === 'sessions' ? "sessions-container" : "media-container"}>
+        {activeMainTab === 'sessions' ? (
+          // 音频会话标签页内容
+          (() => {
+            const filteredSessions = getFilteredAndSortedSessions();
+            const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
+            const paginatedSessions = filteredSessions.slice(
+              (currentPage - 1) * sessionsPerPage,
+              currentPage * sessionsPerPage
+            );
+            return paginatedSessions.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">☁️</div>
+                <h3>云端暂无录音会话</h3>
+                <p>点击"新建录音"开始您的第一次录音并自动上传到云端</p>
+                <button onClick={createNewSession} className="create-first-btn">
+                  🎤 开始录音
+                </button>
+              </div>
+            ) : (
+              <>
+              <div className="sessions-grid">
+                {paginatedSessions.map((session) => (
+                  <div
+                    key={session.sessionId}
+                    className="session-card cloud-session"
+                    onClick={() => enterSession(session)}
+                  >
+                    <div className="session-header">
+                      <div className="session-info">
+                        <h3 className="session-id">
+                          <span className="id-icon">🆔</span>
+                          {userCode}/{session.sessionId}
+                          <span className="cloud-badge" title="云端存储">
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/scyd.svg" className="cloud-badge" width={20} height={20}/>
+                          </span>
+                        </h3>
+                        <div className="session-meta">
+                          <span className="session-count">
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/huatong.svg" className="session-count" width={15} height={15}/> {session.count} 个录音
+                          </span>
+                          <span className="session-size">
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/save.svg" className="session-count" width={15} height={15}/> {formatFileSize(
+                              session.recordings.reduce((total, r) => total + (r.size || 0), 0)
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={(e) => deleteSession(session.sessionId, e)}
+                        className="delete-session-btn"
+                        title="删除会话及云端文件"
+                      >
+                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete.svg" className="delete-session-btn" width={50} height={50}/>
+                      </button>
+                    </div>
+
+                    <div className="session-content">
+                      <div className="latest-recording">
+                        <h4 className="latest-title">最新录音</h4>
+                        <div className="recording-preview">
+                          <span className="recording-name">
+                            {session.latestRecording.fileName}
+                          </span>
+                          <span className="recording-size">
+                            {formatFileSize(session.latestRecording.size)}
+                          </span>
+                        </div>
+                        <div className="recording-date">
+                          {session.latestRecording.timestamp}
+                        </div>
+                      </div>
+
+                      <div className="session-actions">
+                        <div className="action-icon">
+                        <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf.svg" className="action-icon" width={50} height={50}/>
+                          {session.recordings.length > 0 ? '' : ''}
+                        </div>
+                        <span className="action-text">
+                          {session.recordings.length > 0 ? '播放' : '录音'}
                         </span>
                       </div>
                     </div>
-                    
-                    <button
-                      onClick={(e) => deleteSession(session.sessionId, e)}
-                      className="delete-session-btn"
-                      title="删除会话及云端文件"
-                    >
-                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete.svg" className="delete-session-btn" width={50} height={50}/>
-                    </button>
-                  </div>
 
-                  <div className="session-content">
-                    <div className="latest-recording">
-                      <h4 className="latest-title">最新录音</h4>
-                      <div className="recording-preview">
-                        <span className="recording-name">
-                          {session.latestRecording.fileName}
-                        </span>
-                        <span className="recording-size">
-                          {formatFileSize(session.latestRecording.size)}
-                        </span>
-                      </div>
-                      <div className="recording-date">
-                        {session.latestRecording.timestamp}
-                      </div>
-                    </div>
-
-                    <div className="session-actions">
-                      <div className="action-icon">
-                      <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf.svg" className="action-icon" width={50} height={50}/>
-                        {session.recordings.length > 0 ? '' : ''}
-                      </div>
-                      <span className="action-text">
-                        {session.recordings.length > 0 ? '播放' : '录音'}
+                    <div className="session-footer">
+                      <span className="created-date">
+                        创建: {formatDateFromString(session.createdAt)}
+                      </span>
+                      <span className="updated-date">
+                        更新: {formatDateFromString(session.updatedAt)}
                       </span>
                     </div>
                   </div>
-
-                  <div className="session-footer">
-                    <span className="created-date">
-                      创建: {formatDateFromString(session.createdAt)}
-                    </span>
-                    <span className="updated-date">
-                      更新: {formatDateFromString(session.updatedAt)}
-                    </span>
-                  </div>
+                ))}
+              </div>
+              {/* 分页按钮 */}
+              {totalPages > 1 && (
+                <div className="pagination">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    上一页
+                  </button>
+                  <span className="pagination-current-page">
+                    {currentPage}
+                  </span>
+                  <span className="pagination-total-page">/ {totalPages} 页</span>
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                  >
+                    下一页
+                  </button>
                 </div>
-              ))}
+              )}
+              </>
+            );
+          })()
+        ) : (
+          // 媒体文件标签页内容
+          <div className="media-files-section">
+            {/* 文件类型标签 */}
+            <div className="file-type-tabs">
+              <button 
+                className={`file-tab ${mediaActiveTab === 'all' ? 'active' : ''}`}
+                onClick={() => {
+                  setMediaActiveTab('all');
+                  setMediaCurrentPage(1);
+                }}
+              >
+                📁 全部 ({uploadedFiles.length})
+              </button>
+              <button 
+                className={`file-tab ${mediaActiveTab === 'photos' ? 'active' : ''}`}
+                onClick={() => {
+                  setMediaActiveTab('photos');
+                  setMediaCurrentPage(1);
+                }}
+              >
+                📷 照片 ({uploadedFiles.filter(f => f.type === 'image').length})
+              </button>
+              <button 
+                className={`file-tab ${mediaActiveTab === 'videos' ? 'active' : ''}`}
+                onClick={() => {
+                  setMediaActiveTab('videos');
+                  setMediaCurrentPage(1);
+                }}
+              >
+                🎬 视频 ({uploadedFiles.filter(f => f.type === 'video').length})
+              </button>
             </div>
-            {/* 分页按钮 */}
-            {totalPages > 1 && (
-              <div className="pagination">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  上一页
-                </button>
-                <span className="pagination-current-page">
-                  {currentPage}
-                </span>
-                <span className="pagination-total-page">/ {totalPages} 页</span>
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                >
-                  下一页
-                </button>
+
+            {(() => {
+              const filteredMediaFiles = getFilteredMediaFiles();
+              const totalMediaPages = Math.ceil(filteredMediaFiles.length / mediaFilesPerPage);
+              const startIndex = (mediaCurrentPage - 1) * mediaFilesPerPage;
+              const endIndex = startIndex + mediaFilesPerPage;
+              const currentMediaFiles = filteredMediaFiles.slice(startIndex, endIndex);
+
+              return filteredMediaFiles.length > 0 ? (
+                <>
+                  <div className="section-header">
+                    {totalMediaPages > 1 && (
+                      <div className="pagination-info">
+                        第 {mediaCurrentPage} 页，共 {totalMediaPages} 页
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="photos-grid">
+                    {currentMediaFiles.map(file => (
+                      <div key={file.id} className="media-item">
+                        <div className="media-content" onClick={() => handlePreviewFile(file)}>
+                          {file.type === 'image' ? (
+                            <div className="image-preview">
+                              <img src={file.preview || file.url} alt={file.name} className="media-preview" />
+                              {/* 显示图片ID和详细信息 */}
+                              {file.id && typeof file.id === 'string' && (
+                                <div className="image-id-display">
+                                  {file.id.startsWith('img_') ? (
+                                    /* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */
+                                    file.sessionId && file.fromRecordPage ? (
+                                      <>会话： {file.sessionId} | ID {file.id.split('_').slice(-1)[0]}</>
+                                    ) : file.sessionId ? (
+                                      <>会话： {file.sessionId} | ID {file.id.split('_').slice(-1)[0]}</>
+                                    ) : (
+                                      <>📷 图片ID: {file.id.split('_').slice(-1)[0]}</>
+                                    )
+                                  ) : (
+                                    <>📷 ID: {file.id}</>
+                                  )}
+                                  
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="video-preview">
+                              <video 
+                                src={file.preview || file.url} 
+                                className="media-preview"
+                                muted
+                                preload="metadata"
+                                onLoadedMetadata={(e) => {
+                                  e.target.currentTime = 1;
+                                }}
+                              />
+                              <div className="video-overlay">
+                                <div className="video-play-icon">▶</div>
+                              </div>
+                              {/* 显示视频ID和详细信息 */}
+                              {file.id && typeof file.id === 'string' && (
+                                <div className="video-id-display">
+                                  {file.id.startsWith('vid_') ? (
+                                    /* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */
+                                    file.sessionId && file.fromRecordPage ? (
+                                      <>会话： {file.sessionId} | ID {file.id.split('_').slice(-1)[0]}</>
+                                    ) : file.sessionId ? (
+                                      <>会话： {file.sessionId} | ID {file.id.split('_').slice(-1)[0]}</>
+                                    ) : (
+                                      <>🎬 视频ID: {file.id.split('_').slice(-1)[0]}</>
+                                    )
+                                  ) : (
+                                    <>🎬 ID: {file.id}</>
+                                  )}
+                                  
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <div className="media-overlay">
+                            <button 
+                              className="delete-media-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteMediaFile(file.id);
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 分页控件 */}
+                  {totalMediaPages > 1 && (
+                    <div className="pagination">
+                      <button 
+                        className="pagination-btn"
+                        onClick={() => setMediaCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={mediaCurrentPage === 1}
+                      >
+                        上一页
+                      </button>
+                      <span className="pagination-current-page">{mediaCurrentPage}</span>
+                      <span className="pagination-total-page">/ {totalMediaPages} 页</span>
+                      <button 
+                        className="pagination-btn"
+                        onClick={() => setMediaCurrentPage(prev => Math.min(prev + 1, totalMediaPages))}
+                        disabled={mediaCurrentPage === totalMediaPages}
+                      >
+                        下一页
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-icon">
+                    {mediaActiveTab === 'all' ? '📁' : mediaActiveTab === 'photos' ? '📷' : '🎬'}
+                  </div>
+                  <p className="empty-text">
+                    还没有上传任何{mediaActiveTab === 'all' ? '文件' : mediaActiveTab === 'photos' ? '照片' : '视频'}
+                  </p>
+                  <p className="empty-subtext">
+                    前往录音页面或上传页面开始上传媒体文件
+                  </p>
+                  <button onClick={createNewSession} className="create-first-btn">
+                    🎤 前往录音页面
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+      </main>
+      {/* 媒体文件预览弹窗 - 移动端全屏，PC端图片 */}
+      {previewFile && (
+        <div className={`preview-modal${isMobile ? ' fullscreen' : ''}`} onClick={closePreview}>
+          <div className="preview-content" onClick={e => e.stopPropagation()}>
+            {previewFile.type === 'image' ? (
+              <img 
+                src={previewFile.preview || previewFile.url} 
+                alt={previewFile.name} 
+                className={`preview-media${isMobile ? ' fullscreen-media' : ''}`} 
+                onClick={closePreview}
+                style={{ cursor: 'pointer' }}
+              />
+            ) : (
+              // 视频全屏预览（移动端弹窗）
+              <div className={`fullscreen-video-wrapper${isMobile ? ' mobile' : ''}`}>
+                <video
+                  ref={videoRef}
+                  src={previewFile.preview || previewFile.url}
+                  className={`preview-media${isMobile ? ' fullscreen-media' : ''}`}
+                  controls
+                  autoPlay
+                  playsInline={!isMobile} // iOS全屏时不使用playsInline
+                  webkit-playsinline={!isMobile} // 旧版iOS兼容
+                  crossOrigin="anonymous"
+                  preload="metadata"
+                  onPlay={e => { setVideoPlaying(true); handleVideoPlay(); }}
+                  onPause={() => setVideoPlaying(false)}
+                  onClick={e => e.stopPropagation()}
+                  style={{ 
+                    maxHeight: isMobile ? '70vh' : undefined,
+                    backgroundColor: '#000', // 确保视频背景是黑色
+                    objectFit: 'contain' // 确保视频正确显示
+                  }}
+                  onLoadedMetadata={handleVideoLoadedMetadata}
+                  onError={(e) => {
+                    console.error('视频加载错误:', e);
+                    console.error('视频源:', e.target.src);
+                  }}
+                />
               </div>
             )}
-            </>
-          );
-        })()}
-      </main>
+          </div>
+        </div>
+      )}
+
       {/* 移动端底部大按钮
       <button className="add-device-btn" onClick={createNewSession} style={{display: 'block'}}>
         新建录音

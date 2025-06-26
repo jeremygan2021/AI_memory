@@ -257,12 +257,35 @@ const VideoPlayerPage = () => {
   const toggleFullscreen = () => {
     if (!videoRef.current) return;
 
-    if (!document.fullscreenElement) {
-      videoRef.current.requestFullscreen().catch(err => {
+    const video = videoRef.current;
+    
+    // 检测iOS设备
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-      });
+    if (!document.fullscreenElement && !video.webkitDisplayingFullscreen) {
+      if (isIOS) {
+        // iOS设备使用特殊的全屏API
+        if (video.webkitEnterFullscreen) {
+          video.webkitEnterFullscreen();
+        } else if (video.webkitRequestFullscreen) {
+          video.webkitRequestFullscreen();
+        }
+      } else {
+        // 非iOS设备使用标准全屏API
+        if (video.requestFullscreen) {
+          video.requestFullscreen().catch(err => {
+            console.log('全屏播放失败:', err);
+          });
+        } else if (video.webkitRequestFullscreen) {
+          video.webkitRequestFullscreen();
+        }
+      }
     } else {
-      document.exitFullscreen();
+      if (isIOS && video.webkitExitFullscreen) {
+        video.webkitExitFullscreen();
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
     }
   };
 
@@ -394,7 +417,20 @@ const VideoPlayerPage = () => {
               ref={videoRef}
               src={video.preview}
               className="video-element"
+              controls
+              playsInline={!isMobile} // iOS全屏时不使用playsInline
+              webkit-playsinline={!isMobile} // 旧版iOS兼容
+              crossOrigin="anonymous"
+              preload="metadata"
               onClick={toggleFullscreen}
+              style={{
+                backgroundColor: '#000',
+                objectFit: 'contain'
+              }}
+              onError={(e) => {
+                console.error('视频加载错误:', e);
+                console.error('视频源:', e.target.src);
+              }}
             />
           </div>
 

@@ -318,44 +318,48 @@ const HomePage = () => {
   const loadUploadedFiles = useCallback(() => {
     try {
       const saved = localStorage.getItem('uploadedFiles');
-      if (saved) {
+      if (saved && userCode) {
         const files = JSON.parse(saved);
+        // 只显示当前userCode下的文件
+        const userFiles = files.filter(f => f.userCode === userCode);
         // 按上传时间排序，最新的在前面，只取前6个
-        const sortedFiles = files
+        const sortedFiles = userFiles
           .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime))
           .slice(0, 6);
         setUploadedFiles(sortedFiles);
-        
         // 分离照片和视频
         const photos = sortedFiles.filter(file => file.type === 'image').slice(0, 6);
         const videos = sortedFiles.filter(file => file.type === 'video').slice(0, 6);
         setUploadedPhotos(photos);
         setUploadedVideos(videos);
+      } else {
+        setUploadedFiles([]);
+        setUploadedPhotos([]);
+        setUploadedVideos([]);
       }
     } catch (error) {
+      setUploadedFiles([]);
+      setUploadedPhotos([]);
+      setUploadedVideos([]);
       console.error('加载文件失败:', error);
     }
-  }, []);
+  }, [userCode]);
 
   // 优化事件监听
   useEffect(() => {
     loadUploadedFiles();
-    
     // 监听localStorage变化
     const handleStorageChange = (e) => {
       if (e.key === 'uploadedFiles') {
         loadUploadedFiles();
       }
     };
-    
     // 也监听自定义事件，用于同页面更新
     const handleFilesUpdate = () => {
       loadUploadedFiles();
     };
-    
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('filesUpdated', handleFilesUpdate);
-    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('filesUpdated', handleFilesUpdate);
@@ -690,7 +694,7 @@ const HomePage = () => {
             </div>
             
             {/* 移动端相册模块 - 放在录制声音和宝宝信息之间 */}
-            {isMobileView && (
+            {isMobileView  && (
               <div className="mobile-gallery-entrance mobile-left-gallery">
                 <div className="mobile-gallery-card" onClick={goToGallery}>
                   <div className="gallery-icon">📸</div>

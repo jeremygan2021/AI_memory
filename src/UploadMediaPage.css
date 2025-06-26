@@ -214,6 +214,7 @@
 }
 
 .media-preview {
+  position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -455,29 +456,7 @@
   box-shadow: 0 4px 24px rgba(0,0,0,0.15);
 }
 
-.preview-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  z-index: 1001;
-}
 
-.preview-close:hover {
-  background: rgba(0, 0, 0, 0.9);
-  transform: scale(1.1);
-}
 
 .preview-info {
   padding: 20px;
@@ -949,12 +928,6 @@
   .preview-content {
     max-width: 95vw;
     max-height: 95vh;
-  }
-  
-  .preview-close {
-    width: 35px;
-    height: 35px;
-    font-size: 20px;
   }
   
   .preview-info {
@@ -1447,9 +1420,9 @@
 
 /* 图片预览和ID显示样式 */
 .image-preview {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  
+  width: 100vw;
+  height: 100vh;
 }
 
 .image-id-display {
@@ -1538,37 +1511,13 @@
   justify-content: center;
   padding: 0;
   animation: fadeIn 0.2s;
+  /* 确保固定定位 */
+  overflow: hidden;
+  -webkit-overflow-scrolling: none;
+  overscroll-behavior: none;
 }
 
-.fullscreen-header {
-  width: 100vw;
-  background: rgba(30,30,30,0.85);
-  color: #fff;
-  font-size: 13px;
-  font-family: monospace, 'Muyao-Softbrush-2', sans-serif;
-  padding: 14px 18px 10px 18px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 10001;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  box-sizing: border-box;
-  white-space: nowrap;
-}
 
-.file-id-info {
-  font-size: 12px;
-  color: #ffe082;
-  margin-left: 16px;
-  font-family: monospace;
-  background: rgba(0,0,0,0.18);
-  border-radius: 6px;
-  padding: 2px 8px;
-}
 
 .fullscreen-media {
   max-width: 100vw;
@@ -1581,6 +1530,9 @@
   background: #111;
   border-radius: 0;
   box-shadow: none;
+  /* 图片固定定位优化 */
+  position: relative;
+  z-index: 10000;
 }
 
 .fullscreen-video-wrapper.mobile {
@@ -1590,7 +1542,6 @@
   align-items: center;
   justify-content: center;
   background: #111;
-  margin-top: 48px;
 }
 
 .preview-modal.fullscreen .preview-content {
@@ -1607,79 +1558,244 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  /* 确保内容也是固定的 */
+  overflow: hidden;
 }
 
-.preview-modal.fullscreen .preview-close {
-  position: absolute;
-  top: 16px;
-  right: 18px;
-  background: rgba(255, 59, 48, 0.95);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 26px;
-  font-weight: bold;
-  z-index: 10002;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  transition: background 0.2s, transform 0.2s;
-}
 
-.preview-modal.fullscreen .preview-close:hover {
-  background: #ff1744;
-  transform: scale(1.08);
-}
 
 @media (max-width: 768px) {
-  .fullscreen-header {
-    font-size: 12px;
-    padding: 10px 10px 8px 10px;
-  }
-  .file-id-info {
-    font-size: 10px;
-    padding: 2px 6px;
-  }
   .fullscreen-media {
     max-height: 65vh;
   }
   .fullscreen-video-wrapper.mobile {
     height: 65vh;
-    margin-top: 36px;
-  }
-  .preview-modal.fullscreen .preview-close {
-    width: 34px;
-    height: 34px;
-    font-size: 20px;
-    top: 10px;
-    right: 10px;
   }
 }
 
 @media (max-width: 480px) {
-  .fullscreen-header {
-    font-size: 10px;
-    padding: 7px 6px 6px 6px;
-  }
-  .file-id-info {
-    font-size: 9px;
-    padding: 1px 4px;
-  }
   .fullscreen-media {
     max-height: 55vh;
   }
   .fullscreen-video-wrapper.mobile {
     height: 55vh;
-    margin-top: 24px;
   }
-  .preview-modal.fullscreen .preview-close {
-    width: 28px;
-    height: 28px;
-    font-size: 16px;
-    top: 6px;
-    right: 6px;
+}
+
+/* iOS设备视频全屏播放优化 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari特有的CSS特性检测 */
+  
+  /* 只对全屏预览中的媒体元素应用优化 */
+  .preview-modal.fullscreen .fullscreen-media {
+    -webkit-appearance: none;
+    outline: none;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  /* iOS图片全屏预览优化 - 只在全屏模式下应用 */
+  .preview-modal.fullscreen img.fullscreen-media {
+    -webkit-appearance: none !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    background-color: #111 !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100vw !important;
+    max-height: 80vh !important;
+    position: relative !important;
+    z-index: 10000 !important;
+    /* 只在图片预览时防止滚动 */
+    touch-action: pan-x pan-y !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+  
+  /* iOS全屏弹窗容器优化 - 减少影响 */
+  .preview-modal.fullscreen {
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-x pan-y !important;
+  }
+  
+  /* iOS全屏预览内容容器 - 只限制必要属性 */
+  .preview-modal.fullscreen .preview-content {
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+  
+  /* iOS视频元素优化 */
+  .preview-modal.fullscreen video {
+    -webkit-appearance: none !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    background-color: #000 !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100vw !important;
+    max-height: 80vh !important;
+  }
+  
+  /* iOS全屏播放时的特殊处理 */
+  .preview-modal.fullscreen video::-webkit-media-controls {
+    -webkit-appearance: none !important;
+    display: block !important;
+  }
+  
+  .preview-modal.fullscreen video::-webkit-media-controls-panel {
+    -webkit-appearance: none !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+  }
+  
+  /* iOS全屏状态下的视频容器 */
+  .fullscreen-video-wrapper.mobile {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    background-color: #000 !important;
+    width: 100vw !important;
+    height: 80vh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* iOS横屏模式优化 */
+  @media (orientation: landscape) {
+    .preview-modal.fullscreen video {
+      max-height: 90vh !important;
+    }
+    
+    .preview-modal.fullscreen img.fullscreen-media {
+      max-height: 90vh !important;
+    }
+    
+    .fullscreen-video-wrapper.mobile {
+      height: 90vh !important;
+    }
+  }
+}
+
+/* iOS全屏视频播放专用动画 */
+@keyframes iosVideoFadeIn {
+  0% { 
+    opacity: 0; 
+    -webkit-transform: scale(0.9) translateZ(0);
+    transform: scale(0.9) translateZ(0);
+  }
+  100% { 
+    opacity: 1; 
+    -webkit-transform: scale(1) translateZ(0);
+    transform: scale(1) translateZ(0);
+  }
+}
+
+/* iOS设备检测和应用动画 */
+@media (max-width: 768px) {
+  .preview-modal.fullscreen video {
+    animation: iosVideoFadeIn 0.3s ease-out;
+  }
+}
+
+/* iOS深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .preview-modal.fullscreen {
+    background: rgba(0, 0, 0, 0.98) !important;
+  }
+  
+  .fullscreen-video-wrapper.mobile {
+    background: #000 !important;
+  }
+}
+
+/* 移动端全屏预览通用滚动防护 - 优化版本 */
+@media (max-width: 768px) {
+  /* 当全屏预览打开时温和地禁用页面滚动 */
+  body.fullscreen-preview-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    overscroll-behavior: contain !important;
+  }
+  
+  html.fullscreen-preview-open {
+    overflow: hidden !important;
+    overscroll-behavior: contain !important;
+  }
+  
+  /* 全屏预览容器增强固定 - 减少性能影响 */
+  .preview-modal.fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+    overflow: hidden !important;
+    overscroll-behavior: contain !important;
+  }
+  
+  /* 图片全屏显示优化 - 更温和的限制 */
+  .preview-modal.fullscreen img.fullscreen-media {
+    position: relative !important;
+    z-index: 10000 !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    object-fit: contain !important;
+    background-color: #111 !important;
+  }
+  
+
+  
+  /* 确保正常滚动不受影响 - 重置可能的冲突 */
+  body:not(.fullscreen-preview-open) {
+    overflow: auto !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  
+  html:not(.fullscreen-preview-open) {
+    overflow: auto !important;
+  }
+  
+  /* 确保上传页面本身的滚动性能 */
+  .upload-page:not(.fullscreen-preview-open) {
+    -webkit-overflow-scrolling: touch !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-y !important;
+  }
+  
+  .upload-page:not(.fullscreen-preview-open) .photos-container {
+    -webkit-overflow-scrolling: touch !important;
+    overflow: visible !important;
+    touch-action: pan-y !important;
   }
 } 

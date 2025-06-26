@@ -3321,3 +3321,84 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
 }
+
+/* iPad Air (1180x820) 和 iPad Pro (1366x1024) 横屏布局优化 */
+@media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+  .memory-main {
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .memory-left,
+  .memory-center,
+  .memory-right {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    margin: 0;
+  }
+  
+  .memory-right {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .photo-board,
+  .video-board,
+  .media-board {
+    max-width: none;
+    min-height: 350px;
+    flex: 1;
+  }
+  
+  .album-list {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  /* 优化卡片布局 */
+  .memory-card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .memory-card.compact {
+    height: 160px;
+    margin-bottom: 0;
+  }
+
+  /* 优化用户信息卡片 */
+  .user-account-card {
+    max-width: none;
+  }
+
+  /* 优化录音功能卡片 */
+  .center-voice-card {
+    max-width: none;
+    padding: 30px;
+  }
+
+  /* 优化活动列表 */
+  .parent-activity {
+    max-width: none;
+  }
+
+  /* 优化图表区域 */
+  .activity-chart {
+    max-width: none;
+  }
+
+  /* 优化媒体展示区域 */
+  .media-content {
+    max-width: none;
+  }
+
+  .media-tabs {
+    justify-content: center;
+  }
+}

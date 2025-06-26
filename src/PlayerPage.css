@@ -197,8 +197,8 @@
   width: 400.67px;  /* 240 * (16/9) */
   height: 240px;    /* 保持16:9比例 */
   position: absolute;
-  top: 20px;        /* 从负值改为正值，避免与导航栏重叠 */
-  right: 20px;      /* 改为right定位，更直观 */
+  top: -100px;        /* 从负值改为正值，避免与导航栏重叠 */
+  right:-40px;      /* 改为right定位，更直观 */
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性动画 */
   cursor: pointer;
   transform-origin: center center;
@@ -658,8 +658,8 @@
     width: 320px;  /* 比默认稍小，适合中等平板 */
     height: 192px; /* 保持16:9比例 */
     position: absolute;
-    top: 15px;     /* 确保不与导航栏重叠 */
-    right: 15px;   /* 使用right定位 */
+    top: -80px;     /* 确保不与导航栏重叠 */
+    right: -30px;   /* 使用right定位 */
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
     transform-origin: center center;
@@ -895,11 +895,11 @@
   }
 
   .player-main {
-    padding: 25px 10px 15px; /* 调整padding避免重叠 */
+    padding: 35px 10px 15px; /* 调整padding避免重叠 */
     padding-left: max(10px, var(--safe-area-inset-left));
     padding-right: max(10px, var(--safe-area-inset-right));
     padding-bottom: max(15px, var(--safe-area-inset-bottom));
-    min-height: calc(calc(var(--vh, 1vh) * 100) - 120px);
+    
   }
 
   .player-container {
@@ -1022,8 +1022,8 @@
     width: 140px;  /* 进一步缩小 */
     height: 84px;
     position: absolute;
-    top: 5px;      /* 最小边距 */
-    right: 5px;
+    top: -50px;      /* 最小边距 */
+    right: -10px;
     z-index: 2;
   }
 
@@ -1060,7 +1060,7 @@
   }
 
   .player-container {
-    padding: 30px 12px 20px; /* 为avatar-icon预留足够空间 */
+    padding: 50px 12px 20px; /* 为avatar-icon预留足够空间 */
     border-radius: 18px;
     max-width: 300px;
     margin-bottom: var(--safe-area-inset-bottom);
@@ -1431,6 +1431,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  margin-top: -400px;
 }
 
 .ios-interaction-prompt h3 {
@@ -1874,6 +1875,13 @@
     font-size: 13px;
   }
 
+  .upload-modal-preview-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
   /* 主播放器区域最大高度限制 */
   .player-main {
     max-height: calc(100vh - 120px);
@@ -1897,7 +1905,7 @@
 
   .carousel-container {
     width: 280px;
-    height: 168px;
+    height: 120px;
   }
 
   .carousel-nav {
@@ -1942,7 +1950,7 @@
 @media (max-width: 375px) {
   .carousel-container {
     width: 240px;
-    height: 144px;
+    height: 124px;
   }
 
   .carousel-nav {
