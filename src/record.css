@@ -28213,27 +28213,55 @@ html, body {
 }
 
 .upload-modal-video-id-display {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-family: monospace;
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+  color: white !important;
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  backdrop-filter: blur(8px) !important;
+  font-family: 'Courier New', 'Monaco', monospace !important;
+  letter-spacing: 0.3px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  z-index: 10 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+  min-height: 20px !important;
+  box-sizing: border-box !important;
 }
 
 .upload-modal-image-id-display {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-family: monospace;
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+  color: white !important;
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  backdrop-filter: blur(8px) !important;
+  font-family: 'Courier New', 'Monaco', monospace !important;
+  letter-spacing: 0.3px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  z-index: 10 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+  min-height: 20px !important;
+  box-sizing: border-box !important;
 }
 
 .upload-modal-media-overlay {
@@ -28622,16 +28650,60 @@ html, body {
 
 /* 移动端适配 */
 @media (max-width: 768px) {
-  .upload-modal-image-id-display {
-    font-size: 9px;
-    padding: 2px 4px;
+  .upload-modal-image-id-display,
+  .upload-modal-video-id-display {
+    position: absolute !important;
+    bottom: 6px !important;
+    left: 6px !important;
+    right: 6px !important;
+    background: rgba(0, 0, 0, 0.95) !important;
+    color: white !important;
+    padding: 4px 6px !important;
+    border-radius: 4px !important;
+    font-size: 9px !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    backdrop-filter: blur(6px) !important;
+    font-family: 'Courier New', 'Monaco', monospace !important;
+    letter-spacing: 0.2px !important;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    z-index: 15 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.1 !important;
+    min-height: 16px !important;
+    box-sizing: border-box !important;
   }
 }
 
 @media (max-width: 480px) {
-  .upload-modal-image-id-display {
-    font-size: 8px;
-    padding: 2px 3px;
+  .upload-modal-image-id-display,
+  .upload-modal-video-id-display {
+    position: absolute !important;
+    bottom: 4px !important;
+    left: 4px !important;
+    right: 4px !important;
+    background: rgba(0, 0, 0, 0.98) !important;
+    color: white !important;
+    padding: 3px 5px !important;
+    border-radius: 3px !important;
+    font-size: 8px !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    backdrop-filter: blur(4px) !important;
+    font-family: 'Courier New', 'Monaco', monospace !important;
+    letter-spacing: 0.1px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    z-index: 20 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.0 !important;
+    min-height: 14px !important;
+    box-sizing: border-box !important;
   }
 }
 
@@ -28851,5 +28923,53 @@ html, body {
     will-change: scroll-position;
     contain: layout style;
     transform: translateZ(0);
+  }
+}
+
+/* === 额外的ID显示稳定性样式 === */
+.upload-modal-image-id-display,
+.upload-modal-video-id-display {
+  /* 强制固定定位和尺寸 */
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  max-width: calc(100% - 16px) !important;
+  word-wrap: break-word !important;
+  hyphens: auto !important;
+}
+
+/* 确保在任何容器变换下都能显示 */
+.upload-modal-media-content .upload-modal-image-id-display,
+.upload-modal-media-content .upload-modal-video-id-display {
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  right: 8px !important;
+}
+
+/* 防止父容器影响ID显示 */
+.upload-modal-image-preview,
+.upload-modal-video-preview {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* 缩放时保持可见性 */
+@media (min-resolution: 1.5dppx) {
+  .upload-modal-image-id-display,
+  .upload-modal-video-id-display {
+    font-size: 10px !important;
+    padding: 5px 7px !important;
+  }
+}
+
+@media (min-resolution: 2dppx) {
+  .upload-modal-image-id-display,
+  .upload-modal-video-id-display {
+    font-size: 9px !important;
+    padding: 4px 6px !important;
   }
 }

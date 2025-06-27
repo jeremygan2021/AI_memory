@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './VideoPlayerPage.css';
 
 const VideoPlayerPage = () => {
-  const { userid, sessionid, videoId } = useParams();
+  const { userid: userCode, sessionid: sessionId, videoid: videoId } = useParams();
   const navigate = useNavigate();
   const videoRef = useRef(null);
   
@@ -15,11 +15,13 @@ const VideoPlayerPage = () => {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [loading, setLoading] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
-  const [userCode, setUserCode] = useState('');
   const [userInteracted, setUserInteracted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSpeedControl, setShowSpeedControl] = useState(false);
+
+  const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/recordings/';
+  const ossUrl = `${ossBase}${userCode}/${sessionId}/${videoId}`;
 
   // 检测移动设备
   useEffect(() => {
@@ -69,15 +71,6 @@ const VideoPlayerPage = () => {
       document.removeEventListener('click', handleClickOutside);
     };
   }, [showSpeedControl]);
-
-  // 从URL参数获取用户代码
-  useEffect(() => {
-    if (userid && userid.length === 4) {
-      setUserCode(userid.toUpperCase());
-    } else {
-      navigate('/');
-    }
-  }, [userid, navigate]);
 
   // 移动端视口高度修正
   useEffect(() => {
@@ -309,10 +302,10 @@ const VideoPlayerPage = () => {
     if (fromPlayer === 'player') {
       // 从播放页面进入的，返回播放页面
       const recordingId = urlParams.get('recordingId') || 'default';
-      navigate(`/${userCode}/${sessionid}/play/${recordingId}`);
-    } else if (sessionid && sessionid !== 'homepage') {
+      navigate(`/${userCode}/${sessionId}/play/${recordingId}`);
+    } else if (sessionId && sessionId !== 'homepage') {
       // 有具体的sessionid，返回到对应的上传页面
-      navigate(`/${userCode}/upload-media/${sessionid}`);
+      navigate(`/${userCode}/upload-media/${sessionId}`);
     } else {
       // 如果是从主页进入的视频或没有sessionid，返回主页
       navigate(`/${userCode}`);
@@ -415,22 +408,11 @@ const VideoPlayerPage = () => {
           <div className="video-container">
             <video
               ref={videoRef}
-              src={video.preview}
+              src={ossUrl}
               className="video-element"
               controls
-              playsInline={!isMobile} // iOS全屏时不使用playsInline
-              webkit-playsinline={!isMobile} // 旧版iOS兼容
-              crossOrigin="anonymous"
-              preload="metadata"
-              onClick={toggleFullscreen}
-              style={{
-                backgroundColor: '#000',
-                objectFit: 'contain'
-              }}
-              onError={(e) => {
-                console.error('视频加载错误:', e);
-                console.error('视频源:', e.target.src);
-              }}
+              autoPlay
+              style={{ width: '100%', maxHeight: '80vh', background: '#000' }}
             />
           </div>
 

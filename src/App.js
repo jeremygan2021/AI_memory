@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import './common.css';
-import './browser-compatibility.css';
 import './index.css';
 import FamilyPage from './FamilyPage';
 import RecordComponent from './record';
@@ -314,58 +313,6 @@ const HomePage = () => {
     };
   }, [isMobileView]);
 
-  // 优化文件加载 - 使用useCallback
-  const loadUploadedFiles = useCallback(() => {
-    try {
-      const saved = localStorage.getItem('uploadedFiles');
-      if (saved && userCode) {
-        const files = JSON.parse(saved);
-        // 只显示当前userCode下的文件
-        const userFiles = files.filter(f => f.userCode === userCode);
-        // 按上传时间排序，最新的在前面，只取前6个
-        const sortedFiles = userFiles
-          .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime))
-          .slice(0, 6);
-        setUploadedFiles(sortedFiles);
-        // 分离照片和视频
-        const photos = sortedFiles.filter(file => file.type === 'image').slice(0, 6);
-        const videos = sortedFiles.filter(file => file.type === 'video').slice(0, 6);
-        setUploadedPhotos(photos);
-        setUploadedVideos(videos);
-      } else {
-        setUploadedFiles([]);
-        setUploadedPhotos([]);
-        setUploadedVideos([]);
-      }
-    } catch (error) {
-      setUploadedFiles([]);
-      setUploadedPhotos([]);
-      setUploadedVideos([]);
-      console.error('加载文件失败:', error);
-    }
-  }, [userCode]);
-
-  // 优化事件监听
-  useEffect(() => {
-    loadUploadedFiles();
-    // 监听localStorage变化
-    const handleStorageChange = (e) => {
-      if (e.key === 'uploadedFiles') {
-        loadUploadedFiles();
-      }
-    };
-    // 也监听自定义事件，用于同页面更新
-    const handleFilesUpdate = () => {
-      loadUploadedFiles();
-    };
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('filesUpdated', handleFilesUpdate);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('filesUpdated', handleFilesUpdate);
-    };
-  }, [loadUploadedFiles]);
-  
   // 使用useCallback优化函数
   const goToAudioLibrary = useCallback(() => {
     if (userCode) {
@@ -548,21 +495,11 @@ const HomePage = () => {
     }
   }, [previewIndex, uploadedPhotos]);
 
-  // 打开视频播放器
+  // 打开视频播放器（改为弹窗，不跳转）
   const openVideoPlayer = useCallback((idx) => {
-    if (userCode && uploadedVideos[idx]) {
-      const videoFile = uploadedVideos[idx];
-      
-      // 使用新的独立视频ID路由
-      if (videoFile.id && typeof videoFile.id === 'string' && videoFile.id.startsWith('vid_')) {
-        navigate(`/${userCode}/video-player/${videoFile.id}`);
-      } else {
-        // 兼容旧系统，使用默认sessionid
-        const defaultSessionId = 'homepage';
-        navigate(`/${userCode}/video-player/${defaultSessionId}/${videoFile.id || idx}`);
-      }
-    }
-  }, [userCode, uploadedVideos, navigate]);
+    setPreviewFile(uploadedVideos[idx]);
+    setPreviewIndex(idx);
+  }, [uploadedVideos]);
 
   // 跳转到相册页面
   const goToGallery = useCallback(() => {
@@ -586,6 +523,61 @@ const HomePage = () => {
   const albumData = useMemo(() => {
     return uploadedFiles.length > 0 ? uploadedFiles : [];
   }, [uploadedFiles]);
+
+  // 云端相册加载逻辑
+  const loadCloudMediaFiles = useCallback(async () => {
+    if (!userCode) return;
+    const prefix = `recordings/${userCode}/`;
+    const API_BASE_URL = 'https://data.tangledup-ai.com';
+    const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
+    try {
+      const response = await fetch(`${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=1000`);
+      if (!response.ok) throw new Error('云端文件获取失败');
+      const result = await response.json();
+      const files = result.files || result.data || result.objects || result.items || result.results || [];
+      // 只保留图片和视频
+      const mapped = files.map(file => {
+        const objectKey = file.object_key || file.objectKey || file.key || file.name;
+        let ossKey = objectKey;
+        if (ossKey && ossKey.startsWith('recordings/')) {
+          ossKey = ossKey.substring('recordings/'.length);
+        }
+        const fileName = objectKey ? objectKey.split('/').pop() : '';
+        const contentType = file.content_type || '';
+        const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
+        const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
+        if (!isImage && !isVideo) return null;
+        const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
+        return {
+          id: fileName,
+          name: fileName,
+          preview: ossUrl, // 直接用OSS直链
+          ossUrl,
+          type: isImage ? 'image' : 'video',
+          uploadTime: file.last_modified || file.lastModified || file.modified || '',
+          objectKey,
+          sessionId: objectKey && objectKey.split('/')[2],
+          userCode,
+        };
+      }).filter(Boolean);
+      // 按上传时间倒序，取前6个
+      const sortedFiles = mapped.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+      setUploadedFiles(sortedFiles.slice(0, 6));
+      setUploadedPhotos(sortedFiles.filter(f => f.type === 'image').slice(0, 6));
+      setUploadedVideos(sortedFiles.filter(f => f.type === 'video').slice(0, 6));
+    } catch (e) {
+      // 云端失败时清空，不再回退本地
+      setUploadedFiles([]);
+      setUploadedPhotos([]);
+      setUploadedVideos([]);
+      console.error('云端相册加载失败:', e);
+    }
+  }, [userCode]);
+
+  // 删除localStorage监听，只加载云端
+  useEffect(() => {
+    loadCloudMediaFiles();
+  }, [loadCloudMediaFiles]);
 
   // 如果没有用户ID，显示输入界面
   if (!userid) {
@@ -887,7 +879,7 @@ const HomePage = () => {
                           onClick={() => openPhotoPreview(idx)}
                         >
                           <img
-                            src={file.preview}
+                            src={file.ossUrl || file.preview}
                             className="album-img"
                             alt={file.name || `照片${idx + 1}`}
                           />
@@ -913,7 +905,7 @@ const HomePage = () => {
                         >
                           <div className="video-preview-container">
                             <video
-                              src={file.preview}
+                              src={file.ossUrl || file.preview}
                               className="album-img"
                               muted
                               preload="metadata"
@@ -943,13 +935,13 @@ const HomePage = () => {
             {previewFile.type === 'video' ? (
               <video 
                 className="album-preview-video" 
-                src={previewFile.preview} 
+                src={previewFile.ossUrl || previewFile.preview} 
                 controls 
                 autoPlay
                 onClick={e => e.stopPropagation()}
               />
             ) : (
-              <img className="album-preview-img" src={previewFile.preview} alt="大图预览" />
+              <img className="album-preview-img" src={previewFile.ossUrl || previewFile.preview} alt="大图预览" />
             )}
             <button className="album-preview-close" onClick={closePreview}>×</button>
             <button className="album-preview-arrow left" onClick={showPrev}>‹</button>

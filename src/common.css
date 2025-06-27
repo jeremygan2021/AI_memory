@@ -1401,6 +1401,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   cursor: pointer;
   transition: all 0.3s ease;
   animation: fadeIn 0.3s ease-in-out;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes fadeIn {
@@ -1441,7 +1442,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 .album-preview-img {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 90vh;
   border-radius: 8px;
 }
 

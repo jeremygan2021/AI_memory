@@ -826,18 +826,18 @@ const RecordComponent = () => {
     }
 
     // 如果正在录音，先暂停录音
-    if (isRecording && !isPaused) {
-      setWasRecordingBeforeModal(true);
-      setWasRecordingPausedBeforeModal(false);
-      console.log('录音中，先暂停录音再弹出弹窗');
-      pauseRecording();
-    } else if (isRecording && isPaused) {
-      setWasRecordingBeforeModal(true);
-      setWasRecordingPausedBeforeModal(true);
-    } else {
-      setWasRecordingBeforeModal(false);
-      setWasRecordingPausedBeforeModal(false);
-    }
+    // if (isRecording && !isPaused) {
+    //   setWasRecordingBeforeModal(true);
+    //   setWasRecordingPausedBeforeModal(false);
+    //   console.log('录音中，先暂停录音再弹出弹窗');
+    //   pauseRecording();
+    // } else if (isRecording && isPaused) {
+    //   setWasRecordingBeforeModal(true);
+    //   setWasRecordingPausedBeforeModal(true);
+    // } else {
+    //   setWasRecordingBeforeModal(false);
+    //   setWasRecordingPausedBeforeModal(false);
+    // }
 
     // 加载已上传的媒体文件
     await loadUploadedMediaFiles();
@@ -862,8 +862,8 @@ const RecordComponent = () => {
     }
     
     // 重置状态
-    setWasRecordingBeforeModal(false);
-    setWasRecordingPausedBeforeModal(false);
+    // setWasRecordingBeforeModal(false);
+    // setWasRecordingPausedBeforeModal(false);
   };
 
   // 加载已上传的媒体文件
@@ -1119,7 +1119,7 @@ const RecordComponent = () => {
         } else if (audioOnly) {
           // 仅音频的视频文件，保持原扩展名但标记为音频
           const fileExtension = processedFile.name.split('.').pop().toLowerCase();
-          uploadFileName = `recording_${recordingId}.${fileExtension}`;
+          uploadFileName = `recording_${recordingId}.mp3`;
         }
 
         // 创建录音记录
@@ -1390,22 +1390,14 @@ const RecordComponent = () => {
   };
 
   const handlePreviewMediaFile = (file) => {
+    // 统一使用弹窗预览，不再跳转播放页面
+    setPreviewFile(file);
     if (isMobile) {
-      // 移动端：图片和视频都弹窗全屏预览
-      setPreviewFile(file);
       // 延迟添加CSS类，确保组件状态更新完成
       setTimeout(() => {
         document.body.classList.add('fullscreen-preview-open');
         document.documentElement.classList.add('fullscreen-preview-open');
       }, 10);
-    } else {
-      // PC端：图片弹窗，视频跳转
-      if (file.type === 'video') {
-        const videoId = file.id.split('_').pop();
-        navigate(`/${userCode}/video-player/${id}/${videoId}`);
-      } else {
-        setPreviewFile(file);
-      }
     }
   };
 
@@ -1884,12 +1876,27 @@ const RecordComponent = () => {
                         <img src={file.preview || file.url} alt={file.name} className="upload-modal-media-preview" />
                         {file.id && file.id.includes('img_') && (
                           <div className="upload-modal-image-id-display">
-                            {/* 检查是否包含会话ID（从录音页面上传的文件） */}
-                            {file.id.split('_').length >= 3 && file.id.split('_')[1] === id ? (
-                              <>会话: {file.id.split('_')[1]} | ID: {file.id.split('_').slice(-1)[0]}</>
-                            ) : (
-                              <>ID: {file.id.split('_').slice(-1)[0]}</>
-                            )}
+                            {/* 检查ID格式：img_sessionId_timestamp_random_uniqueId */}
+                            {(() => {
+                              const idParts = file.id.split('_');
+                              if (idParts.length >= 5) {
+                                // 新格式：包含会话ID
+                                const sessionId = idParts[1];
+                                const uniqueId = idParts.slice(-1)[0];
+                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                  return <>录音会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                } else {
+                                  return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                }
+                              } else if (idParts.length >= 4) {
+                                // 旧格式：img_timestamp_random_uniqueId
+                                const uniqueId = idParts.slice(-1)[0];
+                                return <>图片ID: {uniqueId}</>;
+                              } else {
+                                // 其他格式
+                                return <>图片ID: {file.id}</>;
+                              }
+                            })()}
                           </div>
                         )}
                       </div>
@@ -1909,12 +1916,27 @@ const RecordComponent = () => {
                         </div>
                         {file.id && file.id.includes('vid_') && (
                           <div className="upload-modal-video-id-display">
-                            {/* 检查是否包含会话ID（从录音页面上传的文件） */}
-                            {file.id.split('_').length >= 3 && file.id.split('_')[1] === id ? (
-                              <>会话: {file.id.split('_')[1]} | ID: {file.id.split('_').slice(-1)[0]}</>
-                            ) : (
-                              <>ID: {file.id.split('_').slice(-1)[0]}</>
-                            )}
+                            {/* 检查ID格式：vid_sessionId_timestamp_random_uniqueId */}
+                            {(() => {
+                              const idParts = file.id.split('_');
+                              if (idParts.length >= 5) {
+                                // 新格式：包含会话ID
+                                const sessionId = idParts[1];
+                                const uniqueId = idParts.slice(-1)[0];
+                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                  return <>录音会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                } else {
+                                  return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                }
+                              } else if (idParts.length >= 4) {
+                                // 旧格式：vid_timestamp_random_uniqueId
+                                const uniqueId = idParts.slice(-1)[0];
+                                return <>视频ID: {uniqueId}</>;
+                              } else {
+                                // 其他格式
+                                return <>视频ID: {file.id}</>;
+                              }
+                            })()}
                           </div>
                         )}
                       </div>

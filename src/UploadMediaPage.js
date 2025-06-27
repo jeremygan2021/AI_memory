@@ -27,20 +27,87 @@ const UploadMediaPage = () => {
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
-  // 生成唯一的视频标识码
+  // 生成唯一的视频标识码（包含会话ID）
   const generateUniqueVideoId = () => {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substr(2, 4);
     const uniqueId = Math.random().toString(36).substr(2, 8); // 8位唯一ID
-    return `vid_${timestamp}_${random}_${uniqueId}`;
+    const currentSessionId = sessionid || 'default';
+    return `vid_${currentSessionId}_${timestamp}_${random}_${uniqueId}`;
   };
 
-  // 生成唯一的图片标识码
+  // 生成唯一的图片标识码（包含会话ID）
   const generateUniqueImageId = () => {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substr(2, 4);
     const uniqueId = Math.random().toString(36).substr(2, 8); // 8位唯一ID
-    return `img_${timestamp}_${random}_${uniqueId}`;
+    const currentSessionId = sessionid || 'default';
+    return `img_${currentSessionId}_${timestamp}_${random}_${uniqueId}`;
+  };
+
+  // 加载云端媒体文件（只加载当前userCode的图片和视频）
+  const loadCloudMediaFiles = async () => {
+    try {
+      if (!userCode) return;
+      const prefix = `recordings/${userCode}/`;
+      const response = await fetch(
+        `${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=1000`
+      );
+      if (!response.ok) throw new Error('获取云端文件失败');
+      const result = await response.json();
+      const files = result.files || result.data || result.objects || result.items || result.results || [];
+
+      // 并发获取所有文件的可访问签名URL
+      const mapped = await Promise.all(files.map(async file => {
+        const objectKey = file.object_key || file.objectKey || file.key || file.name;
+        const fileName = objectKey ? objectKey.split('/').pop() : '';
+        const contentType = file.content_type || '';
+        const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
+        const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
+        if (!isImage && !isVideo) return null;
+
+        // 从objectKey解析会话ID
+        const pathParts = objectKey ? objectKey.split('/') : [];
+        const fileSessionId = pathParts.length >= 3 ? pathParts[2] : 'unknown';
+        
+        // 生成基于文件名和时间的唯一ID
+        const timestamp = file.last_modified || file.lastModified || file.modified || new Date().toISOString();
+        const fileExtension = fileName.split('.').pop() || '';
+        const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+        const uniqueId = nameWithoutExt.slice(-8) || Math.random().toString(36).substr(2, 8);
+        const prefix = isImage ? 'img' : 'vid';
+        const generatedId = `${prefix}_${fileSessionId}_${Date.parse(timestamp)}_${uniqueId}`;
+
+        let ossKey = objectKey;
+        if (ossKey && ossKey.startsWith('recordings/')) {
+          ossKey = ossKey.substring('recordings/'.length);
+        }
+        const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
+        const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
+        
+        return {
+          id: generatedId, // 使用生成的ID
+          name: fileName,
+          preview: ossUrl, // 直接用OSS直链
+          ossUrl,
+          type: isImage ? 'image' : 'video',
+          uploadTime: timestamp,
+          objectKey,
+          sessionId: fileSessionId, // 解析出的会话ID
+          userCode,
+          fromRecordPage: false, // 云端文件默认不是从录音页面上传
+          isCloudFile: true // 标记为云端文件
+        };
+      }));
+
+      // 过滤空值并按上传时间倒序排序
+      const sortedFiles = mapped.filter(Boolean)
+        .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+      setUploadedFiles(sortedFiles);
+    } catch (e) {
+      console.error('云端媒体文件加载失败:', e);
+      setUploadedFiles([]);
+    }
   };
 
   // 从URL参数获取用户代码和会话ID
@@ -336,21 +403,10 @@ const UploadMediaPage = () => {
           // 上传到服务器
           uploadMediaFile(processedFile, tempId).then(result => {
             if (result.success) {
-              const fileInfo = {
-                id: uniqueId,
-                name: newFile.name,
-                preview: result.cloudUrl,
-                type: newFile.type,
-                uploadTime: newFile.uploadTime,
-                objectKey: result.objectKey,
-                sessionId: sessionid,
-                fromRecordPage: false, // 从UploadMediaPage上传的标记为false
-                userCode: userCode // 添加userCode
-              };
-              saveToLocalStorage(fileInfo);
-              
               // 显示上传成功提示
               alert(`图片上传成功！`);
+              // 重新加载云端文件
+              loadCloudMediaFiles();
             }
           }).catch(error => {
             alert(`图片上传失败: ${error.message}`);
@@ -383,43 +439,19 @@ const UploadMediaPage = () => {
         // 上传到服务器
         uploadMediaFile(processedFile, tempId).then(result => {
           if (result.success) {
-            const fileInfo = {
-              id: uniqueId,
-              name: newFile.name,
-              preview: result.cloudUrl,
-              type: newFile.type,
-              uploadTime: newFile.uploadTime,
-              objectKey: result.objectKey,
-              sessionId: sessionid,
-              fromRecordPage: false, // 从UploadMediaPage上传的标记为false
-              originalFormat: originalFormat,
-              convertedFormat: convertedFormat,
-              isConverted: !!(originalFormat && convertedFormat),
-              userCode: userCode // 添加userCode
-            };
-            saveToLocalStorage(fileInfo);
-            
             // 显示上传成功提示，包含转换信息
             const successMessage = convertedFormat ? 
               `视频上传成功！(${originalFormat} → ${convertedFormat} 格式转换)` : 
               `视频上传成功！`;
             alert(successMessage);
+            // 重新加载云端文件
+            loadCloudMediaFiles();
           }
         }).catch(error => {
           alert(`视频上传失败: ${error.message}`);
         });
       }
     });
-  };
-
-  // 保存到本地存储
-  const saveToLocalStorage = (fileInfo) => {
-    const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
-    const updated = [...saved, fileInfo];
-    console.log('保存文件到localStorage:', fileInfo); // 调试信息
-    console.log('更新后的文件列表:', updated); // 调试信息
-    localStorage.setItem('uploadedFiles', JSON.stringify(updated));
-    window.dispatchEvent(new Event('filesUpdated'));
   };
 
   // 其他处理函数
@@ -489,14 +521,8 @@ const UploadMediaPage = () => {
         }
       }
       
-      // 从本地状态删除
-      setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
-      
-      // 从localStorage删除
-      const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
-      const updated = saved.filter(file => file.id !== fileId);
-      localStorage.setItem('uploadedFiles', JSON.stringify(updated));
-      window.dispatchEvent(new Event('filesUpdated'));
+      // 重新加载云端文件
+      await loadCloudMediaFiles();
       
       // 分页处理
       const newFiles = uploadedFiles.filter(file => file.id !== fileId);
@@ -509,23 +535,11 @@ const UploadMediaPage = () => {
     }
   };
 
-  const handlePreviewFile = (file) => {
-    if (isMobile) {
-      // 移动端：图片和视频都弹窗全屏预览
-      setPreviewFile(file);
-      // 延迟添加CSS类，确保组件状态更新完成
-      setTimeout(() => {
-        document.body.classList.add('fullscreen-preview-open');
-        document.documentElement.classList.add('fullscreen-preview-open');
-      }, 10);
-    } else {
-      // PC端：图片弹窗，视频跳转
-      if (file.type === 'video') {
-        navigate(`/${userCode}/video-player/${sessionid}/${file.id}`);
-      } else {
-        setPreviewFile(file);
-      }
-    }
+  // 处理媒体文件点击
+  const handleMediaClick = (file) => {
+    // 移动端：所有媒体文件都弹窗预览（图片和视频）
+    // PC端：图片弹窗预览，视频也弹窗预览（不再跳转播放页面）
+    setPreviewFile(file);
   };
 
   const closePreview = () => {
@@ -653,42 +667,6 @@ const UploadMediaPage = () => {
     }
   };
 
-  // 页面加载时读取文件
-  useEffect(() => {
-    const saved = localStorage.getItem('uploadedFiles');
-    if (saved) {
-      try {
-        const allFiles = JSON.parse(saved);
-        // 只加载当前userCode的文件
-        const filteredFiles = allFiles.filter(file => file.userCode === userCode);
-        setUploadedFiles(filteredFiles);
-      } catch (e) {
-        setUploadedFiles([]);
-      }
-    } else {
-      setUploadedFiles([]);
-    }
-
-    const handleFilesUpdated = () => {
-      const updated = localStorage.getItem('uploadedFiles');
-      if (updated) {
-        try {
-          const allFiles = JSON.parse(updated);
-          // 只加载当前userCode的文件
-          const filteredFiles = allFiles.filter(file => file.userCode === userCode);
-          setUploadedFiles(filteredFiles);
-        } catch (e) {
-          setUploadedFiles([]);
-        }
-      } else {
-        setUploadedFiles([]);
-      }
-    };
-
-    window.addEventListener('filesUpdated', handleFilesUpdated);
-    return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
-  }, [userCode]);
-
   // 筛选当前标签页的文件
   const filteredFiles = uploadedFiles.filter(file => {
     if (activeTab === 'all') return true;
@@ -714,6 +692,13 @@ const UploadMediaPage = () => {
       setCurrentPage(currentPage + 1);
     }
   };
+
+  // userCode变化时加载云端媒体文件
+  useEffect(() => {
+    if (userCode) {
+      loadCloudMediaFiles();
+    }
+  }, [userCode]);
 
   return (
     <div className="upload-page" onPaste={handlePaste}>
@@ -797,45 +782,70 @@ const UploadMediaPage = () => {
               <div className="photos-grid">
                               {currentFiles.map(file => (
                 <div key={file.id} className="media-item">
-                  <div className="media-content" onClick={() => handlePreviewFile(file)}>
+                  <div className="media-content" onClick={() => handleMediaClick(file)}>
                     {file.type === 'image' ? (
                       <div className="image-preview">
-                      <img src={file.preview || file.url} alt={file.name} className="media-preview" />
+                      <img src={file.ossUrl || file.preview || file.url} alt={file.name} className="media-preview" 
+                        onError={e => { console.error('图片加载失败', file.ossUrl || file.preview || file.url, file); e.target.style.background = '#fdd'; }}
+                      />
                         {/* 显示图片ID，区分是否从录音页面上传 */}
                         {file.id && typeof file.id === 'string' && file.id.startsWith('img_') && (
-                          <div className="image-id-display">
-                            {/* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */}
-                            {file.sessionId && file.fromRecordPage ? (
-                              <>会话: {file.sessionId} | ID: {file.id.split('_').slice(-1)[0]}</>
-                            ) : (
-                              <>ID: {file.id.split('_').slice(-1)[0]}</>
-                            )}
+                          <div className="image-id-display1">
+                            {/* 检查ID格式：img_sessionId_timestamp_random_uniqueId */}
+                            {(() => {
+                              const idParts = file.id.split('_');
+                              if (idParts.length >= 5) {
+                                const sessionId = idParts[1];
+                                const uniqueId = idParts.slice(-1)[0];
+                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                  return <>录音会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                } else {
+                                  return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                }
+                              } else if (idParts.length >= 4) {
+                                const uniqueId = idParts.slice(-1)[0];
+                                return <>图片ID: {uniqueId}</>;
+                              } else {
+                                return <>图片ID: {file.id}</>;
+                              }
+                            })()}
                           </div>
                         )}
                       </div>
                     ) : (
                       <div className="video-preview">
                         <video 
-                          src={file.preview || file.url} 
+                          src={file.ossUrl || file.preview || file.url} 
                           className="media-preview"
                           muted
                           preload="metadata"
-                          onLoadedMetadata={(e) => {
-                            e.target.currentTime = 1;
-                          }}
+                          onLoadedMetadata={(e) => { e.target.currentTime = 1; }}
+                          onError={e => { console.error('视频加载失败', file.ossUrl || file.preview || file.url, file); e.target.style.background = '#fdd'; }}
                         />
                         <div className="video-overlay">
                           <div className="video-play-icon">▶</div>
                         </div>
                         {/* 显示视频ID，区分是否从录音页面上传 */}
                         {file.id && typeof file.id === 'string' && file.id.startsWith('vid_') && (
-                          <div className="video-id-display">
-                            {/* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */}
-                            {file.sessionId && file.fromRecordPage ? (
-                              <>会话: {file.sessionId} | ID: {file.id.split('_').slice(-1)[0]}</>
-                            ) : (
-                              <>ID: {file.id.split('_').slice(-1)[0]}</>
-                            )}
+                          <div className="video-id-display1">
+                            {/* 检查ID格式：vid_sessionId_timestamp_random_uniqueId */}
+                            {(() => {
+                              const idParts = file.id.split('_');
+                              if (idParts.length >= 5) {
+                                const sessionId = idParts[1];
+                                const uniqueId = idParts.slice(-1)[0];
+                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                  return <>录音会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                } else {
+                                  return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                }
+                              } else if (idParts.length >= 4) {
+                                const uniqueId = idParts.slice(-1)[0];
+                                return <>视频ID: {uniqueId}</>;
+                              } else {
+                                return <>视频ID: {file.id}</>;
+                              }
+                            })()}
                           </div>
                         )}
                       </div>
@@ -898,18 +908,19 @@ const UploadMediaPage = () => {
           <div className="preview-content" onClick={e => e.stopPropagation()}>
             {previewFile.type === 'image' ? (
               <img 
-                src={previewFile.preview || previewFile.url} 
+                src={previewFile.ossUrl || previewFile.preview || previewFile.url} 
                 alt={previewFile.name} 
                 className={`preview-media${isMobile ? ' fullscreen-media' : ''}`} 
                 onClick={closePreview}
                 style={{ cursor: 'pointer' }}
+                onError={e => { console.error('大图预览加载失败', previewFile.ossUrl || previewFile.preview || previewFile.url, previewFile); e.target.style.background = '#fdd'; }}
               />
             ) : (
               // 视频全屏预览（移动端弹窗）
               <div className={`fullscreen-video-wrapper${isMobile ? ' mobile' : ''}`}>
                 <video
                   ref={videoRef}
-                  src={previewFile.preview || previewFile.url}
+                  src={previewFile.ossUrl || previewFile.preview || previewFile.url}
                   className={`preview-media${isMobile ? ' fullscreen-media' : ''}`}
                   controls
                   autoPlay
@@ -926,9 +937,9 @@ const UploadMediaPage = () => {
                     objectFit: 'contain' // 确保视频正确显示
                   }}
                   onLoadedMetadata={handleVideoLoadedMetadata}
-                  onError={(e) => {
-                    console.error('视频加载错误:', e);
-                    console.error('视频源:', e.target.src);
+                  onError={e => {
+                    console.error('大视频预览加载失败', previewFile.ossUrl || previewFile.preview || previewFile.url, previewFile);
+                    e.target.style.background = '#fdd';
                   }}
                 />
               </div>

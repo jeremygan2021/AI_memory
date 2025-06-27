@@ -64,36 +64,74 @@ const AudioLibrary = () => {
   useEffect(() => {
     if (userCode) { 
       loadCloudAudioFiles();
-      loadMediaFiles();
+      loadCloudMediaFiles(); // 改为加载云端媒体文件
     }
   }, [userCode]);
 
-  // 加载媒体文件
-  const loadMediaFiles = () => {
-    const saved = localStorage.getItem('uploadedFiles');
-    if (saved) {
-      try {
-        const allFiles = JSON.parse(saved);
-        // 只加载当前userCode的文件
-        const filteredFiles = allFiles.filter(file => file.userCode === userCode);
-        setUploadedFiles(filteredFiles);
-      } catch (e) {
-        setUploadedFiles([]);
-      }
-    } else {
+  // 加载云端媒体文件（只加载当前userCode的图片和视频）
+  const loadCloudMediaFiles = async () => {
+    try {
+      if (!userCode) return;
+      const prefix = `recordings/${userCode}/`;
+      const response = await fetch(
+        `${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=1000`
+      );
+      if (!response.ok) throw new Error('获取云端文件失败');
+      const result = await response.json();
+      const files = result.files || result.data || result.objects || result.items || result.results || [];
+
+      // 并发获取所有文件的可访问签名URL
+      const mapped = await Promise.all(files.map(async file => {
+        const objectKey = file.object_key || file.objectKey || file.key || file.name;
+        const fileName = objectKey ? objectKey.split('/').pop() : '';
+        const contentType = file.content_type || '';
+        const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
+        const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
+        if (!isImage && !isVideo) return null;
+
+        // 从objectKey解析会话ID
+        const pathParts = objectKey ? objectKey.split('/') : [];
+        const fileSessionId = pathParts.length >= 3 ? pathParts[2] : 'unknown';
+        
+        // 生成基于文件名和时间的唯一ID
+        const timestamp = file.last_modified || file.lastModified || file.modified || new Date().toISOString();
+        const fileExtension = fileName.split('.').pop() || '';
+        const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+        const uniqueId = nameWithoutExt.slice(-8) || Math.random().toString(36).substr(2, 8);
+        const prefix = isImage ? 'img' : 'vid';
+        const generatedId = `${prefix}_${fileSessionId}_${Date.parse(timestamp)}_${uniqueId}`;
+
+        let ossKey = objectKey;
+        if (ossKey && ossKey.startsWith('recordings/')) {
+          ossKey = ossKey.substring('recordings/'.length);
+        }
+        const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
+        const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
+        
+        return {
+          id: generatedId, // 使用生成的ID
+          name: fileName,
+          preview: ossUrl, // 直接用OSS直链
+          ossUrl,
+          type: isImage ? 'image' : 'video',
+          uploadTime: timestamp,
+          objectKey,
+          sessionId: fileSessionId, // 解析出的会话ID
+          userCode,
+          fromRecordPage: false, // 云端文件默认不是从录音页面上传
+          isCloudFile: true // 标记为云端文件
+        };
+      }));
+
+      // 过滤空值并按上传时间倒序排序
+      const sortedFiles = mapped.filter(Boolean)
+        .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+      setUploadedFiles(sortedFiles);
+    } catch (error) {
+      console.error('云端媒体文件加载失败:', error);
       setUploadedFiles([]);
     }
   };
-
-  // 监听文件更新
-  useEffect(() => {
-    const handleFilesUpdated = () => {
-      loadMediaFiles();
-    };
-
-    window.addEventListener('filesUpdated', handleFilesUpdated);
-    return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
-  }, [userCode]);
 
   const loadCloudAudioFiles = async () => {
     try {
@@ -408,27 +446,13 @@ const AudioLibrary = () => {
   // 刷新文件列表
   const refreshFiles = () => {
     loadCloudAudioFiles();
-    loadMediaFiles();
+    loadCloudMediaFiles();
   };
 
-  // 媒体文件预览
-  const handlePreviewFile = (file) => {
-    if (isMobile) {
-      // 移动端：图片和视频都弹窗全屏预览
-      setPreviewFile(file);
-      // 延迟添加CSS类，确保组件状态更新完成
-      setTimeout(() => {
-        document.body.classList.add('fullscreen-preview-open');
-        document.documentElement.classList.add('fullscreen-preview-open');
-      }, 10);
-    } else {
-      // PC端：图片弹窗，视频跳转
-      if (file.type === 'video') {
-        navigate(`/${userCode}/video-player/${file.sessionId || 'default'}/${file.id}`);
-      } else {
-        setPreviewFile(file);
-      }
-    }
+  // 处理媒体文件点击
+  const handleMediaClick = (file) => {
+    // 统一用弹窗预览，不再跳转播放页面
+    setPreviewFile(file);
   };
 
   // 关闭预览
@@ -476,6 +500,7 @@ const AudioLibrary = () => {
     if (!window.confirm('确定要删除这个文件吗？')) return;
     
     try {
+      // 只删除云端文件
       if (fileToDelete.objectKey) {
         const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(fileToDelete.objectKey)}`, {
           method: 'DELETE'
@@ -485,14 +510,8 @@ const AudioLibrary = () => {
         }
       }
       
-      // 从本地状态删除
-      setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
-      
-      // 从localStorage删除
-      const saved = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
-      const updated = saved.filter(file => file.id !== fileId);
-      localStorage.setItem('uploadedFiles', JSON.stringify(updated));
-      window.dispatchEvent(new Event('filesUpdated'));
+      // 重新加载云端文件
+      await loadCloudMediaFiles();
       
       // 分页处理
       const newFiles = uploadedFiles.filter(file => file.id !== fileId);
@@ -974,22 +993,33 @@ const AudioLibrary = () => {
                   <div className="photos-grid">
                     {currentMediaFiles.map(file => (
                       <div key={file.id} className="media-item">
-                        <div className="media-content" onClick={() => handlePreviewFile(file)}>
+                        <div className="media-content" onClick={() => handleMediaClick(file)}>
                           {file.type === 'image' ? (
                             <div className="image-preview">
-                              <img src={file.preview || file.url} alt={file.name} className="media-preview" />
+                              <img src={file.ossUrl || file.preview || file.url} alt={file.name} className="media-preview" />
                               {/* 显示图片ID和详细信息 */}
                               {file.id && typeof file.id === 'string' && (
                                 <div className="image-id-display">
                                   {file.id.startsWith('img_') ? (
-                                    /* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */
-                                    file.sessionId && file.fromRecordPage ? (
-                                      <>会话： {file.sessionId} | ID {file.id.split('_').slice(-1)[0]}</>
-                                    ) : file.sessionId ? (
-                                      <>会话： {file.sessionId} | ID {file.id.split('_').slice(-1)[0]}</>
-                                    ) : (
-                                      <>📷 图片ID: {file.id.split('_').slice(-1)[0]}</>
-                                    )
+                                    /* 检查ID格式：img_sessionId_timestamp_random_uniqueId */
+                                    (() => {
+                                      const idParts = file.id.split('_');
+                                      if (idParts.length >= 5) {
+                                        // 新格式：包含会话ID
+                                        const sessionId = idParts[1];
+                                        const uniqueId = idParts.slice(-1)[0];
+                                        return file.fromRecordPage ? 
+                                          <>🎵录音会话: {sessionId} | 📷图片ID: {uniqueId}</> :
+                                          <>📁会话: {sessionId} | 📷图片ID: {uniqueId}</>;
+                                      } else if (idParts.length >= 4) {
+                                        // 旧格式：img_timestamp_random_uniqueId
+                                        const uniqueId = idParts.slice(-1)[0];
+                                        return <>📷 图片ID: {uniqueId}</>;
+                                      } else {
+                                        // 其他格式
+                                        return <>📷 ID: {file.id}</>;
+                                      }
+                                    })()
                                   ) : (
                                     <>📷 ID: {file.id}</>
                                   )}
@@ -1000,7 +1030,7 @@ const AudioLibrary = () => {
                           ) : (
                             <div className="video-preview">
                               <video 
-                                src={file.preview || file.url} 
+                                src={file.ossUrl || file.preview || file.url} 
                                 className="media-preview"
                                 muted
                                 preload="metadata"
@@ -1015,14 +1045,25 @@ const AudioLibrary = () => {
                               {file.id && typeof file.id === 'string' && (
                                 <div className="video-id-display">
                                   {file.id.startsWith('vid_') ? (
-                                    /* 检查是否从录音页面上传（有sessionId且为fromRecordPage） */
-                                    file.sessionId && file.fromRecordPage ? (
-                                      <>会话： {file.sessionId} | ID {file.id.split('_').slice(-1)[0]}</>
-                                    ) : file.sessionId ? (
-                                      <>会话： {file.sessionId} | ID {file.id.split('_').slice(-1)[0]}</>
-                                    ) : (
-                                      <>🎬 视频ID: {file.id.split('_').slice(-1)[0]}</>
-                                    )
+                                    /* 检查ID格式：vid_sessionId_timestamp_random_uniqueId */
+                                    (() => {
+                                      const idParts = file.id.split('_');
+                                      if (idParts.length >= 5) {
+                                        // 新格式：包含会话ID
+                                        const sessionId = idParts[1];
+                                        const uniqueId = idParts.slice(-1)[0];
+                                        return file.fromRecordPage ? 
+                                          <>🎵录音会话: {sessionId} | 🎬视频ID: {uniqueId}</> :
+                                          <>📁会话: {sessionId} | 🎬视频ID: {uniqueId}</>;
+                                      } else if (idParts.length >= 4) {
+                                        // 旧格式：vid_timestamp_random_uniqueId
+                                        const uniqueId = idParts.slice(-1)[0];
+                                        return <>🎬 视频ID: {uniqueId}</>;
+                                      } else {
+                                        // 其他格式
+                                        return <>🎬 ID: {file.id}</>;
+                                      }
+                                    })()
                                   ) : (
                                     <>🎬 ID: {file.id}</>
                                   )}
@@ -1095,7 +1136,7 @@ const AudioLibrary = () => {
           <div className="preview-content" onClick={e => e.stopPropagation()}>
             {previewFile.type === 'image' ? (
               <img 
-                src={previewFile.preview || previewFile.url} 
+                src={previewFile.ossUrl || previewFile.preview || previewFile.url} 
                 alt={previewFile.name} 
                 className={`preview-media${isMobile ? ' fullscreen-media' : ''}`} 
                 onClick={closePreview}
@@ -1106,40 +1147,17 @@ const AudioLibrary = () => {
               <div className={`fullscreen-video-wrapper${isMobile ? ' mobile' : ''}`}>
                 <video
                   ref={videoRef}
-                  src={previewFile.preview || previewFile.url}
+                  src={previewFile.ossUrl || previewFile.preview || previewFile.url}
                   className={`preview-media${isMobile ? ' fullscreen-media' : ''}`}
-                  controls
-                  autoPlay
-                  playsInline={!isMobile} // iOS全屏时不使用playsInline
-                  webkit-playsinline={!isMobile} // 旧版iOS兼容
-                  crossOrigin="anonymous"
-                  preload="metadata"
-                  onPlay={e => { setVideoPlaying(true); handleVideoPlay(); }}
-                  onPause={() => setVideoPlaying(false)}
-                  onClick={e => e.stopPropagation()}
-                  style={{ 
-                    maxHeight: isMobile ? '70vh' : undefined,
-                    backgroundColor: '#000', // 确保视频背景是黑色
-                    objectFit: 'contain' // 确保视频正确显示
-                  }}
-                  onLoadedMetadata={handleVideoLoadedMetadata}
-                  onError={(e) => {
-                    console.error('视频加载错误:', e);
-                    console.error('视频源:', e.target.src);
-                  }}
+                  // ... existing code ...
                 />
               </div>
             )}
           </div>
         </div>
       )}
-
-      {/* 移动端底部大按钮
-      <button className="add-device-btn" onClick={createNewSession} style={{display: 'block'}}>
-        新建录音
-      </button> */}
     </div>
   );
 };
 
-export default AudioLibrary; 
+export default AudioLibrary;
