@@ -1,0 +1,361 @@
+/* 浏览器兼容性专用CSS文件 */
+
+/* 确保IE9+的HTML5语义化标签支持 */
+article, aside, details, figcaption, figure, footer, header, hgroup, main, mark, nav, section, summary, time {
+  display: block;
+}
+
+/* IE8及以下版本的fallback样式 */
+.ie8 .memory-navbar {
+  display: block;
+  width: 100%;
+  height: 70px;
+  background: #c3eae2;
+}
+
+.ie8 .memory-main {
+  display: block;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ie8 .search-container {
+  display: block;
+  width: 500px;
+  background: #fff;
+  border: 1px solid #3bb6a6;
+  border-radius: 25px;
+}
+
+/* Firefox特定修复 */
+@-moz-document url-prefix() {
+  .memory-navbar {
+    -moz-box-sizing: border-box;
+  }
+  
+  .search-container {
+    -moz-box-sizing: border-box;
+  }
+}
+
+/* Chrome和Safari特定修复 */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  .search-container {
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  .memory-title {
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Edge特定修复 */
+@supports (-ms-ime-align:auto) {
+  .memory-navbar {
+    -ms-flex-direction: row;
+  }
+  
+  .search-container {
+    -ms-flex: 1;
+  }
+}
+
+/* 确保所有浏览器的滚动条样式一致 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3bb6a6 transparent;
+}
+
+/* Webkit浏览器滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(59, 182, 166, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 182, 166, 0.6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 182, 166, 0.8);
+}
+
+/* 打印样式 */
+@media print {
+  .memory-navbar,
+  .memory-menu,
+  .search-container {
+    display: none !important;
+  }
+  
+  .memory-main {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .memory-navbar {
+    background: #000 !important;
+    color: #fff !important;
+  }
+  
+  .search-container {
+    border: 2px solid #000 !important;
+    background: #fff !important;
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .memory-app-bg {
+    background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 30%, #3a5a4a 70%, #2e5c54 100%) !important;
+  }
+  
+  .memory-navbar {
+    background-color: rgba(44, 62, 58, 0.9) !important;
+  }
+  
+  .search-container {
+    background: rgba(44, 62, 58, 0.9) !important;
+    color: #fff !important;
+  }
+}
+
+/* 移动端滚动性能优化 */
+@media (max-width: 768px) {
+  /* 1. 移动端全局关闭阴影和滤镜，提升安卓滚动性能 */
+  .memory-navbar,
+  .search-container,
+  .memory-card,
+  .center-voice-card,
+  .album-item,
+  .mobile-gallery-card,
+  .photo-board,
+  .video-board,
+  .memory-app-bg,
+  .memory-main,
+  .preview-thumb,
+  .preview-video-thumb,
+  .upload-media-btn,
+  .voice-action,
+  .delete-btn {
+    box-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 2. 主滚动容器禁止横向滚动，防止重排 */
+  .memory-app-bg,
+  html, body {
+    overflow-x: hidden !important;
+  }
+
+  /* 3. 图片、卡片、按钮等移除阴影 */
+  img,
+  .album-img,
+  .album-preview-img,
+  .album-preview-video {
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* 全局HTML和body设置 */
+  html, body {
+    overflow-x: auto !important;
+    overflow-y: auto !important; /* 明确允许垂直滚动 */
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth !important;
+    /* GPU硬件加速 */
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    /* 优化触摸响应 */
+    touch-action: pan-y !important;
+    /* 防止弹性滚动 */
+    overscroll-behavior-x: none !important;
+    overscroll-behavior-y: contain !important; /* 允许垂直弹性滚动但限制在容器内 */
+    /* 文本渲染优化 */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+  }
+
+  /* 主要容器优化 */
+  .memory-app-bg {
+    /* 强制GPU层合成 */
+    will-change: transform !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    /* 优化滚动性能 */
+    -webkit-overflow-scrolling: touch !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important; /* 确保垂直滚动 */
+    /* 触摸事件优化 */
+    touch-action: pan-y !important;
+    /* 防止内容溢出 */
+    contain: layout style paint !important;
+  }
+
+  .memory-main {
+    /* 强制GPU层合成 */
+    will-change: transform !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    /* 优化滚动性能 */
+    -webkit-overflow-scrolling: touch !important;
+    overflow: visible !important; /* 主要内容区域允许正常流动 */
+    /* 触摸事件优化 */
+    touch-action: pan-y !important;
+    /* 防止内容溢出 */
+    contain: layout style !important;
+  }
+
+  /* 导航栏和菜单栏优化 */
+  .memory-navbar,
+  .memory-menu {
+    /* 固定元素性能优化 */
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    /* 优化层合成 */
+    will-change: transform !important;
+  }
+
+  /* 相册和图片优化 */
+  .mobile-gallery-entrance,
+  .mobile-gallery-card,
+  .gallery-preview,
+  .preview-thumb,
+  .preview-video-thumb {
+    /* 触摸优化 */
+    touch-action: manipulation !important;
+    /* GPU加速 */
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    /* 避免重绘 */
+    will-change: transform !important;
+    /* 容器查询优化 */
+    contain: layout style !important;
+  }
+
+  /* 图表组件优化 */
+  .line-chart-container,
+  .line-chart {
+    /* SVG性能优化 */
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+    /* 形状渲染优化 */
+    shape-rendering: optimizeSpeed !important;
+  }
+
+  /* 按钮和交互元素优化 */
+  .voice-action,
+  .enter-gallery-btn,
+  .upload-media-btn,
+  .memory-card {
+    /* 触摸反馈优化 */
+    touch-action: manipulation !important;
+    /* 避免重排 */
+    contain: layout style !important;
+    /* GPU加速 */
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+  }
+
+  /* 输入框和表单优化 */
+  input[type="range"],
+  input[type="text"],
+  .memory-search {
+    /* 输入优化 */
+    touch-action: manipulation !important;
+    /* 避免缩放 */
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+
+  /* 滚动容器特别优化 */
+  .activity-list,
+  .album-list,
+  .memory-card-list {
+    /* 滚动性能优化 */
+    -webkit-overflow-scrolling: touch !important;
+    /* 硬件加速 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    /* 层合成优化 */
+    will-change: scroll-position !important;
+    /* 容器查询 */
+    contain: layout style paint !important;
+  }
+
+  /* 防止点击延迟 */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+
+  /* 允许文本选择的元素 */
+  .card-title,
+  .card-desc,
+  .activity-text,
+  .memory-title,
+  .voice-title,
+  .voice-desc {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+}
+
+/* iOS Safari 特别优化 */
+@supports (-webkit-touch-callout: none) {
+  .memory-app-bg {
+    /* iOS弹性滚动控制 */
+    -webkit-overflow-scrolling: touch !important;
+    overflow-y: auto !important; /* 确保iOS垂直滚动 */
+    overscroll-behavior-y: contain !important; /* 限制弹性滚动范围 */
+    overscroll-behavior-x: none !important;
+  }
+  
+  /* iOS固定定位优化 */
+  .memory-navbar,
+  .memory-menu {
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    position: fixed !important; /* 确保iOS固定定位 */
+  }
+}
+
+/* Android Chrome 特别优化 */
+@media screen and (-webkit-min-device-pixel-ratio: 1) {
+  .memory-main {
+    /* Android滚动优化 */
+    overscroll-behavior: contain !important;
+  }
+} 
