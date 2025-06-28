@@ -85,6 +85,18 @@ const UploadMediaPage = () => {
         const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
         const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
         
+        // 智能判断是否从录音页面上传：
+        // 1. 检查文件ID格式是否包含sessionId（新格式）
+        // 2. 检查文件路径的sessionId是否为8位会话ID格式（录音页面生成的格式）
+        // 3. 排除特殊标识如'homepage'等
+        const isFromRecordPage = fileSessionId && 
+          fileSessionId.length === 8 && 
+          fileSessionId !== 'homepage' && 
+          fileSessionId !== 'default' &&
+          !/^upload-/.test(fileSessionId); // 排除上传页面生成的ID
+        
+
+        
         return {
           id: generatedId, // 使用生成的ID
           name: fileName,
@@ -95,7 +107,7 @@ const UploadMediaPage = () => {
           objectKey,
           sessionId: fileSessionId, // 解析出的会话ID
           userCode,
-          fromRecordPage: false, // 云端文件默认不是从录音页面上传
+          fromRecordPage: isFromRecordPage, // 智能判断是否从录音页面上传
           isCloudFile: true // 标记为云端文件
         };
       }));
@@ -803,8 +815,13 @@ const UploadMediaPage = () => {
                                   return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
                                 }
                               } else if (idParts.length >= 4) {
+                                const sessionId = idParts[1];
                                 const uniqueId = idParts.slice(-1)[0];
-                                return <>图片ID: {uniqueId}</>;
+                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                  return <>录音会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                } else {
+                                  return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                }
                               } else {
                                 return <>图片ID: {file.id}</>;
                               }
@@ -840,8 +857,13 @@ const UploadMediaPage = () => {
                                   return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
                                 }
                               } else if (idParts.length >= 4) {
+                                const sessionId = idParts[1];
                                 const uniqueId = idParts.slice(-1)[0];
-                                return <>视频ID: {uniqueId}</>;
+                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                  return <>录音会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                } else {
+                                  return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                }
                               } else {
                                 return <>视频ID: {file.id}</>;
                               }

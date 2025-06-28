@@ -616,7 +616,8 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   font-size: 60px;
   margin-bottom: 15px;
   color: #3bb6a6;
-  animation: pulse 2s infinite;
+  box-shadow: 0px 15px 30px rgba(59, 182, 166, 0.5);
+  /* animation: pulse 2s infinite; */
   border-radius: 20px;
 }
 
@@ -627,7 +628,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .center-voice-card .voice-title {
-  font-size: 2.1rem;
+  font-size: 2.5rem;
   font-weight: 900;
   color: #3bb6a6;
   margin-bottom: 16px;
@@ -1353,7 +1354,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .media-content {
-  min-height: 300px;
+  min-height: 100%;
   max-height: auto;
   display: flex;
   flex-direction: column;
@@ -2697,7 +2698,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   
   .memory-center {
     width: 100%;
-    max-width: 100%;
+    min-width: 90vw;
     margin: 0;
     order: 2;
   }
@@ -3183,7 +3184,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   max-width: 350px;
-  width: 100%;
+  min-width: 97vw;
 }
 
 .mobile-gallery-card:hover {
@@ -3194,7 +3195,8 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 .gallery-icon {
   font-size: 60px;
   margin-bottom: 20px;
-  animation: pulse 2s infinite;
+  box-shadow: 0px 15px 30px rgba(59, 182, 166, 0.5);
+  border-radius: 16px;
 }
 
 .mobile-gallery-card .gallery-title {
@@ -3296,8 +3298,205 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   } */
 }
 
-/* 小屏幕桌面优化 (1025px-1365px) */
-@media (min-width: 1025px) and (max-width: 1365px) {
+/* iPad Pro (1024x1366) 竖屏布局优化 - 类似iPad Mini的纵向布局 */
+@media (min-width: 1024px) and (max-width: 1366px) and (orientation: portrait) {
+  .memory-main {
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .memory-left,
+  .memory-center,
+  .memory-right {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    margin: 0;
+  }
+
+  /* 隐藏移动端录音模块，只保留桌面端录音模块 */
+  .mobile-voice-card {
+    display: none !important;
+  }
+  
+  .memory-right {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .photo-board,
+  .video-board,
+  .media-board {
+    max-width: none;
+    min-height: 350px;
+    flex: 1;
+  }
+  
+  .album-list {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  /* 优化卡片布局 */
+  .memory-card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .memory-card.compact {
+    height: 160px;
+    margin-bottom: 0;
+  }
+
+  /* 优化用户信息卡片 */
+  .user-account-card {
+    max-width: none;
+  }
+
+  /* 优化录音功能卡片 */
+  .center-voice-card {
+    max-width: none;
+    padding: 30px;
+  }
+
+  /* 优化活动列表 */
+  .parent-activity {
+    max-width: none;
+  }
+
+  /* 优化图表区域 */
+  .activity-chart {
+    max-width: none;
+  }
+
+  /* 优化媒体展示区域 */
+  .media-content {
+    max-width: none;
+  }
+
+  .media-tabs {
+    justify-content: center;
+  }
+}
+
+/* iPad Pro 缩放优化 - 确保在各种缩放级别下都能正确显示 */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .memory-main {
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .memory-left,
+  .memory-center, 
+  .memory-right {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    margin: 0;
+  }
+
+  .memory-right {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .album-list {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  /* 隐藏移动端录音模块，只保留桌面端录音模块 */
+  .mobile-voice-card {
+    display: none !important;
+  }
+
+  /* 确保所有主要功能模块都显示 */
+  .center-voice-card,
+  .parent-activity,
+  .activity-chart,
+  .photo-board,
+  .video-board,
+  .media-board {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* 通用iPad设备优化 - 确保内容完整显示 */
+@media (device-width: 768px) and (orientation: portrait),
+       (device-width: 834px) and (orientation: portrait),
+       (device-width: 820px) and (orientation: portrait),
+       (device-width: 1024px) and (orientation: portrait) {
+  .memory-main {
+    flex-direction: column !important;
+    gap: 20px !important;
+    padding: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .memory-left,
+  .memory-center,
+  .memory-right {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: auto !important;
+    margin: 0 !important;
+  }
+  
+  .memory-right {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+  
+  /* 隐藏移动端录音模块，只保留桌面端录音模块 */
+  .mobile-voice-card {
+    display: none !important;
+  }
+  
+  /* 强制显示所有主要功能模块 */
+  .user-account-card,
+  .center-voice-card,
+  .parent-activity,
+  .activity-chart,
+  .photo-board,
+  .video-board,
+  .media-board {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: 100% !important;
+  }
+}
+
+/* 平板设备通用优化 - 避免重复录音模块 */
+@media (min-width: 768px) and (max-width: 1366px) {
+  .mobile-voice-card {
+    display: none !important;
+  }
+  .tablet-only {
+    display: block !important;
+  }
+  .center-voice-card-center {
+    display: none !important;
+  }
+  .media-board-right {
+    display: none !important;
+  }
+}
+
+/* 小屏幕桌面优化 (1025px-1365px) - 仅适用于横屏 */
+@media (min-width: 1025px) and (max-width: 1365px) and (orientation: landscape) {
   .memory-main {
     max-width: min(1400px, 94vw);
     gap: clamp(16px, 2vw, 24px);
@@ -3305,17 +3504,14 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   
   .memory-left {
     width: clamp(280px, 28vw, 400px);
-    max-width: 32%;
   }
   
   .memory-center {
     width: clamp(350px, 38vw, 500px);
-    max-width: 42%;
   }
   
   .memory-right {
-    max-width: 26%;
-    min-width: 300px;
+    width: clamp(280px, 28vw, 400px);
   }
   
   .album-list {
@@ -3323,7 +3519,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
 }
 
-/* iPad Air (1180x820) 和 iPad Pro (1366x1024) 横屏布局优化 */
+/* iPad Pro (1366x1024) 和 iPad Air (1180x820) 横屏布局优化 */
 @media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
   .memory-main {
     flex-direction: column;
@@ -3401,5 +3597,162 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
   .media-tabs {
     justify-content: center;
+  }
+}
+
+/* 平板专用：只显示tablet-only，隐藏mobile-voice-card和mobile-left-gallery */
+@media (min-width: 768px) and (max-width: 1366px) {
+  .mobile-voice-card,
+  .mobile-left-gallery {
+    display: none !important;
+  }
+  .tablet-only {
+    display: block !important;
+  }
+}
+
+/* 平板端性能优化 */
+@media (min-width: 768px) and (max-width: 1366px) {
+  /* 1. 强制开启GPU加速 */
+  *,
+  *::before,
+  *::after {
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    -webkit-perspective: 1000 !important;
+    perspective: 1000 !important;
+  }
+
+  /* 2. 主要容器优化 */
+  .memory-app-bg {
+    -webkit-overflow-scrolling: touch !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scroll-behavior: auto !important;
+    overscroll-behavior: contain !important;
+    
+    /* 强制GPU层 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    will-change: transform !important;
+    
+    /* 容器查询优化 */
+    contain: layout style !important;
+  }
+
+  /* 3. 滚动区域优化 */
+  .memory-left,
+  .memory-center,
+  .memory-right {
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    will-change: transform !important;
+    contain: layout style !important;
+  }
+
+  /* 4. 禁用耗性能的特性 */
+  .memory-card,
+  .center-voice-card,
+  .album-item,
+  .mobile-gallery-card,
+  .photo-board,
+  .video-board,
+  .memory-app-bg,
+  .memory-main {
+    box-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 5. 优化动画和过渡 */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.1s !important;
+    animation-fill-mode: both !important;
+    transition-duration: 0.1s !important;
+    transition-timing-function: ease-out !important;
+  }
+
+  /* 6. 隐藏滚动条减少重绘 */
+  .memory-left::-webkit-scrollbar,
+  .memory-center::-webkit-scrollbar,
+  .memory-right::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  .memory-left,
+  .memory-center,
+  .memory-right {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  /* 7. 图片和媒体优化 */
+  img,
+  video,
+  .album-img,
+  .preview-thumb,
+  .preview-video-thumb,
+  .album-preview-img,
+  .album-preview-video {
+    /* 图片渲染优化 */
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: crisp-edges !important;
+    
+    /* GPU加速 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    will-change: transform !important;
+    
+    /* 容器查询 */
+    contain: layout style paint !important;
+    
+    /* 触摸优化 */
+    touch-action: manipulation !important;
+    -webkit-user-drag: none !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  /* 8. 内容容器优化 */
+  .activity-list,
+  .album-list,
+  .memory-card-list {
+    /* 滚动优化 */
+    -webkit-overflow-scrolling: touch !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scroll-behavior: auto !important;
+    
+    /* GPU加速 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    will-change: transform !important;
+    
+    /* 容器查询 */
+    contain: layout style !important;
+  }
+
+  /* 9. 触摸响应优化 */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+  }
+
+  /* 10. 文本选择优化 */
+  .card-title,
+  .card-desc,
+  .activity-text,
+  .memory-title,
+  .voice-title,
+  .voice-desc,
+  input,
+  textarea {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
   }
 }

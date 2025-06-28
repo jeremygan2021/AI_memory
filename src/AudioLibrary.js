@@ -108,6 +108,18 @@ const AudioLibrary = () => {
         const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
         const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
         
+        // 智能判断是否从录音页面上传：
+        // 1. 检查文件ID格式是否包含sessionId（新格式）
+        // 2. 检查文件路径的sessionId是否为8位会话ID格式（录音页面生成的格式）
+        // 3. 排除特殊标识如'homepage'等
+        const isFromRecordPage = fileSessionId && 
+          fileSessionId.length === 8 && 
+          fileSessionId !== 'homepage' && 
+          fileSessionId !== 'default' &&
+          !/^upload-/.test(fileSessionId); // 排除上传页面生成的ID
+        
+
+        
         return {
           id: generatedId, // 使用生成的ID
           name: fileName,
@@ -118,7 +130,7 @@ const AudioLibrary = () => {
           objectKey,
           sessionId: fileSessionId, // 解析出的会话ID
           userCode,
-          fromRecordPage: false, // 云端文件默认不是从录音页面上传
+          fromRecordPage: isFromRecordPage, // 智能判断是否从录音页面上传
           isCloudFile: true // 标记为云端文件
         };
       }));
@@ -621,7 +633,7 @@ const AudioLibrary = () => {
       <div className="audio-library loading">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>加载云端音频库...</p>
+          <p>加载云端资源库...</p>
         </div>
       </div>
     );
@@ -668,10 +680,10 @@ const AudioLibrary = () => {
             <span className="title-icon">
             <SvgIcon name="cloud" className="icon-img" width={32} height={32} color="#3bb6a6" />
             </span>
-            云端音频库
+            云端资源库
             
           </h1>
-          <p className="library-subtitle">管理您在云端的所有录音会话</p>
+          <p className="library-subtitle">管理您在云端的所有录音会话和媒体文件</p>
         </div>
         
         <div className="header-actions">
@@ -1004,7 +1016,7 @@ const AudioLibrary = () => {
                                     /* 检查ID格式：img_sessionId_timestamp_random_uniqueId */
                                     (() => {
                                       const idParts = file.id.split('_');
-                                      if (idParts.length >= 5) {
+                                                                            if (idParts.length >= 5) {
                                         // 新格式：包含会话ID
                                         const sessionId = idParts[1];
                                         const uniqueId = idParts.slice(-1)[0];
@@ -1012,9 +1024,12 @@ const AudioLibrary = () => {
                                           <>🎵录音会话: {sessionId} | 📷图片ID: {uniqueId}</> :
                                           <>📁会话: {sessionId} | 📷图片ID: {uniqueId}</>;
                                       } else if (idParts.length >= 4) {
-                                        // 旧格式：img_timestamp_random_uniqueId
+                                        // 4段格式：img_sessionId_timestamp_uniqueId
+                                        const sessionId = idParts[1];
                                         const uniqueId = idParts.slice(-1)[0];
-                                        return <>📷 图片ID: {uniqueId}</>;
+                                        return file.fromRecordPage ? 
+                                          <>🎵录音会话: {sessionId} | 📷图片ID: {uniqueId}</> :
+                                          <>📁会话: {sessionId} | 📷图片ID: {uniqueId}</>;
                                       } else {
                                         // 其他格式
                                         return <>📷 ID: {file.id}</>;
@@ -1032,11 +1047,13 @@ const AudioLibrary = () => {
                               <video 
                                 src={file.ossUrl || file.preview || file.url} 
                                 className="media-preview"
+                                controls
+                                autoPlay
                                 muted
+                                playsInline
                                 preload="metadata"
-                                onLoadedMetadata={(e) => {
-                                  e.target.currentTime = 1;
-                                }}
+                                onLoadedMetadata={handleVideoLoadedMetadata}
+                                onPlay={handleVideoPlay}
                               />
                               <div className="video-overlay">
                                 <div className="video-play-icon">▶</div>
@@ -1048,7 +1065,7 @@ const AudioLibrary = () => {
                                     /* 检查ID格式：vid_sessionId_timestamp_random_uniqueId */
                                     (() => {
                                       const idParts = file.id.split('_');
-                                      if (idParts.length >= 5) {
+                                                                            if (idParts.length >= 5) {
                                         // 新格式：包含会话ID
                                         const sessionId = idParts[1];
                                         const uniqueId = idParts.slice(-1)[0];
@@ -1056,9 +1073,12 @@ const AudioLibrary = () => {
                                           <>🎵录音会话: {sessionId} | 🎬视频ID: {uniqueId}</> :
                                           <>📁会话: {sessionId} | 🎬视频ID: {uniqueId}</>;
                                       } else if (idParts.length >= 4) {
-                                        // 旧格式：vid_timestamp_random_uniqueId
+                                        // 4段格式：vid_sessionId_timestamp_uniqueId
+                                        const sessionId = idParts[1];
                                         const uniqueId = idParts.slice(-1)[0];
-                                        return <>🎬 视频ID: {uniqueId}</>;
+                                        return file.fromRecordPage ? 
+                                          <>🎵录音会话: {sessionId} | 🎬视频ID: {uniqueId}</> :
+                                          <>📁会话: {sessionId} | 🎬视频ID: {uniqueId}</>;
                                       } else {
                                         // 其他格式
                                         return <>🎬 ID: {file.id}</>;
@@ -1149,7 +1169,13 @@ const AudioLibrary = () => {
                   ref={videoRef}
                   src={previewFile.ossUrl || previewFile.preview || previewFile.url}
                   className={`preview-media${isMobile ? ' fullscreen-media' : ''}`}
-                  // ... existing code ...
+                  controls
+                  autoPlay
+                  muted
+                  playsInline
+                  preload="metadata"
+                  onLoadedMetadata={handleVideoLoadedMetadata}
+                  onPlay={handleVideoPlay}
                 />
               </div>
             )}

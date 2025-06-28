@@ -1314,15 +1314,14 @@
 .media-content {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: 90%;
   cursor: pointer;
   overflow: hidden;
 }
 
 .media-preview {
-  position: relative;
-  width: 100% ;
-  height: 100% ;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
@@ -1340,27 +1339,28 @@
 
 .image-id-display {
   position: absolute !important;
-  bottom:55px !important;
-  left: 8px !important;
-  right: 8px !important;
-  background: rgba(0, 0, 0, 0.9) !important;
+  bottom: 4px !important;
+  left: 4px !important;
+  right: 4px !important;
+  background: rgba(0, 0, 0, 0.98) !important;
   color: white !important;
-  padding: 6px 8px !important;
-  border-radius: 6px !important;
-  font-size: 11px !important;
+  padding: 3px 5px !important;
+  border-radius: 3px !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
   text-align: center !important;
-  backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(4px) !important;
   font-family: 'Courier New', 'Monaco', monospace !important;
-  letter-spacing: 0.3px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  z-index: 10 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  letter-spacing: 0.1px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  z-index: 20 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
   line-height: 1.2 !important;
-  min-height: 20px !important;
+  min-height: 14px !important;
+  max-height: 40px !important;
+  overflow-y: auto !important;
   box-sizing: border-box !important;
 }
 
@@ -1400,27 +1400,28 @@
 
 .video-id-display {
   position: absolute !important;
-  bottom: 55px !important;
-  left: 8px !important;
-  right: 8px !important;
-  background: rgba(0, 0, 0, 0.9) !important;
+  bottom: 4px !important;
+  left: 4px !important;
+  right: 4px !important;
+  background: rgba(0, 0, 0, 0.98) !important;
   color: white !important;
-  padding: 6px 8px !important;
-  border-radius: 6px !important;
-  font-size: 11px !important;
+  padding: 3px 5px !important;
+  border-radius: 3px !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
   text-align: center !important;
-  backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(4px) !important;
   font-family: 'Courier New', 'Monaco', monospace !important;
-  letter-spacing: 0.3px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  z-index: 10 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  letter-spacing: 0.1px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  z-index: 20 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
   line-height: 1.2 !important;
-  min-height: 20px !important;
+  min-height: 14px !important;
+  max-height: 40px !important;
+  overflow-y: auto !important;
   box-sizing: border-box !important;
 }
 
@@ -1576,27 +1577,28 @@
   .image-id-display,
   .video-id-display {
     position: absolute !important;
-    bottom: 6px !important;
-    left: 6px !important;
-    right: 6px !important;
-    background: rgba(0, 0, 0, 0.95) !important;
+    bottom: 4px !important;
+    left: 4px !important;
+    right: 4px !important;
+    background: rgba(0, 0, 0, 0.98) !important;
     color: white !important;
-    padding: 4px 6px !important;
+    padding: 3px 5px !important;
     border-radius: 4px !important;
-    font-size: 9px !important;
+    font-size: 8px !important;
     font-weight: 500 !important;
     text-align: center !important;
-    backdrop-filter: blur(6px) !important;
+    backdrop-filter: blur(4px) !important;
     font-family: 'Courier New', 'Monaco', monospace !important;
-    letter-spacing: 0.2px !important;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    z-index: 15 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    line-height: 1.1 !important;
-    min-height: 16px !important;
+    letter-spacing: 0.1px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    z-index: 20 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.2 !important;
+    min-height: 14px !important;
+    max-height: 40px !important;
+    overflow-y: auto !important;
     box-sizing: border-box !important;
   }
   
@@ -1660,10 +1662,9 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     z-index: 20 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    line-height: 1.0 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.2 !important;
     min-height: 14px !important;
     box-sizing: border-box !important;
   }

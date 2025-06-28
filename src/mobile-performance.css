@@ -1,0 +1,333 @@
+/* 移动端性能优化专用CSS - 解决滚动卡顿问题 */
+
+/* 1. 全局性能优化 - 移动端专用 */
+@media (max-width: 768px) {
+  /* 强制开启硬件加速 */
+  *,
+  *::before,
+  *::after {
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    -webkit-perspective: 1000 !important;
+    perspective: 1000 !important;
+  }
+
+  /* 禁用所有耗性能的CSS特性 */
+  * {
+    /* 禁用阴影和滤镜 */
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    
+    /* 禁用复杂动画 */
+    animation-duration: 0.1s !important;
+    animation-fill-mode: both !important;
+    transition-duration: 0.1s !important;
+    transition-timing-function: ease-out !important;
+    
+    /* 优化渲染 */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeSpeed !important;
+    
+    /* 防止点击延迟 */
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  /* 2. 滚动容器优化 */
+  html {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: auto !important;
+    height: 100% !important;
+  }
+
+  body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: auto !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    
+    /* 强制GPU加速 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    will-change: auto !important;
+  }
+
+  /* 3. 主要布局容器优化 */
+  .memory-app-bg {
+    -webkit-overflow-scrolling: touch !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scroll-behavior: auto !important;
+    
+    /* 强制GPU层 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: auto !important;
+    
+    /* 容器查询优化 */
+    contain: layout style !important;
+    
+    /* 触摸优化 */
+    touch-action: pan-y !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+
+  .memory-main {
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: auto !important;
+    contain: layout style !important;
+    touch-action: pan-y !important;
+  }
+
+  /* 4. 固定定位元素优化 */
+  .memory-navbar,
+  .memory-menu {
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: auto !important;
+    contain: layout style paint !important;
+    isolation: isolate !important;
+    
+    /* 固定定位性能优化 */
+    position: fixed !important;
+    z-index: 1000 !important;
+  }
+
+  /* 5. 滚动区域特别优化 */
+  .activity-list,
+  .album-list,
+  .memory-card-list,
+  .recordings-list-container {
+    -webkit-overflow-scrolling: touch !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scroll-behavior: auto !important;
+    
+    /* 强制GPU层 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: auto !important;
+    contain: layout style !important;
+    
+    /* 隐藏滚动条减少重绘 */
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .activity-list::-webkit-scrollbar,
+  .album-list::-webkit-scrollbar,
+  .memory-card-list::-webkit-scrollbar,
+  .recordings-list-container::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* 6. 图片和媒体优化 */
+  img,
+  video,
+  .album-img,
+  .preview-thumb,
+  .preview-video-thumb,
+  .album-preview-img,
+  .album-preview-video {
+    /* 图片渲染优化 */
+    image-rendering: optimizeSpeed !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    
+    /* GPU加速 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: auto !important;
+    
+    /* 容器查询 */
+    contain: layout style paint !important;
+    
+    /* 触摸优化 */
+    touch-action: manipulation !important;
+    -webkit-user-drag: none !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  /* 7. 交互元素优化 */
+  .memory-card,
+  .center-voice-card,
+  .album-item,
+  .mobile-gallery-card,
+  .voice-action,
+  .enter-gallery-btn,
+  .upload-media-btn,
+  .delete-btn,
+  button,
+  .btn {
+    /* GPU加速 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: auto !important;
+    
+    /* 容器查询 */
+    contain: layout style !important;
+    
+    /* 触摸优化 */
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    
+    /* 简化过渡 */
+    transition: transform 0.1s ease-out !important;
+  }
+
+  /* 8. 文本输入优化 */
+  input,
+  textarea,
+  .memory-search {
+    /* GPU加速 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    
+    /* 输入优化 */
+    touch-action: manipulation !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
+  }
+
+  /* 9. SVG和图表优化 */
+  svg,
+  .line-chart,
+  .line-chart-container {
+    /* SVG渲染优化 */
+    shape-rendering: optimizeSpeed !important;
+    text-rendering: optimizeSpeed !important;
+    
+    /* GPU加速 */
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: auto !important;
+    
+    /* 容器查询 */
+    contain: layout style paint !important;
+  }
+
+  /* 10. 禁用复杂的CSS特性 */
+  * {
+    /* 禁用混合模式 */
+    mix-blend-mode: normal !important;
+    isolation: auto !important;
+    
+    /* 禁用复杂渐变 */
+    background-attachment: scroll !important;
+    
+    /* 禁用复杂边框 */
+    border-image: none !important;
+    
+    /* 优化字体渲染 */
+    font-variant-ligatures: none !important;
+    font-feature-settings: normal !important;
+  }
+
+  /* 11. 特殊元素优化 */
+  .photo-board,
+  .video-board,
+  .media-board,
+  .activity-chart,
+  .parent-activity {
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: auto !important;
+    contain: layout style !important;
+  }
+
+  /* 12. 动画和过渡的性能优化 */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    from { transform: translate3d(20px, 0, 0); }
+    to { transform: translate3d(0, 0, 0); }
+  }
+
+  /* 只保留必要的简单动画 */
+  .fade-in {
+    animation: fadeIn 0.2s ease-out !important;
+  }
+
+  .slide-in {
+    animation: slideIn 0.2s ease-out !important;
+  }
+
+  /* 13. 响应式断点优化 */
+  @media (max-width: 480px) {
+    /* 超小屏幕额外优化 */
+    * {
+      font-size: inherit !important;
+      line-height: inherit !important;
+    }
+
+    .memory-card,
+    .album-item {
+      margin-bottom: 8px !important;
+    }
+  }
+
+  /* 14. iOS特别优化 */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      -webkit-overflow-scrolling: touch !important;
+      overscroll-behavior-y: contain !important;
+    }
+
+    .memory-app-bg {
+      -webkit-overflow-scrolling: touch !important;
+      overscroll-behavior: contain !important;
+    }
+  }
+
+  /* 15. Android特别优化 */
+  @media screen and (-webkit-min-device-pixel-ratio: 1) {
+    .memory-main {
+      overscroll-behavior: contain !important;
+    }
+
+    /* Android Chrome滚动优化 */
+    html {
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* 16. 恢复特定元素的阴影效果 */
+  .voice-icon,
+  .gallery-icon {
+    box-shadow: 0px 15px 30px rgba(59, 182, 166, 0.5) !important;
+  }
+} 

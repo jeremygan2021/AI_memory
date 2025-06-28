@@ -1889,9 +1889,14 @@ const RecordComponent = () => {
                                   return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
                                 }
                               } else if (idParts.length >= 4) {
-                                // 旧格式：img_timestamp_random_uniqueId
+                                // 4段格式：img_sessionId_timestamp_uniqueId
+                                const sessionId = idParts[1];
                                 const uniqueId = idParts.slice(-1)[0];
-                                return <>图片ID: {uniqueId}</>;
+                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                  return <>录音会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                } else {
+                                  return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                }
                               } else {
                                 // 其他格式
                                 return <>图片ID: {file.id}</>;
@@ -1929,9 +1934,14 @@ const RecordComponent = () => {
                                   return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
                                 }
                               } else if (idParts.length >= 4) {
-                                // 旧格式：vid_timestamp_random_uniqueId
+                                // 4段格式：vid_sessionId_timestamp_uniqueId
+                                const sessionId = idParts[1];
                                 const uniqueId = idParts.slice(-1)[0];
-                                return <>视频ID: {uniqueId}</>;
+                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                  return <>录音会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                } else {
+                                  return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                }
                               } else {
                                 // 其他格式
                                 return <>视频ID: {file.id}</>;
@@ -2062,18 +2072,15 @@ const RecordComponent = () => {
         
         {/* 左侧录音控制区 */}
         <div className="record-left-panel">
-          
           <div className="record-control-card">
             {/* 录音控制区标题 */}
             <div className="record-control-header">
               <h2>语音录制</h2>
             </div>
-            
             {/* 时间显示 */}
             <div className="record-time-display">
               <div className="record-time-large">{formatTime(recordingTime)}</div>
             </div>
-            
             {/* 录音状态指示 */}
             <div className={`record-status-indicator ${isRecording ? 'recording' : ''} ${isPaused ? 'paused' : ''}`}>
               <div className="status-dot"></div>
@@ -2081,7 +2088,6 @@ const RecordComponent = () => {
                 {isRecording ? (isPaused ? '已暂停' : '录音中...') : '准备录音'}
               </span>
             </div>
-            
             {/* 录音控制按钮 */}
             <div className="record-control-buttons">
               {!isRecording ? (
@@ -2164,138 +2170,137 @@ const RecordComponent = () => {
               </div>
             )}
           </div>
-        </div>
-
-        {/* 右侧录音列表区 - 只在侧边布局时显示 */}
-        <div className={`record-right-panel ${recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0 ? 'hidden' : 'visible'}`}>
-          {/* 待绑定录音区域 - 始终显示 */}
-          <div className="recordings-section">
-            <div className="section-header">
-              <h3>待绑定的录音</h3>
-              <span className="section-count">({recordings.length})</span>
-            </div>
-            <div className="recordings-list-container">
-              {recordings.length > 0 ? (
-                recordings.map((recording) => (
-                  <div key={recording.id} className="recording-list-item unbound-item">
-                    {/* PC端：单行布局，左侧信息+右侧播放器+操作按钮 */}
-                    <div className="recording-first-row">
-                      <div className="recording-item-info">
-                        <div className="recording-timestamp">
-                          {recording.timestamp}
-                          {recording.isVideo && <span className="video-badge">🎬</span>}
+          {/* 录音列表整体下移到控制区下方 */}
+          <div className={`record-right-panel ${recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0 ? 'hidden' : 'visible'}`}>
+            {/* 待绑定录音区域 - 始终显示 */}
+            <div className="recordings-section">
+              <div className="section-header">
+                <h3>待绑定的录音</h3>
+                <span className="section-count">({recordings.length})</span>
+              </div>
+              <div className="recordings-list-container">
+                {recordings.length > 0 ? (
+                  recordings.map((recording) => (
+                    <div key={recording.id} className="recording-list-item unbound-item">
+                      {/* PC端：单行布局，左侧信息+右侧播放器+操作按钮 */}
+                      <div className="recording-first-row">
+                        <div className="recording-item-info">
+                          <div className="recording-timestamp">
+                            {recording.timestamp}
+                            {recording.isVideo && <span className="video-badge">🎬</span>}
+                          </div>
+                          <div className="recording-size">
+                            {formatTime(recording.duration)} · {getUploadStatusText(recording.id)}
+                            {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
+                          </div>
                         </div>
-                        <div className="recording-size">
-                          {formatTime(recording.duration)} · {getUploadStatusText(recording.id)}
-                          {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
+                        
+                        {/* PC端播放器位置（红色方框区域） */}
+                        <div className="recording-player-pc">
+                          <audio controls src={recording.url} className="mini-audio-player">
+                            您的浏览器不支持音频播放
+                          </audio>
+                        </div>
+                        
+                        <div className="recording-actions">
+                          <button className="action-btn link-btn" onClick={() => bindRecording(recording)} title="绑定录音">
+                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
+                          </button>
+                          {uploadStatus[recording.id] === 'error' && (
+                            <button className="action-btn retry-box" onClick={() => retryUpload(recording)} title="重试上传">
+                              <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={25} height={25}/>
+                            </button>
+                          )}
+                          <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
+                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
+                          </button>
                         </div>
                       </div>
                       
-                      {/* PC端播放器位置（红色方框区域） */}
-                      <div className="recording-player-pc">
+                      {/* 移动端播放器位置（保持原来的下方居中） */}
+                      <div className="recording-player-row recording-player-mobile">
                         <audio controls src={recording.url} className="mini-audio-player">
                           您的浏览器不支持音频播放
                         </audio>
                       </div>
-                      
-                      <div className="recording-actions">
-                        <button className="action-btn link-btn" onClick={() => bindRecording(recording)} title="绑定录音">
-                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
-                        </button>
-                        {uploadStatus[recording.id] === 'error' && (
-                          <button className="action-btn retry-box" onClick={() => retryUpload(recording)} title="重试上传">
-                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={25} height={25}/>
+                    </div>
+                  ))
+                ) : (
+                  <div className="empty-section-state">
+                    <div className="empty-section-icon">🎤</div>
+                    <p>暂无待绑定的录音</p>
+                    <span className="empty-section-hint">录制完成后的录音将出现在这里</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 已绑定录音区域 - 始终显示 */}
+            <div className="recordings-section bound-section">
+              <div className="section-header">
+                <h3>已绑定的录音</h3>
+                <span className="section-count">({boundRecordings.length})</span>
+                {userCode && id && <span className="session-info">会议: {userCode}/{id}</span>}
+                {isCheckingFiles && <span className="checking-status">🔍 检查中...</span>}
+                {boundRecordings.length > 0 && (
+                  <button 
+                    className="refresh-btn" 
+                    onClick={refreshRecordings}
+                    disabled={isCheckingFiles}
+                    title="检查录音文件状态"
+                  >
+                    <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={16} height={16}/>
+                  </button>
+                )}
+              </div>
+              <div className="recordings-list-container">
+                {boundRecordings.length > 0 ? (
+                  boundRecordings.map((recording) => (
+                    <div key={recording.id} className="recording-list-item bound-item">
+                      {/* 只有一行：录制时间（左）+ 操作按钮（右） */}
+                      <div className="recording-first-row">
+                        <div className="recording-item-info">
+                          <div className="recording-timestamp">
+                            {recording.timestamp}
+                            {recording.isVideo && <span className="video-badge">🎬</span>}
+                          </div>
+                          <div className="recording-size">
+                            {formatTime(recording.duration)} · {recording.uploaded ? '已上传' : '本地存储'}
+                            {recording.uploaded && <span className="cloud-icon"> ☁️</span>}
+                            {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
+                          </div>
+                        </div>
+                        <div className="recording-actions">
+                          <button className="action-btn play-icon" onClick={() => enterPlayerMode(recording)} title="播放录音">
+                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf2.svg"  width={20} height={30}/>
                           </button>
-                        )}
-                        <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
-                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* 移动端播放器位置（保持原来的下方居中） */}
-                    <div className="recording-player-row recording-player-mobile">
-                      <audio controls src={recording.url} className="mini-audio-player">
-                        您的浏览器不支持音频播放
-                      </audio>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-section-state">
-                  <div className="empty-section-icon">🎤</div>
-                  <p>暂无待绑定的录音</p>
-                  <span className="empty-section-hint">录制完成后的录音将出现在这里</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 已绑定录音区域 - 始终显示 */}
-          <div className="recordings-section bound-section">
-            <div className="section-header">
-              <h3>已绑定的录音</h3>
-              <span className="section-count">({boundRecordings.length})</span>
-              {userCode && id && <span className="session-info">会议: {userCode}/{id}</span>}
-              {isCheckingFiles && <span className="checking-status">🔍 检查中...</span>}
-              {boundRecordings.length > 0 && (
-                <button 
-                  className="refresh-btn" 
-                  onClick={refreshRecordings}
-                  disabled={isCheckingFiles}
-                  title="检查录音文件状态"
-                >
-                  <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={16} height={16}/>
-                </button>
-              )}
-            </div>
-            <div className="recordings-list-container">
-              {boundRecordings.length > 0 ? (
-                boundRecordings.map((recording) => (
-                  <div key={recording.id} className="recording-list-item bound-item">
-                    {/* 只有一行：录制时间（左）+ 操作按钮（右） */}
-                    <div className="recording-first-row">
-                      <div className="recording-item-info">
-                        <div className="recording-timestamp">
-                          {recording.timestamp}
-                          {recording.isVideo && <span className="video-badge">🎬</span>}
-                        </div>
-                        <div className="recording-size">
-                          {formatTime(recording.duration)} · {recording.uploaded ? '已上传' : '本地存储'}
-                          {recording.uploaded && <span className="cloud-icon"> ☁️</span>}
-                          {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
+                          <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id, true)} title="删除录音">
+                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
+                          </button>
                         </div>
                       </div>
-                      <div className="recording-actions">
-                        <button className="action-btn play-icon" onClick={() => enterPlayerMode(recording)} title="播放录音">
-                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf2.svg"  width={20} height={30}/>
-                        </button>
-                        <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id, true)} title="删除录音">
-                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
-                        </button>
-                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="empty-section-state bound-empty">
+                    <div className="empty-section-icon">🎤</div>
+                    <p>暂无已绑定的录音</p>
+                    <span className="empty-section-hint">点击待绑定录音按钮进行绑定</span>
                   </div>
-                ))
-              ) : (
-                <div className="empty-section-state bound-empty">
-                  <div className="empty-section-icon">🎤</div>
-                  <p>暂无已绑定的录音</p>
-                  <span className="empty-section-hint">点击待绑定录音按钮进行绑定</span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
+
+
+
+            {/* 全部为空时的状态提示 */}
+            {recordings.length === 0 && boundRecordings.length === 0 && (
+              <div className="empty-recordings-state">
+                <div className="empty-icon">🎤</div>
+                <h3>还没有录音</h3>
+              </div>
+            )}
           </div>
-
-
-
-          {/* 全部为空时的状态提示 */}
-          {recordings.length === 0 && boundRecordings.length === 0 && (
-            <div className="empty-recordings-state">
-              <div className="empty-icon">🎤</div>
-              <h3>还没有录音</h3>
-            </div>
-          )}
         </div>
       </div>
 

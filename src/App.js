@@ -240,32 +240,98 @@ const HomePage = () => {
   const [uploadedVideos, setUploadedVideos] = useState([]);
   const [previewFile, setPreviewFile] = useState(null);
   const [previewPhoto, setPreviewPhoto] = useState(null);
+  // 判断是否为平板（iPad等，竖屏/横屏都覆盖）
+  const [isTabletView, setIsTabletView] = useState(() => {
+    const w = window.innerWidth;
+    return w >= 768 && w <= 1366;
+  });
 
   // 移动端滚动性能优化
   useEffect(() => {
-    // 添加移动端滚动保护
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
+      // 1. 基础容器优化
       const memoryAppBg = document.querySelector('.memory-app-bg');
       const memoryMain = document.querySelector('.memory-main');
       
       if (memoryAppBg) {
-        memoryAppBg.style.touchAction = 'pan-y';
-        memoryAppBg.style.overflowY = 'auto'; // 允许垂直滚动
-        memoryAppBg.style.overflowX = 'auto'; // 允许水平滚动
-        memoryAppBg.style.webkitOverflowScrolling = 'touch';
-        memoryAppBg.style.transform = 'translateZ(0)';
+        Object.assign(memoryAppBg.style, {
+          touchAction: 'pan-y',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          webkitOverflowScrolling: 'touch',
+          transform: 'translate3d(0, 0, 0)',
+          willChange: 'auto',
+          backfaceVisibility: 'hidden',
+          webkitBackfaceVisibility: 'hidden'
+        });
       }
       
       if (memoryMain) {
-        memoryMain.style.touchAction = 'pan-y';
-        memoryMain.style.overflow = 'visible';
-        memoryMain.style.transform = 'translateZ(0)';
+        Object.assign(memoryMain.style, {
+          touchAction: 'pan-y',
+          overflow: 'visible',
+          transform: 'translate3d(0, 0, 0)',
+          willChange: 'auto',
+          backfaceVisibility: 'hidden',
+          webkitBackfaceVisibility: 'hidden'
+        });
       }
       
-      // 确保body和html允许滚动
-      document.body.style.overflowY = 'auto';
-      document.documentElement.style.overflowY = 'auto';
+      // 2. 全局优化
+      Object.assign(document.body.style, {
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        webkitOverflowScrolling: 'touch',
+        transform: 'translate3d(0, 0, 0)',
+        backfaceVisibility: 'hidden',
+        webkitBackfaceVisibility: 'hidden'
+      });
+      
+      Object.assign(document.documentElement.style, {
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        webkitOverflowScrolling: 'touch',
+        transform: 'translate3d(0, 0, 0)',
+        backfaceVisibility: 'hidden',
+        webkitBackfaceVisibility: 'hidden'
+      });
+
+      // 3. 禁用页面缩放以提升性能
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+      }
+
+      // 4. 优化图片加载
+      const images = document.querySelectorAll('img');
+      images.forEach(img => {
+        img.style.imageRendering = 'optimizeSpeed';
+        img.style.transform = 'translate3d(0, 0, 0)';
+        img.style.backfaceVisibility = 'hidden';
+        img.style.webkitBackfaceVisibility = 'hidden';
+      });
+
+      // 5. 防抖滚动事件监听器
+      let scrollTimeout;
+      const handleScroll = () => {
+        if (scrollTimeout) return;
+        scrollTimeout = setTimeout(() => {
+          scrollTimeout = null;
+        }, 16); // 约60fps
+      };
+
+      // 6. 被动事件监听器
+      const passiveOptions = { passive: true };
+      window.addEventListener('scroll', handleScroll, passiveOptions);
+      window.addEventListener('touchstart', () => {}, passiveOptions);
+      window.addEventListener('touchmove', () => {}, passiveOptions);
+      
+      // 清理函数
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+      };
     }
   }, []);
   
@@ -579,6 +645,16 @@ const HomePage = () => {
     loadCloudMediaFiles();
   }, [loadCloudMediaFiles]);
 
+  // 判断是否为平板（iPad等，竖屏/横屏都覆盖）
+  useEffect(() => {
+    const handleResize = () => {
+      const w = window.innerWidth;
+      setIsTabletView(w >= 768 && w <= 1366);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // 如果没有用户ID，显示输入界面
   if (!userid) {
     return (
@@ -674,33 +750,46 @@ const HomePage = () => {
               <div className="user-code">{userCode}</div>
               <div className="user-status">✓ 已激活</div>
             </div>
-            
-            {/* 录制声音功能 - 移动到手机端的左侧区域，位于宝宝信息上方 */}
-            <div className="center-voice-card mobile-voice-card" onClick={goToRecordPage}>
-              <div className="voice-icon">🎤</div>
-              <div className="voice-title">录制我的声音</div>
-              <div className="voice-desc">智能语音助手，记录您的美好时光</div>
-              <button className="voice-action">
-                开始录制
-              </button>
-            </div>
-            
-            {/* 移动端相册模块 - 放在录制声音和宝宝信息之间 */}
-            {isMobileView  && (
-              <div className="mobile-gallery-entrance mobile-left-gallery">
-                <div className="mobile-gallery-card" onClick={goToGallery}>
-                  <div className="gallery-icon">📸</div>
-                  <div className="gallery-title">亲子相册</div>
-                  <div className="gallery-desc">
-                    点击可查看相册和上传照片和视频
-                  </div>
-                  <button className="enter-gallery-btn">
-                    上传照片和视频
-                  </button>
+            {/* 平板专用：录音和相册入口，录音在前 */}
+            {isTabletView && (
+              <>
+                <div className="center-voice-card tablet-only" onClick={goToRecordPage}>
+                  <div className="voice-icon">🎤</div>
+                  <div className="voice-title">录制我的声音</div>
+                  <div className="voice-desc">智能语音助手，记录您的美好时光</div>
+                  <button className="voice-action">开始录制</button>
                 </div>
-              </div>
+                <div className="mobile-gallery-entrance mobile-left-gallery tablet-only">
+                  <div className="mobile-gallery-card" onClick={goToGallery}>
+                    <div className="gallery-icon">📸</div>
+                    <div className="gallery-title">亲子相册</div>
+                    <div className="gallery-desc">点击可查看相册和上传照片和视频</div>
+                    <button className="enter-gallery-btn">上传照片和视频</button>
+                  </div>
+                </div>
+              </>
             )}
-            
+            {/* 非平板：原有移动端录音和相册入口 */}
+            {!isTabletView && (
+              <>
+                <div className="center-voice-card mobile-voice-card" onClick={goToRecordPage}>
+                  <div className="voice-icon">🎤</div>
+                  <div className="voice-title">录制我的声音</div>
+                  <div className="voice-desc">智能语音助手，记录您的美好时光</div>
+                  <button className="voice-action">开始录制</button>
+                </div>
+                {isMobileView && (
+                  <div className="mobile-gallery-entrance mobile-left-gallery">
+                    <div className="mobile-gallery-card" onClick={goToGallery}>
+                      <div className="gallery-icon">📸</div>
+                      <div className="gallery-title">亲子相册</div>
+                      <div className="gallery-desc">点击可查看相册和上传照片和视频</div>
+                      <button className="enter-gallery-btn">上传照片和视频</button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
             {/* 宝宝信息 */}
             <div className="baby-info">
               <div className="baby-info-top">
@@ -767,7 +856,7 @@ const HomePage = () => {
         {/* 中间：录制声音、亲子活动和活动时长 */}
         <div className="memory-center">
           {/* 录制声音功能 */}
-          <div className="center-voice-card" onClick={goToAudioLibrary}>
+          <div className="center-voice-card center-voice-card-center" onClick={goToAudioLibrary}>
             <div className="voice-icon">🎤</div>
             <div className="voice-title">录制我的声音</div>
             <div className="voice-desc">智能语音助手，记录您的美好时光</div>
@@ -833,7 +922,7 @@ const HomePage = () => {
         {!isMobileView && (
           <div className="memory-right">
             {/* 合并的亲子媒体模块 */}
-            <div className="activity-board media-board">
+            <div className="activity-board media-board media-board-right">
               {/* 标签导航 */}
               <div className="media-tabs">
                 <div 

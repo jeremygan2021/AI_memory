@@ -23929,7 +23929,8 @@ html, body {
 /* 右侧录音列表区 */
 .record-right-panel {
   position: relative;
-  margin-left:100px;
+  margin-left:0px;
+  margin-right:0px;
   width: 50%;
   display: flex;
   flex-direction: column;
@@ -27110,7 +27111,7 @@ html, body {
 
 /* 侧边布局 - 录音开始后的状态 */
 .record-main-layout.side-layout {
-  display: flex;
+  display: column;
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
@@ -27127,9 +27128,9 @@ html, body {
 
 .record-main-layout.side-layout .record-left-panel {
   flex: 0 0 500px;
-  max-width: 800px;
+  min-width: 90vw;
   height:900px;
-  margin-left:200px;
+  margin-left:0px;
   transform: translateX(0);
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -27138,8 +27139,7 @@ html, body {
   opacity: 1;
   transform: translateX(0);
   flex: 0 0 calc(100% - 550px);
-  width: auto;
-  max-width: 1200px;
+  min-width: 90vw;
   overflow: visible;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -27162,6 +27162,7 @@ html, body {
   border-radius: 20px;
   padding: 40px 32px;
   min-height: 930px;
+  min-width: 80vw;
 }
 
 /* 空状态在居中布局时的优化样式 */
@@ -27319,6 +27320,8 @@ html, body {
   }
   
   .record-main-layout.side-layout .record-left-panel {
+    align-items: center !important;
+  justify-content: center !important;
     flex: 0 0 750px;
     max-width: 750px;
   }
@@ -28230,11 +28233,12 @@ html, body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   z-index: 10 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  line-height: 1.2 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.4 !important;
   min-height: 20px !important;
+  max-height: 60px !important;
+  overflow-y: auto !important;
   box-sizing: border-box !important;
 }
 
@@ -28256,11 +28260,12 @@ html, body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   z-index: 10 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  line-height: 1.2 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.4 !important;
   min-height: 20px !important;
+  max-height: 60px !important;
+  overflow-y: auto !important;
   box-sizing: border-box !important;
 }
 
@@ -28642,9 +28647,11 @@ html, body {
   border-radius: 3px;
   font-size: 10px;
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
+  max-height: 50px;
+  overflow-y: auto;
   z-index: 2;
 }
 
@@ -28669,11 +28676,12 @@ html, body {
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     z-index: 15 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    line-height: 1.1 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.3 !important;
     min-height: 16px !important;
+    max-height: 50px !important;
+    overflow-y: auto !important;
     box-sizing: border-box !important;
   }
 }
@@ -28698,11 +28706,12 @@ html, body {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     z-index: 20 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    line-height: 1.0 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.2 !important;
     min-height: 14px !important;
+    max-height: 40px !important;
+    overflow-y: auto !important;
     box-sizing: border-box !important;
   }
 }
@@ -28973,3 +28982,4 @@ html, body {
     padding: 4px 6px !important;
   }
 }
+
