@@ -302,10 +302,10 @@
     0 0 0 8px #f3fadf,
     0 0 0 20px #f7fbe9;
   position: absolute;
-  left: 50%;
-  top: -10px;
+  left: 10%;
+  top: -50px;  /* 减少负值，降低被遮挡的可能性 */
   transform: translate(-50%, -50%);
-  z-index: 10;
+  z-index: 25;  /* 提高z-index，确保在导航栏之上 */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   user-select: none;
@@ -542,6 +542,7 @@
     height: 80px;
     font-size: 40px;
     top: -30px;
+    z-index: 25;  /* 确保在导航栏之上 */
   }
 
   .video-element {
@@ -638,6 +639,7 @@
 
   .player-container {
     padding: 15px 12px;
+    z-index: 1;
   }
 
   .avatar-icon {
@@ -645,6 +647,7 @@
     height: 70px;
     font-size: 35px;
     top: -25px;
+    z-index: 25;  /* 确保在导航栏之上 */
   }
 
   .video-element {
@@ -723,6 +726,7 @@
     height: 60px;
     font-size: 30px;
     top: -20px;
+    z-index: 25;  /* 确保在导航栏之上 */
   }
 
   .speed-control {

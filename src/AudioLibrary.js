@@ -1013,32 +1013,25 @@ const AudioLibrary = () => {
                               {file.id && typeof file.id === 'string' && (
                                 <div className="image-id-display">
                                   {file.id.startsWith('img_') ? (
-                                    /* 检查ID格式：img_sessionId_timestamp_random_uniqueId */
                                     (() => {
                                       const idParts = file.id.split('_');
-                                                                            if (idParts.length >= 5) {
-                                        // 新格式：包含会话ID
+                                      if (idParts.length >= 4) {
                                         const sessionId = idParts[1];
                                         const uniqueId = idParts.slice(-1)[0];
-                                        return file.fromRecordPage ? 
-                                          <>🎵录音会话: {sessionId} | 📷图片ID: {uniqueId}</> :
-                                          <>📁会话: {sessionId} | 📷图片ID: {uniqueId}</>;
-                                      } else if (idParts.length >= 4) {
-                                        // 4段格式：img_sessionId_timestamp_uniqueId
-                                        const sessionId = idParts[1];
-                                        const uniqueId = idParts.slice(-1)[0];
-                                        return file.fromRecordPage ? 
-                                          <>🎵录音会话: {sessionId} | 📷图片ID: {uniqueId}</> :
-                                          <>📁会话: {sessionId} | 📷图片ID: {uniqueId}</>;
+                                        if (sessionId.length === 8) {
+                                          return <>录音会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                        } else if (sessionId.length === 6) {
+                                          return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                        } else {
+                                          return <>图片ID: {uniqueId}</>;
+                                        }
                                       } else {
-                                        // 其他格式
                                         return <>📷 ID: {file.id}</>;
                                       }
                                     })()
                                   ) : (
                                     <>📷 ID: {file.id}</>
                                   )}
-                                  
                                 </div>
                               )}
                             </div>
@@ -1062,32 +1055,25 @@ const AudioLibrary = () => {
                               {file.id && typeof file.id === 'string' && (
                                 <div className="video-id-display">
                                   {file.id.startsWith('vid_') ? (
-                                    /* 检查ID格式：vid_sessionId_timestamp_random_uniqueId */
                                     (() => {
                                       const idParts = file.id.split('_');
-                                                                            if (idParts.length >= 5) {
-                                        // 新格式：包含会话ID
+                                      if (idParts.length >= 4) {
                                         const sessionId = idParts[1];
                                         const uniqueId = idParts.slice(-1)[0];
-                                        return file.fromRecordPage ? 
-                                          <>🎵录音会话: {sessionId} | 🎬视频ID: {uniqueId}</> :
-                                          <>📁会话: {sessionId} | 🎬视频ID: {uniqueId}</>;
-                                      } else if (idParts.length >= 4) {
-                                        // 4段格式：vid_sessionId_timestamp_uniqueId
-                                        const sessionId = idParts[1];
-                                        const uniqueId = idParts.slice(-1)[0];
-                                        return file.fromRecordPage ? 
-                                          <>🎵录音会话: {sessionId} | 🎬视频ID: {uniqueId}</> :
-                                          <>📁会话: {sessionId} | 🎬视频ID: {uniqueId}</>;
+                                        if (sessionId.length === 8) {
+                                          return <>录音会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                        } else if (sessionId.length === 6) {
+                                          return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                        } else {
+                                          return <>视频ID: {uniqueId}</>;
+                                        }
                                       } else {
-                                        // 其他格式
                                         return <>🎬 ID: {file.id}</>;
                                       }
                                     })()
                                   ) : (
                                     <>🎬 ID: {file.id}</>
                                   )}
-                                  
                                 </div>
                               )}
                             </div>

@@ -49,8 +49,15 @@ const PlayerPage = () => {
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth <= 768 || 
-                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) ||
+                    ('ontouchstart' in window) || // 支持触摸的设备
+                    (navigator.maxTouchPoints > 0); // 支持触摸点的设备
       setIsMobile(mobile);
+      console.log('移动设备检测结果:', mobile);
+      console.log('UserAgent:', navigator.userAgent);
+      console.log('窗口宽度:', window.innerWidth);
+      console.log('支持触摸:', 'ontouchstart' in window);
+      console.log('最大触摸点:', navigator.maxTouchPoints);
     };
     
     checkMobile();
@@ -525,8 +532,8 @@ const PlayerPage = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // iOS设备必须在用户交互后才能播放音频
-    if (isIOS && !userInteracted) {
+    // 移动设备必须在用户交互后才能播放音频
+    if (isMobile && !userInteracted) {
       alert('请先点击页面任意位置以启用音频播放');
       return;
     }
@@ -535,11 +542,19 @@ const PlayerPage = () => {
       if (isPlaying) {
         audio.pause();
       } else {
-        // iOS特殊处理
-        if (isIOS) {
-          // 设置适合iOS的音频属性
+        // 移动设备特殊处理
+        if (isMobile) {
+          // 设置适合移动设备的音频属性
           audio.preload = 'auto';
           audio.defaultMuted = false;
+          // 确保音频文件已经加载
+          if (!audio.src) {
+            const audioUrl = recording?.signedUrl || recording?.cloudUrl || recording?.url;
+            if (audioUrl) {
+              audio.src = audioUrl;
+              console.log('重新设置音频源:', audioUrl);
+            }
+          }
         }
 
         // 确保音频已经准备好播放
@@ -1164,7 +1179,7 @@ const PlayerPage = () => {
               disabled={!audioReady}
               title={
                 !audioReady ? '音频加载中...' : 
-                isIOS && !userInteracted ? '需要用户交互才能播放' :
+                isMobile && !userInteracted ? '需要用户交互才能播放' :
                 isPlaying ? '暂停' : '播放'
               }
             >
@@ -1176,7 +1191,7 @@ const PlayerPage = () => {
                   width: '90px', 
                   height: '90px', 
                   transform: isPlaying ? 'translateY(-2px)' : 'translateY(+2px)',
-                  opacity: (!audioReady || (isIOS && !userInteracted)) ? 0.5 : 1
+                  opacity: (!audioReady || (isMobile && !userInteracted)) ? 0.5 : 1
                 }}
               />
             </button>
@@ -1238,21 +1253,32 @@ const PlayerPage = () => {
       {/* 隐藏的音频元素 */}
       <audio
         ref={audioRef}
+        src={recording ? (recording.signedUrl || recording.cloudUrl || recording.url) : ''} // 直接设置src属性，确保移动端兼容性
         preload="auto"
         style={{ display: 'none' }}
         crossOrigin="anonymous"
-        playsInline={isIOS} // iOS需要内联播放
-        webkit-playsinline={isIOS} // 旧版iOS兼容
+        playsInline={true} // 所有移动设备都启用内联播放
+        webkit-playsinline="true" // iOS兼容
         controls={false}
         muted={false}
-        autoPlay={false} // 禁用自动播放，遵循iOS政策
-        onLoadedMetadata={() => console.log('音频URL:', recording.signedUrl || recording.cloudUrl || recording.url)}
+        autoPlay={false} // 禁用自动播放，遵循移动端政策
+        onLoadedMetadata={() => console.log('音频URL:', recording?.signedUrl || recording?.cloudUrl || recording?.url)}
         onError={(e) => {
           console.error('音频元素错误:', e);
           console.error('当前src:', e.target.src);
+          console.error('错误代码:', e.target.error?.code);
+          console.error('错误信息:', e.target.error?.message);
+          // 移动端错误处理
+          if (isMobile) {
+            console.error('移动端音频播放错误，可能的原因：');
+            console.error('1. CORS跨域问题');
+            console.error('2. 音频格式不支持');
+            console.error('3. 网络连接问题');
+            console.error('4. 用户交互权限问题');
+          }
         }}
       >
-        {/* 为iOS提供多种音频格式 */}
+        {/* 为移动端提供多种音频格式作为备选 */}
         {recording && (recording.signedUrl || recording.cloudUrl || recording.url) && (
           <>
             <source src={recording.signedUrl || recording.cloudUrl || recording.url} type="audio/mp4" />
@@ -1301,9 +1327,9 @@ const PlayerPage = () => {
         </div>
       )}
 
-      {/* iOS用户交互提示 */}
-      {isIOS && !userInteracted && (
-        <div className="ios-interaction-prompt" style={{
+      {/* 移动端用户交互提示 */}
+      {isMobile && !userInteracted && (
+        <div className="mobile-interaction-prompt" style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -1320,9 +1346,21 @@ const PlayerPage = () => {
         }}>
           <div>
             <h3>音频播放需要用户交互</h3>
-            <p>请点击此处启用音频播放</p>
+            <p>移动设备需要用户操作才能播放音频</p>
+            <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '16px' }}>请点击下方按钮启用音频播放功能</p>
             <button 
-              onClick={() => setUserInteracted(true)}
+              onClick={() => {
+                setUserInteracted(true);
+                // 立即尝试初始化音频
+                const audio = audioRef.current;
+                if (audio && recording) {
+                  const audioUrl = recording.signedUrl || recording.cloudUrl || recording.url;
+                  if (audioUrl && !audio.src) {
+                    audio.src = audioUrl;
+                    audio.load();
+                  }
+                }
+              }}
               style={{
                 backgroundColor: '#007AFF',
                 color: 'white',
@@ -1330,10 +1368,12 @@ const PlayerPage = () => {
                 borderRadius: '8px',
                 padding: '12px 24px',
                 fontSize: '16px',
-                marginTop: '-10px'
+                marginTop: '0px',
+                minWidth: '120px',
+                cursor: 'pointer'
               }}
             >
-              启用音频
+              启用音频播放
             </button>
           </div>
         </div>

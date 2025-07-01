@@ -108,6 +108,7 @@ const UploadMediaPage = () => {
           sessionId: fileSessionId, // 解析出的会话ID
           userCode,
           fromRecordPage: isFromRecordPage, // 智能判断是否从录音页面上传
+          // isFromUploadPage: isFromUploadPage,//智能判断时候从上传页面上传
           isCloudFile: true // 标记为云端文件
         };
       }));
@@ -130,22 +131,23 @@ const UploadMediaPage = () => {
       navigate('/');
       return;
     }
-    
     // 如果没有会话ID，生成一个新的
     if (!sessionid) {
-      const newSessionId = Math.random().toString(36).substr(2, 8);
-      navigate(`/${userid}/upload-media/${newSessionId}`, { replace: true });
+      // 判断来源，如果不是录音页面，主页跳转生成6位sessionId
+      const urlParams = new URLSearchParams(window.location.search);
+      const source = urlParams.get('from');
+      const sessionLength = source === 'record' ? 8 : 6;
+      const newSessionId = Math.random().toString(36).substr(2, sessionLength);
+      navigate(`/${userid}/upload-media/${newSessionId}${window.location.search ? window.location.search : ''}`, { replace: true });
       return;
     }
-    
-    // 验证会话ID（应该是8位字符）
-    if (sessionid && sessionid.length === 8) {
+    // 验证会话ID（录音页面8位，上传页面6位）
+    if ((sessionid && sessionid.length === 8) || (sessionid && sessionid.length === 6)) {
       // 会话ID有效
     } else {
       navigate('/');
       return;
     }
-
     // 检查来源参数
     const urlParams = new URLSearchParams(window.location.search);
     const source = urlParams.get('from');
@@ -214,7 +216,15 @@ const UploadMediaPage = () => {
   // 上传媒体文件到服务器
   const uploadMediaFile = async (file, tempId) => {
     try {
-      console.log('开始上传媒体文件:', { fileName: file.name, tempId, blobSize: file.size });
+      console.log('开始上传媒体文件:', { 
+        fileName: file.name, 
+        tempId, 
+        blobSize: file.size,
+        fileType: file.type,
+        isMobile: isMobile,
+        isTablet: isMobile && (window.innerWidth >= 768 && window.innerWidth <= 1366),
+        userAgent: navigator.userAgent
+      });
       
       const formData = new FormData();
       formData.append('file', file);
@@ -226,6 +236,7 @@ const UploadMediaPage = () => {
         xhr.upload.addEventListener('progress', (e) => {
           if (e.lengthComputable) {
             const percentComplete = (e.loaded / e.total) * 100;
+            // console.log(`上传进度: ${percentComplete.toFixed(1)}% (${e.loaded}/${e.total})`);
             setUploadingFiles(prev => new Map(prev.set(tempId, {
               ...prev.get(tempId),
               progress: percentComplete
@@ -234,6 +245,7 @@ const UploadMediaPage = () => {
         });
         
         xhr.addEventListener('loadstart', () => {
+          console.log('开始上传文件到服务器');
           setUploadingFiles(prev => new Map(prev.set(tempId, {
             fileName: file.name,
             progress: 0,
@@ -242,10 +254,13 @@ const UploadMediaPage = () => {
         });
         
         xhr.addEventListener('load', () => {
+          console.log('服务器响应状态:', xhr.status);
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
+              console.log('服务器响应原文:', xhr.responseText);
               const result = JSON.parse(xhr.responseText);
-              if (result.success) {
+              console.log('服务器响应结果:', result);
+              if (result.success || result.code === 0 || result.status === 200) {
                 // 上传成功，立即移除进度显示
                 setUploadingFiles(prev => {
                   const newMap = new Map(prev);
@@ -261,17 +276,21 @@ const UploadMediaPage = () => {
                   requestId: result.request_id
                 });
               } else {
+                console.error('服务器返回错误:', result);
                 throw new Error(result.message || '上传失败');
               }
             } catch (parseError) {
-              reject(new Error('响应解析失败'));
+              console.error('响应解析失败:', parseError, '原始响应:', xhr.responseText);
+              reject(new Error('响应解析失败，原始响应: ' + xhr.responseText));
             }
           } else {
+            console.error('HTTP错误:', xhr.status, xhr.statusText, '响应:', xhr.responseText);
             reject(new Error(`上传失败: ${xhr.status} - ${xhr.statusText}`));
           }
         });
         
         xhr.addEventListener('error', () => {
+          console.error('网络错误或请求失败');
           setUploadingFiles(prev => {
             const newMap = new Map(prev);
             newMap.delete(tempId);
@@ -281,6 +300,7 @@ const UploadMediaPage = () => {
         });
         
         xhr.addEventListener('abort', () => {
+          console.log('上传被取消');
           setUploadingFiles(prev => {
             const newMap = new Map(prev);
             newMap.delete(tempId);
@@ -296,6 +316,13 @@ const UploadMediaPage = () => {
         
         console.log('媒体文件上传URL:', uploadUrl.toString());
         console.log('文件夹路径:', folderPath);
+        console.log('请求详情:', {
+          method: 'POST',
+          url: uploadUrl.toString(),
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        });
         
         xhr.open('POST', uploadUrl);
         xhr.send(formData);
@@ -336,6 +363,12 @@ const UploadMediaPage = () => {
     // 检测iOS设备
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
+    // 检测平板设备（包括Android平板）
+    const isTablet = isMobile && (
+      /iPad|Tablet|PlayBook|Kindle|Silk|Android.*(?=.*\bMobile\b)(?=.*\bTablet\b)|Android(?!.*Mobile)/i.test(navigator.userAgent) ||
+      (window.innerWidth >= 768 && window.innerWidth <= 1366)
+    );
+    
     mediaFiles.forEach(file => {
       const isVideo = file.type.startsWith('video/');
       const isImage = file.type.startsWith('image/');
@@ -351,43 +384,75 @@ const UploadMediaPage = () => {
         return;
       }
       
-      // iOS设备mov格式转换处理
+      // 移动设备（包括平板）视频格式转换处理
       let processedFile = file;
       let originalFormat = '';
       let convertedFormat = '';
       
-      if (isVideo && isIOS && (file.type === 'video/quicktime' || file.name.toLowerCase().endsWith('.mov'))) {
-        console.log('检测到iOS设备的mov格式视频，准备转换为mp4格式');
-        originalFormat = file.name.toLowerCase().endsWith('.mov') ? 'mov' : file.type;
-        
-        // 创建新的文件名（将.mov改为.mp4）
-        const newFileName = file.name.replace(/\.mov$/i, '.mp4');
-        
-        // 创建新的File对象，修改MIME类型为video/mp4
-        processedFile = new File([file], newFileName, {
-          type: 'video/mp4',
-          lastModified: file.lastModified
-        });
-        
-        convertedFormat = 'mp4';
-        console.log(`iOS视频格式转换: ${originalFormat} -> ${convertedFormat}`);
-        console.log(`文件名转换: ${file.name} -> ${newFileName}`);
-        console.log(`MIME类型转换: ${file.type} -> video/mp4`);
+      if (isVideo && (isMobile || isTablet)) {
+        // 扩展格式检测，不仅仅是mov格式
+        const needsConversion = 
+          file.type === 'video/quicktime' || 
+          file.name.toLowerCase().endsWith('.mov') ||
+          file.type === 'video/3gpp' ||
+          file.name.toLowerCase().endsWith('.3gp') ||
+          file.type === 'video/x-msvideo' ||
+          file.name.toLowerCase().endsWith('.avi') ||
+          // 某些Android设备可能产生的格式
+          file.type === '' && /\.(mov|3gp|avi|wmv|flv)$/i.test(file.name);
+
+        if (needsConversion) {
+          console.log('检测到移动设备的非标准视频格式，准备转换为mp4格式');
+          originalFormat = file.name.split('.').pop().toLowerCase() || file.type;
+          
+          // 创建新的文件名（统一改为.mp4）
+          const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+          const newFileName = `${nameWithoutExt}.mp4`;
+          
+          // 创建新的File对象，修改MIME类型为video/mp4
+          processedFile = new File([file], newFileName, {
+            type: 'video/mp4',
+            lastModified: file.lastModified
+          });
+          
+          convertedFormat = 'mp4';
+          console.log(`移动端视频格式转换: ${originalFormat} -> ${convertedFormat}`);
+          console.log(`文件名转换: ${file.name} -> ${newFileName}`);
+          console.log(`MIME类型转换: ${file.type} -> video/mp4`);
+        } else {
+          // 只要不是标准mp4类型，都强制修正
+          const ext = processedFile.name.split('.').pop().toLowerCase();
+          if (ext !== 'mp4' || processedFile.type !== 'video/mp4') {
+            const nameWithoutExt = processedFile.name.replace(/\.[^/.]+$/, '');
+            processedFile = new File([processedFile], `${nameWithoutExt}.mp4`, {
+              type: 'video/mp4',
+              lastModified: processedFile.lastModified
+            });
+            convertedFormat = 'mp4';
+            originalFormat = ext;
+            console.log(`强制修正视频类型/扩展名: ${ext} -> mp4`);
+          }
+        }
+      }
+      
+      // 上传前详细日志
+      if (isVideo) {
+        console.log('最终上传文件:', processedFile, 'MIME:', processedFile.type, '文件名:', processedFile.name);
       }
       
       // 增强的视频格式兼容性检查
       if (isVideo) {
-        const supportedVideoFormats = ['mp4', 'webm', 'mov']; // mov会被转换为mp4
+        const supportedVideoFormats = ['mp4', 'webm', 'mov', '3gp', 'avi']; // 扩展支持的格式，会被转换为mp4
         const fileExtension = processedFile.name.split('.').pop().toLowerCase();
         
         if (!supportedVideoFormats.includes(fileExtension) && !processedFile.type.startsWith('video/')) {
-          alert(`不支持的视频格式: ${processedFile.name}. 支持的格式：MP4, WebM, MOV（iOS自动转换）`);
+          alert(`不支持的视频格式: ${processedFile.name}. 支持的格式：MP4, WebM, MOV, 3GP, AVI（移动端自动转换）`);
           return;
         }
         
         // 显示转换信息
         if (originalFormat && convertedFormat) {
-          console.log(`✅ iOS视频格式自动转换成功: ${originalFormat} → ${convertedFormat}`);
+          console.log(`✅ 移动端视频格式自动转换成功: ${originalFormat} → ${convertedFormat}`);
         }
       }
       
@@ -408,7 +473,8 @@ const UploadMediaPage = () => {
             uploadTime: new Date().toLocaleString(),
             size: processedFile.size,
             sessionId: sessionid, // 添加会话ID
-            userCode: userCode // 添加userCode
+            userCode: userCode, // 添加userCode
+            fromRecordPage: fromSource === 'record' // 新增：标记来源
           };
           setUploadedFiles(prev => [...prev, newFile]);
           
@@ -444,7 +510,8 @@ const UploadMediaPage = () => {
           originalFormat: originalFormat, // 记录原始格式
           convertedFormat: convertedFormat, // 记录转换后格式
           isConverted: !!(originalFormat && convertedFormat), // 是否经过转换
-          userCode: userCode // 添加userCode
+          userCode: userCode, // 添加userCode
+          fromRecordPage: fromSource === 'record' // 新增：标记来源
         };
         setUploadedFiles(prev => [...prev, newFile]);
         
@@ -809,18 +876,22 @@ const UploadMediaPage = () => {
                               if (idParts.length >= 5) {
                                 const sessionId = idParts[1];
                                 const uniqueId = idParts.slice(-1)[0];
-                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                if (sessionId.length === 8) {
                                   return <>录音会话: {sessionId} | 图片ID: {uniqueId}</>;
-                                } else {
+                                } else if (sessionId.length === 6) {
                                   return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                } else {
+                                  return <>图片ID: {uniqueId}</>;
                                 }
                               } else if (idParts.length >= 4) {
                                 const sessionId = idParts[1];
                                 const uniqueId = idParts.slice(-1)[0];
-                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                if (sessionId.length === 8) {
                                   return <>录音会话: {sessionId} | 图片ID: {uniqueId}</>;
-                                } else {
+                                } else if (sessionId.length === 6) {
                                   return <>会话: {sessionId} | 图片ID: {uniqueId}</>;
+                                } else {
+                                  return <>图片ID: {uniqueId}</>;
                                 }
                               } else {
                                 return <>图片ID: {file.id}</>;
@@ -851,18 +922,22 @@ const UploadMediaPage = () => {
                               if (idParts.length >= 5) {
                                 const sessionId = idParts[1];
                                 const uniqueId = idParts.slice(-1)[0];
-                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                if (sessionId.length === 8) {
                                   return <>录音会话: {sessionId} | 视频ID: {uniqueId}</>;
-                                } else {
+                                } else if (sessionId.length === 6) {
                                   return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                } else {
+                                  return <>视频ID: {uniqueId}</>;
                                 }
                               } else if (idParts.length >= 4) {
                                 const sessionId = idParts[1];
                                 const uniqueId = idParts.slice(-1)[0];
-                                if (file.fromRecordPage || (file.sessionId && sessionId && file.sessionId === sessionId)) {
+                                if (sessionId.length === 8) {
                                   return <>录音会话: {sessionId} | 视频ID: {uniqueId}</>;
-                                } else {
+                                } else if (sessionId.length === 6) {
                                   return <>会话: {sessionId} | 视频ID: {uniqueId}</>;
+                                } else {
+                                  return <>视频ID: {uniqueId}</>;
                                 }
                               } else {
                                 return <>视频ID: {file.id}</>;

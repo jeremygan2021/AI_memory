@@ -523,8 +523,8 @@ const HomePage = () => {
   // 处理上传照片和视频
   const handleUpload = useCallback((type) => {
     if (userCode) {
-      // 生成唯一的会话ID（8位随机字符）
-      const sessionId = Math.random().toString(36).substr(2, 8);
+      // 生成唯一的会话ID（6位随机字符）
+      const sessionId = Math.random().toString(36).substr(2, 6);
       navigate(`/${userCode}/upload-media/${sessionId}`);
     }
   }, [userCode, navigate]);
@@ -570,8 +570,8 @@ const HomePage = () => {
   // 跳转到相册页面
   const goToGallery = useCallback(() => {
     if (userCode) {
-      // 生成唯一的会话ID（8位随机字符）
-      const sessionId = Math.random().toString(36).substr(2, 8);
+      // 生成唯一的会话ID（6位随机字符）
+      const sessionId = Math.random().toString(36).substr(2, 6);
       navigate(`/${userCode}/upload-media/${sessionId}`);
     }
   }, [userCode, navigate]);

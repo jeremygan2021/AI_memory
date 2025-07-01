@@ -643,7 +643,18 @@ const RecordComponent = () => {
 
   // 进入播放页面
   const enterPlayerMode = (recording) => {
-    navigate(`/${userCode}/${id}/play/${recording.id}`);
+    let uniqueId = recording.id;
+    // 优先用objectKey里的唯一识别码（只取最后一段下划线后的部分）
+    if (recording.objectKey) {
+      // 取文件名（不含扩展名）
+      const matches = recording.objectKey.match(/([^/]+)\.[a-zA-Z0-9]+$/);
+      if (matches && matches[1]) {
+        // 只取最后一个下划线后的部分
+        const parts = matches[1].split('_');
+        uniqueId = parts[parts.length - 1];
+      }
+    }
+    navigate(`/${userCode}/${id}/play/${uniqueId}`);
   };
 
   // 删除录音
@@ -825,19 +836,7 @@ const RecordComponent = () => {
       return;
     }
 
-    // 如果正在录音，先暂停录音
-    // if (isRecording && !isPaused) {
-    //   setWasRecordingBeforeModal(true);
-    //   setWasRecordingPausedBeforeModal(false);
-    //   console.log('录音中，先暂停录音再弹出弹窗');
-    //   pauseRecording();
-    // } else if (isRecording && isPaused) {
-    //   setWasRecordingBeforeModal(true);
-    //   setWasRecordingPausedBeforeModal(true);
-    // } else {
-    //   setWasRecordingBeforeModal(false);
-    //   setWasRecordingPausedBeforeModal(false);
-    // }
+
 
     // 加载已上传的媒体文件
     await loadUploadedMediaFiles();
@@ -915,7 +914,15 @@ const RecordComponent = () => {
   // 上传媒体文件到服务器
   const uploadMediaFile = async (file, tempId) => {
     try {
-      console.log('开始上传媒体文件:', { fileName: file.name, tempId, blobSize: file.size });
+      console.log('开始上传媒体文件:', { 
+        fileName: file.name, 
+        tempId, 
+        blobSize: file.size,
+        fileType: file.type,
+        isMobile: isMobile,
+        isTablet: isMobile && (window.innerWidth >= 768 && window.innerWidth <= 1366),
+        userAgent: navigator.userAgent
+      });
       
       const formData = new FormData();
       formData.append('file', file);
@@ -927,6 +934,7 @@ const RecordComponent = () => {
         xhr.upload.addEventListener('progress', (e) => {
           if (e.lengthComputable) {
             const percentComplete = (e.loaded / e.total) * 100;
+            // console.log(`上传进度: ${percentComplete.toFixed(1)}% (${e.loaded}/${e.total})`);
             setMediaUploadingFiles(prev => new Map(prev.set(tempId, {
               ...prev.get(tempId),
               progress: percentComplete
@@ -935,6 +943,7 @@ const RecordComponent = () => {
         });
         
         xhr.addEventListener('loadstart', () => {
+          console.log('开始上传文件到服务器');
           setMediaUploadingFiles(prev => new Map(prev.set(tempId, {
             fileName: file.name,
             progress: 0,
@@ -943,9 +952,11 @@ const RecordComponent = () => {
         });
         
         xhr.addEventListener('load', () => {
+          console.log('服务器响应状态:', xhr.status);
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const result = JSON.parse(xhr.responseText);
+              console.log('服务器响应结果:', result);
               if (result.success) {
                 // 上传成功，立即移除进度显示
                 setMediaUploadingFiles(prev => {
@@ -962,17 +973,21 @@ const RecordComponent = () => {
                   requestId: result.request_id
                 });
               } else {
+                console.error('服务器返回错误:', result);
                 throw new Error(result.message || '上传失败');
               }
             } catch (parseError) {
+              console.error('响应解析失败:', parseError, '原始响应:', xhr.responseText);
               reject(new Error('响应解析失败'));
             }
           } else {
+            console.error('HTTP错误:', xhr.status, xhr.statusText, '响应:', xhr.responseText);
             reject(new Error(`上传失败: ${xhr.status} - ${xhr.statusText}`));
           }
         });
         
         xhr.addEventListener('error', () => {
+          console.error('网络错误或请求失败');
           setMediaUploadingFiles(prev => {
             const newMap = new Map(prev);
             newMap.delete(tempId);
@@ -982,6 +997,7 @@ const RecordComponent = () => {
         });
         
         xhr.addEventListener('abort', () => {
+          console.log('上传被取消');
           setMediaUploadingFiles(prev => {
             const newMap = new Map(prev);
             newMap.delete(tempId);
@@ -997,6 +1013,13 @@ const RecordComponent = () => {
         
         console.log('媒体文件上传URL:', uploadUrl.toString());
         console.log('文件夹路径:', folderPath);
+        console.log('请求详情:', {
+          method: 'POST',
+          url: uploadUrl.toString(),
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        });
         
         xhr.open('POST', uploadUrl);
         xhr.send(formData);
@@ -1024,6 +1047,12 @@ const RecordComponent = () => {
     // 检测iOS设备
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
+    // 检测平板设备（包括Android平板）
+    const isTablet = isMobile && (
+      /iPad|Tablet|PlayBook|Kindle|Silk|Android.*(?=.*\bMobile\b)(?=.*\bTablet\b)|Android(?!.*Mobile)/i.test(navigator.userAgent) ||
+      (window.innerWidth >= 768 && window.innerWidth <= 1366)
+    );
+    
     for (const file of fileArray) {
       // 检查文件类型 - 增强iOS格式支持
       const isImage = file.type.startsWith('image/');
@@ -1046,43 +1075,57 @@ const RecordComponent = () => {
         continue;
       }
       
-      // iOS设备mov格式转换处理
+      // 移动设备（包括平板）视频格式转换处理
       let processedFile = file;
       let originalFormat = '';
       let convertedFormat = '';
       
-      if (isVideo && isIOS && (file.type === 'video/quicktime' || file.name.toLowerCase().endsWith('.mov'))) {
-        console.log('检测到iOS设备的mov格式视频，准备转换为mp4格式');
-        originalFormat = file.name.toLowerCase().endsWith('.mov') ? 'mov' : file.type;
+      if (isVideo && (isMobile || isTablet)) {
+        // 扩展格式检测，不仅仅是mov格式
+        const needsConversion = 
+          file.type === 'video/quicktime' || 
+          file.name.toLowerCase().endsWith('.mov') ||
+          file.type === 'video/3gpp' ||
+          file.name.toLowerCase().endsWith('.3gp') ||
+          file.type === 'video/x-msvideo' ||
+          file.name.toLowerCase().endsWith('.avi') ||
+          // 某些Android设备可能产生的格式
+          file.type === '' && /\.(mov|3gp|avi|wmv|flv)$/i.test(file.name);
         
-        // 创建新的文件名（将.mov改为.mp4）
-        const newFileName = file.name.replace(/\.mov$/i, '.mp4');
-        
-        // 创建新的File对象，修改MIME类型为video/mp4
-        processedFile = new File([file], newFileName, {
-          type: 'video/mp4',
-          lastModified: file.lastModified
-        });
-        
-        convertedFormat = 'mp4';
-        console.log(`iOS视频格式转换: ${originalFormat} -> ${convertedFormat}`);
-        console.log(`文件名转换: ${file.name} -> ${newFileName}`);
-        console.log(`MIME类型转换: ${file.type} -> video/mp4`);
+        if (needsConversion) {
+          console.log('检测到移动设备的非标准视频格式，准备转换为mp4格式');
+          originalFormat = file.name.split('.').pop().toLowerCase() || file.type;
+          
+          // 创建新的文件名（统一改为.mp4）
+          const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+          const newFileName = `${nameWithoutExt}.mp4`;
+          
+          // 创建新的File对象，修改MIME类型为video/mp4
+          processedFile = new File([file], newFileName, {
+            type: 'video/mp4',
+            lastModified: file.lastModified
+          });
+          
+          convertedFormat = 'mp4';
+          console.log(`移动端视频格式转换: ${originalFormat} -> ${convertedFormat}`);
+          console.log(`文件名转换: ${file.name} -> ${newFileName}`);
+          console.log(`MIME类型转换: ${file.type} -> video/mp4`);
+        }
       }
       
       // 增强的视频格式兼容性检查
       if (isVideo) {
-        const supportedVideoFormats = ['mp4', 'webm', 'mov']; // mov会被转换为mp4
+        const supportedVideoFormats = ['mp4', 'webm', 'mov', '3gp', 'avi']; // 扩展支持的格式，会被转换为mp4
         const fileExtension = processedFile.name.split('.').pop().toLowerCase();
         
         if (!supportedVideoFormats.includes(fileExtension) && !processedFile.type.startsWith('video/')) {
-          alert(`不支持的视频格式: ${processedFile.name}. 支持的格式：MP4, WebM, MOV（iOS自动转换）`);
+          alert(`不支持的视频格式: ${processedFile.name}. 支持的格式：MP4, WebM, MOV, 3GP, AVI（移动端自动转换）`);
           continue;
         }
         
         // 显示转换信息
         if (originalFormat && convertedFormat) {
-          console.log(`✅ iOS视频格式自动转换成功: ${originalFormat} → ${convertedFormat}`);
+          console.log(`✅ 移动端视频格式自动转换成功: ${originalFormat} → ${convertedFormat}`);
         }
       }
       
@@ -1529,8 +1572,12 @@ const RecordComponent = () => {
   // 检测移动设备
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth <= 768 || 
-                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      // 新增：平板端（宽度在768-1366之间且支持触摸）也视为移动端
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const mobile =
+        window.innerWidth <= 768 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        (isTouchDevice && window.innerWidth > 768 && window.innerWidth <= 1366);
       setIsMobile(mobile);
     };
     
@@ -2050,7 +2097,8 @@ const RecordComponent = () => {
         <style jsx global>{`
           .background-decoration {
             background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png') !important;
-            background-size: cover !important;
+            background-size: 100% 100% !important;
+            min-height: 100vh !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
             background-attachment: scroll !important; /* iOS优化 */
