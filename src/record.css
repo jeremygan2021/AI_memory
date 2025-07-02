@@ -689,7 +689,7 @@ html, body {
     position: relative !important;
     display: flex !important;
     margin-top: 0 !important;
-    margin-left: 0px !important;
+    margin-left: 50px !important;
     margin-right: 0 !important;
     transform: none !important;
     left: auto !important;
@@ -703,7 +703,7 @@ html, body {
   .record-main-layout.side-layout .record-right-panel {
     /* 统一重置参数 */
     margin-top: 100px !important;
-    margin-left: 80px !important;
+    margin-left: 0px !important;
     margin-right: 0 !important;
     transform: none !important;
     left: auto !important;
@@ -754,7 +754,7 @@ html, body {
     min-height: calc(100vh - 140px) !important;
     
     /* 重置干扰样式 */
-    margin-left: 0 !important;
+    margin-left: 6% !important;
     transform: none !important;
     position: relative !important;
     top: auto !important;
@@ -956,7 +956,7 @@ html, body {
     min-height: calc(100vh - 120px) !important;
     
     /* 重置干扰样式 */
-    margin-left: 0 !important;
+    margin-left: 13% !important;
     transform: none !important;
     position: relative !important;
     top: auto !important;
@@ -1240,7 +1240,7 @@ html, body {
   .recording-player-mobile {
     display: block !important;
     width: 100% !important;
-    margin: 12px 0 !important;
+    margin: 0 !important;
   }
 
   .recording-actions {
@@ -25443,7 +25443,7 @@ html, body {
     justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
-    margin-top: 8px !important;
+    margin-top: 0px !important;
   }
 
   /* 900px断点下已绑定录音只显示一行 */
@@ -26216,7 +26216,7 @@ html, body {
     padding: 8px 6px !important;
     border-radius: 12px !important;
     margin: 0 auto 4px auto !important;
-    max-height: 250px !important;
+    max-height: 450px !important;
   }
   
   .section-header {
@@ -27963,9 +27963,9 @@ html, body {
 
 /* 居中布局 - 没有录音时的初始状态 */
 .record-main-layout.centered-layout {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   min-height: calc(100vh - 120px);
   padding: 20px;
@@ -28268,7 +28268,7 @@ html, body {
   justify-content: center !important;
   min-height: 100vh !important;
   margin-top: 0 !important;
-  left: 50px !important;
+  left: 0px !important;
 }
 
 /* 强制显示空状态区域 */
@@ -29889,13 +29889,35 @@ html, body {
 /* ===============================
    iPad Air 横屏专用居中样式（1180x820等）
    =============================== */
+
+   /* 居中布局优化 - 开始录音前 */
+  
+
    @media (min-width: 1100px) and (max-width: 1220px) and (orientation: landscape) {
+
+    .record-main-layout.centered-layout {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      min-height: calc(100vh - 100px) !important;
+      padding: 20px 16px !important;
+      gap: 24px !important;
+      
+      /* 确保不超出边界 */
+      width: 100vw !important;
+      max-width: 100vw !important;
+      margin: 0 0 0 -40px!important;
+      overflow-x: hidden !important;
+      box-sizing: border-box !important;
+    }
+
     .record-main-layout.side-layout .record-left-panel,
     .record-main-layout.centered-layout .record-left-panel,
     .record-left-panel {
       max-width: 800px !important;
       margin-top:10% !important;
-      margin-left: 15% !important;
+      margin-left: 20% !important;
       transform: none !important;
       position: relative !important;
       left: auto !important;
@@ -30106,8 +30128,8 @@ html, body {
   .recording-list-item {
     width: 100% !important;
     max-width: 100% !important;
-    margin-bottom: 16px !important;
-    padding: 16px !important;
+    margin-bottom: 0px !important;
+    padding: 5px !important;
     box-sizing: border-box !important;
   }
 }
@@ -30333,7 +30355,7 @@ html, body {
   .record-main-layout.centered-layout {
     width: 100% !important;
     max-width: 100% !important;
-    margin-left: -12% !important;
+    margin-left: 0% !important;
     /* 避免使用100vw */
   }
 
@@ -30341,6 +30363,178 @@ html, body {
   .record-container {
     width: 100% !important;
     max-width: 100% !important;
+  }
+}
+
+/* ===============================================
+   PC端专用布局修复 - 解决层级和居中问题
+   =============================================== */
+
+/* PC端专用样式 - 只在1367px以上的真正PC端生效 */
+@media (min-width: 1367px) {
+  /* 修复导航栏层级问题 - 确保不被其他元素遮盖 */
+  .top-navigation-bar {
+    position: fixed !important;
+    z-index: 100 !important; /* 提高层级，确保在最上层 */
+    width: 100% !important;
+    height: 90px !important;
+    background: #9ee099 !important;
+    padding: 16px 20px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 0 0 15px 15px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 4px 20px rgba(43, 73, 40, 0.4), 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+    margin: 0 0 16px -25px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 修复主容器层级和定位 */
+  .record-container {
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 15px !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* PC端主布局水平居中修复 */
+  .record-main-layout {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 1200px !important; /* 限制最大宽度 */
+    margin: 0 auto !important; /* 水平居中 */
+    padding: 40px 20px !important;
+    min-height: calc(100vh - 120px) !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 40px !important;
+    overflow: visible !important;
+    transform: none !important; /* 重置任何变换 */
+  }
+
+  /* PC端录音前居中布局 */
+  .record-main-layout.centered-layout {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    max-width: 800px !important;
+    margin: 0 auto 0 20% !important;
+    gap: 30px !important;
+  }
+
+  /* PC端录音后并排布局 */
+  .record-main-layout.side-layout {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    max-width: 1200px !important;
+    margin: 0 auto 0 10% !important;
+    gap: 40px !important;
+  }
+
+  /* PC端左右面板样式 */
+  .record-left-panel {
+    flex: 0 0 500px !important;
+    max-width: 500px !important;
+    margin: 0 !important;
+    transform: none !important;
+    position: relative !important;
+  }
+
+  .record-right-panel {
+    flex: 1 !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+    transform: none !important;
+    position: relative !important;
+  }
+
+  /* 确保录音控制卡片在PC端正确显示 */
+  .record-control-card {
+    width: 100% !important;
+    max-width: 500px !important;
+    margin: 0 auto !important;
+    padding: 32px !important;
+    border-radius: 20px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  /* 录音列表在PC端的样式 */
+  .recordings-section {
+    min-width: 1000px !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  /* 确保所有导航元素可见且层级正确 */
+  .nav-left,
+  .nav-right,
+  .back-button,
+  .user-info {
+    position: relative !important;
+    z-index: 1600 !important; /* 比导航栏更高 */
+  }
+
+  /* 返回按钮在PC端的样式优化 */
+  .back-button {
+    background: rgba(32, 201, 151, 0.2) !important;
+    padding: 12px 20px !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(32, 201, 151, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    min-width: 120px !important;
+  }
+
+  /* 用户信息区域在PC端的样式优化 */
+  .user-info {
+    width: auto !important;
+    min-width: 240px !important;
+    background: #319888 !important;
+    padding: 12px 16px !important;
+    border-radius: 50px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* 超大屏PC端额外优化 */
+@media (min-width: 1600px) {
+  .record-main-layout {
+    max-width: 1400px !important;
+    padding: 50px 40px !important;
+    gap: 50px !important;
+  }
+  
+  .record-main-layout.side-layout .record-left-panel {
+    flex: 0 0 200px !important;
+    max-width: 600px !important;
+  }
+  
+  .record-main-layout.side-layout .record-right-panel {
+    max-width: 700px !important;
+  }
+  
+  .record-control-card {
+    min-width: 1000px !important;
+    padding: 40px !important;
   }
 }
 

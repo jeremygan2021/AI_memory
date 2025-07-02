@@ -779,6 +779,67 @@ const UploadMediaPage = () => {
     }
   }, [userCode]);
 
+  // 智能跳转到播放页面
+  const goToPlayerPage = async () => {
+    try {
+      // 获取当前会话的录音文件
+      const prefix = `recordings/${userCode}/${sessionid}/`;
+      const response = await fetch(
+        `${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=100`
+      );
+
+      if (!response.ok) {
+        alert('无法获取录音文件列表');
+        return;
+      }
+
+      const result = await response.json();
+      const files = result.files || result.data || result.objects || result.items || result.results || [];
+      
+      // 过滤出音频文件
+      const audioFiles = files.filter(file => {
+        const objectKey = file.object_key || file.objectKey || file.key || file.name;
+        if (!objectKey) return false;
+        const fileName = objectKey.split('/').pop();
+        const contentType = file.content_type || '';
+        const isAudio = contentType.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac|flac|wma|amr|3gp|opus|webm)$/i.test(fileName);
+        return isAudio;
+      });
+
+      if (audioFiles.length === 0) {
+        alert('此会话中没有找到录音文件，请先录制一段音频');
+        return;
+      }
+
+      // 使用最新的录音文件
+      const latestAudio = audioFiles.sort((a, b) => {
+        const timeA = new Date(a.last_modified || a.lastModified || a.modified || 0);
+        const timeB = new Date(b.last_modified || b.lastModified || b.modified || 0);
+        return timeB - timeA;
+      })[0];
+
+      // 从文件名提取recordingId
+      const objectKey = latestAudio.object_key || latestAudio.objectKey || latestAudio.key || latestAudio.name;
+      const fileName = objectKey.split('/').pop();
+      const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+      const parts = nameWithoutExt.split('_');
+      const recordingId = parts[parts.length - 1] || '12345678';
+
+      console.log('跳转到播放页面:', {
+        userCode,
+        sessionid,
+        recordingId,
+        fileName
+      });
+
+      // 跳转到播放页面
+      navigate(`/${userCode}/player/${sessionid}/${recordingId}`);
+    } catch (error) {
+      console.error('跳转播放页面失败:', error);
+      alert('跳转失败，请手动进入播放页面');
+    }
+  };
+
   return (
     <div className="upload-page" onPaste={handlePaste}>
       {/* 顶部导航 */}
@@ -788,6 +849,29 @@ const UploadMediaPage = () => {
             ← {fromSource === 'record' ? '返回录音页面' : '返回主页'}
           </span>
         </div>
+        
+        {/* 添加轮播测试按钮 */}
+        {sessionid && sessionid !== 'homepage' && (
+          <div 
+            className="test-player-button"
+            onClick={goToPlayerPage}
+            style={{
+              background: 'linear-gradient(135deg, #4CAF50, #45a049)',
+              color: 'white',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🎠 测试轮播功能
+          </div>
+        )}
+        
         <div className="session-info">
           <span>用户: {userCode} | 会话: {sessionid}</span>
         </div>

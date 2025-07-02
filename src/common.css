@@ -1851,7 +1851,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   /* 特别处理移动端相册模块，防止溢出 */
   .mobile-gallery-entrance,
   .mobile-gallery-card {
-    max-width: 100% !important;
+    min-width: 100% !important;
     overflow: hidden;
     box-sizing: border-box;
   }

@@ -10,6 +10,7 @@ const GalleryPage = () => {
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
   const [uploadedVideos, setUploadedVideos] = useState([]);
   const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [previewVideo, setPreviewVideo] = useState(null);
 
   // 验证用户ID
   useEffect(() => {
@@ -84,12 +85,14 @@ const GalleryPage = () => {
     setPreviewPhoto(null);
   };
 
-  // 打开视频播放器
-  const openVideoPlayer = (idx) => {
-    if (userid && uploadedVideos[idx]) {
-      const videoFile = uploadedVideos[idx];
-      navigate(`/${userid}/video-player/${videoFile.id || idx}`);
-    }
+  // 打开视频预览
+  const openVideoPreview = (video) => {
+    setPreviewVideo(video);
+  };
+
+  // 关闭视频预览
+  const closeVideoPreview = () => {
+    setPreviewVideo(null);
   };
 
   // 返回首页
@@ -163,7 +166,7 @@ const GalleryPage = () => {
                   if (activeTab === 'photos') {
                     openPhotoPreview(file);
                   } else {
-                    openVideoPlayer(idx);
+                    openVideoPreview(file);
                   }
                 }}
               >
@@ -211,6 +214,28 @@ const GalleryPage = () => {
               <div className="preview-name">{previewPhoto.name}</div>
               <div className="preview-date">
                 {new Date(previewPhoto.uploadTime).toLocaleString()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 视频预览弹窗 */}
+      {previewVideo && (
+        <div className="gallery-preview-mask" onClick={closeVideoPreview}>
+          <div className="gallery-preview-box" onClick={e => e.stopPropagation()}>
+            <video 
+              className="gallery-preview-video" 
+              src={previewVideo.preview} 
+              controls 
+              autoPlay
+              onClick={e => e.stopPropagation()}
+            />
+            <button className="gallery-preview-close" onClick={closeVideoPreview}>×</button>
+            <div className="preview-info">
+              <div className="preview-name">{previewVideo.name}</div>
+              <div className="preview-date">
+                {new Date(previewVideo.uploadTime).toLocaleString()}
               </div>
             </div>
           </div>

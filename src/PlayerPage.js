@@ -169,33 +169,84 @@ const PlayerPage = () => {
     }
   }, [id, recordingId, userCode, navigate]);
 
-  // 加载与当前会话相关的照片和视频
-  const loadMediaFiles = () => {
+  // 加载与当前会话相关的照片和视频（云端+本地）
+  const loadMediaFiles = async () => {
     try {
-      const saved = localStorage.getItem('uploadedFiles');
-      if (saved) {
-        const allFiles = JSON.parse(saved);
-        // 过滤出与当前会话ID相关的照片和视频文件
-        const sessionFiles = allFiles.filter(file => 
-          file.sessionId === id && (file.type === 'image' || file.type === 'video')
+      let cloudFiles = [];
+      // 云端加载
+      if (userCode && id) {
+        const prefix = `recordings/${userCode}/${id}/`;
+        const response = await fetch(
+          `${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=1000`
         );
-        console.log('加载到的会话相关媒体文件:', sessionFiles);
-        setMediaFiles(sessionFiles);
+        if (response.ok) {
+          const result = await response.json();
+          const files = result.files || result.data || result.objects || result.items || result.results || [];
+          cloudFiles = files.map(file => {
+            const objectKey = file.object_key || file.objectKey || file.key || file.name;
+            const fileName = objectKey ? objectKey.split('/').pop() : '';
+            const contentType = file.content_type || '';
+            const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
+            const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
+            if (!isImage && !isVideo) return null;
+            // 生成唯一ID
+            const timestamp = file.last_modified || file.lastModified || file.modified || new Date().toISOString();
+            const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+            const uniqueId = nameWithoutExt.slice(-8) || Math.random().toString(36).substr(2, 8);
+            const prefix = isImage ? 'img' : 'vid';
+            const generatedId = `${prefix}_${id}_${Date.parse(timestamp)}_${uniqueId}`;
+            let ossKey = objectKey;
+            if (ossKey && ossKey.startsWith('recordings/')) {
+              ossKey = ossKey.substring('recordings/'.length);
+            }
+            const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
+            const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
+            return {
+              id: generatedId,
+              name: fileName,
+              preview: ossUrl,
+              url: ossUrl,
+              type: isImage ? 'image' : 'video',
+              uploadTime: timestamp,
+              objectKey,
+              sessionId: id,
+              userCode,
+              isCloudFile: true
+            };
+          }).filter(Boolean);
+        }
       }
+      // 本地加载
+      let localFiles = [];
+      try {
+        const saved = localStorage.getItem('uploadedFiles');
+        if (saved) {
+          const allFiles = JSON.parse(saved);
+          localFiles = allFiles.filter(file => 
+            file.sessionId === id && (file.type === 'image' || file.type === 'video')
+          );
+        }
+      } catch (error) {
+        // 本地异常忽略
+      }
+      // 合并去重（以云端为主，ID为唯一标识）
+      const allFiles = [...cloudFiles, ...localFiles.filter(lf => !cloudFiles.some(cf => cf.id === lf.id))];
+      setMediaFiles(allFiles);
+      console.log('合并后的媒体文件:', allFiles);
     } catch (error) {
       console.error('加载媒体文件失败:', error);
+      setMediaFiles([]);
     }
   };
 
-  // 监听localStorage变化，实时更新媒体文件
+  // 监听localStorage变化，实时更新媒体文件（异步）
   useEffect(() => {
     const handleFilesUpdated = () => {
       loadMediaFiles();
     };
-    
     window.addEventListener('filesUpdated', handleFilesUpdated);
     return () => window.removeEventListener('filesUpdated', handleFilesUpdated);
-  }, [id]);
+  }, [id, userCode]);
 
   const loadRecordingFromCloud = async () => {
     try {
@@ -798,19 +849,21 @@ const PlayerPage = () => {
 
   // 开始自动轮播
   const startCarouselTimer = () => {
-    if (mediaFiles.length > 1 && !isCarouselHovered) {
-      carouselTimerRef.current = setInterval(() => {
-        setCurrentMediaIndex(prev => 
+    stopCarouselTimer(); // 先清理
+    if (mediaFiles.length > 1 && (!isCarouselHovered || isMobile)) {
+      carouselTimerRef.current = setTimeout(() => {
+        setCurrentMediaIndex(prev =>
           prev === mediaFiles.length - 1 ? 0 : prev + 1
         );
-      }, 3000); // 每3秒切换一次
+        startCarouselTimer(); // 递归调用
+      }, 3000);
     }
   };
 
   // 停止自动轮播
   const stopCarouselTimer = () => {
     if (carouselTimerRef.current) {
-      clearInterval(carouselTimerRef.current);
+      clearTimeout(carouselTimerRef.current);
       carouselTimerRef.current = null;
     }
   };
@@ -823,21 +876,28 @@ const PlayerPage = () => {
 
   // 自动轮播控制
   useEffect(() => {
-    if (mediaFiles.length > 1) {
-      if (isCarouselHovered) {
+    if (mediaFiles && mediaFiles.length > 1) {
+      if (isCarouselHovered && !isMobile) {
         stopCarouselTimer();
       } else {
         startCarouselTimer();
       }
+    } else {
+      stopCarouselTimer();
     }
-
     return () => stopCarouselTimer();
-  }, [mediaFiles.length, isCarouselHovered]);
+  }, [mediaFiles, isCarouselHovered, isMobile]);
 
-  // 清理定时器
+  // 页面可见性变化时自动重启轮播
   useEffect(() => {
-    return () => stopCarouselTimer();
-  }, []);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && mediaFiles && mediaFiles.length > 1) {
+        startCarouselTimer();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [mediaFiles, isMobile, isCarouselHovered]);
 
   const handleMediaClick = (file) => {
     if (isMobile) {
@@ -1041,9 +1101,9 @@ const PlayerPage = () => {
       {/* 主播放器区域 */}
       <main className="player-main">
         <div className="player-container">
-          <img src="/asset/elephant.png" alt="背景" className="elephant-icon" />
+          {/* <img src="/asset/elephant.png" alt="背景" className="elephant-icon" /> */}
           {/* 录音信息 - 隐藏详细信息 */}
-          <div className="recording-info">
+          {/* <div className="recording-info">
             <div className="recording-avatar">
               <div className="avatar-icon">
                 <img src="/asset/music.png" alt="音乐图标" style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
@@ -1055,7 +1115,7 @@ const PlayerPage = () => {
                 <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* 轮播图区域 - 只有上传了照片或视频才显示 */}
           {mediaFiles.length > 0 && (

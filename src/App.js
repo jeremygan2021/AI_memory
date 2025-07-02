@@ -7,7 +7,7 @@ import RecordComponent from './record';
 import PlayerPage from './PlayerPage';
 import AudioLibrary from './AudioLibrary';
 import ModernSearchBox from './components/ModernSearchBox';
-import VideoPlayerPage from './VideoPlayerPage';
+
 import UploadMediaPage from './UploadMediaPage';
 
 // 折线图数据
@@ -183,7 +183,7 @@ const RecordPage = () => {
           boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
           backdropFilter: 'blur(10px)'
         }} onClick={() => navigate(`/${userid}`)}>
-          <span style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50' }}>← 返回主页</span>
+          <span style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50' }}>返回主页</span>
         </div>
         
         <div style={{
@@ -1067,8 +1067,6 @@ function App() {
       <Route path="/:userid/audio-library" element={<AudioLibrary />} />
       <Route path="/:userid/gallery" element={<UploadMediaPage />} />
       <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
-                      <Route path="/:userid/video-player/:sessionid/:videoId" element={<VideoPlayerPage />} />
-                <Route path="/:userid/video-player/:videoId" element={<VideoPlayerPage />} />
       <Route path="/:userid/:id" element={<RecordPage />} />
       <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
     </Routes>
