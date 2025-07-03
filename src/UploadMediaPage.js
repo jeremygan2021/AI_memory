@@ -700,50 +700,64 @@ const UploadMediaPage = () => {
     try {
       const videoId = file.id;
       console.log('UploadMediaPage: 开始复制视频链接', { videoId, file });
-      
       if (!videoId || typeof videoId !== 'string') {
         console.error('UploadMediaPage: 视频ID无效:', videoId);
         alert('无法生成播放链接：视频ID无效');
         return;
       }
-
       // 生成完整的播放链接
       const baseUrl = window.location.origin;
       const playLink = `${baseUrl}/${userCode}/video-player/${sessionid}/${videoId}?from=upload`;
-      
       console.log('UploadMediaPage: 生成的播放链接:', playLink);
-      
-      // 尝试使用现代的 Clipboard API
+      // 检测iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        window.prompt('请手动长按下方链接并选择"复制"', playLink);
+        return;
+      }
+      // 现代Clipboard API
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(playLink);
-        console.log('UploadMediaPage: 视频播放链接已复制到剪贴板');
-        alert('✅ 视频播放链接已复制到剪贴板！');
-      } else {
-        // 降级到传统方法
-        const textArea = document.createElement('textarea');
-        textArea.value = playLink;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
         try {
-          document.execCommand('copy');
+          await navigator.clipboard.writeText(playLink);
+          console.log('UploadMediaPage: 视频播放链接已复制到剪贴板');
           alert('✅ 视频播放链接已复制到剪贴板！');
         } catch (err) {
-          console.error('复制失败:', err);
-          alert('复制失败，请手动复制链接：' + playLink);
+          // Clipboard API失败，降级
+          fallbackCopyTextToClipboard(playLink);
         }
-        
-        document.body.removeChild(textArea);
+      } else {
+        // 直接降级
+        fallbackCopyTextToClipboard(playLink);
       }
     } catch (error) {
       console.error('复制链接失败:', error);
       alert('复制链接失败，请稍后重试');
     }
   };
+
+  // 降级复制方法
+  function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    let success = false;
+    try {
+      success = document.execCommand('copy');
+    } catch (err) {
+      success = false;
+    }
+    document.body.removeChild(textArea);
+    if (success) {
+      alert('✅ 视频播放链接已复制到剪贴板！');
+    } else {
+      alert('复制失败，请手动复制链接：' + text);
+    }
+  }
 
   const closePreview = () => {
     setPreviewFile(null);
