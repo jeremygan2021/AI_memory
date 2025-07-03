@@ -7,8 +7,8 @@ import RecordComponent from './record';
 import PlayerPage from './PlayerPage';
 import AudioLibrary from './AudioLibrary';
 import ModernSearchBox from './components/ModernSearchBox';
-
 import UploadMediaPage from './UploadMediaPage';
+import VideoPlayerPage from './VideoPlayerPage';
 
 // 折线图数据
 const chartData = [
@@ -1067,6 +1067,7 @@ function App() {
       <Route path="/:userid/audio-library" element={<AudioLibrary />} />
       <Route path="/:userid/gallery" element={<UploadMediaPage />} />
       <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
+      <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
       <Route path="/:userid/:id" element={<RecordPage />} />
       <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
     </Routes>

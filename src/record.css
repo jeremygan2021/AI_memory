@@ -29816,6 +29816,7 @@ html, body {
   top: 0; left: 0; right: 0; bottom: 0;
   width: 100vw !important;
   height: 100vh !important;
+  min-height: 100% !important;
   z-index: 100001 !important;
   background: rgba(0,0,0,0.97) !important;
   display: flex !important;

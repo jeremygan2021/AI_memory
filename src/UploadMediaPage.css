@@ -1873,3 +1873,199 @@
     touch-action: pan-y !important;
   }
 } 
+
+/* 分页按钮横向排列 */
+.pagination-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  margin: 18px 0 0 0;
+}
+
+.pagination-row .pagination-btn {
+  min-width: 90px;
+  padding: 10px 0;
+  font-size: 16px;
+  border-radius: 24px;
+  border: none;
+  background: #3bb6a6;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+}
+.pagination-row .pagination-btn:disabled {
+  background: #b2dfdb;
+  color: #eee;
+}
+
+@media (max-width: 768px) {
+  .pagination-row {
+    gap: 10px;
+  }
+  .pagination-row .pagination-btn {
+    min-width: 80px;
+    font-size: 15px;
+    padding: 9px 0;
+  }
+}
+
+/* 长按视频交互样式 */
+.media-content {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* 视频悬停提示 */
+.video-preview .media-content:hover::before {
+  content: "点击播放 · 长按复制链接";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 15;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+/* 长按状态样式 */
+.media-content.long-pressing {
+  transform: scale(0.95);
+  filter: brightness(0.8);
+  transition: all 0.1s ease;
+}
+
+.media-content.long-pressing::after {
+  content: "继续长按复制链接...";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 165, 0, 0.9);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 20;
+  animation: pulse-orange 1s infinite;
+}
+
+/* 长按成功状态样式 */
+.media-content.long-press-success {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+  transition: all 0.2s ease;
+}
+
+.media-content.long-press-success::after {
+  content: "✅ 链接已复制！";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(34, 197, 94, 0.95);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 1;
+  pointer-events: none;
+  z-index: 20;
+  animation: success-bounce 0.6s ease;
+}
+
+@keyframes pulse-orange {
+  0%, 100% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.9;
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes success-bounce {
+  0% { 
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.7;
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 视频播放图标增强 - 点击跳转提示 */
+.video-preview .video-overlay::before {
+  content: "点击播放";
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.video-preview:hover .video-overlay::before {
+  opacity: 1;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .media-content[style*="user-select: none"]::after {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+  
+  .video-preview .video-overlay::before {
+    font-size: 9px;
+    padding: 3px 6px;
+    bottom: 8px;
+  }
+}
+
+/* 长按反馈动画 */
+@keyframes longPressStart {
+  0% { transform: scale(1); }
+  100% { transform: scale(0.95); }
+}
+
+@keyframes longPressSuccess {
+  0% { transform: scale(0.95); background-color: rgba(255, 255, 255, 0.9); }
+  50% { transform: scale(1.05); background-color: rgba(76, 175, 80, 0.2); }
+  100% { transform: scale(1); background-color: rgba(255, 255, 255, 0.9); }
+}
+
+/* 长按状态指示 */
+.media-content.long-pressing {
+  animation: longPressStart 0.5s ease-out forwards;
+}
+
+.media-content.long-press-success {
+  animation: longPressSuccess 0.6s ease-out forwards;
+} 

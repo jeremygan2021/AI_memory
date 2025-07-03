@@ -2098,7 +2098,7 @@ const RecordComponent = () => {
           .background-decoration {
             background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png') !important;
             background-size: 100% 100% !important;
-            min-height: 100vh !important;
+            height: 100% !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
             background-attachment: scroll !important; /* iOS优化 */

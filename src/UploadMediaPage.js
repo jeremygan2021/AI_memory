@@ -24,6 +24,9 @@ const UploadMediaPage = () => {
   const [videoPlaying, setVideoPlaying] = useState(false);
   const videoRef = useRef(null);
   const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false);
+  // 长按视频相关状态
+  const [longPressTimer, setLongPressTimer] = useState(null);
+  const [isLongPress, setIsLongPress] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
@@ -199,8 +202,12 @@ const UploadMediaPage = () => {
       // 确保组件卸载时恢复页面滚动
       document.body.classList.remove('fullscreen-preview-open');
       document.documentElement.classList.remove('fullscreen-preview-open');
+      // 清理长按定时器
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+      }
     };
-  }, []);
+  }, [longPressTimer]);
 
   // 返回逻辑 - 根据来源决定返回哪里
   const goBack = () => {
@@ -616,9 +623,126 @@ const UploadMediaPage = () => {
 
   // 处理媒体文件点击
   const handleMediaClick = (file) => {
-    // 移动端：所有媒体文件都弹窗预览（图片和视频）
-    // PC端：图片弹窗预览，视频也弹窗预览（不再跳转播放页面）
-    setPreviewFile(file);
+    // 如果是长按操作，不执行点击逻辑
+    if (isLongPress) {
+      setIsLongPress(false);
+      return;
+    }
+
+    if (file.type === 'video') {
+      // 视频点击跳转到视频播放页面
+      const videoId = file.id;
+      console.log('UploadMediaPage: 视频点击，准备跳转', { 
+        videoId, 
+        userCode, 
+        sessionid, 
+        fileInfo: file 
+      });
+      
+      if (videoId && typeof videoId === 'string') {
+        const targetUrl = `/${userCode}/video-player/${sessionid}/${videoId}?from=upload`;
+        console.log('UploadMediaPage: 跳转到视频播放页面:', targetUrl);
+        navigate(targetUrl);
+      } else {
+        console.warn('UploadMediaPage: 视频ID无效:', videoId, '文件:', file);
+        // 降级到弹窗预览
+        alert('视频ID无效，将使用弹窗预览模式');
+        setPreviewFile(file);
+      }
+    } else {
+      // 图片弹窗预览
+      setPreviewFile(file);
+    }
+  };
+
+  // 长按开始事件
+  const handleLongPressStart = (file, e) => {
+    // 阻止默认的右键菜单和其他默认行为
+    e.preventDefault();
+    
+    if (file.type === 'video') {
+      // 添加长按开始的视觉反馈
+      const mediaElement = e.currentTarget;
+      mediaElement.classList.add('long-pressing');
+      
+      const timer = setTimeout(() => {
+        setIsLongPress(true);
+        // 移除长按状态，添加成功状态
+        mediaElement.classList.remove('long-pressing');
+        mediaElement.classList.add('long-press-success');
+        
+        // 复制视频播放链接
+        copyVideoLink(file);
+        
+        // 2秒后移除成功状态
+        setTimeout(() => {
+          mediaElement.classList.remove('long-press-success');
+        }, 600);
+      }, 500); // 500ms长按触发
+      
+      setLongPressTimer(timer);
+    }
+  };
+
+  // 长按结束事件
+  const handleLongPressEnd = (e) => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+      // 如果提前松开，清理长按状态
+      const mediaElement = e.currentTarget;
+      mediaElement.classList.remove('long-pressing');
+    }
+  };
+
+  // 复制视频播放链接
+  const copyVideoLink = async (file) => {
+    try {
+      const videoId = file.id;
+      console.log('UploadMediaPage: 开始复制视频链接', { videoId, file });
+      
+      if (!videoId || typeof videoId !== 'string') {
+        console.error('UploadMediaPage: 视频ID无效:', videoId);
+        alert('无法生成播放链接：视频ID无效');
+        return;
+      }
+
+      // 生成完整的播放链接
+      const baseUrl = window.location.origin;
+      const playLink = `${baseUrl}/${userCode}/video-player/${sessionid}/${videoId}?from=upload`;
+      
+      console.log('UploadMediaPage: 生成的播放链接:', playLink);
+      
+      // 尝试使用现代的 Clipboard API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(playLink);
+        console.log('UploadMediaPage: 视频播放链接已复制到剪贴板');
+        alert('✅ 视频播放链接已复制到剪贴板！');
+      } else {
+        // 降级到传统方法
+        const textArea = document.createElement('textarea');
+        textArea.value = playLink;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          alert('✅ 视频播放链接已复制到剪贴板！');
+        } catch (err) {
+          console.error('复制失败:', err);
+          alert('复制失败，请手动复制链接：' + playLink);
+        }
+        
+        document.body.removeChild(textArea);
+      }
+    } catch (error) {
+      console.error('复制链接失败:', error);
+      alert('复制链接失败，请稍后重试');
+    }
   };
 
   const closePreview = () => {
@@ -846,31 +970,10 @@ const UploadMediaPage = () => {
       <div className="upload-header">
         <div className="back-button" onClick={goBack}>
           <span className="back-text">
-            ← {fromSource === 'record' ? '返回录音页面' : '返回主页'}
+            {fromSource === 'record' ? '返回录音页面' : '返回主页'}
           </span>
         </div>
         
-        {/* 添加轮播测试按钮 */}
-        {sessionid && sessionid !== 'homepage' && (
-          <div 
-            className="test-player-button"
-            onClick={goToPlayerPage}
-            style={{
-              background: 'linear-gradient(135deg, #4CAF50, #45a049)',
-              color: 'white',
-              padding: '8px 16px',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            🎠 测试轮播功能
-          </div>
-        )}
         
         <div className="session-info">
           <span>用户: {userCode} | 会话: {sessionid}</span>
@@ -945,7 +1048,21 @@ const UploadMediaPage = () => {
               <div className="photos-grid">
                               {currentFiles.map(file => (
                 <div key={file.id} className="media-item">
-                  <div className="media-content" onClick={() => handleMediaClick(file)}>
+                  <div 
+                    className="media-content" 
+                    onClick={() => handleMediaClick(file)}
+                    onMouseDown={(e) => file.type === 'video' ? handleLongPressStart(file, e) : null}
+                    onMouseUp={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
+                    onMouseLeave={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
+                    onTouchStart={(e) => file.type === 'video' ? handleLongPressStart(file, e) : null}
+                    onTouchEnd={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
+                    onTouchCancel={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
+                    onContextMenu={(e) => file.type === 'video' ? e.preventDefault() : null}
+                    style={{ 
+                      userSelect: file.type === 'video' ? 'none' : 'auto',
+                      WebkitUserSelect: file.type === 'video' ? 'none' : 'auto'
+                    }}
+                  >
                     {file.type === 'image' ? (
                       <div className="image-preview">
                       <img src={file.ossUrl || file.preview || file.url} alt={file.name} className="media-preview" 
@@ -1049,7 +1166,7 @@ const UploadMediaPage = () => {
 
               {/* 分页控件 */}
               {totalPages > 1 && (
-                <div className="pagination">
+                <div className="pagination pagination-row">
                   <button 
                     className="pagination-btn"
                     onClick={goToPrevPage}

@@ -1,47 +1,47 @@
 /* 字体配置 */
 @font-face {
-  font-family: 'MUYAO-SOFTBRUSH';
-  src: url('./fonts/Muyao-Softbrush-2.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
+    font-family: 'MUYAO-SOFTBRUSH';
+    src: url('./fonts/Muyao-Softbrush-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 
 /* CSS自定义属性 - 移动端视口支持 */
 :root {
-/* 移动端视口高度支持 */
---vh: 1vh;
---dvh: 1dvh;
-/* 安全区域支持 */
---safe-area-inset-top: env(safe-area-inset-top, 0px);
---safe-area-inset-right: env(safe-area-inset-right, 0px);
---safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
---safe-area-inset-left: env(safe-area-inset-left, 0px);
+  /* 移动端视口高度支持 */
+  --vh: 1vh;
+  --dvh: 1dvh;
+  /* 安全区域支持 */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
 }
 
 /* 移动端视口高度修正 */
 @supports (height: 100dvh) {
-:root {
-  --vh: 1dvh;
-}
+  :root {
+    --vh: 1dvh;
+  }
 }
 
 /* 播放页面样式 */
 .player-page {
-min-height: 100vh;
-min-height: calc(var(--vh, 1vh) * 100); /* 使用CSS变量确保兼容性 */
-background: linear-gradient(135deg, #a8e6a3 0%, #88d982 50%, #a8e6a3 100%);
-position: relative;
-overflow-x: hidden;
-font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-/* 确保背景在移动端完全覆盖 */
-background-attachment: fixed;
-background-size: cover;
-background-repeat: no-repeat;
-/* 安全区域支持 */
-padding-top: var(--safe-area-inset-top);
-padding-bottom: var(--safe-area-inset-bottom);
-padding-left: var(--safe-area-inset-left);
-padding-right: var(--safe-area-inset-right);
+  min-height: 100vh;
+  min-height: calc(var(--vh, 1vh) * 100); /* 使用CSS变量确保兼容性 */
+  background: linear-gradient(135deg, #a8e6a3 0%, #88d982 50%, #a8e6a3 100%);
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* 确保背景在移动端完全覆盖 */
+  background-attachment: fixed;
+  background-size: cover;
+  background-repeat: no-repeat;
+  /* 安全区域支持 */
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
 }
 
 /* 确保所有播放页面的文本元素使用统一字体 */
@@ -58,305 +58,321 @@ padding-right: var(--safe-area-inset-right);
 .player-page input, 
 .player-page textarea, 
 .player-page label {
-font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* 背景装饰 */
 .background-decoration {
-position: absolute;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-overflow: hidden;
-pointer-events: none;
-z-index: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .wave {
-position: absolute;
-width: 200%;
-height: 200%;
-background: radial-gradient(circle, rgba(255,255,255,0.08) 2px, transparent 2px);
-background-size: 60px 60px;
-animation: backgroundMove 25s linear infinite;
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 2px, transparent 2px);
+  background-size: 60px 60px;
+  animation: backgroundMove 25s linear infinite;
 }
 
 .wave1 {
-animation-delay: 0s;
-background-size: 40px 40px;
+  animation-delay: 0s;
+  background-size: 40px 40px;
 }
 
 .wave2 {
-animation-delay: -8s;
-background-size: 80px 80px;
-opacity: 0.5;
+  animation-delay: -8s;
+  background-size: 80px 80px;
+  opacity: 0.5;
 }
 
 .wave3 {
-animation-delay: -16s;
-background-size: 120px 120px;
-opacity: 0.3;
+  animation-delay: -16s;
+  background-size: 120px 120px;
+  opacity: 0.3;
 }
 
 @keyframes backgroundMove {
-0% { transform: translate(-50%, -50%) rotate(0deg); }
-100% { transform: translate(-50%, -50%) rotate(360deg); }
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 /* 加载状态 */
 .player-page.loading {
-display: flex;
-align-items: center;
-justify-content: center;
-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
 .loading-spinner {
-text-align: center;
+  text-align: center;
 }
 
 .spinner {
-width: 50px;
-height: 50px;
-border: 4px solid rgba(255, 255, 255, 0.3);
-border-top: 4px solid white;
-border-radius: 50%;
-animation: spin 1s linear infinite;
-margin: 0 auto 20px;
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
 }
 
 @keyframes spin {
-0% { transform: rotate(0deg); }
-100% { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 错误状态 */
 .player-page.error {
-display: flex;
-align-items: center;
-justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .error-content {
-text-align: center;
-color: white;
-background: rgba(255, 255, 255, 0.1);
-padding: 40px;
-border-radius: 20px;
-backdrop-filter: blur(10px);
+  text-align: center;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
 }
 
 .error-content h2 {
-margin: 0 0 16px 0;
-font-size: 24px;
+  margin: 0 0 16px 0;
+  font-size: 24px;
 }
 
 .error-content p {
-margin: 0 0 24px 0;
-opacity: 0.8;
+  margin: 0 0 24px 0;
+  opacity: 0.8;
 }
 
 /* 顶部导航 */
 .player-header {
-position: relative;
-z-index: 10;
-display: flex;
-align-items: center;
-justify-content: space-between;
-padding: 20px 30px;
-padding-top: max(20px, var(--safe-area-inset-top));
-padding-left: max(30px, var(--safe-area-inset-left));
-padding-right: max(30px, var(--safe-area-inset-right));
-background: rgba(255, 255, 255, 0.15);
-backdrop-filter: blur(20px);
-border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  padding-top: max(20px, var(--safe-area-inset-top));
+  padding-left: max(30px, var(--safe-area-inset-left));
+  padding-right: max(30px, var(--safe-area-inset-right));
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .nav-back-btn,
 .delete-recording-btn {
-display: flex;
-align-items: center;
-gap: 8px;
-padding: 12px 20px;
-background: #f8fae6;
-border: none;
-border-radius: 25px;
-color: #2d5016;
-font-size: 14px;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.3s ease;
-backdrop-filter: blur(10px);
-/* 触摸设备优化 */
-min-height: 44px;
--webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #f8fae6;
+  border: none;
+  border-radius: 25px;
+  color: #2d5016;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  /* 触摸设备优化 */
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .elephant-icon {
+  width: 400.67px;  /* 240 * (16/9) */
+  height: 240px;    /* 保持16:9比例 */
   position: absolute;
-  top: -40px;      /* 让大象头部溢出白色区域 */
-  right: -40px;    /* 让大象身体也部分溢出 */
-  width: 140px;
-  height: auto;
-  max-width: 40vw;
-  max-height: 120px;
-  z-index: 10;
-  pointer-events: none; /* 避免遮挡交互 */
+  top: -80px;       /* 溢出player-container上边界 */
+  right: -60px;     /* 位于右上角，部分溢出 */
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性动画 */
+  cursor: pointer;
+  transform-origin: center center;
+  z-index: 25;      /* 低于轮播图，避免遮挡 */
 }
 
 .elephant-icon:hover {
-transform: scale(1.1) rotate(5deg);
-filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
 }
 
 .elephant-icon:active {
-transform: scale(0.95) rotate(-3deg);
-filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+  transform: scale(0.95) rotate(-3deg);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
 }
 
 .nav-back-btn:hover {
-background: rgba(255, 255, 255, 0.35);
-transform: translateX(-3px);
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateX(-3px);
 }
 
 .delete-recording-btn:hover {
-background: rgba(220, 53, 69, 0.3);
-transform: translateY(-2px);
-color: white;
+  background: rgba(220, 53, 69, 0.3);
+  transform: translateY(-2px);
+  color: white;
 }
 
 .back-icon {
-font-size: 18px;
-transition: transform 0.3s ease;
+  font-size: 18px;
+  transition: transform 0.3s ease;
 }
 
 .nav-back-btn:hover .back-icon {
-transform: translateX(-2px);
+  transform: translateX(-2px);
 }
 
 .session-info {
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 4px;
-background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .session-label {
-font-size: 20px;
-color: #2d5016;
-text-transform: uppercase;
-letter-spacing: 0.5px;
+  font-size: 20px;
+  color: #2d5016;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .session-id {
-font-size: 14px;
-color: #2d5016;
-font-weight: 600;
-background: rgba(255, 255, 255, 0.25);
-padding: 4px 12px;
-border-radius: 12px;
-font-family: 'SF Mono', monospace;
+  font-size: 14px;
+  color: #2d5016;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-family: 'SF Mono', monospace;
 }
 
 /* 主播放器区域 */
 .player-main {
-position: relative;
-z-index: 5;
-display: flex;
-align-items: center;
-justify-content: center;
-min-height: calc(calc(var(--vh, 1vh) * 100) - 120px); /* 增加导航栏预留空间 */
-padding: 60px 20px 40px; /* 增加顶部padding */
-padding-left: max(20px, var(--safe-area-inset-left));
-padding-right: max(20px, var(--safe-area-inset-right));
-padding-bottom: max(40px, var(--safe-area-inset-bottom));
-background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/asset/background2.png');
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(calc(var(--vh, 1vh) * 100) - 120px); /* 增加导航栏预留空间 */
+  padding: 60px 20px 40px; /* 增加顶部padding */
+  padding-left: max(20px, var(--safe-area-inset-left));
+  padding-right: max(20px, var(--safe-area-inset-right));
+  padding-bottom: max(40px, var(--safe-area-inset-bottom));
+  background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/asset/background2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .player-container {
-width: 100%;
-max-height: 100%;
-max-width: 600px;
-background: #ffffe6;
-backdrop-filter: blur(20px);
-border-radius: 30px;
-padding: 60px 40px 50px; /* 增加顶部padding为avatar-icon预留空间 */
-box-shadow: 
-  0 25px 80px rgba(45, 80, 22, 0.15),
-  0 10px 35px rgba(45, 80, 22, 0.1);
-border: 1px solid rgba(255, 255, 255, 0.4);
-position: relative; /* 为avatar-icon提供定位参考 */
+  width: 100%;
+  max-height: 100%;
+  max-width: 600px;
+  background: #ffffe6;
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 80px 40px 50px; /* 增加顶部padding为图标预留空间 */
+  box-shadow: 
+    0 25px 80px rgba(45, 80, 22, 0.15),
+    0 10px 35px rgba(45, 80, 22, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  position: relative; /* 为图标定位提供参考 */
 }
 
 /* 录音信息区域 */
 .recording-info {
-text-align: center;
-margin-bottom: 0;
+  text-align: center;
+  margin-bottom: 0;
 }
 
 .recording-avatar {
-width: 75px;
-height: 75px;
-position: relative;
-display: inline-block;
-margin-bottom: 5px;
+  width: 75px;
+  height: 75px;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 5px;
 }
 
 .avatar-icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #f3fadf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  color: #7bbd5a;
+  box-shadow:
+    0 8px 32px 0 rgba(74, 201, 103, 0.18),
+    0 2px 8px 0 rgba(74, 201, 103, 0.10),
+    0 0 0 8px #f3fadf,
+    0 0 0 20px #f7fbe9;
   position: absolute;
   left: 50%;
-  top: -50px; /* 适当下移，避免与大象重叠 */
-  transform: translateX(-50%);
-  z-index: 15;
-  width: 70px;
-  height: 70px;
-  font-size: 36px;
+  top: -60px; /* 溢出player-container上边界 */
+  transform: translate(-50%, 0); /* 水平居中 */
+  z-index: 15; /* 高于elephant-icon，但低于轮播图 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  border: 2px solid #e2f5c2;
 }
 
 .avatar-icon:hover {
-transform: translate(-50%, 0) scale(1.05);
-box-shadow:
-  0 16px 40px 0 rgba(74, 201, 103, 0.22),
-  0 0 0 8px #eaf7d0,
-  0 0 0 20px #f3fadf;
-background: #eaf7d0;
+  transform: translate(-50%, 0) scale(1.05);
+  box-shadow:
+    0 16px 40px 0 rgba(74, 201, 103, 0.22),
+    0 0 0 8px #eaf7d0,
+    0 0 0 20px #f3fadf;
+  background: #eaf7d0;
 }
 
 .avatar-icon:active {
-transform: translate(-50%, 0) scale(0.95);
-box-shadow:
-  0 8px 20px 0 rgba(74, 201, 103, 0.12),
-  0 0 0 8px #e2f5c2,
-  0 0 0 20px #f3fadf;
-background: #e2f5c2;
+  transform: translate(-50%, 0) scale(0.95);
+  box-shadow:
+    0 8px 20px 0 rgba(74, 201, 103, 0.12),
+    0 0 0 8px #e2f5c2,
+    0 0 0 20px #f3fadf;
+  background: #e2f5c2;
 }
 
 .sound-waves {
-position: absolute;
-top: -10%;
-left: 50%;
-transform: translate(-50%, -50%);
-display: flex;
-gap: 4px;
-z-index: 1;
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 4px;
+  z-index: 1;
 }
 
 .wave-bar {
-width: 4px;
-height: 20px;
-background: rgba(74, 201, 103, 0.6);
-border-radius: 2px;
-transform-origin: bottom;
-transition: all 0.3s ease;
+  width: 4px;
+  height: 20px;
+  background: rgba(74, 201, 103, 0.6);
+  border-radius: 2px;
+  transform-origin: bottom;
+  transition: all 0.3s ease;
 }
 
 .wave-bar.active {
-animation: waveAnimation 1.5s ease-in-out infinite;
+  animation: waveAnimation 1.5s ease-in-out infinite;
 }
 
 .wave-bar:nth-child(1) { animation-delay: 0s; }
@@ -365,1611 +381,1910 @@ animation: waveAnimation 1.5s ease-in-out infinite;
 .wave-bar:nth-child(4) { animation-delay: 0.3s; }
 
 @keyframes waveAnimation {
-0%, 100% { transform: scaleY(1); }
-50% { transform: scaleY(2); }
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(2); }
 }
 
 .recording-title {
-font-size: 32px;
-font-weight: 700;
-margin: 0 0 25px 0;
-background: linear-gradient(135deg, #4ac967, #88d982);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-background-clip: text;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 25px 0;
+  background: linear-gradient(135deg, #4ac967, #88d982);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .recording-metadata {
-display: flex;
-flex-direction: column;
-gap: 12px;
-color: #666;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #666;
 }
 
 .metadata-item {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 8px 16px;
-background: rgba(74, 201, 103, 0.08);
-border-radius: 12px;
-border-left: 3px solid #4ac967;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(74, 201, 103, 0.08);
+  border-radius: 12px;
+  border-left: 3px solid #4ac967;
 }
 
 .metadata-item .label {
-font-weight: 600;
-font-size: 14px;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .metadata-item .value {
-font-size: 14px;
-color: #333;
+  font-size: 14px;
+  color: #333;
 }
 
 /* 进度条区域 */
 .progress-section {
-margin-bottom: 40px;
+  margin-bottom: 40px;
 }
 
 .time-display {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 15px;
-font-family: 'SF Mono', monospace;
-font-size: 16px;
-font-weight: 600;
-color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-family: 'SF Mono', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
 }
 
 .progress-container {
-position: relative;
-height: 6px;
-background: rgba(74, 201, 103, 0.2);
-border-radius: 3px;
-overflow: hidden;
+  position: relative;
+  height: 6px;
+  background: rgba(74, 201, 103, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
 }
 
 .progress-slider {
-position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: transparent;
-border: none;
-outline: none;
-cursor: pointer;
-z-index: 2;
--webkit-appearance: none;
-appearance: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .progress-slider::-webkit-slider-thumb {
--webkit-appearance: none;
-appearance: none;
-width: 18px;
-height: 18px;
-border-radius: 50%;
-background: #4ac967;
-cursor: pointer;
-box-shadow: 0 2px 8px rgba(74, 201, 103, 0.5);
-transition: all 0.3s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4ac967;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(74, 201, 103, 0.5);
+  transition: all 0.3s ease;
 }
 
 .progress-slider::-webkit-slider-thumb:hover {
-transform: scale(1.2);
-box-shadow: 0 4px 15px rgba(74, 201, 103, 0.7);
+  transform: scale(1.2);
+  box-shadow: 0 4px 15px rgba(74, 201, 103, 0.7);
 }
 
 .progress-fill {
-position: absolute;
-top: 0;
-left: 0;
-height: 100%;
-background: linear-gradient(90deg, #4ac967, #88d982);
-border-radius: 3px;
-transition: width 0.1s ease;
-z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #4ac967, #88d982);
+  border-radius: 3px;
+  transition: width 0.1s ease;
+  z-index: 1;
 }
 
 /* 主控制按钮 */
 .main-controls {
-display: flex;
-justify-content: center;
-align-items: center;
-gap: 30px;
-margin-bottom: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 40px;
 }
 
 .control-btn {
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 8px;
-background: none;
-border: none;
-cursor: pointer;
-padding: 16px;
-border-radius: 100px;
-transition: all 0.3s ease;
-color: #333;
-/* 触摸设备优化 */
-min-height: 44px;
--webkit-tap-highlight-color: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 16px;
+  border-radius: 100px;
+  transition: all 0.3s ease;
+  color: #333;
+  /* 触摸设备优化 */
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .control-btn:hover {
-background: rgba(74, 201, 103, 0.1);
-transform: translateY(-3px);
+  background: rgba(74, 201, 103, 0.1);
+  transform: translateY(-3px);
 }
 
 .skip-btn .btn-icon {
-font-size: 24px;
+  font-size: 24px;
 }
 
 .skip-btn .btn-label {
-font-size: 12px;
-font-weight: 600;
-color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
 }
 
 .play-box {
-background: linear-gradient(135deg, #4ac967, #88d982);
-color: white;
+  background: linear-gradient(135deg, #4ac967, #88d982);
+  color: white;
 
-transform: translateY(0px);
-border-radius: 30%;
-/* box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); */
+  transform: translateY(0px);
+  border-radius: 30%;
+  /* box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); */
 }
 
 .play-box:hover {
-background: linear-gradient(135deg, #88d982, #4ac967);
-transform: translateY(-3px) scale(1.05);
-box-shadow: 0 15px 40px rgba(74, 201, 103, 0.6);
+  background: linear-gradient(135deg, #88d982, #4ac967);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(74, 201, 103, 0.6);
 }
 
 .play-box .btn-icon {
-font-size: 32px;
+  font-size: 32px;
 }
 
 .play-btn.playing {
-animation: pulse 2s ease-in-out infinite;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
-0% { box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); }
-50% { box-shadow: 0 15px 45px rgba(74, 201, 103, 0.7); }
-100% { box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); }
+  0% { box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); }
+  50% { box-shadow: 0 15px 45px rgba(74, 201, 103, 0.7); }
+  100% { box-shadow: 0 10px 30px rgba(74, 201, 103, 0.4); }
 
 }
 
 /* 高级控制 */
 .advanced-controls {
-display: flex;
-flex-direction: column;
-gap: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 }
 
 .control-group {
-display: flex;
-flex-direction: column;
-gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .control-label {
-font-size: 14px;
-font-weight: 600;
-color: #333;
-display: flex;
-align-items: center;
-gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* 播放速度控制 */
 .speed-buttons {
-display: flex;
-gap: 8px;
-flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .speed-btn {
-padding: 10px 20px;
-border: 4px solid #cce7b0;
-background: #f1fad3;
-color: #4ac967;
-border-radius: 20px;
-font-size: 12px;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.3s ease;
-/* 触摸设备优化 */
-min-height: 44px;
--webkit-tap-highlight-color: transparent;
+  padding: 10px 20px;
+  border: 4px solid #cce7b0;
+  background: #f1fad3;
+  color: #4ac967;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* 触摸设备优化 */
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .speed-btn:hover {
-background: rgba(74, 201, 103, 0.1);
-border-color: #4ac967;
+  background: rgba(74, 201, 103, 0.1);
+  border-color: #4ac967;
 }
 
 .speed-btn.active {
-background: linear-gradient(135deg, #4ac967, #88d982);
-color: white;
-border-color: transparent;
-box-shadow: 0 4px 15px rgba(74, 201, 103, 0.3);
+  background: linear-gradient(135deg, #4ac967, #88d982);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(74, 201, 103, 0.3);
 }
 
 /* 音量控制 */
 .volume-container {
-display: flex;
-align-items: center;
-gap: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .volume-slider {
-flex: 1;
-height: 4px;
-background: rgba(74, 201, 103, 0.2);
-border-radius: 2px;
-outline: none;
--webkit-appearance: none;
-appearance: none;
+  flex: 1;
+  height: 4px;
+  background: rgba(74, 201, 103, 0.2);
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .volume-slider::-webkit-slider-thumb {
--webkit-appearance: none;
-appearance: none;
-width: 16px;
-height: 16px;
-border-radius: 50%;
-background: #4ac967;
-cursor: pointer;
-box-shadow: 0 2px 6px rgba(74, 201, 103, 0.4);
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4ac967;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(74, 201, 103, 0.4);
 }
 
 .volume-value {
-font-size: 12px;
-font-weight: 600;
-color: #4ac967;
-min-width: 40px;
-text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4ac967;
+  min-width: 40px;
+  text-align: right;
 }
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
-.elephant-icon {
-  top: -28px;
-  right: -28px;
-  width: 110px;
-  max-height: 90px;
-}
+  .elephant-icon {
+    width: 320px;  /* 比默认稍小，适合中等平板 */
+    height: 192px; /* 保持16:9比例 */
+    top: -50px;    /* 相对于player-container溢出 */
+    right: -50px;  /* 右上角溢出 */
+    z-index: 100;   /* 保持层级 */
+  }
 
-.avatar-icon {
-  width: 60px;
-  height: 60px;
-  font-size: 28px;
-  top: 12px;
-}
+  .player-container {
+    max-width: 500px;
+    padding: 70px 30px 40px; /* 调整padding为图标预留空间 */
+  }
+  
+  .avatar-icon {
+    width: 75px;
+    height: 75px;
+    font-size: 50px;
+    top: -38px; /* 相对于player-container溢出 */
+    z-index: 15; /* 保持层级 */
+  }
+  
+  .recording-title {
+    font-size: 28px;
+  }
 
-.player-container {
-  max-width: 500px;
-  padding: 50px 30px 40px; /* 调整padding */
-}
+  .media-carousel-section {
+    margin-bottom: 25px;
+    padding: 15px;
+  }
 
-.recording-title {
-  font-size: 28px;
-}
+  .carousel-container {
+    width: 350px;
+    height: 210px;
+  }
 }
 
 @media (max-width: 768px) {
-.player-page {
-  /* 移动端确保背景完全覆盖 */
-  min-height: calc(var(--vh, 1vh) * 100);
-  background-attachment: scroll; /* 移动端改为scroll避免性能问题 */
-}
+  .player-page {
+    /* 移动端确保背景完全覆盖 */
+    min-height: calc(var(--vh, 1vh) * 100);
+    background-attachment: scroll; /* 移动端改为scroll避免性能问题 */
+  }
 
-.elephant-icon {
-  top: -18px;
-  right: -18px;
-  width: 80px;
-  max-height: 60px;
-}
+  .elephant-icon {
+    width: 200px;  /* 缩小尺寸适合小屏 */
+    height: 120px; /* 保持16:9比例 */
+    top: -40px;    /* 减少溢出 */
+    right: -30px;  /* 减少溢出 */
+    z-index: 30;   /* 提高层级 */
+  }
 
-.elephant-icon:hover {
-  transform: scale(1.05) rotate(2deg); /* 减小旋转角度 */
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
-}
+  .player-header {
+    padding: 15px 20px;
+    padding-top: max(15px, var(--safe-area-inset-top));
+    padding-left: max(20px, var(--safe-area-inset-left));
+    padding-right: max(20px, var(--safe-area-inset-right));
+    flex-wrap: wrap;
+    gap: 10px;
+    z-index: 15; /* 确保导航栏在适当层级 */
+  }
 
-.elephant-icon:active {
-  transform: scale(0.98) rotate(-1deg);
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
-}
+  .nav-back-btn,
+  .delete-recording-btn {
+    font-size: 12px;
+    padding: 10px 16px;
+    min-height: 40px;
+  }
 
-.player-header {
-  padding: 15px 20px;
-  padding-top: max(15px, var(--safe-area-inset-top));
-  padding-left: max(20px, var(--safe-area-inset-left));
-  padding-right: max(20px, var(--safe-area-inset-right));
-  flex-wrap: wrap;
-  gap: 10px;
-  z-index: 15; /* 确保导航栏在最上层 */
-}
+  .session-info {
+    order: 3;
+    flex-basis: 100%;
+    margin-top: 10px;
+  }
 
-.nav-back-btn,
-.delete-recording-btn {
-  font-size: 12px;
-  padding: 10px 16px;
-  min-height: 40px;
-}
+  .player-main {
+    padding: 25px 15px 20px; /* 减少padding */
+    padding-left: max(15px, var(--safe-area-inset-left));
+    padding-right: max(15px, var(--safe-area-inset-right));
+    padding-bottom: max(20px, var(--safe-area-inset-bottom));
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 120px);
+  }
 
-.session-info {
-  order: 3;
-  flex-basis: 100%;
-  margin-top: 10px;
-}
+  .player-container {
+    padding: 70px 20px 25px; /* 优化padding，为图标预留合适空间 */
+    border-radius: 25px;
+    max-width: 95%; /* 增加宽度利用 */
+    margin: 0 auto; /* 居中 */
+  }
 
-.player-main {
-  padding: 30px 15px 20px; /* 增加顶部padding确保不与elephant-icon重叠 */
-  padding-left: max(15px, var(--safe-area-inset-left));
-  padding-right: max(15px, var(--safe-area-inset-right));
-  padding-bottom: max(20px, var(--safe-area-inset-bottom));
-  min-height: calc(calc(var(--vh, 1vh) * 100) - 140px); /* 调整高度计算 */
-}
+  .avatar-icon {
+    width: 65px;
+    height: 65px;
+    font-size: 32px;
+    top: -32px; /* 适度溢出 */
+    z-index: 35; /* 最高层级 */
+  }
 
-.player-container {
-  padding: 40px 25px 30px; /* 为avatar-icon预留更多空间 */
-  border-radius: 25px;
-  max-width: 400px;
-}
+  .recording-title {
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
 
-.avatar-icon {
-  width: 48px;
-  height: 48px;
-  font-size: 22px;
-  top: 8px;
-}
+  .metadata-item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 
-.recording-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
+  .time-display {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
 
-.metadata-item {
-  padding: 8px 12px;
-  font-size: 13px;
-}
+  .progress-container {
+    height: 8px;
+  }
 
-.time-display {
-  font-size: 14px;
-  margin-bottom: 12px;
-}
+  .progress-slider::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
 
-.progress-container {
-  height: 8px;
-}
+  .main-controls {
+    gap: 20px;
+    margin-bottom: 25px;
+  }
 
-.progress-slider::-webkit-slider-thumb {
-  width: 20px;
-  height: 20px;
-}
+  .control-btn {
+    padding: 12px;
+    min-height: 60px;
+  }
 
-.main-controls {
-  gap: 20px;
-  margin-bottom: 30px;
-}
+  .play-box {
+    padding: 16px;
+    border-radius: 50%;
+  }
 
-.control-btn {
-  padding: 12px;
-  min-height: 60px;
-}
+  .play-box .btn-icon {
+    font-size: 28px;
+  }
 
-.play-box {
-  padding: 16px;
-  border-radius: 50%;
-}
+  .skip-btn .btn-icon {
+    font-size: 20px;
+  }
 
-.play-box .btn-icon {
-  font-size: 28px;
-}
+  .skip-btn .btn-label {
+    font-size: 11px;
+  }
 
-.skip-btn .btn-icon {
-  font-size: 20px;
-}
+  .advanced-controls {
+    gap: 20px;
+  }
 
-.skip-btn .btn-label {
-  font-size: 11px;
-}
+  .speed-buttons {
+    gap: 6px;
+    justify-content: center;
+  }
 
-.advanced-controls {
-  gap: 20px;
-}
+  .speed-btn {
+    padding: 8px 16px;
+    font-size: 11px;
+    min-height: 36px;
+  }
 
-.speed-buttons {
-  gap: 6px;
-  justify-content: center;
-}
+  .control-group {
+    gap: 10px;
+  }
 
-.speed-btn {
-  padding: 8px 16px;
-  font-size: 11px;
-  min-height: 36px;
-}
+  .control-label {
+    font-size: 13px;
+  }
 
-.control-group {
-  gap: 10px;
-}
+  .volume-container {
+    gap: 12px;
+  }
 
-.control-label {
-  font-size: 13px;
-}
+  .volume-value {
+    font-size: 11px;
+    min-width: 35px;
+  }
 
-.volume-container {
-  gap: 12px;
-}
+  /* 移动端轮播图样式优化 */
+  .media-carousel-section {
+    margin-top: 20px; /* 减少顶部间距 */
+    margin-bottom: 15px;
+    padding: 12px; /* 减少内边距 */
+    border-radius: 12px; /* 稍小的圆角 */
+  }
 
-.volume-value {
-  font-size: 11px;
-  min-width: 35px;
-}
+  .carousel-title {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .carousel-container {
+    width: 100%; /* 填满容器 */
+    max-width: 300px; /* 限制最大宽度 */
+    height: 180px; /* 适合16:9比例 */
+    margin: 0 auto; /* 居中 */
+  }
+
+  .carousel-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    margin: 0 10px; /* 减少间距 */
+  }
+
+  .video-play-overlay {
+    width: 32px;
+    height: 32px;
+  }
+
+  .play-icon {
+    font-size: 12px;
+  }
+
+  .media-type-badge {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .carousel-indicators {
+    margin-top: 10px;
+  }
+
+  .indicator {
+    width: 6px;
+    height: 6px;
+  }
+
+  .preview-content {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .preview-close {
+    width: 36px;
+    height: 36px;
+  }
+
+  .preview-image {
+    max-height: 60vh;
+  }
+
+  .preview-info {
+    padding: 16px;
+  }
+
+  .preview-info h4 {
+    font-size: 16px;
+  }
+
+  .preview-info p {
+    font-size: 13px;
+  }
+
+  .upload-modal-preview-media {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* 主播放器区域最大高度限制 */
+  .player-main {
+    max-height: calc(100vh - 100px); /* 减少高度限制 */
+    overflow-y: auto;
+  }
+
+  .player-container {
+    max-height: calc(100vh - 120px);
+  }
 }
 
 @media (max-width: 480px) {
-.player-page {
-  /* 小屏幕设备的背景优化 */
-  min-height: calc(var(--vh, 1vh) * 100);
-  background-attachment: scroll;
-}
+  .player-page {
+    /* 小屏幕设备的背景优化 */
+    min-height: calc(var(--vh, 1vh) * 100);
+    background-attachment: scroll;
+  }
 
-.elephant-icon {
-  top: -10px;
-  right: -10px;
-  width: 60px;
-  max-height: 40px;
-}
+  .elephant-icon {
+    width: 180px;  /* 小屏幕适中尺寸 */
+    height: 108px; /* 保持16:9比例 */
+    top: -30px;    /* 相对于player-container溢出 */
+    right: -30px;  /* 右上角溢出 */
+    z-index: 10;   /* 保持层级 */
+  }
 
-.elephant-icon:hover {
-  transform: scale(1.03) rotate(1deg); /* 减小缩放和旋转 */
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
-}
+  .player-header {
+    padding: 12px 15px;
+    padding-top: max(12px, var(--safe-area-inset-top));
+    padding-left: max(15px, var(--safe-area-inset-left));
+    padding-right: max(15px, var(--safe-area-inset-right));
+    z-index: 15;
+  }
 
-.elephant-icon:active {
-  transform: scale(0.99) rotate(-0.5deg);
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
-}
+  .nav-back-btn,
+  .delete-recording-btn {
+    font-size: 11px;
+    padding: 8px 12px;
+    min-height: 36px;
+  }
 
-.player-header {
-  padding: 12px 15px;
-  padding-top: max(12px, var(--safe-area-inset-top));
-  padding-left: max(15px, var(--safe-area-inset-left));
-  padding-right: max(15px, var(--safe-area-inset-right));
-  z-index: 15;
-}
+  .player-main {
+    padding: 25px 10px 15px; /* 调整padding */
+    padding-left: max(10px, var(--safe-area-inset-left));
+    padding-right: max(10px, var(--safe-area-inset-right));
+    padding-bottom: max(15px, var(--safe-area-inset-bottom));
+  }
 
-.nav-back-btn,
-.delete-recording-btn {
-  font-size: 11px;
-  padding: 8px 12px;
-  min-height: 36px;
-}
+  .player-container {
+    padding: 50px 15px 25px; /* 为图标预留空间 */
+    border-radius: 20px;
+    max-width: 320px;
+    margin-bottom: var(--safe-area-inset-bottom);
+  }
 
-.player-main {
-  padding: 35px 10px 15px; /* 调整padding避免重叠 */
-  padding-left: max(10px, var(--safe-area-inset-left));
-  padding-right: max(10px, var(--safe-area-inset-right));
-  padding-bottom: max(15px, var(--safe-area-inset-bottom));
-  
-}
+  .avatar-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    top: -30px; /* 相对于player-container溢出 */
+    z-index: 15; /* 保持层级 */
+  }
 
-.player-container {
-  padding: 35px 15px 25px; /* 为avatar-icon预留空间 */
-  border-radius: 20px;
-  max-width: 320px;
-  margin-bottom: var(--safe-area-inset-bottom);
-}
+  .recording-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
 
-.avatar-icon {
-  width: 36px;
-  height: 36px;
-  font-size: 16px;
-  top: 4px;
-}
+  .metadata-item {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-left-width: 2px;
+  }
 
-.recording-title {
-  font-size: 20px;
-  margin-bottom: 15px;
-}
+  .time-display {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
 
-.metadata-item {
-  padding: 6px 10px;
-  font-size: 12px;
-  border-left-width: 2px;
-}
+  .progress-container {
+    height: 6px;
+  }
 
-.time-display {
-  font-size: 13px;
-  margin-bottom: 10px;
-}
+  .progress-slider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+  }
 
-.progress-container {
-  height: 6px;
-}
+  .main-controls {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
 
-.progress-slider::-webkit-slider-thumb {
-  width: 18px;
-  height: 18px;
-}
+  .control-btn {
+    padding: 10px;
+    min-height: 50px;
+  }
 
-.main-controls {
-  gap: 15px;
-  margin-bottom: 25px;
-}
+  .play-box {
+    padding: 12px;
+    border-radius: 50%;
+  }
 
-.control-btn {
-  padding: 10px;
-  min-height: 50px;
-}
+  .play-box .btn-icon {
+    font-size: 24px;
+  }
 
-.play-box {
-  padding: 12px;
-  border-radius: 50%;
-}
+  .skip-btn .btn-icon {
+    font-size: 18px;
+  }
 
-.play-box .btn-icon {
-  font-size: 24px;
-}
+  .skip-btn .btn-label {
+    font-size: 10px;
+  }
 
-.skip-btn .btn-icon {
-  font-size: 18px;
-}
+  .advanced-controls {
+    gap: 15px;
+  }
 
-.skip-btn .btn-label {
-  font-size: 10px;
-}
+  .speed-buttons {
+    gap: 4px;
+    flex-wrap: wrap;
+  }
 
-.advanced-controls {
-  gap: 15px;
-}
+  .speed-btn {
+    padding: 6px 12px;
+    font-size: 10px;
+    min-height: 32px;
+    border-width: 2px;
+  }
 
-.speed-buttons {
-  gap: 4px;
-  flex-wrap: wrap;
-}
+  .control-group {
+    gap: 8px;
+  }
 
-.speed-btn {
-  padding: 6px 12px;
-  font-size: 10px;
-  min-height: 32px;
-  border-width: 2px;
-}
+  .control-label {
+    font-size: 12px;
+  }
 
-.control-group {
-  gap: 8px;
-}
+  .volume-container {
+    gap: 10px;
+  }
 
-.control-label {
-  font-size: 12px;
-}
+  .volume-slider {
+    height: 3px;
+  }
 
-.volume-container {
-  gap: 10px;
-}
+  .volume-slider::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+  }
 
-.volume-slider {
-  height: 3px;
-}
+  .volume-value {
+    font-size: 10px;
+    min-width: 30px;
+  }
 
-.volume-slider::-webkit-slider-thumb {
-  width: 14px;
-  height: 14px;
-}
+  /* 小屏幕轮播图样式 */
+  .media-carousel-section {
+    margin-bottom: 15px;
+    padding: 12px;
+  }
 
-.volume-value {
-  font-size: 10px;
-  min-width: 30px;
-}
+  .carousel-title {
+    font-size: 14px;
+  }
+
+  .carousel-container {
+    width: 280px;
+    height: 168px;
+  }
+
+  .carousel-nav {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    margin: 0 8px;
+  }
+
+  .video-play-overlay {
+    width: 28px;
+    height: 28px;
+  }
+
+  .play-icon {
+    font-size: 10px;
+  }
+
+  .media-type-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .preview-info h4 {
+    font-size: 14px;
+  }
+
+  .preview-info p {
+    font-size: 12px;
+  }
+
+  /* 超小屏设备主播放器区域优化 */
+  .player-main {
+    max-height: calc(100vh - 100px);
+  }
+
+  .player-container {
+    max-height: calc(100vh - 120px);
+    z-index: 1;
+  }
 }
 
 /* 超小屏幕优化 (375px及以下) */
 @media (max-width: 375px) {
-.player-page {
-  min-height: calc(var(--vh, 1vh) * 100);
-  background-attachment: scroll;
-}
+  .player-page {
+    min-height: calc(var(--vh, 1vh) * 100);
+    background-attachment: scroll;
+  }
 
-.elephant-icon {
-  width: 140px;  /* 进一步缩小 */
-  height: 84px;
-  position: absolute;
-  top: 10px;      /* 改为正值，确保不被导航栏遮挡 */
-  right: -10px;
-  z-index: 20;    /* 提高z-index，确保在导航栏之上 */
-}
+  .elephant-icon {
+    width: 140px;  /* 超小屏幕尺寸 */
+    height: 84px;
+    top: -25px;    /* 相对于player-container溢出 */
+    right: -25px;  /* 右上角溢出 */
+    z-index: 10;   /* 保持层级 */
+  }
 
-.player-header {
-  padding: 8px 12px;
-  padding-top: max(8px, var(--safe-area-inset-top));
-  padding-left: max(12px, var(--safe-area-inset-left));
-  padding-right: max(12px, var(--safe-area-inset-right));
-  flex-wrap: wrap;
-  gap: 8px;
-  z-index: 15;
-}
+  .player-header {
+    padding: 8px 12px;
+    padding-top: max(8px, var(--safe-area-inset-top));
+    padding-left: max(12px, var(--safe-area-inset-left));
+    padding-right: max(12px, var(--safe-area-inset-right));
+    flex-wrap: wrap;
+    gap: 8px;
+    z-index: 15;
+  }
 
-.nav-back-btn,
-.delete-recording-btn {
-  font-size: 10px;
-  padding: 6px 10px;
-  min-height: 32px;
-}
+  .nav-back-btn,
+  .delete-recording-btn {
+    font-size: 10px;
+    padding: 6px 10px;
+    min-height: 32px;
+  }
 
-.session-info {
-  order: 3;
-  flex-basis: 100%;
-  margin-top: 8px;
-  font-size: 12px;
-}
+  .session-info {
+    order: 3;
+    flex-basis: 100%;
+    margin-top: 8px;
+    font-size: 12px;
+  }
 
-.player-main {
-  padding: 20px 8px 10px; /* 优化padding */
-  padding-left: max(8px, var(--safe-area-inset-left));
-  padding-right: max(8px, var(--safe-area-inset-right));
-  padding-bottom: max(10px, var(--safe-area-inset-bottom));
-  min-height: calc(calc(var(--vh, 1vh) * 100) - 100px);
-}
+  .player-main {
+    padding: 20px 8px 10px; /* 优化padding */
+    padding-left: max(8px, var(--safe-area-inset-left));
+    padding-right: max(8px, var(--safe-area-inset-right));
+    padding-bottom: max(10px, var(--safe-area-inset-bottom));
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 100px);
+  }
 
-.player-container {
-  padding: 50px 12px 20px; /* 为avatar-icon预留足够空间 */
-  border-radius: 18px;
-  max-width: 300px;
-  margin-bottom: var(--safe-area-inset-bottom);
-}
+  .player-container {
+    padding: 45px 12px 20px; /* 为图标预留空间 */
+    border-radius: 18px;
+    max-width: 300px;
+    margin-bottom: var(--safe-area-inset-bottom);
+  }
 
-.recording-avatar {
-  width: 55px;
-  height: 55px;
-  margin-bottom: 3px;
-}
+  .recording-avatar {
+    width: 55px;
+    height: 55px;
+    margin-bottom: 3px;
+  }
 
-.avatar-icon {
-  width: 55px;
-  height: 55px;
-  font-size: 26px;
-  top: -28px; /* 调整位置 */
-}
+  .avatar-icon {
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+    top: -28px; /* 相对于player-container溢出 */
+    z-index: 15; /* 保持层级 */
+  }
 
-.sound-waves {
-  top: -15%;
-}
+  .sound-waves {
+    top: -15%;
+  }
 
-.wave-bar {
-  width: 3px;
-  height: 16px;
-}
+  .wave-bar {
+    width: 3px;
+    height: 16px;
+  }
 
-.recording-title {
-  font-size: 18px;
-  margin-bottom: 12px;
-  line-height: 1.2;
-}
+  .recording-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
 
-.metadata-item {
-  padding: 5px 8px;
-  font-size: 11px;
-  border-left-width: 2px;
-  margin-bottom: 4px;
-}
+  .metadata-item {
+    padding: 5px 8px;
+    font-size: 11px;
+    border-left-width: 2px;
+    margin-bottom: 4px;
+  }
 
-.metadata-item .label,
-.metadata-item .value {
-  font-size: 11px;
-}
+  .metadata-item .label,
+  .metadata-item .value {
+    font-size: 11px;
+  }
+
+  /* 超小屏轮播图样式 */
+  .carousel-container {
+    width: 240px;
+    height: 144px;
+  }
+
+  .carousel-nav {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    margin: 0 6px;
+  }
+
+  .video-play-overlay {
+    width: 24px;
+    height: 24px;
+  }
+
+  .play-icon {
+    font-size: 8px;
+  }
 }
 
 /* 横屏模式优化 */
 @media (max-width: 900px) and (orientation: landscape) {
-.player-page {
-  min-height: calc(var(--vh, 1vh) * 100);
-}
+  .player-page {
+    min-height: calc(var(--vh, 1vh) * 100);
+  }
 
-.elephant-icon {
-  width: 120px;
-  height: 72px;
-  top: 8px;  /* 避免与导航栏重叠 */
-  right: 8px; /* 使用right定位 */
-  z-index: 20;  /* 提高z-index，确保在导航栏之上 */
-}
+  .elephant-icon {
+    width: 120px;
+    height: 72px;
+    top: -25px;  /* 相对于player-container溢出 */
+    right: -25px; /* 右上角溢出 */
+    z-index: 10;  /* 保持层级 */
+  }
+  
+  .player-header {
+    padding: 10px 20px;
+    z-index: 15; /* 确保导航栏在最上层 */
+  }
 
-.player-header {
-  padding: 10px 20px;
-  z-index: 15; /* 确保导航栏在最上层 */
-}
+  .player-main {
+    padding: 15px 20px;
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 80px);
+  }
 
-.player-main {
-  padding: 15px 20px;
-  min-height: calc(calc(var(--vh, 1vh) * 100) - 80px);
-}
+  .player-container {
+    padding: 40px 30px;
+    max-width: 600px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 30px;
+  }
 
-.player-container {
-  padding: 20px 30px;
-  max-width: 600px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 30px;
-}
+  .recording-info {
+    flex: 1;
+    margin-bottom: 0;
+    text-align: left;
+  }
 
-.recording-info {
-  flex: 1;
-  margin-bottom: 0;
-  text-align: left;
-}
+  .avatar-icon {
+    width: 75px;
+    height: 75px;
+    font-size: 30px;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    z-index: 15; /* 保持层级 */
+  }
 
-.avatar-icon {
-  width: 75px;
-  height: 75px;
-  font-size: 30px;
-  position: relative;
-  top: auto;
-  left: auto;
-  transform: none;
-}
+  .recording-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
 
-.recording-title {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
+  .metadata-item {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
 
-.metadata-item {
-  padding: 4px 8px;
-  font-size: 11px;
-}
+  .progress-section,
+  .main-controls,
+  .advanced-controls {
+    flex: 1;
+    margin-bottom: 0;
+  }
 
-.progress-section,
-.main-controls,
-.advanced-controls {
-  flex: 1;
-  margin-bottom: 0;
-}
+  .main-controls {
+    gap: 10px;
+    justify-content: center;
+  }
 
-.main-controls {
-  gap: 10px;
-  justify-content: center;
-}
+  .control-btn {
+    padding: 8px;
+    min-height: 40px;
+  }
 
-.control-btn {
-  padding: 8px;
-  min-height: 40px;
-}
+  .play-box .btn-icon {
+    font-size: 20px;
+  }
 
-.play-box .btn-icon {
-  font-size: 20px;
-}
+  .speed-buttons {
+    justify-content: center;
+  }
 
-.speed-buttons {
-  justify-content: center;
-}
+  .speed-btn {
+    padding: 4px 8px;
+    font-size: 9px;
+    min-height: 28px;
+  }
 
-.speed-btn {
-  padding: 4px 8px;
-  font-size: 9px;
-  min-height: 28px;
-}
+  /* 横屏模式轮播图样式 */
+  .media-carousel-section {
+    margin-bottom: 15px;
+    padding: 10px;
+  }
+
+  .carousel-container {
+    width: 240px;
+    height: 144px;
+  }
 }
 
 /* 超小屏幕横屏模式优化 */
 @media (max-width: 667px) and (orientation: landscape) {
-.player-page {
-  min-height: calc(var(--vh, 1vh) * 100);
-}
+  .player-page {
+    min-height: calc(var(--vh, 1vh) * 100);
+  }
 
-.elephant-icon {
-  width: 100px;
-  height: 60px;
-  top: 5px;  /* 避免与导航栏重叠 */
-  right: 5px; /* 改为right定位 */
-  z-index: 20;  /* 提高z-index，确保在导航栏之上 */
-}
+  .elephant-icon {
+    width: 100px;
+    height: 60px;
+    top: -20px;  /* 相对于player-container溢出 */
+    right: -20px; /* 右上角溢出 */
+    z-index: 10;  /* 保持层级 */
+  }
 
-.player-header {
-  padding: 5px 15px;
-}
+  .player-header {
+    padding: 5px 15px;
+  }
 
-.player-main {
-  padding: 8px 15px;
-  min-height: calc(calc(var(--vh, 1vh) * 100) - 60px);
-}
+  .player-main {
+    padding: 8px 15px;
+    min-height: calc(calc(var(--vh, 1vh) * 100) - 60px);
+  }
 
-.player-container {
-  padding: 15px 20px;
-  max-width: 95%;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 20px;
-}
+  .player-container {
+    padding: 30px 20px;
+    max-width: 95%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+  }
 
-.recording-info {
-  flex: 1;
-  margin-bottom: 0;
-  text-align: left;
-  min-width: 0;
-}
+  .recording-info {
+    flex: 1;
+    margin-bottom: 0;
+    text-align: left;
+    min-width: 0;
+  }
 
-.recording-avatar {
-  width: 50px;
-  height: 50px;
-  margin-bottom: 5px;
-}
+  .recording-avatar {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 5px;
+  }
 
-.avatar-icon {
-  width: 50px;
-  height: 50px;
-  font-size: 25px;
-  position: relative;
-  top: auto;
-  left: auto;
-  transform: none;
-  box-shadow: 0 2px 8px rgba(74, 201, 103, 0.3);
-}
+  .avatar-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 25px;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(74, 201, 103, 0.3);
+    z-index: 15; /* 保持层级 */
+  }
 
-.sound-waves {
-  position: relative;
-  top: auto;
-  left: auto;
-  transform: none;
-  margin-top: 5px;
-}
+  .sound-waves {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin-top: 5px;
+  }
 
-.recording-title {
-  font-size: 14px;
-  margin-bottom: 8px;
-}
+  .recording-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
 
-.metadata-item {
-  padding: 3px 6px;
-  font-size: 9px;
-  margin-bottom: 2px;
-}
+  .metadata-item {
+    padding: 3px 6px;
+    font-size: 9px;
+    margin-bottom: 2px;
+  }
 
-.progress-section,
-.main-controls,
-.advanced-controls {
-  flex: 1;
-  margin-bottom: 0;
-}
+  .progress-section,
+  .main-controls,
+  .advanced-controls {
+    flex: 1;
+    margin-bottom: 0;
+  }
 
-.progress-section {
-  max-width: 200px;
-}
+  .progress-section {
+    max-width: 200px;
+  }
 
-.time-display {
-  font-size: 10px;
-  margin-bottom: 5px;
-}
+  .time-display {
+    font-size: 10px;
+    margin-bottom: 5px;
+  }
 
-.progress-container {
-  height: 3px;
-}
+  .progress-container {
+    height: 3px;
+  }
 
-.main-controls {
-  gap: 8px;
-  justify-content: center;
-  max-width: 150px;
-}
+  .main-controls {
+    gap: 8px;
+    justify-content: center;
+    max-width: 150px;
+  }
 
-.control-btn {
-  padding: 5px;
-  min-height: 35px;
-}
+  .control-btn {
+    padding: 5px;
+    min-height: 35px;
+  }
 
-.play-box {
-  padding: 6px;
-}
+  .play-box {
+    padding: 6px;
+  }
 
-.play-box .btn-icon {
-  font-size: 18px;
-}
+  .play-box .btn-icon {
+    font-size: 18px;
+  }
 
-.skip-btn .btn-icon {
-  font-size: 12px;
-}
+  .skip-btn .btn-icon {
+    font-size: 12px;
+  }
 
-.skip-btn .btn-label {
-  font-size: 7px;
-}
+  .skip-btn .btn-label {
+    font-size: 7px;
+  }
 
-.advanced-controls {
-  gap: 8px;
-}
+  .advanced-controls {
+    gap: 8px;
+  }
 
-.control-label {
-  font-size: 9px;
-  margin-bottom: 3px;
-}
+  .control-label {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
 
-.speed-buttons {
-  justify-content: center;
-  gap: 2px;
-}
+  .speed-buttons {
+    justify-content: center;
+    gap: 2px;
+  }
 
-.speed-btn {
-  padding: 3px 6px;
-  font-size: 7px;
-  min-height: 22px;
-}
+  .speed-btn {
+    padding: 3px 6px;
+    font-size: 7px;
+    min-height: 22px;
+  }
 
-.volume-container {
-  gap: 5px;
-}
+  .volume-container {
+    gap: 5px;
+  }
 
-.volume-value {
-  font-size: 7px;
-}
+  .volume-value {
+    font-size: 7px;
+  }
 }
 
 /* 减少动画模式支持 */
 @media (prefers-reduced-motion: reduce) {
-.player-page,
-.background-decoration,
-.wave,
-.nav-back-btn,
-.delete-recording-btn,
-.control-btn,
-.speed-btn,
-.avatar-icon,
-.elephant-icon {
-  animation: none;
-  transition: none;
-}
-
-.wave-bar {
-  animation: none;
-}
-
-.play-btn.playing {
-  animation: none;
-}
+  .player-page,
+  .background-decoration,
+  .wave,
+  .nav-back-btn,
+  .delete-recording-btn,
+  .control-btn,
+  .speed-btn,
+  .avatar-icon,
+  .elephant-icon {
+    animation: none;
+    transition: none;
+  }
+  
+  .wave-bar {
+    animation: none;
+  }
+  
+  .play-btn.playing {
+    animation: none;
+  }
 }
 
 /* 深色模式支持 */
 @media (prefers-color-scheme: dark) {
-.player-page {
-  background: linear-gradient(135deg, #2d4a2d 0%, #1a3a1a 50%, #2d4a2d 100%);
-}
-
-.player-container {
-  background: rgba(45, 74, 45, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.recording-title {
-  background: linear-gradient(135deg, #88d982, #a8e6a3);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.metadata-item {
-  background: rgba(136, 217, 130, 0.1);
-  border-left-color: #88d982;
-}
-
-.metadata-item .label,
-.metadata-item .value,
-.time-display,
-.control-label {
-  color: #a8e6a3;
-}
-
-.progress-container {
-  background: rgba(136, 217, 130, 0.2);
-}
-
-.nav-back-btn,
-.delete-recording-btn {
-  background: rgba(45, 74, 45, 0.9);
-  color: #a8e6a3;
-}
-
-.speed-btn {
-  background: rgba(45, 74, 45, 0.8);
-  border-color: rgba(136, 217, 130, 0.3);
-  color: #88d982;
-}
-
-.speed-btn.active {
-  background: linear-gradient(135deg, #88d982, #a8e6a3);
-  color: #2d4a2d;
-}
+  .player-page {
+    background: linear-gradient(135deg, #2d4a2d 0%, #1a3a1a 50%, #2d4a2d 100%);
+  }
+  
+  .player-container {
+    background: rgba(45, 74, 45, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .recording-title {
+    background: linear-gradient(135deg, #88d982, #a8e6a3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .metadata-item {
+    background: rgba(136, 217, 130, 0.1);
+    border-left-color: #88d982;
+  }
+  
+  .metadata-item .label,
+  .metadata-item .value,
+  .time-display,
+  .control-label {
+    color: #a8e6a3;
+  }
+  
+  .progress-container {
+    background: rgba(136, 217, 130, 0.2);
+  }
+  
+  .nav-back-btn,
+  .delete-recording-btn {
+    background: rgba(45, 74, 45, 0.9);
+    color: #a8e6a3;
+  }
+  
+  .speed-btn {
+    background: rgba(45, 74, 45, 0.8);
+    border-color: rgba(136, 217, 130, 0.3);
+    color: #88d982;
+  }
+  
+  .speed-btn.active {
+    background: linear-gradient(135deg, #88d982, #a8e6a3);
+    color: #2d4a2d;
+  }
 }
 
 /* iOS 音频播放兼容性样式 */
 
 /* iOS 用户交互提示样式 */
 .ios-interaction-prompt {
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-margin-top: -400px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin-top: -400px;
 }
 
 .ios-interaction-prompt h3 {
-margin: 0 0 12px 0;
-font-size: 20px;
-font-weight: 600;
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .ios-interaction-prompt p {
-margin: 0 0 16px 0;
-font-size: 16px;
-opacity: 0.9;
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  opacity: 0.9;
 }
 
 .ios-interaction-prompt button {
-cursor: pointer;
-transition: all 0.2s ease;
-box-shadow: 0 2px 10px rgba(0, 122, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 10px rgba(0, 122, 255, 0.3);
 }
 
 .ios-interaction-prompt button:hover {
-background-color: #0051D0 !important;
-transform: translateY(-1px);
-box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4);
+  background-color: #0051D0 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4);
 }
 
 
 
 /* iOS播放按钮增强 */
 .control-btn.play-box {
-position: relative;
-overflow: visible;
+  position: relative;
+  overflow: visible;
 }
 
 /* iOS 音频元素增强 */
 @supports (-webkit-touch-callout: none) {
-/* 这是iOS Safari特有的CSS特性检测 */
-
-audio {
-  -webkit-appearance: none;
-  outline: none;
-}
-
-audio::-webkit-media-controls {
-  display: none !important;
-}
-
-audio::-webkit-media-controls-panel {
-  display: none !important;
-}
-
-/* 播放器在iOS上的优化 */
-.player-container {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.control-btn:active {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.progress-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #007AFF;
-  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
-}
-
-.volume-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 18px;
-  width: 18px;
-  border-radius: 50%;
-  background: #007AFF;
-  box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
-}
+  /* 这是iOS Safari特有的CSS特性检测 */
+  
+  audio {
+    -webkit-appearance: none;
+    outline: none;
+  }
+  
+  audio::-webkit-media-controls {
+    display: none !important;
+  }
+  
+  audio::-webkit-media-controls-panel {
+    display: none !important;
+  }
+  
+  /* 播放器在iOS上的优化 */
+  .player-container {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  .control-btn:active {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #007AFF;
+    box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+  }
+  
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #007AFF;
+    box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
+  }
 }
 
 /* iOS设备横屏适配 */
 @media screen and (orientation: landscape) and (max-height: 500px) {
-.ios-interaction-prompt {
-  padding: 10px;
-}
-
-.ios-interaction-prompt h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-
-.ios-interaction-prompt p {
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.ios-interaction-prompt button {
-  padding: 10px 20px;
-  font-size: 14px;
-}
-
-.player-container {
-  padding: 10px;
-}
-
-.main-controls {
-  gap: 15px;
-}
-
-.control-btn.play-box img {
-  width: 70px !important;
-  height: 70px !important;
-}
+  .ios-interaction-prompt {
+    padding: 10px;
+  }
+  
+  .ios-interaction-prompt h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  
+  .ios-interaction-prompt p {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .ios-interaction-prompt button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .player-container {
+    padding: 10px;
+  }
+  
+  .main-controls {
+    gap: 15px;
+  }
+  
+  .control-btn.play-box img {
+    width: 70px !important;
+    height: 70px !important;
+  }
 }
 
 /* iOS 14+ 兼容性 */
 @media screen and (min-width: 375px) {
-@supports (padding: max(0px, env(safe-area-inset-top))) {
-  .player-header {
-    padding-top: max(20px, env(safe-area-inset-top));
-    padding-left: max(20px, env(safe-area-inset-left));
-    padding-right: max(20px, env(safe-area-inset-right));
+  @supports (padding: max(0px, env(safe-area-inset-top))) {
+    .player-header {
+      padding-top: max(20px, env(safe-area-inset-top));
+      padding-left: max(20px, env(safe-area-inset-left));
+      padding-right: max(20px, env(safe-area-inset-right));
+    }
+    
+    .player-main {
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
   }
-  
-  .player-main {
-    padding-bottom: max(20px, env(safe-area-inset-bottom));
-  }
-}
 }
 
 /* iOS Safari 音频加载动画优化 */
 @keyframes ios-audio-pulse {
-0%, 100% { 
-  opacity: 0.7; 
-  transform: scale(1); 
-}
-50% { 
-  opacity: 1; 
-  transform: scale(1.05); 
-}
+  0%, 100% { 
+    opacity: 0.7; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.05); 
+  }
 }
 
 .control-btn.play-box.disabled img {
-animation: ios-audio-pulse 1.5s ease-in-out infinite;
+  animation: ios-audio-pulse 1.5s ease-in-out infinite;
 }
 
 
 
 /* iOS 深色模式适配 */
 @media (prefers-color-scheme: dark) {
-.ios-interaction-prompt {
-  background-color: rgba(28, 28, 30, 0.95);
-}
+  .ios-interaction-prompt {
+    background-color: rgba(28, 28, 30, 0.95);
+  }
 }
 
 /* 轮播图区域样式 */
 .media-carousel-section {
-background: rgba(255, 255, 255, 0.1);
-border-radius: 16px;
-backdrop-filter: blur(10px);
-border: 1px solid rgba(255, 255, 255, 0.2);
+  min-height: 200px;
+  max-height: 200px;
+  margin-top: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 30px; /* 与其他内容保持距离 */
+  padding: 20px; /* 内边距 */
+  z-index: 20; /* 最高层级，避免被图标遮挡 */
+  position: relative;
 }
 
 .carousel-header {
-text-align: center;
-margin-bottom: 16px;
+  text-align: center;
+  margin-bottom: 16px;
 }
 
 .carousel-title {
-color: white;
-font-size: 18px;
-font-weight: 600;
-font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
 }
 
 .media-carousel {
-position: relative;
-display: flex;
-align-items: center;
-justify-content: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 21; /* 确保导航按钮在最上层 */
+  top: 45px;
 }
 
 .carousel-container {
-width: 400px;
-height: 240px;
-display: flex;
-justify-content: center;
-align-items: center;
-overflow: hidden;
-border-radius: 12px;
-position: relative;
+  width: 400px;
+  height: 240px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  position: relative;
+  z-index: 22; /* 确保内容在最上层 */
 }
 
 .carousel-track {
-display: flex;
-transition: transform 0.3s ease;
-height: 100%;
+  display: flex;
+  transition: transform 0.3s ease;
+  height: 100%;
 }
 
 .carousel-item {
-flex: 0 0 100%;
-height: 100%;
-position: relative;
-cursor: pointer;
-border-radius: 12px;
-overflow: hidden;
+  flex: 0 0 100%;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .carousel-media {
-width: 100%;
-height: 100%;
-object-fit: cover;
-display: block;
-border-radius: 12px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
 }
 
 .carousel-video {
-position: relative;
-width: 100%;
-height: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .video-play-overlay {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-background: rgba(0, 0, 0, 0.6);
-border-radius: 50%;
-width: 40px;
-height: 40px;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: all 0.3s ease;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
 .play-icon {
-color: white;
-font-size: 14px;
-margin-left: 2px;
+  color: white;
+  font-size: 14px;
+  margin-left: 2px;
 }
 
 .media-type-badge {
-position: absolute;
-top: 8px;
-right: 8px;
-background: rgba(0, 0, 0, 0.7);
-border-radius: 12px;
-padding: 4px 8px;
-font-size: 12px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
 }
 
 .carousel-nav {
-background: rgba(255, 255, 255, 0);
-border: none;
-border-radius: 50%;
-width: 36px;
-height: 36px;
-display: flex;
-/* align-items: center; */
-justify-content: center;
-color: #5fce70;
-font-size: 24px;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.3s ease;
-backdrop-filter: blur(10px);
-margin: 0 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5fce70;
+  font-size: 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  margin: 0 16px;
+  z-index: 23; /* 导航按钮最高层级 */
 }
 
 .carousel-nav:hover {
-background: rgba(118, 200, 149, 0.3);
-transform: scale(1.1);
+  background: rgba(118, 200, 149, 0.3);
+  transform: scale(1.1);
 }
 
 .carousel-nav.prev {
-margin-right: 16px;
+  margin-right: 16px;
 }
 
 .carousel-nav.next {
-margin-left: 16px;
+  margin-left: 16px;
 }
 
 .carousel-indicators {
-display: flex;
-justify-content: center;
-gap: 8px;
-margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .indicator {
-width: 8px;
-height: 8px;
-border-radius: 50%;
-background: rgba(255, 255, 255, 0.4);
-border: none;
-cursor: pointer;
-transition: all 0.3s ease;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .indicator.active {
-background: rgba(255, 255, 255, 0.8);
-transform: scale(1.2);
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.2);
 }
 
 /* 图片预览弹窗样式 */
 .preview-overlay {
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background: rgba(0, 0, 0, 0.9);
-display: flex;
-align-items: center;
-justify-content: center;
-z-index: 9999;
-backdrop-filter: blur(10px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(10px);
 }
 
 .preview-content {
-position: relative;
-max-width: 90vw;
-max-height: 90vh;
-background: white;
-border-radius: 16px;
-overflow: hidden;
-box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .preview-close {
-position: absolute;
-top: 16px;
-right: 16px;
-background: rgba(0, 0, 0, 0.7);
-border: none;
-border-radius: 50%;
-width: 40px;
-height: 40px;
-color: white;
-font-size: 24px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: all 0.3s ease;
-z-index: 10000;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10000;
 }
 
 .preview-close:hover {
-background: rgba(0, 0, 0, 0.9);
-transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
 }
 
 .preview-image {
-width: 100%;
-height: auto;
-max-height: 70vh;
-object-fit: contain;
-display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
 }
 
 .preview-info {
-padding: 20px;
-background: white;
+  padding: 20px;
+  background: white;
 }
 
 .preview-info h4 {
-margin: 0 0 8px 0;
-font-size: 18px;
-color: #333;
-font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #333;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
 }
 
 .preview-info p {
-margin: 0;
-color: #666;
-font-size: 14px;
+  margin: 0;
+  color: #666;
+  font-size: 14px;
 }
 
 /* 移动端优化 */
 @media (max-width: 768px) {
-.media-carousel-section {
-  margin: 0;
-  padding: 0;
-}
+  .media-carousel-section {
+    margin: 0;
+    padding: 0;
+  }
 
-.carousel-title {
-  font-size: 16px;
-}
+  .carousel-title {
+    font-size: 16px;
+  }
 
-.carousel-container {
-  width: 320px;
-  height: 200px;
-}
+  .carousel-container {
+    width: 320px;
+    height: 200px;
+  }
 
-.carousel-nav {
-  width: 32px;
-  height: 32px;
-  font-size: 16px;
-  margin: 0 12px;
-}
+  .carousel-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    margin: 0 12px;
+  }
 
-.video-play-overlay {
-  width: 32px;
-  height: 32px;
-}
+  .video-play-overlay {
+    width: 32px;
+    height: 32px;
+  }
 
-.play-icon {
-  font-size: 12px;
-}
+  .play-icon {
+    font-size: 12px;
+  }
 
-.preview-content {
-  max-width: 95vw;
-  max-height: 95vh;
-}
+  .preview-content {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
 
-.preview-close {
-  width: 36px;
-  height: 36px;
-  font-size: 20px;
-  top: 12px;
-  right: 12px;
-}
+  .preview-close {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    top: 12px;
+    right: 12px;
+  }
 
-.preview-image {
-  max-height: 60vh;
-}
+  .preview-image {
+    max-height: 60vh;
+  }
 
-.preview-info {
-  padding: 16px;
-}
+  .preview-info {
+    padding: 16px;
+  }
 
-.preview-info h4 {
-  font-size: 16px;
-}
+  .preview-info h4 {
+    font-size: 16px;
+  }
 
-.preview-info p {
-  font-size: 13px;
-}
+  .preview-info p {
+    font-size: 13px;
+  }
 
-.upload-modal-preview-media {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  display: block;
-}
+  .upload-modal-preview-media {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+  }
 
-/* 主播放器区域最大高度限制 */
-.player-main {
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-}
+  /* 主播放器区域最大高度限制 */
+  .player-main {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
 
-.player-container {
-  max-height: calc(100vh - 140px);
-}
+  .player-container {
+    max-height: calc(100vh - 140px);
+  }
 }
 
 @media (max-width: 480px) {
-.media-carousel-section {
-  margin: 0;
-  padding: 0;
-}
+  .media-carousel-section {
+    margin: 0;
+    padding: 0;
+  }
 
-.carousel-title {
-  font-size: 14px;
-}
+  .carousel-title {
+    font-size: 14px;
+  }
 
-.carousel-container {
-  width: 280px;
-  height: 120px;
-}
+  .carousel-container {
+    width: 280px;
+    height: 120px;
+  }
 
-.carousel-nav {
-  width: 28px;
-  height: 28px;
-  font-size: 14px;
-  margin: 0 8px;
-}
+  .carousel-nav {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    margin: 0 8px;
+  }
 
-.video-play-overlay {
-  width: 28px;
-  height: 28px;
-}
+  .video-play-overlay {
+    width: 28px;
+    height: 28px;
+  }
 
-.play-icon {
-  font-size: 10px;
-}
+  .play-icon {
+    font-size: 10px;
+  }
 
-.media-type-badge {
-  font-size: 10px;
-  padding: 2px 6px;
-}
+  .media-type-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
 
-.preview-info h4 {
-  font-size: 14px;
-}
+  .preview-info h4 {
+    font-size: 14px;
+  }
 
-.preview-info p {
-  font-size: 12px;
-}
+  .preview-info p {
+    font-size: 12px;
+  }
 
-/* 超小屏设备主播放器区域优化 */
-.player-main {
-  max-height: calc(100vh - 100px);
-}
+  /* 超小屏设备主播放器区域优化 */
+  .player-main {
+    max-height: calc(100vh - 100px);
+  }
 
-.player-container {
-  max-height: calc(100vh - 120px);
-  z-index: 1;
-}
+  .player-container {
+    max-height: calc(100vh - 120px);
+    z-index: 1;
+  }
 }
 
 @media (max-width: 375px) {
-.carousel-container {
-  width: 240px;
-  height: 124px;
-}
+  .carousel-container {
+    width: 240px;
+    height: 124px;
+  }
 
-.carousel-nav {
-  width: 24px;
-  height: 24px;
-  font-size: 12px;
-  margin: 0 6px;
-}
+  .carousel-nav {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    margin: 0 6px;
+  }
 
-.video-play-overlay {
-  width: 24px;
-  height: 24px;
-}
+  .video-play-overlay {
+    width: 24px;
+    height: 24px;
+  }
 
-.play-icon {
-  font-size: 8px;
-}
+  .play-icon {
+    font-size: 8px;
+  }
 }
 
 /* 横屏模式优化 */
 @media (max-width: 900px) and (orientation: landscape) {
-.media-carousel-section {
-  margin: 0;
-  padding: 0;
-}
+  .media-carousel-section {
+    margin: 0;
+    padding: 0;
+  }
 
-.carousel-container {
-  width: 240px;
-  height: 144px;
-}
+  .carousel-container {
+    width: 240px;
+    height: 144px;
+  }
 
-.player-main {
-  max-height: calc(100vh - 80px);
-}
+  .player-main {
+    max-height: calc(100vh - 80px);
+  }
 
-.player-container {
-  max-height: calc(100vh - 100px);
-}
+  .player-container {
+    max-height: calc(100vh - 100px);
+  }
 }
 
 /* 高度受限设备优化 */
 @media screen and (max-height: 600px) {
-.player-main {
-  max-height: calc(100vh - 60px);
-  padding: 8px 20px;
+  .player-main {
+    max-height: calc(100vh - 60px);
+    padding: 8px 20px;
+  }
+
+  .player-container {
+    max-height: calc(100vh - 80px);
+    padding: 16px;
+  }
+
+  .media-carousel-section {
+    margin: 0;
+    padding: 0;
+  }
+
+  .carousel-container {
+    width: 200px;
+    height: 120px;
+  }
 }
 
-.player-container {
-  max-height: calc(100vh - 80px);
-  padding: 16px;
+/* iPad横屏模式专用优化 */
+@media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+  .player-header {
+    z-index: 15; /* 导航栏保持在中等层级 */
+  }
+
+  .elephant-icon {
+    width: 300px;
+    height: 180px;
+    top: -50px;    /* 减少溢出，避免被导航栏遮挡 */
+    right: -40px;  /* 稍微向内移动 */
+    z-index: 30;   /* 提高层级，确保在导航栏之上 */
+  }
+
+  .avatar-icon {
+    width: 90px;
+    height: 90px;
+    font-size: 45px;
+    top: -45px;    /* 减少溢出，避免被导航栏遮挡 */
+    z-index: 35;   /* 最高层级，确保在所有元素之上 */
+  }
+
+  .player-container {
+    padding: 90px 40px 50px; /* 增加顶部padding为图标预留更多空间 */
+  }
+
+  .media-carousel-section {
+    margin-top: 60px; /* 调整轮播图距离 */
+    z-index: 20;      /* 确保在适当层级 */
+  }
 }
 
-.media-carousel-section {
-  margin: 0;
-  padding: 0;
+/* iPad Air横屏模式特别优化 (1180x820) */
+@media (min-width: 1180px) and (max-width: 1180px) and (orientation: landscape) {
+  .player-header {
+    z-index: 15;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .elephant-icon {
+    width: 280px;
+    height: 168px;
+    top: -30px;    /* 进一步减少溢出 */
+    right: -30px;
+    z-index: 30;
+  }
+
+  .avatar-icon {
+    width: 85px;
+    height: 85px;
+    font-size: 42px;
+    top: -42px;    /* 进一步减少溢出 */
+    z-index: 35;
+  }
+
+  .player-main {
+    padding-top: 100px; /* 为固定导航栏预留空间 */
+  }
+
+  .player-container {
+    padding: 80px 35px 45px;
+  }
+
+  .media-carousel-section {
+    margin-top: 50px;
+  }
 }
 
-.carousel-container {
-  width: 200px;
-  height: 120px;
-}
+/* iPad mini横屏模式优化 (1024x768) */
+@media (min-width: 1024px) and (max-width: 1024px) and (orientation: landscape) {
+  .player-header {
+    z-index: 15;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .elephant-icon {
+    width: 260px;
+    height: 156px;
+    top: -25px;    /* 最小溢出 */
+    right: -25px;
+    z-index: 30;
+  }
+
+  .avatar-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 40px;
+    top: -40px;    /* 最小溢出 */
+    z-index: 35;
+  }
+
+  .player-main {
+    padding-top: 90px; /* 为固定导航栏预留空间 */
+  }
+
+  .player-container {
+    padding: 75px 30px 40px;
+  }
+
+  .media-carousel-section {
+    margin-top: 40px;
+  }
 } 

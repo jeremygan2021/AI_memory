@@ -29,12 +29,18 @@ const PlayerPage = () => {
   const [mediaFiles, setMediaFiles] = useState([]); // 关联的照片和视频文件
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0); // 当前轮播索引
   const [isCarouselHovered, setIsCarouselHovered] = useState(false); // 轮播图悬停状态
+  const [isCarouselPlaying, setIsCarouselPlaying] = useState(true); // 轮播播放状态
   const carouselTimerRef = useRef(null); // 轮播定时器引用
+  const carouselIntervalRef = useRef(null); // 轮播间隔引用
   const [previewFile, setPreviewFile] = useState(null); // 预览文件
   const [isMobile, setIsMobile] = useState(false); // 是否移动设备
   const [videoPlaying, setVideoPlaying] = useState(false); // 视频播放状态
   const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false); // 是否已尝试自动全屏
   const videoPreviewRef = useRef(null); // 视频预览引用
+  const [videoThumbnails, setVideoThumbnails] = useState({}); // 视频缩略图缓存
+  // 新增：轮播触摸滑动状态
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
 
   // 检测iOS设备
   useEffect(() => {
@@ -233,6 +239,11 @@ const PlayerPage = () => {
       const allFiles = [...cloudFiles, ...localFiles.filter(lf => !cloudFiles.some(cf => cf.id === lf.id))];
       setMediaFiles(allFiles);
       console.log('合并后的媒体文件:', allFiles);
+      
+      // 生成视频缩略图
+      if (allFiles.length > 0) {
+        processVideoThumbnails(allFiles);
+      }
     } catch (error) {
       console.error('加载媒体文件失败:', error);
       setMediaFiles([]);
@@ -830,74 +841,232 @@ const PlayerPage = () => {
     return Math.max(0, Math.min(100, percent));
   };
 
-  // 轮播图相关函数
-  const goToPrevMedia = () => {
-    setCurrentMediaIndex(prev => 
-      prev === 0 ? mediaFiles.length - 1 : prev - 1
-    );
-    // 用户手动操作时重置定时器
-    resetCarouselTimer();
+  // 生成视频缩略图
+  const generateVideoThumbnail = (videoFile) => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.muted = true;
+      video.currentTime = 1; // 截取第1秒的画面
+      
+      video.onloadedmetadata = () => {
+        video.currentTime = Math.min(1, video.duration * 0.1); // 取视频10%位置或1秒
+      };
+      
+      video.onseeked = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8);
+          resolve(thumbnailUrl);
+        } catch (error) {
+          console.warn('生成视频缩略图失败:', error);
+          reject(error);
+        } finally {
+          video.remove();
+        }
+      };
+      
+      video.onerror = (error) => {
+        console.warn('视频加载失败:', error);
+        video.remove();
+        reject(error);
+      };
+      
+      // 设置超时
+      setTimeout(() => {
+        video.remove();
+        reject(new Error('生成缩略图超时'));
+      }, 10000);
+      
+      video.src = videoFile.preview || videoFile.url;
+      video.load();
+    });
   };
 
-  const goToNextMedia = () => {
-    setCurrentMediaIndex(prev => 
-      prev === mediaFiles.length - 1 ? 0 : prev + 1
-    );
-    // 用户手动操作时重置定时器
-    resetCarouselTimer();
-  };
-
-  // 开始自动轮播
-  const startCarouselTimer = () => {
-    stopCarouselTimer(); // 先清理
-    if (mediaFiles.length > 1 && (!isCarouselHovered || isMobile)) {
-      carouselTimerRef.current = setTimeout(() => {
-        setCurrentMediaIndex(prev =>
-          prev === mediaFiles.length - 1 ? 0 : prev + 1
-        );
-        startCarouselTimer(); // 递归调用
-      }, 3000);
+  // 批量生成视频缩略图
+  const processVideoThumbnails = async (files) => {
+    const videoFiles = files.filter(file => file.type === 'video');
+    const thumbnails = { ...videoThumbnails };
+    
+    for (const file of videoFiles) {
+      if (!thumbnails[file.id]) {
+        try {
+          console.log('生成视频缩略图:', file.name);
+          const thumbnail = await generateVideoThumbnail(file);
+          thumbnails[file.id] = thumbnail;
+        } catch (error) {
+          console.warn('视频缩略图生成失败:', file.name, error);
+          thumbnails[file.id] = '/asset/video.svg'; // 使用默认图标
+        }
+      }
     }
+    
+    setVideoThumbnails(thumbnails);
   };
 
-  // 停止自动轮播
-  const stopCarouselTimer = () => {
+  // 轮播图相关函数
+  const stopCarousel = () => {
     if (carouselTimerRef.current) {
       clearTimeout(carouselTimerRef.current);
       carouselTimerRef.current = null;
     }
-  };
-
-  // 重置自动轮播定时器
-  const resetCarouselTimer = () => {
-    stopCarouselTimer();
-    startCarouselTimer();
-  };
-
-  // 自动轮播控制
-  useEffect(() => {
-    if (mediaFiles && mediaFiles.length > 1) {
-      if (isCarouselHovered && !isMobile) {
-        stopCarouselTimer();
-      } else {
-        startCarouselTimer();
-      }
-    } else {
-      stopCarouselTimer();
+    if (carouselIntervalRef.current) {
+      clearInterval(carouselIntervalRef.current);
+      carouselIntervalRef.current = null;
     }
-    return () => stopCarouselTimer();
-  }, [mediaFiles, isCarouselHovered, isMobile]);
+  };
 
-  // 页面可见性变化时自动重启轮播
+  const goToNextSlide = () => {
+    if (mediaFiles.length <= 1) return;
+    
+    setCurrentMediaIndex(prev => {
+      const nextIndex = prev >= mediaFiles.length - 1 ? 0 : prev + 1;
+      console.log(`轮播切换: ${prev} -> ${nextIndex}`, {
+        isMobile,
+        transform: `translateX(-${nextIndex * 100}%)`,
+        totalFiles: mediaFiles.length
+      });
+      return nextIndex;
+    });
+  };
+
+  const goToPrevMedia = () => {
+    if (mediaFiles.length <= 1) return;
+    
+    setCurrentMediaIndex(prev => {
+      const prevIndex = prev === 0 ? mediaFiles.length - 1 : prev - 1;
+      console.log(`手动切换到上一张: ${prev} -> ${prevIndex}`);
+      return prevIndex;
+    });
+    // 用户手动操作时暂停并重启轮播
+    setIsCarouselPlaying(false);
+    setTimeout(() => setIsCarouselPlaying(true), 1000);
+  };
+
+  const goToNextMedia = () => {
+    if (mediaFiles.length <= 1) return;
+    
+    setCurrentMediaIndex(prev => {
+      const nextIndex = prev >= mediaFiles.length - 1 ? 0 : prev + 1;
+      console.log(`手动切换到下一张: ${prev} -> ${nextIndex}`);
+      return nextIndex;
+    });
+    // 用户手动操作时暂停并重启轮播
+    setIsCarouselPlaying(false);
+    setTimeout(() => setIsCarouselPlaying(true), 1000);
+  };
+
+  const goToSlide = (index) => {
+    if (index < 0 || index >= mediaFiles.length) return;
+    
+    console.log(`直接跳转到第${index}张`);
+    setCurrentMediaIndex(index);
+    // 用户手动操作时暂停并重启轮播
+    setIsCarouselPlaying(false);
+    setTimeout(() => setIsCarouselPlaying(true), 1000);
+  };
+
+  const startCarousel = () => {
+    stopCarousel();
+    
+    // 检查是否需要轮播
+    if (mediaFiles.length <= 1) {
+      console.log('媒体文件数量不足，无需轮播');
+      return;
+    }
+    
+    // PC端悬停时不轮播，移动端忽略悬停状态
+    const shouldPause = !isMobile && isCarouselHovered;
+    if (shouldPause || !isCarouselPlaying) {
+      console.log('轮播暂停:', { shouldPause, isCarouselPlaying, isMobile, isCarouselHovered });
+      return;
+    }
+    
+    console.log('启动轮播定时器');
+    carouselTimerRef.current = setTimeout(() => {
+      goToNextSlide();
+      // 递归调用继续轮播
+      if (isCarouselPlaying) {
+        startCarousel();
+      }
+    }, 3000);
+  };
+
+  const pauseCarousel = () => {
+    console.log('暂停轮播');
+    setIsCarouselPlaying(false);
+    stopCarousel();
+  };
+
+  const resumeCarousel = () => {
+    console.log('恢复轮播');
+    setIsCarouselPlaying(true);
+  };
+
+  // 自动轮播控制 - 监听状态变化
   useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && mediaFiles && mediaFiles.length > 1) {
-        startCarouselTimer();
+    console.log('轮播状态变化:', { 
+      mediaFilesCount: mediaFiles.length, 
+      isCarouselPlaying, 
+      isCarouselHovered, 
+      isMobile 
+    });
+    
+    if (mediaFiles.length > 1 && isCarouselPlaying) {
+      startCarousel();
+    } else {
+      stopCarousel();
+    }
+    
+    return () => stopCarousel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mediaFiles.length, isCarouselPlaying, isCarouselHovered, isMobile]);
+
+  // 媒体文件变化时重置轮播索引
+  useEffect(() => {
+    if (mediaFiles.length > 0 && currentMediaIndex >= mediaFiles.length) {
+      console.log('重置轮播索引:', currentMediaIndex, '->', 0);
+      setCurrentMediaIndex(0);
+    }
+  }, [mediaFiles.length, currentMediaIndex]);
+
+  // 页面可见性变化时控制轮播
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('页面可见，恢复轮播');
+        if (mediaFiles.length > 1) {
+          resumeCarousel();
+        }
+      } else {
+        console.log('页面隐藏，暂停轮播');
+        pauseCarousel();
       }
     };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [mediaFiles, isMobile, isCarouselHovered]);
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      stopCarousel();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mediaFiles.length]);
+
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
+      console.log('PlayerPage卸载，清理轮播定时器');
+      stopCarousel();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleMediaClick = (file) => {
     if (isMobile) {
@@ -1047,6 +1216,33 @@ const PlayerPage = () => {
     }
   };
 
+  // 新增：轮播触摸事件处理函数
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      setTouchStartX(e.touches[0].clientX);
+      setTouchEndX(null);
+    }
+  };
+  const handleTouchMove = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      setTouchEndX(e.touches[0].clientX);
+    }
+  };
+  const handleTouchEnd = () => {
+    if (touchStartX !== null && touchEndX !== null) {
+      const deltaX = touchEndX - touchStartX;
+      if (Math.abs(deltaX) > 30) { // 阈值可调整
+        if (deltaX > 0) {
+          goToPrevMedia();
+        } else {
+          goToNextMedia();
+        }
+      }
+    }
+    setTouchStartX(null);
+    setTouchEndX(null);
+  };
+
   if (loading) {
     return (
       <div className="player-page loading">
@@ -1088,15 +1284,19 @@ const PlayerPage = () => {
           <span>返回录音页面</span>
         </button>
         
-        <div className="session-info">
+        {/* <div className="session-info">
           <span className="session-label">会话ID:{userCode ? `${userCode}/${id}` : id}</span>  
-        </div>
+        </div> */}
         
         <button onClick={deleteRecording} className="delete-recording-btn">
           <span>🗑️</span>
           <span>删除</span>
         </button>
       </header>
+      
+      <div className="session-info">
+        <span className="session-label">会话ID:{userCode ? `${userCode}/${id}` : id}</span>  
+      </div>
 
       {/* 主播放器区域 */}
       <main className="player-main">
@@ -1123,11 +1323,25 @@ const PlayerPage = () => {
               
               <div 
                 className="media-carousel"
-                onMouseEnter={() => setIsCarouselHovered(true)}
-                onMouseLeave={() => setIsCarouselHovered(false)}
+                onMouseEnter={() => {
+                  console.log('鼠标进入轮播区域');
+                  setIsCarouselHovered(true);
+                }}
+                onMouseLeave={() => {
+                  console.log('鼠标离开轮播区域');
+                  setIsCarouselHovered(false);
+                }}
+                // 新增：移动端滑动切换
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               >
                 {mediaFiles.length > 1 && (
-                  <button className="carousel-nav prev" onClick={goToPrevMedia}>
+                  <button 
+                    className="carousel-nav prev" 
+                    onClick={goToPrevMedia}
+                    title="上一张"
+                  >
                     ‹
                   </button>
                 )}
@@ -1137,30 +1351,59 @@ const PlayerPage = () => {
                     className="carousel-track"
                     style={{
                       transform: `translateX(-${currentMediaIndex * 100}%)`,
-                      width: `${mediaFiles.length * 100}%`
+                      WebkitTransform: `translateX(-${currentMediaIndex * 100}%)`, // Safari兼容
+                      width: `${mediaFiles.length * 100}%`,
+                      transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                      WebkitTransition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' // Safari兼容
                     }}
                   >
                     {mediaFiles.map((file, index) => (
                       <div 
                         key={file.id || index} 
-                        className="carousel-item"
+                        className={`carousel-item ${index === currentMediaIndex ? 'active' : ''}`}
                         onClick={() => handleMediaClick(file)}
+                        style={{ 
+                          opacity: index === currentMediaIndex ? 1 : 0.8,
+                          transition: 'opacity 0.3s ease'
+                        }}
                       >
                         {file.type === 'image' ? (
                           <img 
                             src={file.preview || file.url} 
-                            alt={file.name}
+                            alt={file.name || `图片${index + 1}`}
                             className="carousel-media"
+                            loading={index === currentMediaIndex ? 'eager' : 'lazy'}
+                            onError={(e) => {
+                              console.warn(`图片加载失败: ${file.name}`, e);
+                              e.target.src = '/asset/image-placeholder.svg';
+                            }}
                           />
                         ) : (
                           <div className="carousel-video">
-                            <video 
-                              src={file.preview || file.url}
-                              poster={file.preview || '/asset/video.svg'}
-                              className="carousel-media"
-                              muted
-                              preload="metadata"
-                            />
+                            {videoThumbnails[file.id] ? (
+                              <img
+                                src={videoThumbnails[file.id]}
+                                alt={file.name || `视频${index + 1}`}
+                                className="carousel-media video-thumbnail"
+                                loading={index === currentMediaIndex ? 'eager' : 'lazy'}
+                                onError={(e) => {
+                                  console.warn(`视频缩略图加载失败: ${file.name}`, e);
+                                  e.target.src = '/asset/video.svg';
+                                }}
+                              />
+                            ) : (
+                              <video 
+                                src={file.preview || file.url}
+                                poster={file.preview || '/asset/video.svg'}
+                                className="carousel-media"
+                                muted
+                                preload={index === currentMediaIndex ? 'metadata' : 'none'}
+                                onError={(e) => {
+                                  console.warn(`视频加载失败: ${file.name}`, e);
+                                }}
+                              />
+                            )}
+                            
                           </div>
                         )}
                         <div className="media-type-badge">
@@ -1172,27 +1415,29 @@ const PlayerPage = () => {
                 </div>
 
                 {mediaFiles.length > 1 && (
-                  <button className="carousel-nav next" onClick={goToNextMedia}>
+                  <button 
+                    className="carousel-nav next" 
+                    onClick={goToNextMedia}
+                    title="下一张"
+                  >
                     ›
                   </button>
                 )}
               </div>
               
-              {/* 指示器
+              {/* 指示器点 */}
               {mediaFiles.length > 1 && (
                 <div className="carousel-indicators">
                   {mediaFiles.map((_, index) => (
                     <button
                       key={index}
                       className={`indicator ${index === currentMediaIndex ? 'active' : ''}`}
-                      onClick={() => {
-                        setCurrentMediaIndex(index);
-                        resetCarouselTimer();
-                      }}
+                      onClick={() => goToSlide(index)}
+                      title={`跳转到第${index + 1}张`}
                     />
                   ))}
                 </div>
-              )} */}
+              )}
             </div>
           )}
 

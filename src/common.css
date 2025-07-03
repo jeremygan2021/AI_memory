@@ -860,8 +860,8 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 .age-slider {
   width: 100%;
-  height: 6px;
-  border-radius: 3px;
+  height: 18px;
+  border-radius: 16px;
   background: #e8f4f2;
   outline: none;
   margin-bottom: 15px;

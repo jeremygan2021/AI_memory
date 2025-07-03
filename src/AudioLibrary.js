@@ -929,7 +929,7 @@ const AudioLibrary = () => {
               </div>
               {/* 分页按钮 */}
               {totalPages > 1 && (
-                <div className="pagination">
+                <div className="pagination pagination-row">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
@@ -1096,7 +1096,7 @@ const AudioLibrary = () => {
 
                   {/* 分页控件 */}
                   {totalMediaPages > 1 && (
-                    <div className="pagination">
+                    <div className="pagination pagination-row">
                       <button 
                         className="pagination-btn"
                         onClick={() => setMediaCurrentPage(prev => Math.max(prev - 1, 1))}
