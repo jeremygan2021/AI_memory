@@ -836,10 +836,30 @@
 
   /* 移动端轮播图样式优化 */
   .media-carousel-section {
-    margin-top: 20px; /* 减少顶部间距 */
-    margin-bottom: 15px;
-    padding: 12px; /* 减少内边距 */
-    border-radius: 12px; /* 稍小的圆角 */
+    margin: 15px 0;
+    padding: 0 15px;
+    max-height: 220px;
+  }
+
+  .media-carousel-section .swiper {
+    height: 200px;
+  }
+
+  .media-carousel-section .swiper-button-prev,
+  .media-carousel-section .swiper-button-next {
+    width: 32px;
+    height: 32px;
+    margin-top: -16px;
+  }
+
+  .media-carousel-section .swiper-button-prev:after,
+  .media-carousel-section .swiper-button-next:after {
+    font-size: 14px;
+  }
+
+  .media-carousel-section .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
   }
 
   .carousel-title {
@@ -848,17 +868,15 @@
   }
 
   .carousel-container {
-    width: 100%; /* 填满容器 */
-    max-width: 300px; /* 限制最大宽度 */
-    height: 180px; /* 适合16:9比例 */
-    margin: 0 auto; /* 居中 */
+    width: 320px;
+    height: 200px;
   }
 
   .carousel-nav {
     width: 32px;
     height: 32px;
     font-size: 16px;
-    margin: 0 10px; /* 减少间距 */
+    margin: 0 12px;
   }
 
   .video-play-overlay {
@@ -919,12 +937,43 @@
 
   /* 主播放器区域最大高度限制 */
   .player-main {
-    max-height: calc(100vh - 100px); /* 减少高度限制 */
+    max-height: calc(100vh - 120px);
     overflow-y: auto;
   }
 
   .player-container {
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 140px);
+  }
+
+  /* 隐藏移动端的Swiper左右切换按钮 */
+  .media-carousel-section .swiper-button-prev,
+  .media-carousel-section .swiper-button-next {
+    display: none !important;
+  }
+  /* 右滑切换提示样式 */
+  .swiper-swipe-tip {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    z-index: 30;
+    background: rgba(255,255,255,0.85);
+    color: #3bb36a;
+    font-size: 13px;
+    border-radius: 16px;
+    padding: 4px 14px 4px 8px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    user-select: none;
+    pointer-events: none;
+    font-weight: 500;
+  }
+  .swiper-swipe-tip .swipe-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+    background: url('data:image/svg+xml;utf8,<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 9h10m0 0l-3.5-3.5M14 9l-3.5 3.5" stroke="%233bb36a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat center/contain;
   }
 }
 
@@ -1076,8 +1125,30 @@
 
   /* 小屏幕轮播图样式 */
   .media-carousel-section {
-    margin-bottom: 15px;
-    padding: 12px;
+    margin: 10px 0;
+    padding: 0 10px;
+    max-height: 150px;
+  }
+
+  .media-carousel-section .swiper {
+    height: 120px;
+  }
+
+  .media-carousel-section .swiper-button-prev,
+  .media-carousel-section .swiper-button-next {
+    width: 28px;
+    height: 28px;
+    margin-top: -14px;
+  }
+
+  .media-carousel-section .swiper-button-prev:after,
+  .media-carousel-section .swiper-button-next:after {
+    font-size: 12px;
+  }
+
+  .media-carousel-section .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
   }
 
   .carousel-title {
@@ -1086,7 +1157,7 @@
 
   .carousel-container {
     width: 280px;
-    height: 168px;
+    height: 120px;
   }
 
   .carousel-nav {
@@ -1225,16 +1296,24 @@
   }
 
   /* 超小屏轮播图样式 */
-  .carousel-container {
-    width: 240px;
-    height: 144px;
+  .media-carousel-section {
+    max-height: 140px;
   }
 
-  .carousel-nav {
+  .media-carousel-section .swiper {
+    height: 124px;
+  }
+
+  .media-carousel-section .swiper-button-prev,
+  .media-carousel-section .swiper-button-next {
     width: 24px;
     height: 24px;
-    font-size: 12px;
-    margin: 0 6px;
+    margin-top: -12px;
+  }
+
+  .media-carousel-section .swiper-button-prev:after,
+  .media-carousel-section .swiper-button-next:after {
+    font-size: 10px;
   }
 
   .video-play-overlay {
@@ -1743,17 +1822,83 @@
 
 /* 轮播图区域样式 */
 .media-carousel-section {
-  min-height: 200px;
-  max-height: 200px;
-  margin-top: 80px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 30px; /* 与其他内容保持距离 */
-  padding: 20px; /* 内边距 */
-  z-index: 20; /* 最高层级，避免被图标遮挡 */
+  margin: 16px 0;
+  padding: 0 12px;
   position: relative;
+  z-index: 10;
+  height: 160px; /* 统一高度，防止滚动条 */
+  max-height: none;
+  overflow: visible;
+}
+
+/* Swiper自定义样式 */
+.media-carousel-section .swiper {
+  height: 160px;
+  min-height: 160px;
+  max-height: 160px;
+}
+
+.media-carousel-section .swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 160px;
+}
+
+/* 强制显示导航按钮并优化样式 */
+.media-carousel-section .swiper-button-prev,
+.media-carousel-section .swiper-button-next {
+  display: flex !important;
+  background: rgba(255,255,255,0.9);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-top: -16px;
+  z-index: 20;
+  top: 50% !important;
+  transform: translateY(-50%);
+}
+
+.media-carousel-section .swiper-button-prev:after,
+.media-carousel-section .swiper-button-next:after {
+  font-size: 16px;
+  color: #5fce70;
+  font-weight: bold;
+}
+
+.media-carousel-section .swiper-button-prev:hover,
+.media-carousel-section .swiper-button-next:hover {
+  background: rgba(118, 200, 149, 0.3);
+  transform: scale(1.1) translateY(-50%);
+}
+
+.media-carousel-section .swiper-pagination {
+  bottom: 6px !important;
+  z-index: 20;
+}
+
+.media-carousel-section .swiper-pagination-bullet {
+  background: rgba(255,255,255,0.5);
+  opacity: 1;
+  width: 6px;
+  height: 6px;
+}
+
+.media-carousel-section .swiper-pagination-bullet-active {
+  background: rgba(255,255,255,0.9);
+  transform: scale(1.2);
+}
+
+/* 确保播放器控制区域不被遮挡 */
+.player-main {
+  position: relative;
+  z-index: 5;
+}
+
+.main-controls,
+.advanced-controls {
+  position: relative;
+  z-index: 15; /* 确保控制按钮在轮播图之上 */
 }
 
 .carousel-header {
@@ -1774,7 +1919,7 @@
   align-items: center;
   justify-content: center;
   z-index: 21; /* 确保导航按钮在最上层 */
-  top: 45px;
+
 }
 
 .carousel-container {
@@ -1793,6 +1938,7 @@
   display: flex;
   transition: transform 0.3s ease;
   height: 100%;
+  min-width: 100%; /* 新增，确保轮播在小屏下可滑动 */
 }
 
 .carousel-item {
@@ -1981,8 +2127,30 @@
 /* 移动端优化 */
 @media (max-width: 768px) {
   .media-carousel-section {
-    margin: 0;
-    padding: 0;
+    margin: 15px 0;
+    padding: 0 15px;
+    max-height: 220px;
+  }
+
+  .media-carousel-section .swiper {
+    height: 200px;
+  }
+
+  .media-carousel-section .swiper-button-prev,
+  .media-carousel-section .swiper-button-next {
+    width: 32px;
+    height: 32px;
+    margin-top: -16px;
+  }
+
+  .media-carousel-section .swiper-button-prev:after,
+  .media-carousel-section .swiper-button-next:after {
+    font-size: 14px;
+  }
+
+  .media-carousel-section .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
   }
 
   .carousel-title {
@@ -2055,12 +2223,65 @@
   .player-container {
     max-height: calc(100vh - 140px);
   }
+
+  /* 隐藏移动端的Swiper左右切换按钮 */
+  .media-carousel-section .swiper-button-prev,
+  .media-carousel-section .swiper-button-next {
+    display: none !important;
+  }
+  /* 右滑切换提示样式 */
+  .swiper-swipe-tip {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    z-index: 30;
+    background: rgba(255,255,255,0.85);
+    color: #3bb36a;
+    font-size: 13px;
+    border-radius: 16px;
+    padding: 4px 14px 4px 8px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    user-select: none;
+    pointer-events: none;
+    font-weight: 500;
+  }
+  .swiper-swipe-tip .swipe-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+    background: url('data:image/svg+xml;utf8,<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 9h10m0 0l-3.5-3.5M14 9l-3.5 3.5" stroke="%233bb36a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat center/contain;
+  }
 }
 
 @media (max-width: 480px) {
   .media-carousel-section {
-    margin: 0;
-    padding: 0;
+    margin: 10px 0;
+    padding: 0 10px;
+    max-height: 150px;
+  }
+
+  .media-carousel-section .swiper {
+    height: 120px;
+  }
+
+  .media-carousel-section .swiper-button-prev,
+  .media-carousel-section .swiper-button-next {
+    width: 28px;
+    height: 28px;
+    margin-top: -14px;
+  }
+
+  .media-carousel-section .swiper-button-prev:after,
+  .media-carousel-section .swiper-button-next:after {
+    font-size: 12px;
+  }
+
+  .media-carousel-section .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
   }
 
   .carousel-title {
@@ -2113,16 +2334,24 @@
 }
 
 @media (max-width: 375px) {
-  .carousel-container {
-    width: 240px;
+  .media-carousel-section {
+    max-height: 140px;
+  }
+
+  .media-carousel-section .swiper {
     height: 124px;
   }
 
-  .carousel-nav {
+  .media-carousel-section .swiper-button-prev,
+  .media-carousel-section .swiper-button-next {
     width: 24px;
     height: 24px;
-    font-size: 12px;
-    margin: 0 6px;
+    margin-top: -12px;
+  }
+
+  .media-carousel-section .swiper-button-prev:after,
+  .media-carousel-section .swiper-button-next:after {
+    font-size: 10px;
   }
 
   .video-play-overlay {
@@ -2287,4 +2516,61 @@
   .media-carousel-section {
     margin-top: 40px;
   }
+}
+
+/* 默认PC端高度更大 */
+@media (min-width: 769px) {
+  .media-carousel-section {
+    height: 360px;
+    min-height: 360px;
+    max-height: 360px;
+    overflow: hidden;
+  }
+  .media-carousel-section .swiper {
+    height: 360px;
+    min-height: 360px;
+    max-height: 360px;
+    overflow: hidden;
+  }
+  .media-carousel-section .swiper-slide {
+    height: 360px;
+    min-height: 360px;
+    max-height: 360px;
+  }
+}
+
+/* 移动端高度更小且无滚动条 */
+@media (max-width: 768px) {
+  .media-carousel-section {
+    height: 220px;
+    min-height: 220px;
+    max-height: 220px;
+    overflow: hidden;
+    margin: 12px 0;
+    padding: 0 8px;
+  }
+  .media-carousel-section .swiper {
+    height: 220px;
+    min-height: 220px;
+    max-height: 220px;
+    overflow: hidden;
+  }
+  .media-carousel-section .swiper-slide {
+    height: 220px;
+    min-height: 220px;
+    max-height: 220px;
+  }
+}
+
+/* 轮播内容图片/视频自适应高度且不超出 */
+.media-carousel-section .carousel-item,
+.media-carousel-section .carousel-media,
+.media-carousel-section .carousel-video,
+.media-carousel-section .video-thumbnail {
+  height: 100% !important;
+  max-height: 100% !important;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  overflow: hidden;
 } 

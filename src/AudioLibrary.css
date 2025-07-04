@@ -435,7 +435,6 @@
 
 .cloud-indicator .stat-icon {
   color: #3bb6a6;
-  animation: cloudFloat 3s ease-in-out infinite;
 }
 
 .cloud-indicator .stat-number {
@@ -601,7 +600,7 @@
   margin-left: 8px;
   font-size: 14px;
   color: #3bb6a6;
-  animation: cloudFloat 3s ease-in-out infinite;
+  /* animation: cloudFloat 3s ease-in-out infinite; */
 }
 
 @keyframes cloudFloat {
@@ -814,7 +813,7 @@
     flex-direction: row;
     overflow-x: auto;
     gap: 18px;
-    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+    background: linear-gradient(135deg, #3ebaab 0%, #c4eae1 100%);
     border-radius: 28px;
     padding: 18px 10px 18px 18px;
     margin: 0 0 18px 0;
@@ -830,7 +829,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 14px 8px;
+    padding: 5px 5px;
     font-size: 15px;
     font-weight: 600;
     color: #6d6d6d;
@@ -838,12 +837,12 @@
   .stat-number {
     font-size: 22px;
     font-weight: 700;
-    color: #7b2ff2;
+    color: #3bb6a6;
     margin-bottom: 2px;
   }
   .stat-label {
     font-size: 13px;
-    color: #b06ab3;
+    color: #666;
   }
   .sessions-container {
     padding-bottom: 90px;
@@ -926,7 +925,7 @@
   .library-stats {
     padding: 16px;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 34px;
   }
   
   .sessions-container {

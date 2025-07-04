@@ -36,6 +36,10 @@ const AudioLibrary = () => {
   const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false);
   const mediaFilesPerPage = 12;
 
+  // 新增长按相关状态
+  const [longPressTimer, setLongPressTimer] = useState(null);
+  const [isLongPress, setIsLongPress] = useState(false);
+
   // 从URL参数获取用户代码
   useEffect(() => {
     if (userid && validateUserCode(userid)) {
@@ -628,6 +632,106 @@ const AudioLibrary = () => {
     });
   };
 
+  // 复制视频播放链接函数
+  const copyVideoLink = async (file) => {
+    try {
+      const videoId = file.id;
+      if (!videoId || typeof videoId !== 'string') {
+        alert('无法生成播放链接：视频ID无效');
+        return;
+      }
+      const baseUrl = window.location.origin;
+      const playLink = `${baseUrl}/${userCode}/video-player/${file.sessionId || 'unknown'}/${videoId}?from=library`;
+      // iOS特殊处理
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        window.prompt('请手动长按下方链接并选择"复制"', playLink);
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(playLink);
+          alert('✅ 视频播放链接已复制到剪贴板！');
+        } catch (err) {
+          fallbackCopyTextToClipboard(playLink);
+        }
+      } else {
+        fallbackCopyTextToClipboard(playLink);
+      }
+    } catch (error) {
+      alert('复制链接失败，请稍后重试');
+    }
+  };
+  function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    let success = false;
+    try {
+      success = document.execCommand('copy');
+    } catch (err) {
+      success = false;
+    }
+    document.body.removeChild(textArea);
+    if (success) {
+      alert('✅ 视频播放链接已复制到剪贴板！');
+    } else {
+      alert('复制失败，请手动复制链接：' + text);
+    }
+  }
+
+  // 长按事件处理
+  const handleLongPressStart = (file, e) => {
+    e.preventDefault();
+    if (file.type === 'video') {
+      const mediaElement = e.currentTarget;
+      mediaElement.classList.add('long-pressing');
+      const timer = setTimeout(() => {
+        setIsLongPress(true);
+        mediaElement.classList.remove('long-pressing');
+        mediaElement.classList.add('long-press-success');
+        copyVideoLink(file);
+        setTimeout(() => {
+          mediaElement.classList.remove('long-press-success');
+        }, 600);
+      }, 500);
+      setLongPressTimer(timer);
+    }
+  };
+  const handleLongPressEnd = (e) => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+      const mediaElement = e.currentTarget;
+      mediaElement.classList.remove('long-pressing');
+    }
+  };
+
+  // 视频点击跳转播放页面
+  const handleVideoClick = (file, e) => {
+    if (isLongPress) {
+      setIsLongPress(false);
+      return;
+    }
+    if (file.type === 'video') {
+      const videoId = file.id;
+      if (videoId && typeof videoId === 'string') {
+        const targetUrl = `/${userCode}/video-player/${file.sessionId || 'unknown'}/${videoId}?from=library`;
+        navigate(targetUrl);
+      } else {
+        alert('视频ID无效，将使用弹窗预览模式');
+        setPreviewFile(file);
+      }
+    } else {
+      setPreviewFile(file);
+    }
+  };
+
   if (loading) {
     return (
       <div className="audio-library loading">
@@ -1005,7 +1109,15 @@ const AudioLibrary = () => {
                   <div className="photos-grid">
                     {currentMediaFiles.map(file => (
                       <div key={file.id} className="media-item">
-                        <div className="media-content" onClick={() => handleMediaClick(file)}>
+                        <div
+                          className="media-content"
+                          onClick={file.type === 'video' ? (e) => handleVideoClick(file, e) : () => handleMediaClick(file)}
+                          onMouseDown={file.type === 'video' ? (e) => handleLongPressStart(file, e) : undefined}
+                          onTouchStart={file.type === 'video' ? (e) => handleLongPressStart(file, e) : undefined}
+                          onMouseUp={file.type === 'video' ? handleLongPressEnd : undefined}
+                          onMouseLeave={file.type === 'video' ? handleLongPressEnd : undefined}
+                          onTouchEnd={file.type === 'video' ? handleLongPressEnd : undefined}
+                        >
                           {file.type === 'image' ? (
                             <div className="image-preview">
                               <img src={file.ossUrl || file.preview || file.url} alt={file.name} className="media-preview" />
@@ -1037,11 +1149,10 @@ const AudioLibrary = () => {
                             </div>
                           ) : (
                             <div className="video-preview">
-                              <video 
-                                src={file.ossUrl || file.preview || file.url} 
+                              <video
+                                src={file.ossUrl || file.preview || file.url}
                                 className="media-preview"
                                 controls
-                                autoPlay
                                 muted
                                 playsInline
                                 preload="metadata"

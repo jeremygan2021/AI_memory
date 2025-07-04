@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './PlayerPage.css';
 import { getUserCode, validateUserCode } from './utils/userCode';
+// Swiper相关引入
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 // API配置
 
@@ -28,19 +34,12 @@ const PlayerPage = () => {
   const [isIOS, setIsIOS] = useState(false); // iOS设备检测
   const [mediaFiles, setMediaFiles] = useState([]); // 关联的照片和视频文件
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0); // 当前轮播索引
-  const [isCarouselHovered, setIsCarouselHovered] = useState(false); // 轮播图悬停状态
-  const [isCarouselPlaying, setIsCarouselPlaying] = useState(true); // 轮播播放状态
-  const carouselTimerRef = useRef(null); // 轮播定时器引用
-  const carouselIntervalRef = useRef(null); // 轮播间隔引用
   const [previewFile, setPreviewFile] = useState(null); // 预览文件
   const [isMobile, setIsMobile] = useState(false); // 是否移动设备
   const [videoPlaying, setVideoPlaying] = useState(false); // 视频播放状态
   const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false); // 是否已尝试自动全屏
   const videoPreviewRef = useRef(null); // 视频预览引用
   const [videoThumbnails, setVideoThumbnails] = useState({}); // 视频缩略图缓存
-  // 新增：轮播触摸滑动状态
-  const [touchStartX, setTouchStartX] = useState(null);
-  const [touchEndX, setTouchEndX] = useState(null);
 
   // 检测iOS设备
   useEffect(() => {
@@ -170,16 +169,32 @@ const PlayerPage = () => {
   // 从云端API加载录音数据
   useEffect(() => {
     if (id && recordingId && userCode) {
-      loadRecordingFromCloud();
-      loadMediaFiles();
+      setLoading(true);
+      Promise.all([
+        loadRecordingFromCloud(),
+        loadMediaFiles()
+      ]).finally(() => setLoading(false));
     }
   }, [id, recordingId, userCode, navigate]);
 
   // 加载与当前会话相关的照片和视频（云端+本地）
   const loadMediaFiles = async () => {
     try {
+      let localFiles = [];
+      try {
+        const saved = localStorage.getItem('uploadedFiles');
+        if (saved) {
+          const allFiles = JSON.parse(saved);
+          localFiles = allFiles.filter(file => 
+            file.sessionId === id && (file.type === 'image' || file.type === 'video')
+          );
+        }
+      } catch (error) {
+        // 本地异常忽略
+      }
+      setMediaFiles(localFiles);
+      // 异步加载云端数据，加载后刷新
       let cloudFiles = [];
-      // 云端加载
       if (userCode && id) {
         const prefix = `recordings/${userCode}/${id}/`;
         const response = await fetch(
@@ -195,7 +210,6 @@ const PlayerPage = () => {
             const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
             const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
             if (!isImage && !isVideo) return null;
-            // 生成唯一ID
             const timestamp = file.last_modified || file.lastModified || file.modified || new Date().toISOString();
             const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
             const uniqueId = nameWithoutExt.slice(-8) || Math.random().toString(36).substr(2, 8);
@@ -222,27 +236,12 @@ const PlayerPage = () => {
           }).filter(Boolean);
         }
       }
-      // 本地加载
-      let localFiles = [];
-      try {
-        const saved = localStorage.getItem('uploadedFiles');
-        if (saved) {
-          const allFiles = JSON.parse(saved);
-          localFiles = allFiles.filter(file => 
-            file.sessionId === id && (file.type === 'image' || file.type === 'video')
-          );
-        }
-      } catch (error) {
-        // 本地异常忽略
-      }
       // 合并去重（以云端为主，ID为唯一标识）
       const allFiles = [...cloudFiles, ...localFiles.filter(lf => !cloudFiles.some(cf => cf.id === lf.id))];
       setMediaFiles(allFiles);
-      console.log('合并后的媒体文件:', allFiles);
-      
-      // 生成视频缩略图
+      // 只为当前轮播页及前后各1页生成缩略图
       if (allFiles.length > 0) {
-        processVideoThumbnails(allFiles);
+        processVideoThumbnailsLazy(allFiles, currentMediaIndex);
       }
     } catch (error) {
       console.error('加载媒体文件失败:', error);
@@ -890,183 +889,33 @@ const PlayerPage = () => {
     });
   };
 
-  // 批量生成视频缩略图
-  const processVideoThumbnails = async (files) => {
+  // 懒加载缩略图，仅为当前轮播页及前后各1页生成
+  const processVideoThumbnailsLazy = async (files, currentIndex) => {
     const videoFiles = files.filter(file => file.type === 'video');
     const thumbnails = { ...videoThumbnails };
-    
-    for (const file of videoFiles) {
-      if (!thumbnails[file.id]) {
+    const indices = [currentIndex - 1, currentIndex, currentIndex + 1]
+      .filter(i => i >= 0 && i < videoFiles.length);
+    for (const i of indices) {
+      const file = videoFiles[i];
+      if (file && !thumbnails[file.id]) {
         try {
-          console.log('生成视频缩略图:', file.name);
           const thumbnail = await generateVideoThumbnail(file);
           thumbnails[file.id] = thumbnail;
-        } catch (error) {
-          console.warn('视频缩略图生成失败:', file.name, error);
-          thumbnails[file.id] = '/asset/video.svg'; // 使用默认图标
+        } catch {
+          thumbnails[file.id] = '/asset/video.svg';
         }
       }
     }
-    
     setVideoThumbnails(thumbnails);
   };
 
-  // 轮播图相关函数
-  const stopCarousel = () => {
-    if (carouselTimerRef.current) {
-      clearTimeout(carouselTimerRef.current);
-      carouselTimerRef.current = null;
-    }
-    if (carouselIntervalRef.current) {
-      clearInterval(carouselIntervalRef.current);
-      carouselIntervalRef.current = null;
-    }
-  };
-
-  const goToNextSlide = () => {
-    if (mediaFiles.length <= 1) return;
-    
-    setCurrentMediaIndex(prev => {
-      const nextIndex = prev >= mediaFiles.length - 1 ? 0 : prev + 1;
-      console.log(`轮播切换: ${prev} -> ${nextIndex}`, {
-        isMobile,
-        transform: `translateX(-${nextIndex * 100}%)`,
-        totalFiles: mediaFiles.length
-      });
-      return nextIndex;
-    });
-  };
-
-  const goToPrevMedia = () => {
-    if (mediaFiles.length <= 1) return;
-    
-    setCurrentMediaIndex(prev => {
-      const prevIndex = prev === 0 ? mediaFiles.length - 1 : prev - 1;
-      console.log(`手动切换到上一张: ${prev} -> ${prevIndex}`);
-      return prevIndex;
-    });
-    // 用户手动操作时暂停并重启轮播
-    setIsCarouselPlaying(false);
-    setTimeout(() => setIsCarouselPlaying(true), 1000);
-  };
-
-  const goToNextMedia = () => {
-    if (mediaFiles.length <= 1) return;
-    
-    setCurrentMediaIndex(prev => {
-      const nextIndex = prev >= mediaFiles.length - 1 ? 0 : prev + 1;
-      console.log(`手动切换到下一张: ${prev} -> ${nextIndex}`);
-      return nextIndex;
-    });
-    // 用户手动操作时暂停并重启轮播
-    setIsCarouselPlaying(false);
-    setTimeout(() => setIsCarouselPlaying(true), 1000);
-  };
-
-  const goToSlide = (index) => {
-    if (index < 0 || index >= mediaFiles.length) return;
-    
-    console.log(`直接跳转到第${index}张`);
-    setCurrentMediaIndex(index);
-    // 用户手动操作时暂停并重启轮播
-    setIsCarouselPlaying(false);
-    setTimeout(() => setIsCarouselPlaying(true), 1000);
-  };
-
-  const startCarousel = () => {
-    stopCarousel();
-    
-    // 检查是否需要轮播
-    if (mediaFiles.length <= 1) {
-      console.log('媒体文件数量不足，无需轮播');
-      return;
-    }
-    
-    // PC端悬停时不轮播，移动端忽略悬停状态
-    const shouldPause = !isMobile && isCarouselHovered;
-    if (shouldPause || !isCarouselPlaying) {
-      console.log('轮播暂停:', { shouldPause, isCarouselPlaying, isMobile, isCarouselHovered });
-      return;
-    }
-    
-    console.log('启动轮播定时器');
-    carouselTimerRef.current = setTimeout(() => {
-      goToNextSlide();
-      // 递归调用继续轮播
-      if (isCarouselPlaying) {
-        startCarousel();
-      }
-    }, 3000);
-  };
-
-  const pauseCarousel = () => {
-    console.log('暂停轮播');
-    setIsCarouselPlaying(false);
-    stopCarousel();
-  };
-
-  const resumeCarousel = () => {
-    console.log('恢复轮播');
-    setIsCarouselPlaying(true);
-  };
-
-  // 自动轮播控制 - 监听状态变化
+  // 监听轮播索引变化时懒加载缩略图
   useEffect(() => {
-    console.log('轮播状态变化:', { 
-      mediaFilesCount: mediaFiles.length, 
-      isCarouselPlaying, 
-      isCarouselHovered, 
-      isMobile 
-    });
-    
-    if (mediaFiles.length > 1 && isCarouselPlaying) {
-      startCarousel();
-    } else {
-      stopCarousel();
+    if (mediaFiles.length > 0) {
+      processVideoThumbnailsLazy(mediaFiles, currentMediaIndex);
     }
-    
-    return () => stopCarousel();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediaFiles.length, isCarouselPlaying, isCarouselHovered, isMobile]);
-
-  // 媒体文件变化时重置轮播索引
-  useEffect(() => {
-    if (mediaFiles.length > 0 && currentMediaIndex >= mediaFiles.length) {
-      console.log('重置轮播索引:', currentMediaIndex, '->', 0);
-      setCurrentMediaIndex(0);
-    }
-  }, [mediaFiles.length, currentMediaIndex]);
-
-  // 页面可见性变化时控制轮播
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log('页面可见，恢复轮播');
-        if (mediaFiles.length > 1) {
-          resumeCarousel();
-        }
-      } else {
-        console.log('页面隐藏，暂停轮播');
-        pauseCarousel();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      stopCarousel();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediaFiles.length]);
-
-  // 组件卸载时清理
-  useEffect(() => {
-    return () => {
-      console.log('PlayerPage卸载，清理轮播定时器');
-      stopCarousel();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // eslint-disable-next-line
+  }, [currentMediaIndex, mediaFiles]);
 
   const handleMediaClick = (file) => {
     if (isMobile) {
@@ -1216,33 +1065,6 @@ const PlayerPage = () => {
     }
   };
 
-  // 新增：轮播触摸事件处理函数
-  const handleTouchStart = (e) => {
-    if (e.touches && e.touches.length === 1) {
-      setTouchStartX(e.touches[0].clientX);
-      setTouchEndX(null);
-    }
-  };
-  const handleTouchMove = (e) => {
-    if (e.touches && e.touches.length === 1) {
-      setTouchEndX(e.touches[0].clientX);
-    }
-  };
-  const handleTouchEnd = () => {
-    if (touchStartX !== null && touchEndX !== null) {
-      const deltaX = touchEndX - touchStartX;
-      if (Math.abs(deltaX) > 30) { // 阈值可调整
-        if (deltaX > 0) {
-          goToPrevMedia();
-        } else {
-          goToNextMedia();
-        }
-      }
-    }
-    setTouchStartX(null);
-    setTouchEndX(null);
-  };
-
   if (loading) {
     return (
       <div className="player-page loading">
@@ -1320,124 +1142,131 @@ const PlayerPage = () => {
           {/* 轮播图区域 - 只有上传了照片或视频才显示 */}
           {mediaFiles.length > 0 && (
             <div className="media-carousel-section">
-              
-              <div 
-                className="media-carousel"
-                onMouseEnter={() => {
-                  console.log('鼠标进入轮播区域');
-                  setIsCarouselHovered(true);
-                }}
-                onMouseLeave={() => {
-                  console.log('鼠标离开轮播区域');
-                  setIsCarouselHovered(false);
-                }}
-                // 新增：移动端滑动切换
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-              >
-                {mediaFiles.length > 1 && (
-                  <button 
-                    className="carousel-nav prev" 
-                    onClick={goToPrevMedia}
-                    title="上一张"
-                  >
-                    ‹
-                  </button>
-                )}
-                
-                <div className="carousel-container">
-                  <div 
-                    className="carousel-track"
-                    style={{
-                      transform: `translateX(-${currentMediaIndex * 100}%)`,
-                      WebkitTransform: `translateX(-${currentMediaIndex * 100}%)`, // Safari兼容
-                      width: `${mediaFiles.length * 100}%`,
-                      transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                      WebkitTransition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' // Safari兼容
-                    }}
-                  >
-                    {mediaFiles.map((file, index) => (
-                      <div 
-                        key={file.id || index} 
-                        className={`carousel-item ${index === currentMediaIndex ? 'active' : ''}`}
-                        onClick={() => handleMediaClick(file)}
-                        style={{ 
-                          opacity: index === currentMediaIndex ? 1 : 0.8,
-                          transition: 'opacity 0.3s ease'
-                        }}
-                      >
-                        {file.type === 'image' ? (
-                          <img 
-                            src={file.preview || file.url} 
-                            alt={file.name || `图片${index + 1}`}
-                            className="carousel-media"
-                            loading={index === currentMediaIndex ? 'eager' : 'lazy'}
-                            onError={(e) => {
-                              console.warn(`图片加载失败: ${file.name}`, e);
-                              e.target.src = '/asset/image-placeholder.svg';
-                            }}
-                          />
-                        ) : (
-                          <div className="carousel-video">
-                            {videoThumbnails[file.id] ? (
-                              <img
-                                src={videoThumbnails[file.id]}
-                                alt={file.name || `视频${index + 1}`}
-                                className="carousel-media video-thumbnail"
-                                loading={index === currentMediaIndex ? 'eager' : 'lazy'}
-                                onError={(e) => {
-                                  console.warn(`视频缩略图加载失败: ${file.name}`, e);
-                                  e.target.src = '/asset/video.svg';
-                                }}
-                              />
-                            ) : (
-                              <video 
-                                src={file.preview || file.url}
-                                poster={file.preview || '/asset/video.svg'}
-                                className="carousel-media"
-                                muted
-                                preload={index === currentMediaIndex ? 'metadata' : 'none'}
-                                onError={(e) => {
-                                  console.warn(`视频加载失败: ${file.name}`, e);
-                                }}
-                              />
-                            )}
-                            
-                          </div>
-                        )}
-                        <div className="media-type-badge">
-                          {file.type === 'image' ? '📷' : '🎬'}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {mediaFiles.length > 1 && (
-                  <button 
-                    className="carousel-nav next" 
-                    onClick={goToNextMedia}
-                    title="下一张"
-                  >
-                    ›
-                  </button>
-                )}
-              </div>
-              
-              {/* 指示器点 */}
-              {mediaFiles.length > 1 && (
-                <div className="carousel-indicators">
-                  {mediaFiles.map((_, index) => (
-                    <button
-                      key={index}
-                      className={`indicator ${index === currentMediaIndex ? 'active' : ''}`}
-                      onClick={() => goToSlide(index)}
-                      title={`跳转到第${index + 1}张`}
-                    />
-                  ))}
+              {/* 右滑切换提示，仅移动端显示 */}
+              {isMobile && mediaFiles.length > 1 && (
+                <div className="swiper-swipe-tip">
+                  <span className="swipe-icon"></span>
+                  右滑切换
                 </div>
               )}
+              <Swiper
+                key={mediaFiles.length}
+                modules={[Autoplay, Pagination, Navigation]}
+                spaceBetween={10}
+                slidesPerView={1}
+                loop={mediaFiles.length > 1}
+                autoplay={mediaFiles.length > 1 ? {
+                  delay: 3000,
+                  disableOnInteraction: false,
+                } : false}
+                pagination={mediaFiles.length > 1 ? { clickable: true } : false}
+                navigation={mediaFiles.length > 1}
+                onSlideChange={swiper => setCurrentMediaIndex(swiper.realIndex)}
+                style={{
+                  width: '100%',
+                  height: isMobile ? '220px' : '360px',
+                  borderRadius: '12px'
+                }}
+              >
+                {mediaFiles.map((file, index) => (
+                  <SwiperSlide key={file.id || index}>
+                    <div
+                      className="carousel-item"
+                      onClick={() => handleMediaClick(file)}
+                      style={{
+                        height: '100%',
+                        width: '100%',
+                        position: 'relative',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {file.type === 'image' ? (
+                        <img
+                          src={file.preview || file.url}
+                          alt={file.name || `图片${index + 1}`}
+                          className="carousel-media"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            borderRadius: '12px'
+                          }}
+                          onError={e => {
+                            console.warn(`图片加载失败: ${file.name}`, e);
+                            e.target.src = '/asset/image-placeholder.svg';
+                          }}
+                        />
+                      ) : (
+                        <div className="carousel-video" style={{ width: '100%', height: '100%' }}>
+                          {videoThumbnails[file.id] ? (
+                            <img
+                              src={videoThumbnails[file.id]}
+                              alt={file.name || `视频${index + 1}`}
+                              className="carousel-media video-thumbnail"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                borderRadius: '12px'
+                              }}
+                              onError={e => {
+                                console.warn(`视频缩略图加载失败: ${file.name}`, e);
+                                e.target.src = '/asset/video.svg';
+                              }}
+                            />
+                          ) : (
+                            <video
+                              src={file.preview || file.url}
+                              poster={file.preview || '/asset/video.svg'}
+                              className="carousel-media"
+                              muted
+                              preload="metadata"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                borderRadius: '12px'
+                              }}
+                              onError={e => {
+                                console.warn(`视频加载失败: ${file.name}`, e);
+                              }}
+                            />
+                          )}
+                          <div className="video-play-overlay" style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            background: 'rgba(0, 0, 0, 0.6)',
+                            borderRadius: '50%',
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '14px'
+                          }}>
+                            ▶
+                          </div>
+                        </div>
+                      )}
+                      <div className="media-type-badge" style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        background: 'rgba(0, 0, 0, 0.7)',
+                        borderRadius: '12px',
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        color: 'white'
+                      }}>
+                        {file.type === 'image' ? '图片' : '视频'}
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             </div>
           )}
 

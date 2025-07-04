@@ -718,9 +718,9 @@ const UploadMediaPage = () => {
       // 现代Clipboard API
       if (navigator.clipboard && navigator.clipboard.writeText) {
         try {
-          await navigator.clipboard.writeText(playLink);
-          console.log('UploadMediaPage: 视频播放链接已复制到剪贴板');
-          alert('✅ 视频播放链接已复制到剪贴板！');
+        await navigator.clipboard.writeText(playLink);
+        console.log('UploadMediaPage: 视频播放链接已复制到剪贴板');
+        alert('✅ 视频播放链接已复制到剪贴板！');
         } catch (err) {
           // Clipboard API失败，降级
           fallbackCopyTextToClipboard(playLink);
@@ -737,27 +737,27 @@ const UploadMediaPage = () => {
 
   // 降级复制方法
   function fallbackCopyTextToClipboard(text) {
-    const textArea = document.createElement('textarea');
+        const textArea = document.createElement('textarea');
     textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
     let success = false;
-    try {
+        try {
       success = document.execCommand('copy');
-    } catch (err) {
+        } catch (err) {
       success = false;
-    }
-    document.body.removeChild(textArea);
+        }
+        document.body.removeChild(textArea);
     if (success) {
       alert('✅ 视频播放链接已复制到剪贴板！');
     } else {
       alert('复制失败，请手动复制链接：' + text);
+      }
     }
-  }
 
   const closePreview = () => {
     setPreviewFile(null);
