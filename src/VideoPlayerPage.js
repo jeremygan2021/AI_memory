@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './VideoPlayerPage.css';
+import CommentSection from './components/CommentSection';
 
 const VideoPlayerPage = () => {
   const { userid: userCode, sessionid: sessionId, videoid: videoId } = useParams();
@@ -685,6 +686,17 @@ const VideoPlayerPage = () => {
           </div>
         </div>
       </div>
+
+      {/* 评论区域 */}
+      {video && videoId && userCode && sessionId && (
+        <div className="comments-container">
+          <CommentSection 
+            recordingId={videoId}
+            userCode={userCode}
+            sessionId={sessionId}
+          />
+        </div>
+      )}
 
     </div>
   );
