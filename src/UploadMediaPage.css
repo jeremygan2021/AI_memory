@@ -1631,7 +1631,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   /* 确保内容也是固定的 */
   overflow: hidden;
 }
@@ -1713,7 +1717,11 @@
     -webkit-transform: translateZ(0) !important;
     transform: translateZ(0) !important;
     overflow: hidden !important;
-    position: relative !important;
+    position: absolute!important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
   
   /* iOS视频元素优化 */
