@@ -9,6 +9,7 @@ import AudioLibrary from './AudioLibrary';
 import ModernSearchBox from './components/ModernSearchBox';
 import UploadMediaPage from './UploadMediaPage';
 import VideoPlayerPage from './VideoPlayerPage';
+import CommentTest from './components/CommentTest';
 
 // 折线图数据
 const chartData = [
@@ -1070,6 +1071,7 @@ function App() {
       <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
       <Route path="/:userid/:id" element={<RecordPage />} />
       <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
+      <Route path="/comment-test" element={<CommentTest />} />
     </Routes>
   );
 }

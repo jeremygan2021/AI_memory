@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './PlayerPage.css';
 import { getUserCode, validateUserCode } from './utils/userCode';
+import CommentSection from './components/CommentSection';
 // Swiper相关引入
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -1123,7 +1124,7 @@ const PlayerPage = () => {
       {/* 主播放器区域 */}
       <main className="player-main">
         <div className="player-container">
-          {/* <img src="/asset/elephant.png" alt="背景" className="elephant-icon" /> */}
+          {/* <img src="/asset/elephant.png" alt="背景" className="elephant-icon" />  */}
           {/* 录音信息 - 隐藏详细信息 */}
           {/* <div className="recording-info">
             <div className="recording-avatar">
@@ -1383,6 +1384,15 @@ const PlayerPage = () => {
           </div>
         </div>
       </main>
+
+      {/* 评论区域 */}
+      {recording && (
+        <CommentSection 
+          recordingId={recordingId}
+          userCode={userCode}
+          sessionId={id}
+        />
+      )}
 
       {/* 隐藏的音频元素 */}
       <audio

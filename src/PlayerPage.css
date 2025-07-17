@@ -42,6 +42,8 @@
   padding-bottom: var(--safe-area-inset-bottom);
   padding-left: var(--safe-area-inset-left);
   padding-right: var(--safe-area-inset-right);
+  /* 为评论区域添加底部间距 */
+  padding-bottom: max(20px, var(--safe-area-inset-bottom));
 }
 
 /* 确保所有播放页面的文本元素使用统一字体 */
@@ -687,6 +689,12 @@
   .carousel-container {
     width: 350px;
     height: 210px;
+  }
+
+  /* 评论区域响应式 */
+  .comment-section {
+    margin: 15px auto 0;
+    max-width: 600px;
   }
 }
 
@@ -2438,6 +2446,15 @@
     margin-top: 60px; /* 调整轮播图距离 */
     z-index: 20;      /* 确保在适当层级 */
   }
+
+  .comment-section {
+    margin-top: 80px;
+    padding: 20px 30px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 18px;
+  }
 }
 
 /* iPad Air横屏模式特别优化 (1180x820) */
@@ -2477,6 +2494,15 @@
   .media-carousel-section {
     margin-top: 50px;
   }
+
+  .comment-section {
+    margin-top: 60px;
+    padding: 18px 25px;
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 16px;
+  }
 }
 
 /* iPad mini横屏模式优化 (1024x768) */
@@ -2515,6 +2541,27 @@
 
   .media-carousel-section {
     margin-top: 40px;
+  }
+
+  .comment-section {
+    margin-top: 50px;
+    padding: 15px 20px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 14px;
+  }
+}
+
+/* 平板竖屏模式专用样式 */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .comment-section {
+    margin-top: 70px;
+    padding: 22px 35px;
+    max-width: 850px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 20px;
   }
 }
 
@@ -2573,4 +2620,29 @@
   object-fit: cover;
   border-radius: 12px;
   overflow: hidden;
+}
+
+/* 评论区域响应式样式 */
+@media (max-width: 768px) {
+  .comment-section {
+    margin: 15px auto 0;
+    max-width: 95%;
+    border-radius: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .comment-section {
+    margin: 10px auto 0;
+    max-width: 95%;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .comment-section {
+    margin: 8px auto 0;
+    max-width: 95%;
+    border-radius: 10px;
+  }
 } 

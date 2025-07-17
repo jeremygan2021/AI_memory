@@ -1,0 +1,986 @@
+/* 评论区域样式 */
+.comment-section {
+  margin-top: 0;
+  width: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 25px 40px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 评论头部 */
+.comment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+
+}
+
+.comment-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d5016;
+}
+
+.comment-icon {
+  font-size: 20px;
+}
+
+.add-comment-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #4ac967, #88d982);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.add-comment-btn:hover {
+  background: linear-gradient(135deg, #88d982, #4ac967);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 201, 103, 0.4);
+}
+
+.add-comment-btn:active {
+  transform: translateY(0);
+}
+
+/* 评论表单 */
+.comment-form {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.comment-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(74, 201, 103, 0.3);
+  border-radius: 16px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #333;
+  resize: vertical;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.comment-textarea:focus {
+  border-color: #4ac967;
+  box-shadow: 0 0 0 3px rgba(74, 201, 103, 0.1);
+  background: rgba(255, 255, 255, 1);
+}
+
+.comment-textarea::placeholder {
+  color: #999;
+}
+
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.submit-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #4ac967, #88d982);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #88d982, #4ac967);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 201, 103, 0.4);
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 评论列表 */
+.comments-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.comments-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+  background: rgba(74, 201, 103, 0.5);
+  border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(74, 201, 103, 0.7);
+}
+
+/* 无评论状态 */
+.no-comments {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.no-comments-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.6;
+}
+
+.no-comments p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* 评论项 */
+.comment-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-avatar {
+  flex-shrink: 0;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ac967, #88d982);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(74, 201, 103, 0.3);
+}
+
+.comment-content {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 2px solid rgba(74, 201, 103, 0.2);
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: #2d5016;
+  font-size: 14px;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+}
+
+.comment-text {
+  color: #333;
+  font-size: 20px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* 通知样式 */
+.comment-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 10000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+.comment-notification.show {
+  transform: translateX(0);
+}
+
+.comment-notification.success {
+  background: linear-gradient(135deg, #4ac967, #88d982);
+  box-shadow: 0 6px 20px rgba(74, 201, 103, 0.4);
+}
+
+.comment-notification.error {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+/* 平板专用样式 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .comment-section {
+    margin-top: 0;
+    padding: 20px 30px;
+    max-width: 800px;
+    border-radius: 18px;
+  }
+
+  .comment-header {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+  }
+
+  .comment-title {
+    font-size: 17px;
+  }
+
+  .comment-icon {
+    font-size: 19px;
+  }
+
+  .add-comment-btn {
+    padding: 9px 18px;
+    font-size: 13px;
+  }
+
+  .comment-form {
+    margin-bottom: 22px;
+    padding: 18px;
+  }
+
+  .comment-textarea {
+    min-height: 90px;
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .submit-btn {
+    padding: 9px 18px;
+    font-size: 13px;
+  }
+
+  .comments-list {
+    max-height: 350px;
+  }
+
+  .comment-item {
+    gap: 14px;
+    padding: 14px 0;
+  }
+
+  .avatar-circle {
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
+  }
+
+  .comment-author {
+    font-size: 14px;
+  }
+
+  .comment-time {
+    font-size: 12px;
+  }
+
+  .comment-text {
+    font-size: 18px;
+  }
+
+  .no-comments {
+    padding: 35px 18px;
+  }
+
+  .no-comments-icon {
+    font-size: 42px;
+  }
+
+  .no-comments p {
+    font-size: 14px;
+  }
+
+  .comment-notification {
+    top: 18px;
+    right: 18px;
+    padding: 14px 18px;
+    font-size: 14px;
+    max-width: 280px;
+  }
+}
+
+/* iPad Air专用样式 (1180x820) */
+@media (min-width: 1180px) and (max-width: 1180px) and (orientation: landscape) {
+  .comment-section {
+    margin-top: 0;
+    padding: 18px 25px;
+    max-width: 900px;
+    border-radius: 16px;
+  }
+
+  .comment-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .comment-title {
+    font-size: 16px;
+  }
+
+  .comment-icon {
+    font-size: 18px;
+  }
+
+  .add-comment-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .comment-form {
+    margin-bottom: 20px;
+    padding: 16px;
+  }
+
+  .comment-textarea {
+    min-height: 85px;
+    padding: 13px;
+    font-size: 13px;
+  }
+
+  .submit-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .comments-list {
+    max-height: 320px;
+  }
+
+  .comment-item {
+    gap: 12px;
+    padding: 12px 0;
+  }
+
+  .avatar-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .comment-author {
+    font-size: 13px;
+  }
+
+  .comment-time {
+    font-size: 11px;
+  }
+
+  .comment-text {
+    font-size: 16px;
+  }
+
+  .no-comments {
+    padding: 30px 16px;
+  }
+
+  .no-comments-icon {
+    font-size: 38px;
+  }
+
+  .no-comments p {
+    font-size: 13px;
+  }
+
+  .comment-notification {
+    top: 16px;
+    right: 16px;
+    padding: 12px 16px;
+    font-size: 13px;
+    max-width: 260px;
+  }
+}
+
+/* iPad mini专用样式 (1024x768) */
+@media (min-width: 1024px) and (max-width: 1024px) and (orientation: landscape) {
+  .comment-section {
+    margin-top: 0;
+    padding: 15px 20px;
+    max-width: 900px;
+    border-radius: 14px;
+  }
+
+  .comment-header {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+
+  .comment-title {
+    font-size: 15px;
+  }
+
+  .comment-icon {
+    font-size: 17px;
+  }
+
+  .add-comment-btn {
+    padding: 7px 14px;
+    font-size: 11px;
+  }
+
+  .comment-form {
+    margin-bottom: 18px;
+    padding: 14px;
+  }
+
+  .comment-textarea {
+    min-height: 80px;
+    padding: 12px;
+    font-size: 20px;
+  }
+
+  .submit-btn {
+    padding: 7px 14px;
+    font-size: 11px;
+  }
+
+  .comments-list {
+    max-height: 300px;
+  }
+
+  .comment-item {
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .avatar-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .comment-author {
+    font-size: 12px;
+  }
+
+  .comment-time {
+    font-size: 10px;
+  }
+
+  .comment-text {
+    font-size: 20px;
+  }
+
+  .no-comments {
+    padding: 25px 14px;
+  }
+
+  .no-comments-icon {
+    font-size: 34px;
+  }
+
+  .no-comments p {
+    font-size: 12px;
+  }
+
+  .comment-notification {
+    top: 14px;
+    right: 14px;
+    padding: 10px 14px;
+    font-size: 12px;
+    max-width: 240px;
+  }
+}
+
+/* 平板竖屏模式专用样式 */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .comment-section {
+    margin-top: 0;
+    padding: 22px 35px;
+    max-width: 900px;
+    border-radius: 20px;
+  }
+
+  .comment-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .comment-title {
+    font-size: 18px;
+  }
+
+  .comment-icon {
+    font-size: 20px;
+  }
+
+  .add-comment-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .comment-form {
+    margin-bottom: 25px;
+    padding: 20px;
+  }
+
+  .comment-textarea {
+    min-height: 100px;
+    padding: 16px;
+    font-size: 18px;
+  }
+
+  .submit-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .comments-list {
+    max-height: 400px;
+  }
+
+  .comment-item {
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  .avatar-circle {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+  }
+
+  .comment-author {
+    font-size: 15px;
+  }
+
+  .comment-time {
+    font-size: 13px;
+  }
+
+  .comment-text {
+    font-size: 18px;
+  }
+
+  .no-comments {
+    padding: 40px 20px;
+  }
+
+  .no-comments-icon {
+    font-size: 46px;
+  }
+
+  .no-comments p {
+    font-size: 15px;
+  }
+
+  .comment-notification {
+    top: 20px;
+    right: 20px;
+    padding: 16px 20px;
+    font-size: 15px;
+    max-width: 300px;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .comment-section {
+    margin-top: 0;
+    padding: 20px 30px;
+    border-radius: 15px;
+    max-width: 100%;
+  }
+
+  .comment-header {
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+  }
+
+  .comment-title {
+    font-size: 16px;
+  }
+
+  .comment-icon {
+    font-size: 18px;
+  }
+
+  .add-comment-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .comment-form {
+    margin-bottom: 20px;
+    padding: 15px;
+  }
+
+  .comment-textarea {
+    min-height: 80px;
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .submit-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .comments-list {
+    max-height: 300px;
+  }
+
+  .comment-item {
+    gap: 12px;
+    padding: 12px 0;
+  }
+
+  .avatar-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .comment-author {
+    font-size: 13px;
+  }
+
+  .comment-time {
+    font-size: 11px;
+  }
+
+  .comment-text {
+    font-size: 16px;
+  }
+
+  .no-comments {
+    padding: 30px 15px;
+  }
+
+  .no-comments-icon {
+    font-size: 36px;
+  }
+
+  .no-comments p {
+    font-size: 13px;
+  }
+
+  .comment-notification {
+    top: 15px;
+    right: 15px;
+    padding: 12px 16px;
+    font-size: 13px;
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .comment-section {
+    margin-top: 0;
+    padding: 15px 20px;
+    border-radius: 12px;
+    max-width: 100%;
+  }
+
+  .comment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .comment-title {
+    font-size: 15px;
+  }
+
+  .add-comment-btn {
+    align-self: flex-end;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .comment-form {
+    padding: 12px;
+  }
+
+  .comment-textarea {
+    min-height: 70px;
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .form-footer {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .char-count {
+    font-size: 11px;
+  }
+
+  .submit-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .comments-list {
+    max-height: 250px;
+  }
+
+  .comment-item {
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .avatar-circle {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .comment-header {
+    margin-bottom: 6px;
+  }
+
+  .comment-author {
+    font-size: 12px;
+  }
+
+  .comment-time {
+    font-size: 10px;
+  }
+
+  .comment-text {
+    font-size: 16px;
+  }
+
+  .no-comments {
+    padding: 25px 10px;
+  }
+
+  .no-comments-icon {
+    font-size: 32px;
+  }
+
+  .no-comments p {
+    font-size: 12px;
+  }
+
+  .comment-notification {
+    top: 10px;
+    right: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 375px) {
+  .comment-section {
+    margin-top: 0;
+    padding: 12px 15px;
+    max-width: 100%;
+  }
+
+  .comment-title {
+    font-size: 14px;
+  }
+
+  .comment-icon {
+    font-size: 16px;
+  }
+
+  .add-comment-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .comment-textarea {
+    min-height: 60px;
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .submit-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .avatar-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .comment-author {
+    font-size: 11px;
+  }
+
+  .comment-time {
+    font-size: 9px;
+  }
+
+  .comment-text {
+    font-size: 14px;
+  }
+
+  .no-comments-icon {
+    font-size: 28px;
+  }
+
+  .no-comments p {
+    font-size: 11px;
+  }
+}
+
+/* 横屏模式适配 */
+@media (max-width: 900px) and (orientation: landscape) {
+  .comment-section {
+    margin-top: 0;
+    padding: 15px;
+  }
+
+  .comments-list {
+    max-height: 200px;
+  }
+
+  .comment-form {
+    padding: 12px;
+  }
+
+  .comment-textarea {
+    min-height: 60px;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .add-comment-btn:hover,
+  .submit-btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .add-comment-btn:active,
+  .submit-btn:active {
+    transform: scale(0.95);
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .comment-section,
+  .comment-item,
+  .add-comment-btn,
+  .submit-btn,
+  .comment-notification {
+    transition: none;
+  }
+
+  .comment-notification {
+    transform: translateX(0);
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .comment-section {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .comment-title {
+    color: #e0e0e0;
+  }
+
+  .comment-textarea {
+    background: rgba(255, 255, 255, 0.8);
+    color: #333;
+  }
+
+  .comment-textarea:focus {
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .comment-author {
+    color: #e0e0e0;
+  }
+
+  .comment-text {
+    color: #e0e0e0;
+  }
+
+  .no-comments {
+    color: #ccc;
+  }
+} 
+
+/* iPad Pro 12.9 横屏专用样式 */
+@media (width: 1366px) and (height: 1024px) and (orientation: landscape) {
+  .comment-section {
+    margin-top: 0 !important;
+    max-width: 900px !important;
+    padding: 22px 40px !important;
+    border-radius: 20px !important;
+  }
+} 
