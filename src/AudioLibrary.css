@@ -244,7 +244,7 @@
 
 /* 头部操作按钮组 - 统一风格 */
 .header-actions {
-  display: flex;
+  /* display: flex; */
   gap: 12px;
   align-items: center;
 }
@@ -785,7 +785,7 @@
   
   .header-actions {
     width: 100%;
-    justify-content: center;
+    /* justify-content: center; */
   }
   
   .library-title {
@@ -914,7 +914,7 @@
   }
   
   .header-actions {
-    flex-direction: column;
+    /* flex-direction: column; */
     gap: 8px;
   }
   

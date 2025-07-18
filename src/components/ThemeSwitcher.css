@@ -1,0 +1,375 @@
+/* 主题切换器样式 */
+.theme-switcher {
+  position: relative;
+  z-index: 100;
+}
+
+/* 主题切换按钮 */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--theme-buttonBg, #f8fae6);
+  border: 2px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+  border-radius: 25px;
+  color: var(--theme-buttonText, #2d5016);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+  font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--theme-shadow, rgba(45, 80, 22, 0.15));
+}
+
+.theme-toggle-btn:active {
+  transform: translateY(0);
+}
+
+.theme-icon {
+  font-size: 18px;
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.theme-name {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  color: var(--theme-primary, #4ac967);
+}
+
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+/* 遮罩层 */
+.theme-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 98;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 主题选择面板 */
+.theme-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 320px;
+  max-width: 90vw;
+  background: var(--theme-containerBg, #ffffe6);
+  border: 2px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+  border-radius: 20px;
+  box-shadow: var(--theme-cardShadow, 0 25px 80px rgba(45, 80, 22, 0.15), 0 10px 35px rgba(45, 80, 22, 0.1));
+  backdrop-filter: blur(20px);
+  z-index: 99;
+  animation: slideDown 0.3s ease;
+  font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 面板头部 */
+.theme-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+}
+
+.theme-panel-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--theme-textPrimary, #2d5016);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--theme-textPrimary, #2d5016);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
+  transform: rotate(90deg);
+}
+
+/* 主题网格 */
+.theme-grid {
+  padding: 16px 24px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 滚动条已全局隐藏 */
+
+/* 主题选项 */
+.theme-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-option:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--theme-primary, #4ac967);
+}
+
+.theme-option.active {
+  border-color: var(--theme-primary, #4ac967);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 25px var(--theme-shadow, rgba(45, 80, 22, 0.15));
+}
+
+/* 主题预览 */
+.theme-preview {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  padding: 3px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-preview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  border-radius: inherit;
+  filter: blur(20px);
+  opacity: 0.3;
+  z-index: -1;
+}
+
+.theme-preview-content {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.preview-icon {
+  font-size: 24px;
+  animation: previewPulse 3s ease-in-out infinite;
+}
+
+@keyframes previewPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* 主题信息 */
+.theme-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.theme-emoji {
+  font-size: 16px;
+}
+
+.theme-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--theme-textPrimary, #2d5016);
+  white-space: nowrap;
+}
+
+/* 选中指示器 */
+.selected-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background: var(--theme-primary, #4ac967);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  animation: selectedPulse 1s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* 面板底部 */
+.theme-panel-footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+  text-align: center;
+}
+
+.theme-panel-footer p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--theme-textPrimary, #2d5016);
+  opacity: 0.7;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .theme-panel {
+    width: 280px;
+    max-width: calc(100vw - 20px); /* 增加边距利用 */
+    right: 0; /* 调整右对齐 */
+  }
+  
+  .theme-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px 20px;
+  }
+  
+  .theme-option {
+    flex-direction: row;
+    padding: 12px 16px;
+    text-align: left;
+  }
+  
+  .theme-preview {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+  }
+  
+  .theme-info {
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+  }
+  
+  .theme-title {
+    font-size: 14px;
+  }
+  
+  .theme-toggle-btn .theme-name {
+    display: none;
+  }
+}
+
+/* 超小屏优化 */
+@media (max-width: 480px) {
+  .theme-panel {
+    width: 260px;
+    max-width: calc(100vw - 16px);
+    right: 0;
+  }
+  
+  .theme-panel-header {
+    padding: 16px 20px 12px;
+  }
+  
+  .theme-panel-header h3 {
+    font-size: 16px;
+  }
+  
+  .theme-grid {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+  
+  .theme-option {
+    padding: 10px 14px;
+  }
+  
+  .theme-preview {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .theme-title {
+    font-size: 13px;
+  }
+}
+
+/* 暗色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .theme-overlay {
+    background: rgba(0, 0, 0, 0.5);
+  }
+} 

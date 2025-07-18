@@ -10,6 +10,7 @@ import ModernSearchBox from './components/ModernSearchBox';
 import UploadMediaPage from './UploadMediaPage';
 import VideoPlayerPage from './VideoPlayerPage';
 import CommentTest from './components/CommentTest';
+import ThemedIcon from './components/ThemedIcon';
 
 // 折线图数据
 const chartData = [

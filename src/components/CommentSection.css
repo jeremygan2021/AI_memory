@@ -1,6 +1,6 @@
 /* 评论区域样式 */
 .comment-section {
-  margin-top: 0;
+  margin-top: 60px;
   width: 100%;
   max-width: 900px;
   margin-left: auto;
@@ -148,23 +148,7 @@
   padding-right: 5px;
 }
 
-.comments-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.comments-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.comments-list::-webkit-scrollbar-thumb {
-  background: rgba(74, 201, 103, 0.5);
-  border-radius: 3px;
-}
-
-.comments-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(74, 201, 103, 0.7);
-}
+/* 滚动条已全局隐藏 */
 
 /* 无评论状态 */
 .no-comments {
@@ -282,7 +266,7 @@
 /* 平板专用样式 */
 @media (min-width: 769px) and (max-width: 1024px) {
   .comment-section {
-    margin-top: 0;
+    margin-top: 60px;
     padding: 20px 30px;
     max-width: 800px;
     border-radius: 18px;
@@ -373,7 +357,7 @@
 /* iPad Air专用样式 (1180x820) */
 @media (min-width: 1180px) and (max-width: 1180px) and (orientation: landscape) {
   .comment-section {
-    margin-top: 0;
+    margin-top: 60px;
     padding: 18px 25px;
     max-width: 900px;
     border-radius: 16px;
@@ -464,7 +448,7 @@
 /* iPad mini专用样式 (1024x768) */
 @media (min-width: 1024px) and (max-width: 1024px) and (orientation: landscape) {
   .comment-section {
-    margin-top: 0;
+    margin-top: 60px;
     padding: 15px 20px;
     max-width: 900px;
     border-radius: 14px;
@@ -555,7 +539,7 @@
 /* 平板竖屏模式专用样式 */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
   .comment-section {
-    margin-top: 0;
+    margin-top: 60px;
     padding: 22px 35px;
     max-width: 900px;
     border-radius: 20px;
@@ -646,7 +630,7 @@
 /* 响应式设计 */
 @media (max-width: 768px) {
   .comment-section {
-    margin-top: 0;
+    margin-top: 60px;
     padding: 20px 30px;
     border-radius: 15px;
     max-width: 100%;
@@ -736,7 +720,7 @@
 
 @media (max-width: 480px) {
   .comment-section {
-    margin-top: 0;
+    margin-top: 80px;
     padding: 15px 20px;
     border-radius: 12px;
     max-width: 100%;
@@ -837,7 +821,7 @@
 
 @media (max-width: 375px) {
   .comment-section {
-    margin-top: 0;
+    margin-top: 100px;
     padding: 12px 15px;
     max-width: 100%;
   }
@@ -896,7 +880,7 @@
 /* 横屏模式适配 */
 @media (max-width: 900px) and (orientation: landscape) {
   .comment-section {
-    margin-top: 0;
+    margin-top: 60px;
     padding: 15px;
   }
 
@@ -978,7 +962,7 @@
 /* iPad Pro 12.9 横屏专用样式 */
 @media (width: 1366px) and (height: 1024px) and (orientation: landscape) {
   .comment-section {
-    margin-top: 0 !important;
+    margin-top: 70px !important;
     max-width: 900px !important;
     padding: 22px 40px !important;
     border-radius: 20px !important;

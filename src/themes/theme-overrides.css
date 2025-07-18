@@ -1,0 +1,653 @@
+/* 主题变量覆盖样式 */
+
+/* 播放页面主题化 */
+.player-page {
+  background-image: var(--theme-backgroundImage, url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png'));
+}
+
+/* 头部导航主题化 */
+.player-header {
+  background: var(--theme-headerBg, rgba(255, 255, 255, 0.15));
+  border-bottom: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-back-btn,
+.delete-recording-btn {
+  background: var(--theme-buttonBg, #f8fae6);
+  color: var(--theme-buttonText, #2d5016);
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+}
+
+.nav-back-btn:hover {
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
+}
+
+.delete-recording-btn:hover {
+  background: var(--theme-primary, #4ac967);
+  color: var(--theme-textLight, white);
+}
+
+/* 会话信息主题化 */
+.session-info {
+  background: var(--theme-containerBg, #ffffe6);
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin: 8px 20px 0;
+  backdrop-filter: blur(20px);
+  text-align: center;
+}
+
+/* 移动端会话信息优化 */
+@media (max-width: 768px) {
+  .session-info {
+    padding: 6px 12px;
+    margin: 4px 16px 0;
+    font-size: 14px;
+  }
+}
+
+.session-label {
+  color: var(--theme-textPrimary, #2d5016);
+}
+
+/* 播放器容器主题化 */
+/* .player-main {
+  background-image: var(--theme-backgroundImage, url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/asset/background2.png'));
+} */
+
+.player-container {
+  background: var(--theme-containerBg, #ffffe6);
+  box-shadow: var(--theme-cardShadow, 0 25px 80px rgba(45, 80, 22, 0.15), 0 10px 35px rgba(45, 80, 22, 0.1));
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.4));
+  position: relative;
+  z-index: 1; /* 设置较低的z-index */
+}
+
+/* 大象图标优化布局 - 右上角溢出一半 */
+.elephant-icon {
+  width: 200px;
+  height: 200px;    
+  position: absolute;
+  top: -100px;       /* 溢出一半高度 (200px/2 = 100px) */
+  right: -10px;      /* 往左移动20px，显示更多图标内容 */
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+  transform-origin: center center;
+  z-index: 100 !important;  /* 提高层级确保不被遮挡 */      
+  opacity: 0.9;
+}
+
+.elephant-icon:hover {
+  transform: scale(1.05) rotate(3deg);
+  filter: drop-shadow(0 0 15px var(--theme-primary, rgba(255, 255, 255, 0.5)));
+  opacity: 1;
+}
+
+/* 头像图标优化布局 - 上边缘居中溢出一半 */
+.avatar-icon {
+  width: 120px !important;
+  height: 120px !important;
+  border-radius: 50% !important;
+  background: var(--theme-containerBg, #f3fadf) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: absolute !important;
+  top: -60px !important;    /* 溢出一半高度 (120px/2 = 60px) */
+  left: 50% !important;     /* 水平居中 */
+  transform: translateX(-50%) !important; /* 确保完全居中 */
+  z-index: 999 !important;  /* 提高层级，确保在所有元素之上 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  box-shadow: 
+    0 8px 32px 0 var(--theme-shadow, rgba(74, 201, 103, 0.18)),
+    0 2px 8px 0 var(--theme-shadow, rgba(74, 201, 103, 0.10)),
+    0 0 0 8px var(--theme-containerBg, #f3fadf),
+    0 0 0 20px var(--theme-buttonBg, #f7fbe9) !important;
+  border: 2px solid var(--theme-border, #e2f5c2) !important;
+}
+
+.avatar-icon:hover {
+  transform: translateX(-50%) scale(1.05) !important;
+  box-shadow:
+    0 16px 40px 0 var(--theme-shadow, rgba(74, 201, 103, 0.22)),
+    0 0 0 8px var(--theme-primaryHover, #eaf7d0),
+    0 0 0 20px var(--theme-containerBg, #f3fadf) !important;
+  background: var(--theme-primaryHover, #eaf7d0) !important;
+}
+
+/* 移动端图标可见性保障 */
+@media (max-width: 768px) {
+  .avatar-icon {
+    z-index: 9999 !important;      /* 最高层级 */
+    position: absolute !important;  /* 确保绝对定位 */
+    pointer-events: auto !important; /* 确保可点击 */
+    visibility: visible !important;  /* 确保可见 */
+    opacity: 1 !important;          /* 确保不透明 */
+  }
+  
+  .elephant-icon {
+    z-index: 100 !important;        /* 提高层级防止被遮挡 */
+    position: absolute !important;  /* 确保绝对定位 */
+    pointer-events: auto !important; /* 确保可点击 */
+    visibility: visible !important;  /* 确保可见 */
+    opacity: 0.9 !important;        /* 保持透明度 */
+  }
+  
+  /* 确保容器为图标提供足够空间 */
+  .player-container {
+    overflow: visible !important;   /* 允许内容溢出 */
+    position: relative !important;  /* 提供定位参考 */
+  }
+  
+  /* 防止其他元素遮挡图标 */
+  .player-header {
+    z-index: 10 !important;         /* 降低导航栏层级 */
+    position: relative !important;
+    padding: 10px 15px !important;  /* 减少导航栏padding */
+  }
+  
+  .media-carousel-section {
+    z-index: 20 !important;         /* 轮播图层级低于图标 */
+  }
+  
+  /* 移动端整体布局优化 */
+  .player-page {
+    padding-top: 0 !important;
+    padding-bottom: 10px !important;
+  }
+  
+  /* 移动端主区域进一步优化 */
+  .player-main {
+    min-height: 100vh !important;
+    padding: 60px 10px 10px !important;
+  }
+}
+
+/* 进度条主题化 */
+.progress-fill {
+  background: linear-gradient(90deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982)) !important;
+}
+
+.progress-container {
+  background: var(--theme-border, rgba(74, 201, 103, 0.2)) !important;
+}
+
+.progress-slider::-webkit-slider-thumb {
+  background: var(--theme-primary, #4ac967) !important;
+  border: 2px solid var(--theme-containerBg, #ffffe6) !important;
+  box-shadow: 0 2px 8px var(--theme-shadow, rgba(74, 201, 103, 0.5)) !important;
+}
+
+.progress-slider::-webkit-slider-thumb:hover {
+  background: var(--theme-primaryHover, #88d982) !important;
+  box-shadow: 0 4px 15px var(--theme-shadow, rgba(74, 201, 103, 0.7)) !important;
+}
+
+.progress-slider::-moz-range-thumb {
+  background: var(--theme-primary, #4ac967) !important;
+  border: 2px solid var(--theme-containerBg, #ffffe6) !important;
+  box-shadow: 0 2px 8px var(--theme-shadow, rgba(74, 201, 103, 0.5)) !important;
+}
+
+.progress-slider::-moz-range-thumb:hover {
+  background: var(--theme-primaryHover, #88d982) !important;
+  box-shadow: 0 4px 15px var(--theme-shadow, rgba(74, 201, 103, 0.7)) !important;
+}
+
+/* 时间显示主题化 */
+.time-display {
+  color: var(--theme-textSecondary, #333) !important;
+}
+
+/* 全局滚动条隐藏 */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 和 Edge */
+}
+
+/* Webkit浏览器滚动条隐藏 */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* 所有滚动条都已全局隐藏，无需特殊处理 */
+
+/* 控制按钮主题化 */
+.main-controls {
+  margin: 30px 0 25px;
+}
+
+.control-btn:hover {
+  transform: translateY(-3px);
+  filter: drop-shadow(0 8px 20px var(--theme-shadow, rgba(45, 80, 22, 0.15)));
+}
+
+.play-box:hover {
+  transform: translateY(-5px) scale(1.05);
+}
+
+/* 速度按钮主题化 */
+.speed-btn {
+  background: var(--theme-buttonBg, #f8fae6) !important;
+  color: var(--theme-buttonText, #2d5016) !important;
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3)) !important;
+}
+
+.speed-btn:hover {
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35)) !important;
+  transform: translateY(-2px) !important;
+}
+
+.speed-btn.active {
+  background: var(--theme-primary, #4ac967) !important;
+  color: var(--theme-textLight, white) !important;
+  border-color: var(--theme-primary, #4ac967) !important;
+}
+
+/* 录音元数据主题化 */
+.recording-metadata .metadata-item {
+  background: var(--theme-buttonBg, rgba(74, 201, 103, 0.08)) !important;
+  border-left: 3px solid var(--theme-primary, #4ac967) !important;
+}
+
+.recording-metadata .metadata-item .label {
+  color: var(--theme-textSecondary, #666) !important;
+}
+
+.recording-metadata .metadata-item .value {
+  color: var(--theme-textPrimary, #333) !important;
+}
+
+/* 录音标题主题化 */
+.recording-title {
+  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* 播放控制按钮主题化 */
+.play-box {
+  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982)) !important;
+}
+
+.play-box:hover {
+  background: linear-gradient(135deg, var(--theme-primaryHover, #88d982), var(--theme-primary, #4ac967)) !important;
+  box-shadow: 0 10px 25px var(--theme-shadow, rgba(74, 201, 103, 0.5)) !important;
+}
+
+/* 按钮标签主题化 */
+.btn-label {
+  color: var(--theme-textSecondary, #666) !important;
+}
+
+/* 容器边框主题化 */
+.player-container {
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3)) !important;
+  box-shadow: var(--theme-cardShadow, 0 25px 80px rgba(45, 80, 22, 0.15), 0 10px 35px rgba(45, 80, 22, 0.1)) !important;
+}
+
+/* 音量控制主题化 */
+.volume-slider::-webkit-slider-thumb {
+  background: var(--theme-primary, #4ac967);
+}
+
+.volume-slider::-moz-range-thumb {
+  background: var(--theme-primary, #4ac967);
+}
+
+/* 轮播图区域主题化 */
+.media-carousel-section {
+  margin: 90px 0 30px;
+  position: relative;
+  z-index: 20; /* 确保轮播图在大象图标之上 */
+}
+
+/* .swiper-swipe-tip {
+  background: var(--theme-primary, #4ac967);
+  color: var(--theme-textLight, white);
+} */
+
+/* Swiper分页器主题化 */
+.swiper-pagination-bullet {
+  background: var(--theme-border, rgba(255, 255, 255, 0.3));
+}
+
+.swiper-pagination-bullet-active {
+  background: var(--theme-primary, #4ac967);
+}
+
+/* Swiper导航按钮主题化 */
+.swiper-button-next,
+.swiper-button-prev {
+  color: var(--theme-primary, #4ac967);
+  background: var(--theme-containerBg, #ffffe6);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  color: var(--theme-primaryHover, #88d982);
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
+}
+
+/* 预览弹窗主题化 */
+.preview-modal {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.preview-content {
+  background: var(--theme-containerBg, #ffffe6);
+  border: 2px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+}
+
+.preview-close {
+  background: var(--theme-primary, #4ac967);
+  color: var(--theme-textLight, white);
+}
+
+.preview-close:hover {
+  background: var(--theme-primaryHover, #88d982);
+  transform: rotate(90deg);
+}
+
+/* 移动端交互提示主题化 */
+.mobile-interaction-prompt {
+  background: rgba(0, 0, 0, 0.9);
+  color: var(--theme-textLight, white);
+}
+
+.mobile-interaction-prompt button {
+  background: var(--theme-primary, #4ac967);
+  color: var(--theme-textLight, white);
+}
+
+.mobile-interaction-prompt button:hover {
+  background: var(--theme-primaryHover, #88d982);
+}
+
+/* 错误页面主题化 */
+.error-content {
+  background: var(--theme-containerBg, rgba(255, 255, 255, 0.1));
+  color: var(--theme-textLight, white);
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+}
+
+.back-btn {
+  background: var(--theme-primary, #4ac967);
+  color: var(--theme-textLight, white);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: var(--theme-primaryHover, #88d982);
+  transform: translateY(-2px);
+}
+
+/* 加载状态主题化 */
+.loading-spinner {
+  color: var(--theme-textLight, white);
+}
+
+.spinner {
+  border: 4px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+  border-top: 4px solid var(--theme-primary, #4ac967);
+}
+
+/* 时间显示优化 */
+.time-display {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.current-time {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--theme-textPrimary, #2d5016);
+  background: var(--theme-buttonBg, #f8fae6);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+  display: inline-block;
+}
+
+/* 控制组标签主题化 */
+.control-label {
+  color: var(--theme-textPrimary, #2d5016);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* 响应式优化 */
+
+/* 中等平板屏幕 1024px */
+@media (max-width: 1024px) {
+  .elephant-icon {
+    width: 200px;
+    height: 200px;
+    top: -100px;    /* 溢出一半高度 (200px/2 = 100px) */
+    right: -10px;   /* 往左移动20px */
+    z-index: 100 !important;
+  }
+  
+  .avatar-icon {
+    width: 100px !important;
+    height: 100px !important;
+    top: -50px !important;    /* 溢出一半高度 (100px/2 = 50px) */
+    z-index: 999 !important;  /* 确保在最顶层 */
+  }
+  
+  .player-container {
+    padding: 70px 30px 30px;  /* 减少上下padding */
+  }
+  
+  .player-main {
+    padding: 160px 20px 30px !important;  /* 减少主区域padding */
+  }
+}
+
+/* 平板屏幕 768px */
+@media (max-width: 768px) {
+  .header-actions {
+    gap: 8px;
+  }
+  
+  .elephant-icon {
+    width: 240px;
+    height: 240px;
+    top: -120px;    /* 溢出一半高度 (240px/2 = 120px) */
+    right: -40px;   /* 往左移动20px */
+    z-index: 100 !important;
+  }
+  
+  .avatar-icon {
+    width: 90px !important;
+    height: 90px !important;
+    top: -45px !important;    /* 溢出一半高度 (90px/2 = 45px) */
+    z-index: 999 !important;  /* 确保在最顶层 */
+  }
+  
+  .player-container {
+    padding: 140px 25px 25px;  /* 增加顶部padding为240px高度图标预留空间 */
+  }
+  
+  .player-main {
+    padding: 70px 15px 20px !important;  /* 减少主区域padding */
+  }
+}
+
+/* 小屏手机 480px */
+@media (max-width: 480px) {
+  .header-actions {
+    flex-direction: row;    /* 保持水平排列 */
+    gap: 8px;              /* 增加间距 */
+    align-items: center;   /* 垂直居中对齐 */
+    justify-content: flex-end; /* 右对齐 */
+  }
+  
+  /* 移动端按钮尺寸优化 */
+  .nav-back-btn,
+  .delete-recording-btn {
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    min-height: 36px !important;
+    white-space: nowrap !important; /* 防止文字换行 */
+  }
+  
+  /* 主题切换器移动端优化 */
+  .theme-toggle-btn {
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    min-height: 36px !important;
+    gap: 6px !important;
+  }
+  
+  .elephant-icon {
+    width: 150px;
+    height: 150px;
+    top: -90px;     /* 溢出一半高度 (180px/2 = 90px) */
+    right: -30px;   /* 往左移动15px */
+    z-index: 100 !important;
+  }
+  
+  .avatar-icon {
+    width: 70px !important;
+    height: 70px !important;
+    top: -35px !important;    /* 溢出一半高度 (70px/2 = 35px) */
+    z-index: 999 !important;  /* 确保在最顶层 */
+  }
+  
+  .player-container {
+    padding: 110px 18px 20px;  /* 增加顶部padding为180px高度图标预留空间 */
+  }
+  
+  .player-main {
+    padding: 60px 12px 15px !important;  /* 减少主区域padding */
+  }
+}
+
+/* 超小屏手机 375px */
+@media (max-width: 375px) {
+  .header-actions {
+    gap: 6px !important;   /* 减小间距适应小屏 */
+  }
+  
+  /* 超小屏按钮尺寸进一步优化 */
+  .nav-back-btn,
+  .delete-recording-btn {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+    min-height: 32px !important;
+  }
+  
+  .theme-toggle-btn {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+    min-height: 32px !important;
+    gap: 4px !important;
+  }
+  
+  .elephant-icon {
+    width: 100px;
+    height: 100px;
+    top: -50px;     /* 溢出一半高度 (100px/2 = 50px) */
+    right: -20px;   /* 往左移动15px */
+    z-index: 100 !important;
+  }
+  
+  .avatar-icon {
+    width: 60px !important;
+    height: 60px !important;
+    top: -30px !important;    /* 溢出一半高度 (60px/2 = 30px) */
+    z-index: 999 !important;  /* 确保在最顶层 */
+  }
+  
+  .player-container {
+    padding: 70px 12px 18px;  /* 增加顶部padding为100px高度图标预留空间 */
+  }
+  
+  .player-main {
+    padding: 60px 10px 12px !important;  /* 减少主区域padding */
+  }
+}
+
+/* 横屏模式优化 */
+@media (max-width: 900px) and (orientation: landscape) {
+  .header-actions {
+    gap: 10px !important;  /* 横屏模式有更多空间 */
+  }
+  
+  /* 横屏模式按钮尺寸 */
+  .nav-back-btn,
+  .delete-recording-btn,
+  .theme-toggle-btn {
+    font-size: 12px !important;
+    padding: 8px 14px !important;
+    min-height: 36px !important;
+  }
+  
+  .elephant-icon {
+    width: 160px;
+    height: 160px;
+    top: -80px;     /* 溢出一半高度 (160px/2 = 80px) */
+    right: -25px;   /* 往左移动15px */
+    z-index: 100 !important;
+  }
+  
+  .avatar-icon {
+    width: 70px !important;
+    height: 70px !important;
+    top: -35px !important;    /* 溢出一半高度 (70px/2 = 35px) */
+    z-index: 999 !important;  /* 确保在最顶层 */
+  }
+  
+  .player-container {
+    padding: 100px 25px 20px;  /* 增加顶部padding为160px高度图标预留空间 */
+  }
+  
+  .player-main {
+    padding: 120px 15px 15px !important;  /* 减少主区域padding */
+  }
+}
+
+/* 超小屏横屏模式 */
+@media (max-width: 667px) and (orientation: landscape) {
+  .elephant-icon {
+    width: 120px;
+    height: 120px;
+    top: -60px;     /* 溢出一半高度 (120px/2 = 60px) */
+    right: -15px;   /* 往左移动15px */
+    z-index: 100 !important;
+  }
+  
+  .avatar-icon {
+    width: 50px !important;
+    height: 50px !important;
+    top: -25px !important;    /* 溢出一半高度 (50px/2 = 25px) */
+    z-index: 999 !important;  /* 确保在最顶层 */
+  }
+  
+  .player-container {
+    padding: 80px 18px 15px;  /* 增加顶部padding为120px高度图标预留空间 */
+  }
+  
+  .player-main {
+    padding: 12px 10px 10px !important;  /* 减少主区域padding */
+  }
+} 

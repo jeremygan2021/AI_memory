@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './CommentSection.css';
+import '../themes/comment-theme-overrides.css';
 import { buildRecordingPath } from '../utils/userCode';
 
 const CommentSection = ({ recordingId, userCode, sessionId }) => {
@@ -11,9 +12,9 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
   const commentsEndRef = useRef(null);
 
   // 滚动到评论底部
-  const scrollToBottom = () => {
-    commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // const scrollToBottom = () => {
+  //   commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // };
 
   // 加载评论
   useEffect(() => {
@@ -21,11 +22,11 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
   }, [recordingId]);
 
   // 评论加载完成后滚动到底部
-  useEffect(() => {
-    if (comments.length > 0) {
-      setTimeout(scrollToBottom, 100);
-    }
-  }, [comments]);
+  // useEffect(() => {
+  //   if (comments.length > 0) {
+  //     setTimeout(scrollToBottom, 100);
+  //   }
+  // }, [comments]);
 
   const loadComments = async () => {
     try {

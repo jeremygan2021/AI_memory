@@ -252,7 +252,7 @@
 
 /* 主播放区域 */
 .player-main {
-  top: 20px;
+  top: 60px;
   position: relative;
   z-index: 1;
   display: flex;
@@ -303,8 +303,8 @@
     0 0 0 8px #f3fadf,
     0 0 0 20px #f7fbe9;
   position: absolute;
-  left: 45%;
-  top: -5%;  /* 减少负值，降低被遮挡的可能性 */
+  left: 25%;
+  top: -20%;  /* 减少负值，降低被遮挡的可能性 */
   transform: translate(-50%, -50%);
   z-index: 25;  /* 提高z-index，确保在导航栏之上 */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

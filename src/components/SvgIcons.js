@@ -168,6 +168,120 @@ const SvgIcon = ({
           strokeLinejoin="round"
         />
       </svg>
+    ),
+
+    // 播放按钮图标
+    play: (
+      <svg {...iconProps}>
+        <circle 
+          cx="12" 
+          cy="12" 
+          r="10" 
+          fill={color}
+          opacity="0.9"
+        />
+        <polygon 
+          points="10,8 16,12 10,16" 
+          fill="white"
+        />
+      </svg>
+    ),
+
+    // 音乐图标
+    music: (
+      <svg {...iconProps}>
+        {/* 文档主体 */}
+        <path 
+          d="M4 2v20c0 0.5 0.5 1 1 1h14c0.5 0 1-0.5 1-1V6l-4-4H5c-0.5 0-1 0.5-1 1z"
+          fill="rgba(255, 255, 255, 0.9)"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+        
+        {/* 折角 */}
+        <path 
+          d="M16 2v4h4"
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        
+        {/* 音符 - 主音符 */}
+        <ellipse 
+          cx="9" 
+          cy="16" 
+          rx="1.8" 
+          ry="1.3" 
+          fill={color}
+        />
+        
+        {/* 音符 - 副音符 */}
+        <ellipse 
+          cx="15" 
+          cy="18" 
+          rx="1.8" 
+          ry="1.3" 
+          fill={color}
+        />
+        
+        {/* 音符符杆 */}
+        <path 
+          d="M10.8 16v-6"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <path 
+          d="M16.8 18v-6"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        
+        {/* 连音线 */}
+        <path 
+          d="M10.8 10c4 0 6 1.5 6 2v1.5c-2-0.5-4-1.5-6-2V10z"
+          fill={color}
+          opacity="0.8"
+        />
+      </svg>
+    ),
+
+    // 快进图标
+    fast: (
+      <svg {...iconProps}>
+        <polygon 
+          points="5,4 11,12 5,20" 
+          fill={color}
+        />
+        <polygon 
+          points="13,4 19,12 13,20" 
+          fill={color}
+        />
+      </svg>
+    ),
+
+    // 停止按钮图标
+    stop: (
+      <svg {...iconProps}>
+        <circle 
+          cx="12" 
+          cy="12" 
+          r="10" 
+          fill={color}
+          opacity="0.9"
+        />
+        <rect 
+          x="9" 
+          y="9" 
+          width="6" 
+          height="6" 
+          fill="white"
+        />
+      </svg>
     )
   };
 

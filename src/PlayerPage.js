@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './PlayerPage.css';
+import './themes/theme-overrides.css';
 import { getUserCode, validateUserCode } from './utils/userCode';
 import CommentSection from './components/CommentSection';
+import ThemeSwitcher from './components/ThemeSwitcher';
+import ThemedIcon from './components/ThemedIcon';
+import { getCurrentTheme, applyTheme } from './themes/themeConfig';
 // Swiper相关引入
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -41,6 +45,7 @@ const PlayerPage = () => {
   const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false); // 是否已尝试自动全屏
   const videoPreviewRef = useRef(null); // 视频预览引用
   const [videoThumbnails, setVideoThumbnails] = useState({}); // 视频缩略图缓存
+  const [currentTheme, setCurrentTheme] = useState(getCurrentTheme()); // 当前主题
 
   // 检测iOS设备
   useEffect(() => {
@@ -138,6 +143,14 @@ const PlayerPage = () => {
       navigate('/');
     }
   }, [userid, navigate]);
+
+  // 主题切换处理
+  const handleThemeChange = (newTheme) => {
+    setCurrentTheme(newTheme);
+    applyTheme(newTheme.id);
+    // 可以添加主题切换时的其他逻辑，比如通知子组件等
+    console.log('主题已切换至:', newTheme.name);
+  };
 
   // 移动端视口高度修正
   useEffect(() => {
@@ -1094,10 +1107,8 @@ const PlayerPage = () => {
   return (
     <div className="player-page">
       {/* 背景装饰 */}
-      <div className="background-decoration">
-        <div className="wave wave1"></div>
-        <div className="wave wave2"></div>
-        <div className="wave wave3"></div>
+      <div className="background-decoration1">
+        
       </div>
 
       {/* 顶部导航 */}
@@ -1107,14 +1118,14 @@ const PlayerPage = () => {
           <span>返回录音页面</span>
         </button>
         
-        {/* <div className="session-info">
-          <span className="session-label">会话ID:{userCode ? `${userCode}/${id}` : id}</span>  
-        </div> */}
-        
-        <button onClick={deleteRecording} className="delete-recording-btn">
-          <span>🗑️</span>
-          <span>删除</span>
-        </button>
+        {/* 主题切换器和操作按钮 */}
+        <div className="header-actions">
+          <ThemeSwitcher onThemeChange={handleThemeChange} />
+          <button onClick={deleteRecording} className="delete-recording-btn">
+            <span>🗑️</span>
+            <span>删除</span>
+          </button>
+        </div>
       </header>
       
       <div className="session-info">
@@ -1124,22 +1135,23 @@ const PlayerPage = () => {
       {/* 主播放器区域 */}
       <main className="player-main">
         <div className="player-container">
-          {/* <img src="/asset/elephant.png" alt="背景" className="elephant-icon" />  */}
-          {/* 录音信息 - 隐藏详细信息 */}
-          {/* <div className="recording-info">
-            <div className="recording-avatar">
-              <div className="avatar-icon">
-                <img src="/asset/music.png" alt="音乐图标" style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
-              </div>
-              <div className="sound-waves">
-                <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
-                <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
-                <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
-                <div className={`wave-bar ${isPlaying ? 'active' : ''}`}></div>
-              </div>
-            </div>
-          </div> */}
-
+          {/* 大象图标 - 右上角溢出一半 */}
+          <img src={currentTheme.assets.elephantIcon} alt="背景" className="elephant-icon" />
+          
+          {/* 头像图标 - 上边缘居中溢出一半 */}
+          <div className="avatar-icon">
+            <ThemedIcon 
+              name="music"
+              width={60}
+              height={60}
+              colorType="primary"
+              style={{ 
+                opacity: 0.95,
+                filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
+              }}
+            />
+          </div>
+          
           {/* 轮播图区域 - 只有上传了照片或视频才显示 */}
           {mediaFiles.length > 0 && (
             <div className="media-carousel-section">
@@ -1299,11 +1311,13 @@ const PlayerPage = () => {
               className="control-btn skip-btn"
               title="后退10秒"
             >
-              <img 
-                src="/asset/fast.png" 
-                alt="后退10秒"
+              <ThemedIcon 
+                name="fast"
+                width={50}
+                height={50}
+                colorType="primary"
                 className="btn-icon"
-                style={{ width: '50px', height: '50px', transform: 'rotate(180deg)' }}
+                style={{ transform: 'rotate(180deg)' }}
               />
               <span className="btn-label">-10s</span>
             </button>
@@ -1318,17 +1332,30 @@ const PlayerPage = () => {
                 isPlaying ? '暂停' : '播放'
               }
             >
-              <img 
-                src={!audioReady ? "/asset/loading.png" : isPlaying ? "/asset/stop_button.png" : "/asset/play_button.png"} 
-                alt={!audioReady ? "加载中" : isPlaying ? "暂停" : "播放"} 
-                className="btn-icon"
-                style={{ 
-                  width: '90px', 
-                  height: '90px', 
-                  transform: isPlaying ? 'translateY(-2px)' : 'translateY(+2px)',
-                  opacity: (!audioReady || (isMobile && !userInteracted)) ? 0.5 : 1
-                }}
-              />
+              {!audioReady ? (
+                <img 
+                  src="/asset/loading.png"
+                  alt="加载中" 
+                  className="btn-icon"
+                  style={{ 
+                    width: '90px', 
+                    height: '90px', 
+                    opacity: 0.5
+                  }}
+                />
+              ) : (
+                <ThemedIcon 
+                  name={isPlaying ? "stop" : "play"}
+                  width={90}
+                  height={90}
+                  colorType="primary"
+                  className="btn-icon"
+                  style={{ 
+                    transform: isPlaying ? 'translateY(-2px)' : 'translateY(+2px)',
+                    opacity: (isMobile && !userInteracted) ? 0.5 : 1
+                  }}
+                />
+              )}
             </button>
             
             <button 
@@ -1336,11 +1363,12 @@ const PlayerPage = () => {
               className="control-btn skip-btn"
               title="前进10秒"
             >
-              <img 
-                src="/asset/fast.png" 
-                alt="前进10秒"
+              <ThemedIcon 
+                name="fast"
+                width={50}
+                height={50}
+                colorType="primary"
                 className="btn-icon"
-                style={{ width: '50px', height: '50px' }}
               />
               <span className="btn-label">+10s</span>
             </button>
@@ -1363,24 +1391,6 @@ const PlayerPage = () => {
                 ))}
               </div>
             </div>
-
-            {/* 音量控制 */}
-            {/* <div className="control-group">
-              <label className="control-label">
-                <span>音量</span>
-              </label>
-              <div className="volume-container">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={volume * 100}
-                  onChange={handleVolumeChange}
-                  className="volume-slider"
-                />
-                <span className="volume-value">{Math.round(volume * 100)}%</span>
-              </div>
-            </div> */}
           </div>
         </div>
       </main>
@@ -1475,7 +1485,7 @@ const PlayerPage = () => {
       {isMobile && !userInteracted && (
         <div className="mobile-interaction-prompt" style={{
           position: 'fixed',
-          top: 0,
+          top: -1000,
           left: 0,
           right: 0,
           bottom: 0,
