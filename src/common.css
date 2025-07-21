@@ -574,6 +574,22 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   justify-content: stretch;
 }
 
+/* 回忆时间线容器样式 */
+.memory-timeline-container {
+  flex: 1;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+  max-height: 625px;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.memory-timeline-container:hover {
+  box-shadow: 0px 6px 20px rgba(191, 224, 202, 1);
+}
+
 .memory-card {
   background: white;
   border-radius: 16px;
@@ -2020,6 +2036,13 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     box-sizing: border-box;
   }
   
+  /* 移动端回忆时间线容器样式 */
+  .memory-timeline-container {
+    padding: 15px;
+    max-height: 400px;
+    border-radius: 12px;
+  }
+
   /* 移动端图表优化 - 确保y轴文字显示完整 */
   .activity-chart {
     padding: 15px 15px 15px 25px; /* 增加左边距 */

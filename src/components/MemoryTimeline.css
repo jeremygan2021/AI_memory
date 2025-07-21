@@ -1,0 +1,296 @@
+/* 回忆时间线组件样式 */
+.memory-timeline {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* 时间线列表 */
+.timeline-list {
+  position: relative;
+  padding-left: 15px;
+}
+
+/* 时间线项目 */
+.timeline-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.timeline-item:hover {
+  background: rgba(59, 182, 166, 0.08);
+  transform: translateX(4px);
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 时间线圆点 */
+.timeline-dot {
+  position: absolute;
+  left: -7px;
+  top: 16px;
+  width: 14px;
+  height: 14px;
+  background: #3bb6a6;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.3);
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.timeline-dot-inner {
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 时间线连接线 */
+.timeline-line {
+  position: absolute;
+  left: -1px;
+  top: 30px;
+  bottom: -24px;
+  width: 2px;
+  background: linear-gradient(to bottom, 
+    rgba(59, 182, 166, 0.3) 0%, 
+    rgba(59, 182, 166, 0.1) 100%);
+  z-index: 1;
+}
+
+/* 时间线内容 */
+.timeline-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-left: 16px;
+}
+
+/* 时间线图标 */
+.timeline-icon {
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border-radius: 8px;
+  border: 2px solid rgba(59, 182, 166, 0.2);
+  flex-shrink: 0;
+}
+
+/* 时间线信息 */
+.timeline-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3bb6a6;
+  margin-bottom: 4px;
+  font-family: 'Muyao-Softbrush-Regular', sans-serif;
+}
+
+.timeline-time {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.timeline-session {
+  font-size: 11px;
+  color: #94a3b8;
+  opacity: 0.8;
+}
+
+/* 预览图片/视频 */
+.timeline-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f8fafc;
+}
+
+.preview-image,
+.preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* 不同类型的样式变化 */
+.timeline-item.audio .timeline-icon {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.timeline-item.image .timeline-icon {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.timeline-item.video .timeline-icon {
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+  border-color: rgba(147, 51, 234, 0.3);
+}
+
+/* 加载状态 */
+.timeline-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(59, 182, 166, 0.2);
+  border-top: 3px solid #3bb6a6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 空状态 */
+.timeline-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-family: 'Muyao-Softbrush-Regular', sans-serif;
+}
+
+.empty-desc {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .timeline-item {
+    margin-bottom: 20px;
+    padding: 8px;
+  }
+  
+  .timeline-content {
+    gap: 8px;
+    margin-left: 12px;
+  }
+  
+  .timeline-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+  
+  .timeline-title {
+    font-size: 13px;
+  }
+  
+  .timeline-time {
+    font-size: 11px;
+  }
+  
+  .timeline-session {
+    font-size: 10px;
+  }
+  
+  .timeline-preview {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .memory-timeline {
+    padding-right: 4px;
+  }
+  
+  .timeline-list {
+    padding-left: 12px;
+  }
+  
+  .timeline-item {
+    margin-bottom: 16px;
+    padding: 6px;
+  }
+  
+  .timeline-content {
+    gap: 6px;
+    margin-left: 10px;
+  }
+  
+  .timeline-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+  }
+  
+  .timeline-preview {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* 滚动条样式 */
+.memory-timeline::-webkit-scrollbar {
+  width: 6px;
+}
+
+.memory-timeline::-webkit-scrollbar-track {
+  background: rgba(59, 182, 166, 0.1);
+  border-radius: 3px;
+}
+
+.memory-timeline::-webkit-scrollbar-thumb {
+  background: rgba(59, 182, 166, 0.3);
+  border-radius: 3px;
+}
+
+.memory-timeline::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 182, 166, 0.5);
+} 

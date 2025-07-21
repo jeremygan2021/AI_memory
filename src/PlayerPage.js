@@ -1119,13 +1119,11 @@ const PlayerPage = () => {
         </button>
         
         {/* 主题切换器和操作按钮 */}
-        <div className="header-actions">
           <ThemeSwitcher onThemeChange={handleThemeChange} />
           <button onClick={deleteRecording} className="delete-recording-btn">
             <span>🗑️</span>
             <span>删除</span>
           </button>
-        </div>
       </header>
       
       <div className="session-info">
@@ -1312,12 +1310,11 @@ const PlayerPage = () => {
               title="后退10秒"
             >
               <ThemedIcon 
-                name="fast"
+                name="fastBack"
                 width={50}
                 height={50}
                 colorType="primary"
                 className="btn-icon"
-                style={{ transform: 'rotate(180deg)' }}
               />
               <span className="btn-label">-10s</span>
             </button>

@@ -29,7 +29,7 @@
 .video-player-page {
   min-height: 100vh;
   min-height: calc(var(--vh, 1vh) * 100);
-  background: linear-gradient(135deg, #a8e6a3 0%, #88d982 50%, #a8e6a3 100%);
+  /* background: linear-gradient(135deg, #a8e6a3 0%, #88d982 50%, #a8e6a3 100%); */
   position: relative;
   overflow-x: hidden;
   font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -360,7 +360,7 @@
 /* 视频容器 */
 .video-container {
   position: relative;
-  margin: 10px 0;
+  margin-top: 90px;
   height: 460px;
 }
 
@@ -817,6 +817,7 @@
 
 /* 进度控制 */
 .progress-section {
+  margin-top: 100px;
   margin-bottom: 15px;
 }
 

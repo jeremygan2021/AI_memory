@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './VideoPlayerPage.css';
 import CommentSection from './components/CommentSection';
+import ThemeSwitcher from './components/ThemeSwitcher';
+import ThemedIcon from './components/ThemedIcon';
+import { getCurrentTheme, applyTheme } from './themes/themeConfig'; 
 
 const VideoPlayerPage = () => {
   const { userid: userCode, sessionid: sessionId, videoid: videoId } = useParams();
@@ -20,10 +23,18 @@ const VideoPlayerPage = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSpeedControl, setShowSpeedControl] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState(getCurrentTheme()); // 当前主题
 
   const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/recordings/';
   // 注意：这里的ossUrl仅作为备用，实际URL从云端加载时动态构建
 
+  // 主题切换处理
+  const handleThemeChange = (newTheme) => {
+    setCurrentTheme(newTheme);
+    applyTheme(newTheme.id);
+    // 可以添加主题切换时的其他逻辑，比如通知子组件等
+    console.log('主题已切换至:', newTheme.name);
+  };
   // 检测移动设备
   useEffect(() => {
     const checkMobile = () => {
@@ -540,10 +551,16 @@ const VideoPlayerPage = () => {
   return (
     <div className="video-player-page">
       {/* 背景装饰 */}
-      <div className="background-decoration">
-        <div className="wave wave1"></div>
-        <div className="wave wave2"></div>
-        <div className="wave wave3"></div>
+      <div 
+        className="background-decoration"
+        style={{
+          backgroundImage: `url(${currentTheme.assets.backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          transition: 'background-image 0.3s',
+        }}
+      >
       </div>
 
       {/* 顶部导航 */}
@@ -551,27 +568,39 @@ const VideoPlayerPage = () => {
         <div className="session-info">
           <span>用户: {userCode} | 视频ID: {video.id.split('_').pop()}</span>
         </div>
+        {/* 主题切换器和操作按钮 */}
+        <ThemeSwitcher onThemeChange={handleThemeChange} />
       </div>
 
       {/* 主播放区域 */}
       <div className="player-main">
         <div className="player-container">
-          {/* 视频信息 */}
-          {/* <div className="video-info">
-            <div className="video-avatar">
-              <div className="avatar-icon">🎬</div>
-            </div>
-          </div> */}
-
+          {/* 大象图标 - 右上角溢出一半 */}
+          <img src={currentTheme.assets.elephantIcon} alt="背景" className="elephant-icon" />
+          
+          {/* 头像图标 - 上边缘居中溢出一半 */}
+          <div className="avatar-icon">
+            <ThemedIcon 
+              name="music"
+              width={60}
+              height={60}
+              colorType="primary"
+              style={{ 
+                opacity: 0.95,
+                filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
+              }}
+            />
+          </div>
           {/* 视频播放器 */}
           <div className="video-container">
+            
             <video
               ref={videoRef}
               src={video.ossUrl || video.preview || video.url}
               className="video-element"
               controls
               autoPlay
-              style={{ width: '100%', maxHeight: '80vh', background: '#000' }}
+              style={{ width: '100%', maxHeight: '80vh', background: '#000'}}
               onError={(e) => {
                 console.error('视频加载失败:', video.ossUrl || video.preview || video.url);
                 console.error('视频对象:', video);
@@ -603,12 +632,13 @@ const VideoPlayerPage = () => {
                 className="control-btn skip-btn"
                 title="后退10秒"
               >
-                <img 
-                  src="/asset/fast.png" 
-                  alt="后退10秒"
-                  className="btn-icon"
-                  style={{ width: isMobile ? '30px' : '40px', height: isMobile ? '30px' : '40px', transform: 'rotate(180deg)' }}
-                />
+                <ThemedIcon 
+                name="fastBack"
+                width={50}
+                height={50}
+                colorType="primary"
+                className="btn-icon"
+              />
                 <span className="btn-label">-10s</span>
               </button>
               
@@ -616,16 +646,17 @@ const VideoPlayerPage = () => {
                 className={`control-btn play-box ${isPlaying ? 'playing' : ''}`}
                 onClick={togglePlayPause}
               >
-                <img 
-                  src={isPlaying ? "/asset/stop_button.png" : "/asset/play_button.png"} 
-                  alt={isPlaying ? "暂停" : "播放"} 
+                <ThemedIcon 
+                  name={isPlaying ? "stop" : "play"}
+                  width={90}
+                  height={90}
+                  colorType="primary"
                   className="btn-icon"
                   style={{ 
-                    width: isMobile ? '50px' : '70px', 
-                    height: isMobile ? '50px' : '70px', 
-                    transform: isPlaying ? 'translateY(-2px)' : 'translateY(+2px)'
+                    transform: isPlaying ? 'translateY(-2px)' : 'translateY(+2px)',
+                    opacity: (isMobile && !userInteracted) ? 0.5 : 1
                   }}
-                />
+                /> 
               </button>
               
               <button 
@@ -633,12 +664,13 @@ const VideoPlayerPage = () => {
                 className="control-btn skip-btn"
                 title="前进10秒"
               >
-                <img 
-                  src="/asset/fast.png" 
-                  alt="前进10秒"
-                  className="btn-icon"
-                  style={{ width: isMobile ? '30px' : '40px', height: isMobile ? '30px' : '40px' }}
-                />
+                <ThemedIcon 
+                name="fast"
+                width={50}
+                height={50}
+                colorType="primary"
+                className="btn-icon"
+              />
                 <span className="btn-label">+10s</span>
               </button>
             </div>
@@ -649,35 +681,32 @@ const VideoPlayerPage = () => {
               <div className="control-row">
                 <div className="speed-control">
                   <label className="control-label">播放速度</label>
-                  <div className="speed-selector">
-                    <button 
-                      className="current-speed-btn"
-                      onClick={() => setShowSpeedControl(!showSpeedControl)}
-                    >
-                      {playbackRate}x ▼
-                    </button>
-                    {showSpeedControl && (
-                      <div className="speed-dropdown">
-                        {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
-                          <button
-                            key={rate}
-                            className={`speed-option ${playbackRate === rate ? 'active' : ''}`}
-                            onClick={() => {
-                              handlePlaybackRateChange(rate);
-                              setShowSpeedControl(false);
-                            }}
-                          >
-                            {rate}x
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <div className="speed-buttons">
+                {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
+                  <button
+                    key={rate}
+                    onClick={() => handlePlaybackRateChange(rate)}
+                    className={`speed-btn ${playbackRate === rate ? 'active' : ''}`}
+                  >
+                    {rate}x
+                  </button>
+                ))}
+              </div>
                 </div>
 
                 {/* 全屏按钮（移动端也显示） */}
                 <div className="fullscreen-control">
-                  <button className="fullscreen-btn" onClick={toggleFullscreen} style={{marginLeft: 12}}>
+                  <button 
+                    className="fullscreen-btn" 
+                    onClick={toggleFullscreen} 
+                    style={{
+                      marginLeft: 12,
+                      background: currentTheme.colors.buttonBg,
+                      color: currentTheme.colors.buttonText,
+                      border: `1px solid ${currentTheme.colors.border}`,
+                      transition: 'background 0.2s, color 0.2s',
+                    }}
+                  >
                     {isFullscreen ? '退出全屏' : '全屏播放'}
                   </button>
                 </div>

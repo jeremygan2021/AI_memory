@@ -11,6 +11,7 @@ import UploadMediaPage from './UploadMediaPage';
 import VideoPlayerPage from './VideoPlayerPage';
 import CommentTest from './components/CommentTest';
 import ThemedIcon from './components/ThemedIcon';
+import MemoryTimeline from './components/MemoryTimeline';
 
 // 折线图数据
 const chartData = [
@@ -815,43 +816,10 @@ const HomePage = () => {
             </div>
           </div>
           
-          {/* 其他功能 */}
-          <div className="memory-left-title">美好回忆</div>
-          <div className="memory-card-list">
-            <div className="memory-card compact">
-              <div className="card-center-dot">
-                <div className="card-center-dot-inner"></div>
-              </div>
-              <div className="card-content">
-                <div className="card-title">回忆相册</div>
-                <div className="card-desc">美好时光收藏</div>
-                <img className="card-dont1" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/done1.png" alt="装饰图案"/>
-              </div>
-              <img className="card-img" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/baby1.png" alt="宝宝图片" />
-              <img className="card-dont2" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/done2.png" alt="装饰图案"/>
-            </div>
-            <div className="memory-card compact">
-              <div className="card-center-dot">
-                <div className="card-center-dot-inner"></div>
-              </div>
-              <div className="card-content">
-                <div className="card-title">时间回溯</div>
-                <div className="card-desc">历史记录追踪</div>
-                <img className="card-dont" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/done3.png" alt="装饰图案"/>
-              </div>
-              <img className="card-img" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/baby2.png" alt="宝宝图片" />
-            </div>
-            <div className="memory-card compact">
-              <div className="card-center-dot">
-                <div className="card-center-dot-inner"></div>
-              </div>
-              <div className="card-content">
-                <div className="card-title">成长档案</div>
-                <div className="card-desc">宝宝成长每一步</div>
-                <img className="card-dont3" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/done4.png" alt="装饰图案"/>
-              </div>
-              <img className="card-img" src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/baby3.png" alt="宝宝图片" />
-            </div>
+          {/* 回忆时间线 */}
+          <div className="memory-left-title">回忆时间线</div>
+          <div className="memory-timeline-container">
+            <MemoryTimeline userCode={userCode} />
           </div>
         </div>
 

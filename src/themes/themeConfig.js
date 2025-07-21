@@ -38,6 +38,72 @@ export const themes = {
     }
   },
 
+   // 严肃深沉又温馨主题
+   serene: {
+    id: 'serene',
+    name: '温馨深邃',
+    icon: '🕯️',
+    colors: {
+      primaryBg: 'linear-gradient(135deg, #232946 0%, #393e46 50%, #232946 100%)',
+      containerBg: '#f6e7cb',
+      headerBg: 'rgba(35, 41, 70, 0.7)',
+      commentBg: 'rgba(246, 231, 203, 0.85)',
+      
+      primary: '#bfa46f', // 温暖金色
+      primaryHover: '#ffe6a7',
+      secondary: '#6d4c41', // 深棕色
+      
+      buttonBg: '#ffe6a7',
+      buttonText: '#232946',
+      buttonHover: 'rgba(191, 164, 111, 0.25)',
+      
+      textPrimary: '#232946',
+      textSecondary: '#6d4c41',
+      textLight: '#fff',
+      
+      border: 'rgba(191, 164, 111, 0.3)',
+      shadow: 'rgba(35, 41, 70, 0.15)',
+      cardShadow: '0 25px 80px rgba(35, 41, 70, 0.15), 0 10px 35px rgba(191, 164, 111, 0.08)',
+    },
+    assets: {
+      backgroundImage: '/asset/wxbj.png',
+      elephantIcon: '/asset/sunflower.png',
+    }
+  },
+
+  // 宇宙主题
+  dark: {
+    id: 'dark',
+    name: '宇宙黑洞',
+    icon: '🌙',
+    colors: {
+      primaryBg: 'linear-gradient(135deg, #2d3436 0%, #636e72 50%, #2d3436 100%)',
+      containerBg: '#2d3436',
+      headerBg: 'rgba(45, 52, 54, 0.8)',
+      commentBg: 'rgba(45, 52, 54, 0.9)',
+      
+      primary: '#74b9ff',
+      primaryHover: '#0984e3',
+      secondary: '#ddd',
+      
+      buttonBg: '#636e72',
+      buttonText: '#ddd',
+      buttonHover: 'rgba(116, 185, 255, 0.35)',
+      
+      textPrimary: '#ddd',
+      textSecondary: '#ccc',
+      textLight: 'white',
+      
+      border: 'rgba(116, 185, 255, 0.3)',
+      shadow: 'rgba(0, 0, 0, 0.3)',
+      cardShadow: '0 25px 80px rgba(0, 0, 0, 0.3), 0 10px 35px rgba(0, 0, 0, 0.2)',
+    },
+    assets: {
+      backgroundImage: '/asset/yzbj.jpg',
+      elephantIcon: '/asset/planet.png',
+    }
+  },
+
   // 海洋蓝主题
   ocean: {
     id: 'ocean',
@@ -137,38 +203,7 @@ export const themes = {
     }
   },
 
-  // 暗黑主题
-  dark: {
-    id: 'dark',
-    name: '暗夜模式',
-    icon: '🌙',
-    colors: {
-      primaryBg: 'linear-gradient(135deg, #2d3436 0%, #636e72 50%, #2d3436 100%)',
-      containerBg: '#2d3436',
-      headerBg: 'rgba(45, 52, 54, 0.8)',
-      commentBg: 'rgba(45, 52, 54, 0.9)',
-      
-      primary: '#74b9ff',
-      primaryHover: '#0984e3',
-      secondary: '#ddd',
-      
-      buttonBg: '#636e72',
-      buttonText: '#ddd',
-      buttonHover: 'rgba(116, 185, 255, 0.35)',
-      
-      textPrimary: '#ddd',
-      textSecondary: '#ccc',
-      textLight: 'white',
-      
-      border: 'rgba(116, 185, 255, 0.3)',
-      shadow: 'rgba(0, 0, 0, 0.3)',
-      cardShadow: '0 25px 80px rgba(0, 0, 0, 0.3), 0 10px 35px rgba(0, 0, 0, 0.2)',
-    },
-    assets: {
-      backgroundImage: '/asset/yzbj.jpg',
-      elephantIcon: '/asset/planet.png',
-    }
-  },
+  
 
   // 粉色甜美主题
   pink: {
@@ -202,6 +237,7 @@ export const themes = {
       elephantIcon: '/asset/flower.png',
     }
   }
+
 };
 
 // 主题工具函数
