@@ -270,7 +270,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(calc(var(--vh, 1vh) * 100) - 120px); /* 增加导航栏预留空间 */
+  min-height: calc(calc(var(--vh, 1vh) * 100) - 100px); /* 增加导航栏预留空间 */
+  height: fit-content;
   padding: 60px 20px 40px; /* 增加顶部padding */
   padding-left: max(20px, var(--safe-area-inset-left));
   padding-right: max(20px, var(--safe-area-inset-right));
@@ -749,6 +750,7 @@
     padding: 70px 20px 25px; /* 优化padding，为图标预留合适空间 */
     border-radius: 25px;
     max-width: 95%; /* 增加宽度利用 */
+    max-height: fit-content;
     margin: 0 auto; /* 居中 */
   }
 
@@ -946,8 +948,7 @@
 
   /* 主播放器区域最大高度限制 */
   .player-main {
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
+    max-height: auto;
   }
 
   .player-container {
@@ -2225,8 +2226,7 @@
 
   /* 主播放器区域最大高度限制 */
   .player-main {
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
+    max-height:auto;
   }
 
   .player-container {
