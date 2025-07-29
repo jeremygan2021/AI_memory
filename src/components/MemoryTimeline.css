@@ -214,6 +214,7 @@
   .timeline-item {
     margin-bottom: 20px;
     padding: 8px;
+    overflow-y: hidden;
   }
   
   .timeline-content {

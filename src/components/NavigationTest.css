@@ -1,0 +1,45 @@
+.navigation-test {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.navigation-test h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.test-info {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.test-info p {
+  margin: 8px 0;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.test-info strong {
+  color: #34495e;
+}
+
+.test-btn {
+  background: #3bb6a6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.test-btn:hover {
+  background: #2c9aa8;
+} 

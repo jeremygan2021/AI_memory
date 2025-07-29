@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './UploadMediaPage.css'; // 复用现有样式
 import { validateUserCode } from './utils/userCode';
+ import { isWechatMiniProgram } from './utils/environment';
 
 const buildRecordingPath = (sessionId, userCode) => {
   return `recordings/${userCode}/${sessionId}`;
@@ -980,7 +981,8 @@ const UploadMediaPage = () => {
 
   return (
     <div className="upload-page" onPaste={handlePaste}>
-      {/* 顶部导航 */}
+      {/* 顶部导航 - 小程序环境下隐藏 */}
+      {!isWechatMiniProgram() && (
       <div className="upload-header">
         <div className="back-button" onClick={goBack}>
           <span className="back-text">
@@ -993,6 +995,7 @@ const UploadMediaPage = () => {
           <span>用户: {userCode} | 会话: {sessionid}</span>
         </div>
       </div>
+      )}
 
       {/* 上传区域 */}
       <div 
@@ -1259,6 +1262,7 @@ const UploadMediaPage = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

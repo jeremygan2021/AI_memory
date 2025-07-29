@@ -1,0 +1,399 @@
+/* 用户个人页面样式 */
+.user-profile-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  padding: 20px;
+  padding-bottom: 80px; /* 为底部导航栏留出空间 */
+}
+
+/* 顶部标题栏 */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 20px 0;
+  margin-bottom: 20px;
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-icon:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+/* 用户信息卡片 */
+.user-info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.user-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.avatar-placeholder {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.avatar-icon {
+  font-size: 24px;
+  color: white;
+}
+
+.avatar-placeholder img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chat-icon {
+  position: absolute;
+  bottom: -5px;
+  right: 10px;
+  font-size: 16px;
+  color: #4CAF50;
+}
+
+.user-details {
+  flex: 1;
+  margin-left: 16px;
+}
+
+.user-id {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.user-type {
+  font-size: 14px;
+  color: #999;
+  background: #f5f5f5;
+  padding: 4px 12px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.logout-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.logout-section:hover {
+  background-color: #f5f5f5;
+}
+
+.logout-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.logout-arrow {
+  font-size: 12px;
+  color: #999;
+}
+
+/* 会员卡片 */
+.membership-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.membership-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.crown-icon {
+  font-size: 24px;
+  margin-right: 16px;
+  color: #FFD700;
+}
+
+.membership-info {
+  flex: 1;
+}
+
+.membership-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.membership-benefits {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+}
+
+.activate-btn {
+  background: #FFD700;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.activate-btn:hover {
+  background: #FFC700;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 回忆时间线区域 */
+.timeline-section {
+  height: 50vh;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+/* 功能列表 */
+.function-list {
+  background: white;
+  border-radius: 16px;
+  padding: 8px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.function-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.function-item:last-child {
+  border-bottom: none;
+}
+
+.function-item:hover {
+  background-color: #f9f9f9;
+}
+
+.function-icon {
+  font-size: 20px;
+  margin-right: 16px;
+  width: 24px;
+  text-align: center;
+}
+
+.function-text {
+  flex: 1;
+  font-size: 16px;
+  color: #333;
+}
+
+.function-arrow {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .user-profile-page {
+    padding: 16px;
+    padding-bottom: 80px;
+  }
+  
+  .profile-header {
+    padding: 8px 0 16px 0;
+  }
+  
+  .header-title {
+    font-size: 22px;
+  }
+  
+  .action-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  .user-info-card {
+    padding: 16px;
+  }
+  
+  .avatar-placeholder {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .avatar-icon {
+    font-size: 20px;
+  }
+  
+  .user-id {
+    font-size: 16px;
+  }
+  
+  .membership-card {
+    padding: 16px;
+  }
+  
+  .membership-title {
+    font-size: 16px;
+  }
+  
+  .activate-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .timeline-section {
+    padding: 16px;
+  }
+  
+  .section-title {
+    font-size: 16px;
+  }
+  
+  .function-item {
+    padding: 14px 16px;
+  }
+  
+  .function-text {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-profile-page {
+    padding: 12px;
+  }
+  
+  .header-title {
+    font-size: 20px;
+  }
+  
+  .user-info-card {
+    padding: 12px;
+  }
+  
+  .avatar-placeholder {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .user-details {
+    margin-left: 12px;
+  }
+  
+  .user-id {
+    font-size: 15px;
+  }
+  
+  .user-type {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+  
+  .membership-card {
+    padding: 12px;
+  }
+  
+  .crown-icon {
+    font-size: 20px;
+    margin-right: 12px;
+  }
+  
+  .membership-title {
+    font-size: 15px;
+  }
+  
+  .membership-benefits {
+    font-size: 11px;
+  }
+  
+  .activate-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .timeline-section {
+    padding: 12px;
+  }
+  
+  .function-item {
+    padding: 12px 12px;
+  }
+  
+  .function-icon {
+    font-size: 18px;
+    margin-right: 12px;
+  }
+  
+  .function-text {
+    font-size: 14px;
+  }
+} 

@@ -1,0 +1,47 @@
+.miniprogram-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.miniprogram-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* 为底部导航栏留出空间 */
+  padding-bottom: 60px;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .miniprogram-content {
+    padding-bottom: 50px;
+  }
+}
+
+/* 登录页面样式 - 不显示底部导航栏 */
+.miniprogram-content.no-tabbar {
+  padding-bottom: 0;
+}
+
+/* 小程序安全区域适配 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .miniprogram-content {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+  
+  .miniprogram-content.no-tabbar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  @media (max-width: 768px) {
+    .miniprogram-content {
+      padding-bottom: calc(50px + env(safe-area-inset-bottom));
+    }
+    
+    .miniprogram-content.no-tabbar {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+} 

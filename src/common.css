@@ -64,6 +64,11 @@ img {
     /* overflow-x: hidden; */
   }
   
+  /* 小程序环境下移除顶部padding */
+  .memory-app-bg.miniprogram {
+    padding: 0;
+  }
+  
   .memory-main {
     flex-direction: column;
     gap: 16px;
@@ -113,6 +118,7 @@ img {
     justify-content: space-between;
     background-color: rgba(195, 234, 226, 0.95);
     backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     position: fixed;
     top: 0;
@@ -122,7 +128,7 @@ img {
   }
   
   /* 手机端删除按钮优化 - 确保正圆形 */
-  .delete-btn {
+  .delete-activity-btn {
     min-width: 20px !important;
     min-height: 20px !important;
     max-width: 20px !important;
@@ -193,7 +199,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   -webkit-align-items: center;
   -ms-flex-align: center;
   align-items: center;
-  background-color: rgba(195, 234, 226, 0.88);
+  background-color: rgba(195, 234, 226, 1);
   padding: 15px 30px;
   height: 70px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -855,7 +861,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 }
 
 .baby-info-top {
-  height: 55px;
+  height: 75px;
   display: flex;
   align-items: center;
   gap: 20px;
@@ -1053,10 +1059,12 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 .activity-list li {
   display: flex;
   align-items: center;
+  height: 50px;
   gap: 12px;
   padding: 12px 0;
   border-bottom: 1px solid #f0f9f7;
   position: relative;
+  overflow-y: hidden;
 }
 
 .activity-list li:last-child {
@@ -1088,10 +1096,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   color: #333;
 }
 
-.delete-btn {
+.delete-activity-btn {
   position: absolute;
   right: 0;
-  background: #ff6b6b;
+  background: #f75959;
   color: white;
   border: none;
   width: 22px;
@@ -1108,11 +1116,11 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   flex-shrink: 0;
 }
 
-.activity-list li:hover .delete-btn {
+.activity-list li:hover .delete-activity-btn {
   opacity: 1;
 }
 
-.delete-btn:hover {
+.delete-activity-btn:hover {
   background: #ff5252;
   transform: scale(1.1);
 }
@@ -1697,6 +1705,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     align-items: center;
     justify-content: space-between;
     background-color: rgba(195, 234, 226, 0.95);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     overflow: hidden;
     position: fixed;
@@ -1707,7 +1716,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   /* 手机端删除按钮优化 - 确保正圆形 */
-  .delete-btn {
+  .delete-activity-btn {
     min-width: 20px !important;
     min-height: 20px !important;
     max-width: 20px !important;
@@ -2026,14 +2035,14 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 /* 手机端删除按钮优化 - 确保正圆形 */
 @media (max-width: 768px) {
-  .delete-btn {
+  .delete-activity-btn {
     min-width: 20px !important;
     min-height: 20px !important;
     max-width: 20px !important;
     max-height: 20px !important;
     border-radius: 50% !important;
     flex-shrink: 0 !important;
-    box-sizing: border-box;
+   
   }
   
   /* 移动端回忆时间线容器样式 */
@@ -2329,6 +2338,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     overflow-x: hidden;
   }
   
+  .memory-app-bg.miniprogram {
+    padding: 0;
+  }
+  
   .memory-navbar {
     padding: 8px 12px;
     height: 54px;
@@ -2618,6 +2631,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     overflow-x: hidden;
   }
   
+  .memory-app-bg.miniprogram {
+    padding: 0;
+  }
+  
   .memory-navbar {
     padding: 6px 10px;
     height: 50px;
@@ -2838,7 +2855,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     padding: 10px 0;
   }
   
-  .delete-btn {
+  .delete-activity-btn {
     width: 20px;
     height: 20px;
     font-size: 12px;
@@ -2932,6 +2949,10 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 @media (max-width: 320px) {
   .memory-app-bg {
     padding: 80px 0 0 0; /* 为固定导航栏+菜单栏留出空间 */
+  }
+  
+  .memory-app-bg.miniprogram {
+    padding: 0;
   }
   
   .memory-menu {
@@ -3155,7 +3176,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   /* 优化按钮大小 */
-  .delete-btn {
+  .delete-activity-btn {
     width: 26px;
     height: 26px;
     font-size: 14px;

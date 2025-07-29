@@ -1,0 +1,162 @@
+.user-code-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  overflow-y: hidden !important;
+}
+
+.user-code-input-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.input-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.input-header p {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin-bottom: 30px;
+}
+
+.input-form {
+  margin-bottom: 30px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.user-code-input {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  text-align: center;
+  letter-spacing: 2px;
+  font-weight: 600;
+  color: #2c3e50;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.user-code-input:focus {
+  outline: none;
+  border-color: #3bb6a6;
+  box-shadow: 0 0 0 3px rgba(59, 182, 166, 0.1);
+}
+
+.user-code-input.error {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.user-code-input::placeholder {
+  color: #bdc3c7;
+  letter-spacing: 1px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #3bb6a6 0%, #2c9aa8 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 182, 166, 0.3);
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 182, 166, 0.4);
+}
+
+.submit-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.input-footer {
+  text-align: center;
+}
+
+.code-format {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin-bottom: 5px;
+}
+
+.code-example {
+  font-size: 0.8rem;
+  color: #95a5a6;
+  font-style: italic;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .user-code-input-container {
+    padding: 10px;
+  }
+  
+  .user-code-input-card {
+    padding: 30px 20px;
+  }
+  
+  .input-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .input-header p {
+    font-size: 0.9rem;
+  }
+  
+  .user-code-input {
+    font-size: 1.1rem;
+    padding: 12px 15px;
+  }
+  
+  .submit-btn {
+    font-size: 1rem;
+    padding: 12px 15px;
+  }
+}
+
+/* 小程序环境特殊样式 */
+@media (max-width: 375px) {
+  .user-code-input-card {
+    padding: 25px 15px;
+  }
+  
+  .input-header h2 {
+    font-size: 1.3rem;
+  }
+} 

@@ -10,8 +10,14 @@ import ModernSearchBox from './components/ModernSearchBox';
 import UploadMediaPage from './UploadMediaPage';
 import VideoPlayerPage from './VideoPlayerPage';
 import CommentTest from './components/CommentTest';
-import ThemedIcon from './components/ThemedIcon';
 import MemoryTimeline from './components/MemoryTimeline';
+import MiniProgramTabBar from './components/MiniProgramTabBar';
+import UserCodeInput from './components/UserCodeInput';
+import EnvironmentTest from './components/EnvironmentTest';
+import NavigationTest from './components/NavigationTest';
+import MiniProgramLayout from './components/MiniProgramLayout';
+import UserProfilePage from './components/UserProfilePage';
+import { isWechatMiniProgram, isH5Environment } from './utils/environment';
 
 // 折线图数据
 const chartData = [
@@ -660,6 +666,12 @@ const HomePage = () => {
 
   // 如果没有用户ID，显示输入界面
   if (!userid) {
+    // 小程序环境下显示用户代码输入界面
+    if (isWechatMiniProgram()) {
+      return <UserCodeInput />;
+    }
+    
+    // H5环境下显示原有的URL输入提示
     return (
       <div className="App">
         <div style={{
@@ -710,38 +722,69 @@ const HomePage = () => {
   }
 
   return (
-    <div className="memory-app-bg">
-      {/* 顶部导航栏 */}
-      <div className="memory-navbar">
-        <div className="navbar-left">
-          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/shouye.png" className="memory-logo" alt="logo" />
-          <span className="memory-title">Memory</span>
+    <div className={`memory-app-bg ${isWechatMiniProgram() ? 'miniprogram' : ''}`}>
+      {/* 顶部导航栏 - 小程序环境下隐藏 */}
+      {!isWechatMiniProgram() && (
+        <div className="memory-navbar">
+          <div className="navbar-left">
+            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/shouye.png" className="memory-logo" alt="logo" />
+            <span className="memory-title">Memory</span>
+          </div>
+          <div className="navbar-center">
+            <ModernSearchBox
+              placeholder="Search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onSearch={handleSearch}
+              onKeyPress={handleKeyPress}
+              size="medium"
+              width="100%"
+            />
+          </div>
+          <div className="navbar-right">
+            <span className="memory-icon bell" />
+            <span className="memory-icon settings" />
+            <span className="memory-icon user" />
+          </div>
         </div>
-        <div className="navbar-center">
-          <ModernSearchBox
-            placeholder="Search"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onSearch={handleSearch}
-            onKeyPress={handleKeyPress}
-            size="medium"
-            width="100%"
-          />
-        </div>
-        <div className="navbar-right">
-          <span className="memory-icon bell" />
-          <span className="memory-icon settings" />
-          <span className="memory-icon user" />
-        </div>
-      </div>
+      )}
 
-      {/* 菜单栏 */}
-      <div className="memory-menu">
-        <span className="menu-item active">首页</span>
-        <span className="menu-item">智能回忆</span>
-        <span className="menu-item">成长日志</span>
-        <span className="menu-item">安全管家</span>
-      </div>
+      {/* 菜单栏 - 小程序环境下隐藏，H5环境下修改为三个页面导航 */}
+      {!isWechatMiniProgram() && (
+        <div className="memory-menu">
+          <span 
+            className="menu-item active" 
+            onClick={() => userCode && navigate(`/${userCode}`)}
+            style={{ cursor: 'pointer' }}
+          >
+            首页
+          </span>
+          <span 
+            className="menu-item" 
+            onClick={() => {
+              if (userCode) {
+                const randomId = Math.random().toString(36).substr(2, 8);
+                navigate(`/${userCode}/${randomId}`);
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            录音
+          </span>
+          <span 
+            className="menu-item" 
+            onClick={() => {
+              if (userCode) {
+                const sessionId = Math.random().toString(36).substr(2, 6);
+                navigate(`/${userCode}/upload-media/${sessionId}`);
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            上传
+          </span>
+        </div>
+      )}
 
       {/* 主体内容区 - 三栏布局 */}
       <div className="memory-main">
@@ -850,7 +893,7 @@ const HomePage = () => {
                   /> 
                   <span className="activity-text">{activity.text}</span>
                   <button 
-                    className="delete-btn"
+                    className="delete-activity-btn"
                     onClick={() => handleActivityDelete(activity.id)}
                     title="删除活动"
                   >
@@ -1024,24 +1067,33 @@ const HomePage = () => {
           </div>
         </div>
       )}
-    </div>
+
+          </div>
   );
 };
 
+  
+
+
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/:userid" element={<HomePage />} />
-      <Route path="/family" element={<FamilyPage />} />
-      <Route path="/:userid/audio-library" element={<AudioLibrary />} />
-      <Route path="/:userid/gallery" element={<UploadMediaPage />} />
-      <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
-      <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
-      <Route path="/:userid/:id" element={<RecordPage />} />
-      <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
-      <Route path="/comment-test" element={<CommentTest />} />
-    </Routes>
+    <MiniProgramLayout>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/:userid" element={<HomePage />} />
+        <Route path="/family" element={<FamilyPage />} />
+        <Route path="/:userid/audio-library" element={<AudioLibrary />} />
+        <Route path="/:userid/gallery" element={<UploadMediaPage />} />
+        <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
+        <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
+        <Route path="/:userid/:id" element={<RecordPage />} />
+        <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
+                            <Route path="/comment-test" element={<CommentTest />} />
+                    <Route path="/environment-test" element={<EnvironmentTest />} />
+                    <Route path="/navigation-test" element={<NavigationTest />} />
+                    <Route path="/:userid/profile" element={<UserProfilePage />} />
+      </Routes>
+    </MiniProgramLayout>
   );
 }
 
