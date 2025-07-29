@@ -120,7 +120,17 @@ const MiniProgramTabBar = ({ activeTab = 'home' }) => {
         onClick={() => handleTabClick('profile')}
       >
         <div className="tab-icon">
-          <div className="profile-icon">👤</div>
+          <div className="profile-icon">
+          <img 
+            src={activeTab === 'profile' ? '/asset/user-active.png' : '/asset/user.png'} 
+            alt="我的"
+            className="tab-icon-img"
+            onError={(e) => {
+              console.error('图标加载失败:', e.target.src);
+              // e.target.style.display = 'none';
+            }}
+          />
+          </div>
         </div>
         <div className="tab-text">我的</div>
       </div>

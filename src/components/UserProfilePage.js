@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { isWechatMiniProgram } from '../utils/environment';
-import MemoryTimeline from './MemoryTimeline';
+import SvgIcon from './SvgIcons';
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {
@@ -14,6 +14,7 @@ const UserProfilePage = () => {
     isMember: false,
     memberExpireDate: null
   });
+  const [orderType, setOrderType] = useState('online'); // 'online' 或 'store'
 
   // 检查是否为小程序环境
   const isMiniProgram = isWechatMiniProgram();
@@ -74,6 +75,16 @@ const UserProfilePage = () => {
     }
   };
 
+  // 处理订单类型切换
+  const handleOrderTypeChange = (type) => {
+    setOrderType(type);
+  };
+
+  // 处理订单状态点击
+  const handleOrderStatusClick = (status) => {
+    alert(`${status}功能开发中...`);
+  };
+
   // 如果不是小程序环境，不显示此页面
   if (!isMiniProgram) {
     return null;
@@ -88,7 +99,9 @@ const UserProfilePage = () => {
             {userInfo.avatar ? (
               <img src={userInfo.avatar} alt="用户头像" />
             ) : (
-              <div className="avatar-icon">👤</div>
+              <div className="avatar-icon">
+                {/* <img src="/Users/mac/project/AI_memory/src/asset/tx.jpeg" alt="用户头像" /> */}
+              </div>
             )}
           </div>
           <div className="chat-icon">💬</div>
@@ -110,7 +123,7 @@ const UserProfilePage = () => {
         <div className="membership-left">
           <div className="crown-icon">👑</div>
           <div className="membership-info">
-            <div className="membership-title">时光云匣会员</div>
+            <div className="membership-title">时与墨AI回忆录会员</div>
             <div className="membership-benefits">
               权益描述01·权益描述02·权益描述03
             </div>
@@ -127,34 +140,87 @@ const UserProfilePage = () => {
         </div>
       </div>
 
-      {/* 回忆时间线 */}
-      <div className="timeline-section">
-        <div className="section-title">我的回忆</div>
-        <MemoryTimeline userCode={userInfo.userCode} />
+      {/* 我的订单区域 */}
+      <div className="orders-section">
+        <div className="section-title">我的订单</div>
+        
+
+        {/* 订单状态图标网格 */}
+        <div className="order-status-grid">
+          <div className="order-status-item" onClick={() => handleOrderStatusClick('全部订单')}>
+            <div className="status-icon">
+              <SvgIcon name="document" width={24} height={24} />
+            </div>
+            <div className="status-text">全部订单</div>
+          </div>
+          
+          <div className="order-status-item" onClick={() => handleOrderStatusClick('待付款')}>
+            <div className="status-icon">
+              <SvgIcon name="wallet" width={24} height={24} />
+            </div>
+            <div className="status-text">待付款</div>
+          </div>
+          
+          <div className="order-status-item" onClick={() => handleOrderStatusClick('进行中')}>
+            <div className="status-icon">
+              <SvgIcon name="package" width={24} height={24} />
+            </div>
+            <div className="status-text">进行中</div>
+          </div>
+          
+          <div className="order-status-item" onClick={() => handleOrderStatusClick('待收货')}>
+            <div className="status-icon">
+              <SvgIcon name="truck" width={24} height={24} />
+            </div>
+            <div className="status-text">待收货</div>
+          </div>
+          
+          <div className="order-status-item" onClick={() => handleOrderStatusClick('待评价')}>
+            <div className="status-icon">
+              <SvgIcon name="comment" width={24} height={24} />
+            </div>
+            <div className="status-text">待评价</div>
+          </div>
+          
+          <div className="order-status-item" onClick={() => handleOrderStatusClick('退/换货')}>
+            <div className="status-icon">
+              <SvgIcon name="return" width={24} height={24} />
+            </div>
+            <div className="status-text">退/换货</div>
+          </div>
+        </div>
       </div>
 
       {/* 功能列表 */}
       <div className="function-list">
         <div className="function-item" onClick={() => handleFunctionClick('feedback')}>
-          <div className="function-icon">✏️</div>
+          <div className="function-icon">
+            <SvgIcon name="feedback" width={24} height={24} />
+          </div>
           <div className="function-text">意见反馈</div>
           <div className="function-arrow">&gt;</div>
         </div>
         
         <div className="function-item" onClick={() => handleFunctionClick('customer-service')}>
-          <div className="function-icon">🎧</div>
+          <div className="function-icon">
+            <SvgIcon name="contact" width={24} height={24} />
+          </div>
           <div className="function-text">联系客服</div>
           <div className="function-arrow">&gt;</div>
         </div>
         
         <div className="function-item" onClick={() => handleFunctionClick('share')}>
-          <div className="function-icon">📤</div>
+          <div className="function-icon">
+            <SvgIcon name="share" width={24} height={24} />
+          </div>
           <div className="function-text">分享推荐</div>
           <div className="function-arrow">&gt;</div>
         </div>
         
         <div className="function-item" onClick={() => handleFunctionClick('about')}>
-          <div className="function-icon">ℹ️</div>
+          <div className="function-icon">
+            <SvgIcon name="about" width={24} height={24} />
+          </div>
           <div className="function-text">关于我们</div>
           <div className="function-arrow">&gt;</div>
         </div>

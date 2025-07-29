@@ -199,9 +199,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* 回忆时间线区域 */
-.timeline-section {
-  height: 50vh;
+/* 我的订单区域 */
+.orders-section {
   background: white;
   border-radius: 16px;
   padding: 20px;
@@ -216,6 +215,53 @@
   margin-bottom: 16px;
 }
 
+
+/* 订单状态图标网格 */
+.order-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.order-status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.order-status-item:hover {
+  background: #f9f9f9;
+  transform: translateY(-2px);
+}
+
+.status-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.order-status-item:hover .status-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.status-text {
+  font-size: 12px;
+  color: #333;
+  text-align: center;
+  font-weight: 500;
+}
+
 /* 功能列表 */
 .function-list {
   background: white;
@@ -225,12 +271,14 @@
 }
 
 .function-item {
+  height: 60px;
   display: flex;
   align-items: center;
   padding: 16px 20px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   border-bottom: 1px solid #f5f5f5;
+  overflow-y: hidden;
 }
 
 .function-item:last-child {
@@ -310,12 +358,25 @@
     font-size: 13px;
   }
   
-  .timeline-section {
+  .orders-section {
     padding: 16px;
   }
   
   .section-title {
     font-size: 16px;
+  }
+  
+  .order-status-grid {
+    gap: 16px;
+  }
+  
+  .status-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .status-text {
+    font-size: 11px;
   }
   
   .function-item {
@@ -380,8 +441,21 @@
     font-size: 12px;
   }
   
-  .timeline-section {
+  .orders-section {
     padding: 12px;
+  }
+  
+  .order-status-grid {
+    gap: 12px;
+  }
+  
+  .status-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .status-text {
+    font-size: 10px;
   }
   
   .function-item {
