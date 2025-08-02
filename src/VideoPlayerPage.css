@@ -252,7 +252,7 @@
 
 /* 主播放区域 */
 .player-main {
-  top: 60px;
+  top: 100px;
   position: relative;
   z-index: 1;
   display: flex;

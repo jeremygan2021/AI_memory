@@ -1,0 +1,719 @@
+/* src/components/AIMusicGenerator.css */
+.ai-music-generator {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  padding: 24px;
+  margin: 16px 0;
+  box-shadow: 0 8px 32px rgba(59, 182, 166, 0.15);
+  border: 1px solid rgba(59, 182, 166, 0.2);
+  font-family: 'MUYAO-SOFTBRUSH', 'Inter', 'Segoe UI', sans-serif;
+}
+
+.ai-generator-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.ai-generator-header h3 {
+  color: #3bb6a6;
+  font-size: 24px;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.ai-generator-header p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.error-message {
+  background: #fff2f2;
+  border: 1px solid #ffcccb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #d73027;
+  font-size: 14px;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #d73027;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-close:hover {
+  background: rgba(215, 48, 39, 0.1);
+}
+
+.ai-generator-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 生成类型选择器 */
+.generation-type-selector {
+  margin-bottom: 16px;
+}
+
+.generation-type-selector label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #3bb6a6;
+}
+
+.type-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid rgba(59, 182, 166, 0.3);
+  border-radius: 12px;
+  background: rgba(59, 182, 166, 0.05);
+  color: #3bb6a6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.type-btn:hover {
+  border-color: rgba(59, 182, 166, 0.5);
+  background: rgba(59, 182, 166, 0.1);
+}
+
+.type-btn.active {
+  border-color: #3bb6a6;
+  background: linear-gradient(135deg, #3bb6a6, #4ecdc4);
+  color: white;
+}
+
+/* 参考音频选择区域 */
+.reference-audio-section {
+  background: rgba(59, 182, 166, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(59, 182, 166, 0.2);
+}
+
+.reference-audio-section label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #3bb6a6;
+}
+
+.selected-reference {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.reference-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reference-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.reference-info audio {
+  width: 100%;
+  max-width: 300px;
+  height: 32px;
+}
+
+.remove-reference {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s ease;
+}
+
+.remove-reference:hover {
+  background: #ff5252;
+}
+
+.select-reference-btn {
+  width: 100%;
+  padding: 16px;
+  border: 2px dashed rgba(59, 182, 166, 0.4);
+  border-radius: 12px;
+  background: rgba(59, 182, 166, 0.05);
+  color: #3bb6a6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.select-reference-btn:hover {
+  border-color: #3bb6a6;
+  background: rgba(59, 182, 166, 0.1);
+}
+
+/* 表单组 */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #3bb6a6;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  padding: 12px 16px;
+  border: 1px solid rgba(59, 182, 166, 0.3);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3bb6a6;
+}
+
+.form-group textarea::placeholder {
+  color: #999;
+  line-height: 1.4;
+}
+
+/* 上传选项 */
+.upload-option {
+  margin: 16px 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(59, 182, 166, 0.3);
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background: #3bb6a6;
+  border-color: #3bb6a6;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 12px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 生成按钮 */
+.generate-btn {
+  background: linear-gradient(135deg, #3bb6a6, #4ecdc4);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 24px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 182, 166, 0.3);
+}
+
+.generate-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 生成进度 */
+.generation-progress {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(59, 182, 166, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+/* .progress-fill {
+  height: auto;
+  background: linear-gradient(135deg, #3bb6a6, #4ecdc4);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+} */
+
+.progress-text {
+  color: #3bb6a6;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* 生成结果 */
+.generated-music {
+  background: rgba(59, 182, 166, 0.05);
+  border: 1px solid rgba(59, 182, 166, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.generated-music h4 {
+  color: #3bb6a6;
+  margin: 0 0 16px 0;
+  font-size: 18px;
+}
+
+.music-info {
+  margin-bottom: 16px;
+}
+
+.music-info p {
+  margin: 4px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.music-player {
+  width: 100%;
+  margin: 16px 0;
+  border-radius: 8px;
+}
+
+.music-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #52c41a, #73d13d);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .ai-music-generator {
+    padding: 16px;
+    margin: 12px 0;
+  }
+
+  .ai-generator-header h3 {
+    font-size: 20px;
+  }
+
+  .type-buttons {
+    flex-direction: column;
+  }
+
+  .type-btn {
+    padding: 16px;
+    text-align: center;
+  }
+
+  .selected-reference {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reference-info audio {
+    max-width: 100%;
+  }
+
+  .generate-btn {
+    padding: 18px 24px;
+    font-size: 16px;
+  }
+
+  .music-actions {
+    flex-direction: column;
+  }
+
+  .save-btn {
+    padding: 14px 20px;
+  }
+}
+
+/* 新增样式 - 歌词输入 */
+.lyrics-section {
+  margin-bottom: 20px;
+}
+
+.lyrics-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 2px solid rgba(59, 182, 166, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.lyrics-input:focus {
+  border-color: #3bb6a6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 182, 166, 0.1);
+}
+
+.lyrics-help {
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* 高级选项 */
+.advanced-options {
+  background: rgba(245, 245, 245, 0.8);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(59, 182, 166, 0.1);
+}
+
+.advanced-options h4 {
+  margin: 0 0 16px 0;
+  color: #3bb6a6;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.model-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid rgba(59, 182, 166, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.model-select:focus {
+  border-color: #3bb6a6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 182, 166, 0.1);
+}
+
+.option-checkbox {
+  margin-bottom: 12px;
+}
+
+.option-checkbox:last-child {
+  margin-bottom: 0;
+}
+
+/* 参考音频选择样式 */
+.reference-audio-section {
+  margin-bottom: 20px;
+}
+
+.selected-reference {
+  border: 2px solid rgba(59, 182, 166, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  background: rgba(245, 245, 245, 0.8);
+  position: relative;
+}
+
+.reference-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reference-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.reference-source {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.reference-info audio {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.remove-reference {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-reference:hover {
+  background: #ff5252;
+}
+
+.select-reference-btn {
+  width: 100%;
+  padding: 16px;
+  border: 2px dashed rgba(59, 182, 166, 0.3);
+  border-radius: 12px;
+  background: rgba(245, 245, 245, 0.5);
+  color: #666;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.select-reference-btn:hover {
+  border-color: #3bb6a6;
+  background: rgba(59, 182, 166, 0.1);
+  color: #3bb6a6;
+}
+
+/* 三列布局 - 为参考音频选项调整 */
+.type-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+/* 按钮组样式 */
+.button-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.test-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.test-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .type-buttons {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .type-btn {
+    padding: 12px 16px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .test-btn {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+/* 上传进度条样式 */
+.upload-progress {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(59, 182, 166, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(59, 182, 166, 0.2);
+}
+
+.upload-progress .progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(59, 182, 166, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.upload-progress .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3bb6a6, #2a9d8f);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.upload-progress .progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.upload-progress .progress-text {
+  margin: 0;
+  font-size: 14px;
+  color: #3bb6a6;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* 上传按钮禁用状态 */
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.save-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .upload-progress {
+    margin-top: 12px;
+    padding: 10px;
+  }
+  
+  .upload-progress .progress-bar {
+    height: 6px;
+  }
+  
+  .upload-progress .progress-text {
+    font-size: 12px;
+  }
+}

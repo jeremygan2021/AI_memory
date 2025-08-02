@@ -47,6 +47,11 @@ const PlayerPage = () => {
   const [videoThumbnails, setVideoThumbnails] = useState({}); // 视频缩略图缓存
   const [currentTheme, setCurrentTheme] = useState(getCurrentTheme()); // 当前主题
 
+  // 新增音频列表相关状态
+  const [audioFiles, setAudioFiles] = useState([]); // 会话下的所有音频文件
+  const [currentAudioIndex, setCurrentAudioIndex] = useState(0); // 当前播放的音频索引
+  const [showAudioList, setShowAudioList] = useState(false); // 是否显示音频列表
+
   // 检测iOS设备
   useEffect(() => {
     const checkIsIOS = () => {
@@ -305,7 +310,7 @@ const PlayerPage = () => {
           // 判断是否为图片
           const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(fileName);
           // 判断是否为视频
-          const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
+          const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i.test(fileName);
           // 判断是否为音频
           const isAudio = contentType.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac|flac|wma|amr|3gp|opus)$/i.test(fileName);
 
@@ -315,149 +320,106 @@ const PlayerPage = () => {
 
         console.log('过滤后的音频文件列表:', audioFiles);
 
-        // 在音频文件中查找指定的录音文件
-        const foundFile = audioFiles.find(file => {
+        // 处理所有音频文件，构建音频列表
+        const processedAudioFiles = audioFiles.map(file => {
           const objectKey = file.object_key || file.objectKey || file.key || file.name;
-          const fileName = objectKey.split('/').pop();
-          const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
-          
-          console.log(`检查音频文件 ${fileName}:`);
-          console.log(`  文件名（无扩展名）: ${nameWithoutExt}`);
-          console.log(`  查找的recordingId: ${recordingId}`);
-          
-          // 多种匹配策略
-          const strategies = [
-            // 策略1: 精确的recording_ID格式匹配
-            () => nameWithoutExt === `recording_${recordingId}`,
-            
-            // 策略2: 文件名包含recordingId
-            () => nameWithoutExt.includes(recordingId.toString()),
-            
-            // 策略3: 下划线分割后的任意部分匹配
-            () => {
-              const parts = nameWithoutExt.split('_');
-              return parts.includes(recordingId.toString()) || parts.includes(recordingId);
-            },
-            
-            // 策略4: 如果文件名是纯数字，直接比较
-            () => {
-              const fileNumber = nameWithoutExt.replace(/\D/g, '');
-              return fileNumber === recordingId.toString();
-            },
-            
-            // 策略5: 检查文件名最后的数字部分是否匹配recordingId的后几位
-            () => {
-              const fileParts = nameWithoutExt.split('_');
-              const lastPart = fileParts[fileParts.length - 1];
-              const recordingIdStr = recordingId.toString();
-              
-              // 检查最后部分是否是recordingId的后8位或前8位
-              return (
-                lastPart === recordingIdStr ||
-                (recordingIdStr.length > 8 && lastPart === recordingIdStr.slice(-8)) ||
-                (recordingIdStr.length > 8 && lastPart === recordingIdStr.slice(0, 8))
-              );
-            }
-          ];
-          
-          // 逐一尝试每种策略
-          for (let i = 0; i < strategies.length; i++) {
-            try {
-              const result = strategies[i]();
-              if (result) {
-                console.log(`  匹配成功！使用策略 ${i + 1}`);
-                return true;
-              }
-            } catch (e) {
-              console.warn(`  策略 ${i + 1} 执行失败:`, e);
-            }
-          }
-          
-          console.log(`  所有策略都未匹配成功`);
-          return false;
-        });
-
-        // 如果找到匹配的文件，或者只有一个音频文件就使用它
-        let targetFile = foundFile || (audioFiles.length === 1 ? audioFiles[0] : null);
-        
-        // 如果还是没找到，尝试按时间排序找最新的音频文件作为备选
-        if (!targetFile && audioFiles.length > 0) {
-          console.log('未找到精确匹配，尝试使用最新的音频文件');
-          const sortedAudioFiles = [...audioFiles].sort((a, b) => {
-            const timeA = new Date(a.last_modified || a.lastModified || a.modified || 0);
-            const timeB = new Date(b.last_modified || b.lastModified || b.modified || 0);
-            return timeB - timeA; // 降序排列，最新的在前
-          });
-          targetFile = sortedAudioFiles[0];
-          console.log('使用最新音频文件作为备选:', targetFile);
-        }
-
-        if (targetFile) {
-          console.log('使用录音文件:', targetFile);
-          
-          // 从文件名提取真实的唯一标识符
-          const objectKey = targetFile.object_key || targetFile.objectKey || targetFile.key || targetFile.name;
           const fileName = objectKey.split('/').pop();
           const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
           const parts = nameWithoutExt.split('_');
           const realUniqueId = parts[parts.length - 1];
           
-          let signedUrl = targetFile.file_url || targetFile.fileUrl || targetFile.url;
+          let signedUrl = file.file_url || file.fileUrl || file.url;
           
           // 如果没有直接的URL，构建OSS URL
           if (!signedUrl) {
-            // 构建阿里云OSS URL
             signedUrl = `${OSS_BASE_URL}/${objectKey}`;
-            console.log('构建的OSS URL:', signedUrl);
-          } else {
-            console.log('使用API返回的URL:', signedUrl);
-          }
-          
-          // 如果signedUrl还是空，尝试获取签名URL
-          if (!signedUrl) {
-            try {
-              console.log('获取签名URL中...');
-              const urlResponse = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(objectKey)}/url`);
-              if (urlResponse.ok) {
-                const urlResult = await urlResponse.json();
-                signedUrl = urlResult.signed_url || urlResult.signedUrl || urlResult.url;
-                console.log('获取到签名URL:', signedUrl);
-              } else {
-                console.warn('获取签名URL失败:', urlResponse.status);
-              }
-            } catch (urlError) {
-              console.error('获取签名URL出错:', urlError);
-            }
           }
           
           // 检查是否为视频文件
           const isVideo = fileName.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i) || 
-                         (targetFile.content_type && targetFile.content_type.startsWith('video/'));
+                         (file.content_type && file.content_type.startsWith('video/'));
 
-          // 构建录音对象
-          const recording = {
-            id: realUniqueId, // 使用真实的唯一标识符
+          return {
+            id: realUniqueId,
             objectKey: objectKey,
             signedUrl: signedUrl,
             fileName: fileName,
-            size: targetFile.size || 0,
-            timestamp: formatDateFromString(targetFile.last_modified || targetFile.lastModified || targetFile.modified || new Date().toISOString()),
-            boundAt: formatDateFromString(targetFile.last_modified || targetFile.lastModified || targetFile.modified || new Date().toISOString()),
-            duration: 0, // 将在音频加载后获取
+            size: file.size || 0,
+            timestamp: formatDateFromString(file.last_modified || file.lastModified || file.modified || new Date().toISOString()),
+            boundAt: formatDateFromString(file.last_modified || file.lastModified || file.modified || new Date().toISOString()),
+            duration: 0,
             uploaded: true,
             cloudUrl: signedUrl,
-            isVideo: isVideo, // 标记是否为视频文件
-            fileType: targetFile.content_type || ''
+            isVideo: isVideo,
+            fileType: file.content_type || ''
           };
+        });
 
-          console.log('构建的录音对象:', recording);
-          console.log('objectKey:', objectKey);
-          console.log('完整OSS URL:', signedUrl);
-          console.log('音频URL:', recording.signedUrl);
-          setRecording(recording);
+        // 按时间排序，最新的在前
+        const sortedAudioFiles = processedAudioFiles.sort((a, b) => {
+          const timeA = new Date(a.timestamp);
+          const timeB = new Date(b.timestamp);
+          return timeB - timeA;
+        });
+
+        setAudioFiles(sortedAudioFiles);
+
+        // 查找指定的录音文件
+        let targetIndex = 0; // 默认播放第一个
+        if (recordingId) {
+          const foundIndex = sortedAudioFiles.findIndex(audio => {
+            const nameWithoutExt = audio.fileName.replace(/\.[^/.]+$/, "");
+            
+            // 多种匹配策略
+            const strategies = [
+              () => nameWithoutExt === `recording_${recordingId}`,
+              () => nameWithoutExt.includes(recordingId.toString()),
+              () => {
+                const parts = nameWithoutExt.split('_');
+                return parts.includes(recordingId.toString()) || parts.includes(recordingId);
+              },
+              () => {
+                const fileNumber = nameWithoutExt.replace(/\D/g, '');
+                return fileNumber === recordingId.toString();
+              },
+              () => {
+                const fileParts = nameWithoutExt.split('_');
+                const lastPart = fileParts[fileParts.length - 1];
+                const recordingIdStr = recordingId.toString();
+                return (
+                  lastPart === recordingIdStr ||
+                  (recordingIdStr.length > 8 && lastPart === recordingIdStr.slice(-8)) ||
+                  (recordingIdStr.length > 8 && lastPart === recordingIdStr.slice(0, 8))
+                );
+              }
+            ];
+            
+            for (let i = 0; i < strategies.length; i++) {
+              try {
+                if (strategies[i]()) {
+                  console.log(`找到匹配的音频文件，索引: ${sortedAudioFiles.indexOf(audio)}`);
+                  return true;
+                }
+              } catch (e) {
+                console.warn(`策略 ${i + 1} 执行失败:`, e);
+              }
+            }
+            return false;
+          });
+          
+          if (foundIndex !== -1) {
+            targetIndex = foundIndex;
+          }
+        }
+
+        setCurrentAudioIndex(targetIndex);
+        
+        if (sortedAudioFiles.length > 0) {
+          const targetRecording = sortedAudioFiles[targetIndex];
+          console.log('设置当前录音:', targetRecording);
+          setRecording(targetRecording);
         } else {
-          console.log('未找到指定的录音文件，recordingId:', recordingId);
-          console.log('会话中的所有文件:', files);
+          console.log('未找到任何音频文件');
           navigate(`/${userCode}/${id}?recordingNotFound=true`);
         }
       } else {
@@ -770,6 +732,26 @@ const PlayerPage = () => {
     }
   };
 
+  // 切换音频文件
+  const switchAudio = (index) => {
+    if (index >= 0 && index < audioFiles.length) {
+      setCurrentAudioIndex(index);
+      setRecording(audioFiles[index]);
+      setCurrentTime(0);
+      setDuration(0);
+      setAudioReady(false);
+      setIsPlaying(false);
+      
+      // 重置音频元素
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = audioFiles[index].signedUrl || audioFiles[index].cloudUrl || audioFiles[index].url;
+        audioRef.current.load();
+      }
+    }
+  };
+
   // 删除录音
   const deleteRecording = async () => {
     if (window.confirm('确定要删除这个录音吗？')) {
@@ -828,6 +810,15 @@ const PlayerPage = () => {
       console.warn('提取唯一标识符失败:', error);
       return 'unknown';
     }
+  };
+
+  // 格式化文件大小
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   // 格式化时间
@@ -1127,7 +1118,7 @@ const PlayerPage = () => {
       </header>
       
       <div className="session-info">
-        <span className="session-label">会话ID:{userCode ? `${userCode}/${id}` : id}</span>  
+        <span className="session-label">会话ID:{userCode ? `${userCode}/${id}` : id}</span>
       </div>
 
       {/* 主播放器区域 */}
@@ -1150,6 +1141,8 @@ const PlayerPage = () => {
             />
           </div>
           
+
+
           {/* 轮播图区域 - 只有上传了照片或视频才显示 */}
           {mediaFiles.length > 0 && (
             <div className="media-carousel-section">
@@ -1304,10 +1297,24 @@ const PlayerPage = () => {
 
           {/* 主控制按钮 */}
           <div className="main-controls">
+            {/* 音频切换按钮 - 只在有多个音频时显示 */}
+            {/* {audioFiles.length > 1 && (
+              <button 
+                onClick={() => switchAudio(currentAudioIndex - 1)} 
+                className="control-btn audio-nav-btn"
+                disabled={currentAudioIndex <= 0}
+                title="上一个音频"
+              >
+                <span style={{ fontSize: '20px' }}>⏮</span>
+                <span className="btn-label">上一个</span>
+              </button>
+            )} */}
+            
             <button 
-              onClick={() => skipTime(-10)} 
+              onClick={() => switchAudio(currentAudioIndex - 1)}
+              disabled={currentAudioIndex <= 0}
               className="control-btn skip-btn"
-              title="后退10秒"
+              title="上一首"
             >
               <ThemedIcon 
                 name="fastBack"
@@ -1316,7 +1323,7 @@ const PlayerPage = () => {
                 colorType="primary"
                 className="btn-icon"
               />
-              <span className="btn-label">-10s</span>
+              <span className="btn-label">上一首</span>
             </button>
             
             <button 
@@ -1356,9 +1363,9 @@ const PlayerPage = () => {
             </button>
             
             <button 
-              onClick={() => skipTime(10)} 
+              onClick={() => switchAudio(currentAudioIndex + 1)}  
               className="control-btn skip-btn"
-              title="前进10秒"
+              title="下一首"
             >
               <ThemedIcon 
                 name="fast"
@@ -1367,8 +1374,21 @@ const PlayerPage = () => {
                 colorType="primary"
                 className="btn-icon"
               />
-              <span className="btn-label">+10s</span>
+              <span className="btn-label">下一首</span>
             </button>
+            
+            {/* 音频切换按钮 - 只在有多个音频时显示 */}
+            {/* {audioFiles.length > 1 && (
+              <button 
+                onClick={() => switchAudio(currentAudioIndex + 1)} 
+                className="control-btn audio-nav-btn"
+                disabled={currentAudioIndex >= audioFiles.length - 1}
+                title="下一个音频"
+              >
+                <span style={{ fontSize: '20px' }}>⏭</span>
+                <span className="btn-label">下一个</span>
+              </button>
+            )} */}
           </div>
 
           {/* 高级控制 */}
@@ -1388,6 +1408,50 @@ const PlayerPage = () => {
                 ))}
               </div>
             </div>
+            
+            {/* 音频列表控制 */}
+            {audioFiles.length > 1 && (
+              <div className="audio-list-control">
+                <div className="audio-list-header">
+                  <label className="control-label">音频列表</label>
+                  <button 
+                    onClick={() => setShowAudioList(!showAudioList)} 
+                    className="audio-list-toggle"
+                  >
+                    <span>🎵</span>
+                    <span>{showAudioList ? '隐藏' : '显示'} ({audioFiles.length})</span>
+                  </button>
+                </div>
+                
+                {/* 音频列表区域 */}
+                {showAudioList && (
+                  <div className="audio-list-section">
+                    <div className="audio-list">
+                      {audioFiles.map((audio, index) => (
+                        <div
+                          key={audio.id}
+                          className={`audio-item ${index === currentAudioIndex ? 'active' : ''}`}
+                          onClick={() => switchAudio(index)}
+                        >
+                          <div className="audio-info">
+                            <div className="audio-name">
+                              {audio.fileName}
+                            </div>
+                            {/* <div className="audio-meta">
+                              <span>{audio.timestamp}</span>
+                              <span>{formatFileSize(audio.size)}</span>
+                            </div> */}
+                          </div>
+                          <div className="audio-status">
+                            {index === currentAudioIndex ? '播放中' : ''}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>

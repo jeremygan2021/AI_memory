@@ -328,7 +328,6 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
       {/* 评论区域标题 */}
       <div className="comment-header">
         <h3 className="comment-title">
-          <span className="comment-icon">💬</span>
           评论 ({comments.length})
         </h3>
         <button 

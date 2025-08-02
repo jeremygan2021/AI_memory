@@ -537,7 +537,7 @@
   }
   
   .player-main {
-    padding: 60px 12px 15px !important;  /* 减少主区域padding */
+    padding: 60px 12px 100px !important;  /* 减少主区域padding */
     overflow-y: hidden !important;
   }
 }

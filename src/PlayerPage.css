@@ -2634,8 +2634,9 @@
 
 @media (max-width: 480px) {
   .comment-section {
-    margin: 50px auto 0;
+    margin: 100px auto 0;
     max-width: 95%;
+    min-height: fit-content;
     border-radius: 12px;
   }
 }
@@ -2646,4 +2647,327 @@
     max-width: 95%;
     border-radius: 10px;
   }
+}
+
+@media (max-width: 375px) {
+  .comment-section {
+    padding: 10px;
+    margin-top: 10px;
+  }
+}
+
+/* 音频列表控制样式 */
+.audio-list-control {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.audio-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.audio-list-header .control-label {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* 音频列表样式 */
+.audio-list-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.audio-list-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.audio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.audio-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin: 2px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.audio-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.audio-item.active {
+  background: linear-gradient(135deg, #2a5fff60 0%, #24D6E260 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(42, 97, 255, 0.60);
+}
+
+.audio-item.active:hover {
+  background: linear-gradient(135deg, #2a5fff60 0%, #24D6E260 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(42, 97, 255, 0.60);
+}
+
+.audio-item .audio-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.audio-item.active .audio-icon {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.audio-item .audio-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.audio-item .audio-name {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.audio-item.active .audio-name {
+  font-weight: 600;
+}
+
+.audio-item .audio-meta {
+  font-size: 11px;
+  opacity: 0.7;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.audio-item .audio-status {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+/* 音频切换按钮样式 */
+.audio-nav-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.audio-nav-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.audio-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 音频列表切换按钮样式 */
+.audio-list-toggle {
+  background: linear-gradient(135deg, #2a5fff60 0%, #24D6E260 100%);
+  color: BLACK;
+  border: none;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px #2a5fff60;
+}
+
+.audio-list-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px #2a5fff60;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .audio-list-control {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+  
+  .audio-list-header {
+    margin-bottom: 8px;
+  }
+  
+  .audio-list-header .control-label {
+    font-size: 13px;
+  }
+  
+  .audio-list-section {
+    padding: 8px;
+    margin-top: 6px;
+    max-height: 180px;
+  }
+  
+  .audio-item {
+    padding: 6px;
+    margin: 1px 0;
+  }
+  
+  .audio-item .audio-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    margin-right: 8px;
+  }
+  
+  .audio-item .audio-name {
+    font-size: 12px;
+    margin-bottom: 1px;
+  }
+  
+  .audio-item .audio-meta {
+    font-size: 10px;
+    gap: 6px;
+  }
+  
+  .audio-item .audio-status {
+    font-size: 10px;
+    margin-left: 4px;
+  }
+  
+  .audio-nav-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  .audio-list-toggle {
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .audio-list-control {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  
+  .audio-list-header {
+    margin-bottom: 6px;
+  }
+  
+  .audio-list-header .control-label {
+    font-size: 12px;
+  }
+  
+  .audio-list-section {
+    padding: 6px;
+    margin-top: 4px;
+    max-height: 160px;
+  }
+  
+  .audio-item {
+    padding: 5px;
+    margin: 1px 0;
+  }
+  
+  .audio-item .audio-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+    margin-right: 6px;
+  }
+  
+  .audio-item .audio-name {
+    font-size: 11px;
+    margin-bottom: 1px;
+  }
+  
+  .audio-item .audio-meta {
+    font-size: 9px;
+    gap: 4px;
+  }
+  
+  .audio-item .audio-status {
+    font-size: 9px;
+    margin-left: 3px;
+  }
+  
+  .audio-list-toggle {
+    padding: 3px 6px;
+    font-size: 10px;
+    border-radius: 10px;
+  }
+}
+
+/* 滚动条样式 */
+.audio-list-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.audio-list-section::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.audio-list-section::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 3px;
+}
+
+.audio-list-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.7);
 } 

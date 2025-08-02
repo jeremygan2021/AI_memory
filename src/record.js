@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './record.css';
 import UploadMediaPage from './UploadMediaPage';
+import AIMusicGenerator from './components/AIMusicGenerator';
 import { getUserCode, buildRecordingPath, buildSessionStorageKey, validateUserCode } from './utils/userCode';
 import recordButtonImg from './asset/record_button.png';
 import mic_icon from './asset/icon/mic.png'
@@ -60,6 +61,9 @@ const RecordComponent = () => {
   const [isMobileRecording, setIsMobileRecording] = useState(false); // 是否正在移动端录音
   const [isMobileRecordingPaused, setIsMobileRecordingPaused] = useState(false); // 移动端录音是否暂停
   const [mobileRecordingTime, setMobileRecordingTime] = useState(0); // 移动端录音时长
+  
+  // AI音乐生成相关状态
+  const [showAIMusicGenerator, setShowAIMusicGenerator] = useState(false); // 是否显示AI音乐生成器
   
   // 引用
   const mediaRecorderRef = useRef(null); // MediaRecorder实例
@@ -1803,6 +1807,34 @@ const RecordComponent = () => {
     });
   };
 
+  // AI音乐生成完成处理
+  const handleAIMusicGenerated = (localMusic) => {
+    // 将AI生成的音乐添加到已绑定录音列表中
+    const newRecording = {
+      id: Date.now(),
+      url: localMusic.url,
+      audioBlob: null, // AI生成的音乐可能没有blob
+      duration: localMusic.duration,
+      timestamp: localMusic.timestamp,
+      sessionId: id || 'default',
+      cloudUrl: localMusic.url, // AI生成的音乐通常已经是云端URL
+      uploaded: localMusic.uploadedToCloud,
+      fileName: localMusic.title,
+      isAIGenerated: true,
+      originalSongId: localMusic.originalSongId,
+      // 添加到已绑定录音列表的标识
+      isBound: true,
+      userCode: userCode,
+      sessionId: id
+    };
+    
+    // 添加到已绑定录音列表
+    setBoundRecordings(prev => [newRecording, ...prev]);
+    
+    // 显示成功提示
+    alert(`AI音乐《${localMusic.title}》已保存并上传到云端，已添加到已绑定录音列表！`);
+  };
+
   // 检测已绑定录音，智能跳转到播放页面（用户从播放页面返回后永久停止此功能）
   useEffect(() => {
     // 防止无限循环跳转：如果用户曾从播放页面返回或正在检查文件，则永久停止自动跳转
@@ -2177,6 +2209,23 @@ const RecordComponent = () => {
                   </button>
                 )}
 
+                {/* AI音乐生成按钮 */}
+                <button 
+                  className="record-start-btn ai-music-btn" 
+                  onClick={() => setShowAIMusicGenerator(!showAIMusicGenerator)}
+                  style={{
+                    background: showAIMusicGenerator 
+                      ? 'linear-gradient(135deg, #9c88ff, #7c4dff)' 
+                      : 'linear-gradient(135deg, #667eea, #764ba2)',
+                    marginTop: '12px'
+                  }}
+                >
+                  <span className="btn-icon">🎵</span>
+                  <span className="btn-text">
+                    {showAIMusicGenerator ? '关闭AI音乐生成器' : 'AI音乐生成器'}
+                  </span>
+                </button>
+
                 </>
               ) : (
                 <div className="record-action-buttons">
@@ -2216,6 +2265,17 @@ const RecordComponent = () => {
                   您的浏览器不支持音频播放
                 </audio>
               </div>
+            )}
+            
+            {/* AI音乐生成器 */}
+            {showAIMusicGenerator && (
+              <AIMusicGenerator
+                userCode={userCode}
+                sessionId={id}
+                recordings={recordings}
+                boundRecordings={boundRecordings}
+                onMusicGenerated={handleAIMusicGenerated}
+              />
             )}
           </div>
           {/* 录音列表整体下移到控制区下方 */}
