@@ -127,6 +127,12 @@ const RecordComponent = () => {
   // 新增：检查录音文件是否存在于云端
   const checkRecordingExists = async (recording) => {
     try {
+      // 特殊处理：AI生成的音乐，如果有cloudUrl就认为存在
+      if (recording.isAIGenerated && recording.cloudUrl) {
+        console.log('AI生成的音乐，跳过存在性检查:', recording.fileName);
+        return true;
+      }
+
       if (!recording.objectKey && !recording.cloudUrl) {
         return false; // 没有云端信息，认为不存在
       }
@@ -156,6 +162,11 @@ const RecordComponent = () => {
           }
         } catch (error) {
           console.warn('cloudUrl检查失败:', error);
+          // 对于AI生成的音乐，即使HEAD请求失败也认为存在
+          if (recording.isAIGenerated) {
+            console.log('AI生成的音乐，HEAD请求失败但认为存在:', recording.fileName);
+            return true;
+          }
         }
       }
 
@@ -187,6 +198,11 @@ const RecordComponent = () => {
       return false;
     } catch (error) {
       console.warn('检查录音文件存在性失败:', error);
+      // 对于AI生成的音乐，即使检查失败也认为存在
+      if (recording.isAIGenerated) {
+        console.log('AI生成的音乐，检查失败但认为存在:', recording.fileName);
+        return true;
+      }
       return false; // 检查失败时认为文件不存在，避免跳转到空页面
     }
   };
@@ -230,7 +246,11 @@ const RecordComponent = () => {
       return stillExistingRecordings;
     } catch (error) {
       console.error('清理已删除录音时出错:', error);
-      return boundRecordings; // 出错时返回原始列表
+      // 出错时保留AI生成的音乐
+      const aiGeneratedRecordings = boundRecordings.filter(recording => recording.isAIGenerated);
+      const otherRecordings = boundRecordings.filter(recording => !recording.isAIGenerated);
+      console.log('出错时保留AI生成的音乐:', aiGeneratedRecordings.length, '个');
+      return [...aiGeneratedRecordings, ...otherRecordings];
     } finally {
       setIsCheckingFiles(false);
     }
@@ -373,21 +393,32 @@ const RecordComponent = () => {
 
   // 从localStorage加载绑定的录音
   useEffect(() => {
+    console.log('record.js: 尝试从localStorage加载boundRecordings', { id, userCode });
     if (id && userCode) {
       const storageKey = buildSessionStorageKey(id, userCode);
       const stored = localStorage.getItem(storageKey);
+      console.log('record.js: localStorage中的存储键', storageKey, '存储的内容', stored);
       if (stored) {
-        const recordings = JSON.parse(stored);
-        setBoundRecordings(recordings);
+        try {
+          const recordings = JSON.parse(stored);
+          console.log('record.js: 解析后的recordings', recordings);
+          setBoundRecordings(recordings);
+        } catch (error) {
+          console.error('record.js: 解析localStorage数据失败', error);
+        }
+      } else {
+        console.log('record.js: localStorage中没有找到数据');
       }
     }
   }, [id, userCode]);
 
   // 保存绑定的录音到localStorage
   useEffect(() => {
-    if (id && userCode && boundRecordings.length > 0) {
+    console.log('record.js: boundRecordings状态变化', boundRecordings);
+    if (id && userCode) {
       const storageKey = buildSessionStorageKey(id, userCode);
       localStorage.setItem(storageKey, JSON.stringify(boundRecordings));
+      console.log('record.js: 已保存到localStorage', storageKey, boundRecordings);
     }
   }, [boundRecordings, id, userCode]);
 
@@ -1810,29 +1841,19 @@ const RecordComponent = () => {
   // AI音乐生成完成处理
   const handleAIMusicGenerated = (localMusic) => {
     // 将AI生成的音乐添加到已绑定录音列表中
+    // localMusic已经包含了正确的数据结构，直接使用
     const newRecording = {
-      id: Date.now(),
-      url: localMusic.url,
-      audioBlob: null, // AI生成的音乐可能没有blob
-      duration: localMusic.duration,
-      timestamp: localMusic.timestamp,
-      sessionId: id || 'default',
-      cloudUrl: localMusic.url, // AI生成的音乐通常已经是云端URL
-      uploaded: localMusic.uploadedToCloud,
-      fileName: localMusic.title,
-      isAIGenerated: true,
-      originalSongId: localMusic.originalSongId,
-      // 添加到已绑定录音列表的标识
-      isBound: true,
-      userCode: userCode,
-      sessionId: id
+      ...localMusic,
+      id: localMusic.id || Date.now(),
+      sessionId: localMusic.sessionId || id || 'default',
+      userCode: localMusic.userCode || userCode
     };
     
     // 添加到已绑定录音列表
     setBoundRecordings(prev => [newRecording, ...prev]);
     
     // 显示成功提示
-    alert(`AI音乐《${localMusic.title}》已保存并上传到云端，已添加到已绑定录音列表！`);
+    alert(`AI音乐《${localMusic.fileName || localMusic.title}》已保存并上传到云端，已添加到已绑定录音列表！`);
   };
 
   // 检测已绑定录音，智能跳转到播放页面（用户从播放页面返回后永久停止此功能）
@@ -2145,13 +2166,9 @@ const RecordComponent = () => {
       </div>
        
        
-      {/* 主内容区：动态布局 */}
-      <div className={`record-main-layout ${recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0 ? 'centered-layout' : 'side-layout'}`}>
-        {/* 全部为空时的状态提示 - 只在居中布局时显示 */}
-       
-        
-        {/* 左侧录音控制区 */}
-        <div className="record-left-panel">
+      {/* 主内容区：居中布局 */}
+      <div className="record-main-layout">
+        {/* 录音控制区 */}
           <div className="record-control-card">
             {/* 录音控制区标题 */}
             <div className="record-control-header">
@@ -2277,71 +2294,68 @@ const RecordComponent = () => {
                 onMusicGenerated={handleAIMusicGenerated}
               />
             )}
+            
+
           </div>
-          {/* 录音列表整体下移到控制区下方 */}
-          <div className={`record-right-panel ${recordings.length === 0 && boundRecordings.length === 0 && !isRecording && recordingTime === 0 ? 'hidden' : 'visible'}`}>
-            {/* 待绑定录音区域 - 始终显示 */}
+
+        {/* 录音列表区域 */}
+        <div className="record-right-panel">
+          {/* 待绑定录音区域 - 仅在有录音时显示 */}
+          {recordings.length > 0 && (
             <div className="recordings-section">
               <div className="section-header">
                 <h3>待绑定的录音</h3>
                 <span className="section-count">({recordings.length})</span>
               </div>
               <div className="recordings-list-container">
-                {recordings.length > 0 ? (
-                  recordings.map((recording) => (
-                    <div key={recording.id} className="recording-list-item unbound-item">
-                      {/* PC端：单行布局，左侧信息+右侧播放器+操作按钮 */}
-                      <div className="recording-first-row">
-                        <div className="recording-item-info">
-                          <div className="recording-timestamp">
-                            {recording.timestamp}
-                            {recording.isVideo && <span className="video-badge">🎬</span>}
-                          </div>
-                          <div className="recording-size">
-                            {formatTime(recording.duration)} · {getUploadStatusText(recording.id)}
-                            {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
-                          </div>
+                {recordings.map((recording) => (
+                  <div key={recording.id} className="recording-list-item unbound-item">
+                    {/* PC端：单行布局，左侧信息+右侧播放器+操作按钮 */}
+                    <div className="recording-first-row">
+                      <div className="recording-item-info">
+                        <div className="recording-timestamp">
+                          {recording.timestamp}
+                          {recording.isVideo && <span className="video-badge">🎬</span>}
                         </div>
-                        
-                        {/* PC端播放器位置（红色方框区域） */}
-                        <div className="recording-player-pc">
-                          <audio controls src={recording.url} className="mini-audio-player">
-                            您的浏览器不支持音频播放
-                          </audio>
-                        </div>
-                        
-                        <div className="recording-actions">
-                          <button className="action-btn link-btn" onClick={() => bindRecording(recording)} title="绑定录音">
-                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
-                          </button>
-                          {uploadStatus[recording.id] === 'error' && (
-                            <button className="action-btn retry-box" onClick={() => retryUpload(recording)} title="重试上传">
-                              <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={25} height={25}/>
-                            </button>
-                          )}
-                          <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
-                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
-                          </button>
+                        <div className="recording-size">
+                          {formatTime(recording.duration)} · {getUploadStatusText(recording.id)}
+                          {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
                         </div>
                       </div>
                       
-                      {/* 移动端播放器位置（保持原来的下方居中） */}
-                      <div className="recording-player-row recording-player-mobile">
+                      {/* PC端播放器位置（红色方框区域） */}
+                      <div className="recording-player-pc">
                         <audio controls src={recording.url} className="mini-audio-player">
                           您的浏览器不支持音频播放
                         </audio>
                       </div>
+                      
+                      <div className="recording-actions">
+                        <button className="action-btn link-btn" onClick={() => bindRecording(recording)} title="绑定录音">
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
+                        </button>
+                        {uploadStatus[recording.id] === 'error' && (
+                          <button className="action-btn retry-box" onClick={() => retryUpload(recording)} title="重试上传">
+                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={25} height={25}/>
+                          </button>
+                        )}
+                        <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
+                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
+                        </button>
+                      </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="empty-section-state">
-                    <div className="empty-section-icon">🎤</div>
-                    <p>暂无待绑定的录音</p>
-                    <span className="empty-section-hint">录制完成后的录音将出现在这里</span>
+                    
+                    {/* 移动端播放器位置（保持原来的下方居中） */}
+                    <div className="recording-player-row recording-player-mobile">
+                      <audio controls src={recording.url} className="mini-audio-player">
+                        您的浏览器不支持音频播放
+                      </audio>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
+          )}
 
             {/* 已绑定录音区域 - 始终显示 */}
             <div className="recordings-section bound-section">
@@ -2369,12 +2383,14 @@ const RecordComponent = () => {
                       <div className="recording-first-row">
                         <div className="recording-item-info">
                           <div className="recording-timestamp">
-                            {recording.timestamp}
+                            {recording.isAIGenerated ? recording.fileName : recording.timestamp}
+                            {recording.isAIGenerated && <span className="ai-badge">🤖</span>}
                             {recording.isVideo && <span className="video-badge">🎬</span>}
                           </div>
                           <div className="recording-size">
                             {formatTime(recording.duration)} · {recording.uploaded ? '已上传' : '本地存储'}
                             {recording.uploaded && <span className="cloud-icon"> ☁️</span>}
+                            {recording.isAIGenerated && <span className="ai-hint"> (AI生成)</span>}
                             {recording.isVideo && <span className="audio-only-hint"> (仅音频)</span>}
                           </div>
                         </div>
@@ -2398,18 +2414,7 @@ const RecordComponent = () => {
                 )}
               </div>
             </div>
-
-
-
-            {/* 全部为空时的状态提示 */}
-            {recordings.length === 0 && boundRecordings.length === 0 && (
-              <div className="empty-recordings-state">
-                <div className="empty-icon">🎤</div>
-                <h3>还没有录音</h3>
-              </div>
-            )}
           </div>
-        </div>
       </div>
 
       {/* 上传媒体弹窗 */}

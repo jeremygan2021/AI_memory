@@ -1583,7 +1583,7 @@ const PlayerPage = () => {
                 borderRadius: '8px',
                 padding: '12px 24px',
                 fontSize: '16px',
-                marginTop: '0px',
+                marginTop: '100px',
                 minWidth: '120px',
                 cursor: 'pointer'
               }}

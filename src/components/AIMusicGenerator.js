@@ -269,11 +269,11 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
         </div>
 
         {/* 高级选项 */}
-        <div className="advanced-options">
-          <h4>🔧 高级选项</h4>
+        {/* <div className="advanced-options">
+          <h4>🔧 高级选项</h4> */}
           
           {/* 模型选择 */}
-          <div className="form-group">
+          {/* <div className="form-group">
             <label htmlFor="model">音乐模型：</label>
             <select
               id="model"
@@ -285,10 +285,10 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
               <option value="V3">V3</option>
               <option value="V2">V2</option>
             </select>
-          </div>
+          </div> */}
 
           {/* 器乐选项 */}
-          <div className="option-checkbox">
+          {/* <div className="option-checkbox">
             <label className="checkbox-label">
               <input
                 type="checkbox"
@@ -298,10 +298,10 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
               <span className="checkmark"></span>
               纯器乐（无人声）
             </label>
-          </div>
+          </div> */}
 
           {/* 云端上传选项 */}
-          <div className="option-checkbox">
+          {/* <div className="option-checkbox">
             <label className="checkbox-label">
               <input
                 type="checkbox"
@@ -311,8 +311,8 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
               <span className="checkmark"></span>
               生成后自动上传到云端
             </label>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
 
         <div className="button-group">
           <button 
@@ -426,14 +426,19 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
                   if (onMusicGenerated) {
                     const newRecording = {
                       id: Date.now(),
-                      title: currentSong.title,
                       url: currentSong.audio_url,
+                      audioBlob: null,
                       duration: currentSong.duration,
                       timestamp: new Date().toLocaleString('zh-CN'),
+                      sessionId: sessionId || 'default',
+                      cloudUrl: currentSong.audio_url,
+                      uploaded: true,
+                      fileName: currentSong.title,
                       isAIGenerated: true,
-                      uploadedToCloud: true,
-                      userCode,
-                      sessionId
+                      originalSongId: currentSong.id,
+                      isBound: true,
+                      userCode: userCode,
+                      sessionId: sessionId
                     };
                     onMusicGenerated(newRecording);
                   }
