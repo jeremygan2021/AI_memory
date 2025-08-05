@@ -666,59 +666,8 @@ const HomePage = () => {
 
   // 如果没有用户ID，显示输入界面
   if (!userid) {
-    // 小程序环境下显示用户代码输入界面
-    if (isWechatMiniProgram()) {
-      return <UserCodeInput />;
-    }
-    
-    // H5环境下显示原有的URL输入提示
-    return (
-      <div className="App">
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: '20px',
-            padding: '40px',
-            textAlign: 'center',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '20px' }}>🤖 AI智能录音管家</h1>
-            <p style={{ fontSize: '1.2rem', marginBottom: '30px', opacity: 0.9 }}>
-              请在URL中输入您的4字符用户标识
-            </p>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: '10px',
-              padding: '20px',
-              marginBottom: '20px'
-            }}>
-              <p style={{ fontSize: '1rem', marginBottom: '10px' }}>访问格式：</p>
-              <code style={{
-                background: 'rgba(0, 0, 0, 0.3)',
-                padding: '10px 15px',
-                borderRadius: '5px',
-                fontSize: '1.1rem',
-                letterSpacing: '1px'
-              }}>
-                http://me.tangledup-ai.com/userid
-              </code>
-            </div>
-            <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
-              用户标识为4个字符，包含大写字母和数字
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    // 无论是小程序还是H5都显示用户代码输入界面
+    return <UserCodeInput />;
   }
 
   return (
@@ -1079,7 +1028,7 @@ function App() {
   return (
     <MiniProgramLayout>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<UserCodeInput />} />
         <Route path="/:userid" element={<HomePage />} />
         <Route path="/family" element={<FamilyPage />} />
         <Route path="/:userid/audio-library" element={<AudioLibrary />} />
@@ -1088,10 +1037,10 @@ function App() {
         <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
         <Route path="/:userid/:id" element={<RecordPage />} />
         <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
-                            <Route path="/comment-test" element={<CommentTest />} />
-                    <Route path="/environment-test" element={<EnvironmentTest />} />
-                    <Route path="/navigation-test" element={<NavigationTest />} />
-                    <Route path="/:userid/profile" element={<UserProfilePage />} />
+        <Route path="/comment-test" element={<CommentTest />} />
+        <Route path="/environment-test" element={<EnvironmentTest />} />
+        <Route path="/navigation-test" element={<NavigationTest />} />
+        <Route path="/:userid/profile" element={<UserProfilePage />} />
       </Routes>
     </MiniProgramLayout>
   );
