@@ -50,7 +50,7 @@ const PlayerPage = () => {
   // 新增音频列表相关状态
   const [audioFiles, setAudioFiles] = useState([]); // 会话下的所有音频文件
   const [currentAudioIndex, setCurrentAudioIndex] = useState(0); // 当前播放的音频索引
-  const [showAudioList, setShowAudioList] = useState(false); // 是否显示音频列表
+  const [showAudioModal, setShowAudioModal] = useState(false); // 是否显示音频列表弹窗
 
   // 检测iOS设备
   useEffect(() => {
@@ -1407,7 +1407,7 @@ const PlayerPage = () => {
                   </button>
                 ))}
               </div>
-            </div>
+                         </div>
             
             {/* 音频列表控制 */}
             {audioFiles.length > 1 && (
@@ -1415,41 +1415,13 @@ const PlayerPage = () => {
                 <div className="audio-list-header">
                   <label className="control-label">音频列表</label>
                   <button 
-                    onClick={() => setShowAudioList(!showAudioList)} 
+                    onClick={() => setShowAudioModal(true)} 
                     className="audio-list-toggle"
                   >
                     <span>🎵</span>
-                    <span>{showAudioList ? '隐藏' : '显示'} ({audioFiles.length})</span>
+                    <span>选择音频 ({audioFiles.length})</span>
                   </button>
                 </div>
-                
-                {/* 音频列表区域 */}
-                {showAudioList && (
-                  <div className="audio-list-section">
-                    <div className="audio-list">
-                      {audioFiles.map((audio, index) => (
-                        <div
-                          key={audio.id}
-                          className={`audio-item ${index === currentAudioIndex ? 'active' : ''}`}
-                          onClick={() => switchAudio(index)}
-                        >
-                          <div className="audio-info">
-                            <div className="audio-name">
-                              {audio.fileName}
-                            </div>
-                            {/* <div className="audio-meta">
-                              <span>{audio.timestamp}</span>
-                              <span>{formatFileSize(audio.size)}</span>
-                            </div> */}
-                          </div>
-                          <div className="audio-status">
-                            {index === currentAudioIndex ? '播放中' : ''}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -1538,6 +1510,65 @@ const PlayerPage = () => {
                 }}
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 音频列表弹窗 */}
+      {showAudioModal && (
+        <div className="audio-modal-overlay" onClick={() => setShowAudioModal(false)}>
+          <div className="audio-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="audio-modal-header">
+              <h3>音频列表</h3>
+              <button 
+                className="audio-modal-close"
+                onClick={() => setShowAudioModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="audio-modal-body">
+              <div className="audio-modal-list">
+                {audioFiles.map((audio, index) => (
+                  <div
+                    key={audio.id}
+                    className={`audio-modal-item ${index === currentAudioIndex ? 'active' : ''}`}
+                    onClick={() => {
+                      switchAudio(index);
+                      setShowAudioModal(false);
+                    }}
+                  >
+                    <div className="audio-modal-icon">
+                      {index === currentAudioIndex ? '🎵' : '🎶'}
+                    </div>
+                    <div className="audio-modal-info">
+                      <div className="audio-modal-name">
+                        {audio.fileName}
+                      </div>
+                      <div className="audio-modal-meta">
+                        <span>{audio.timestamp}</span>
+                        {audio.size > 0 && (
+                          <span>{formatFileSize(audio.size)}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="audio-modal-status">
+                      {index === currentAudioIndex ? '播放中' : ''}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="audio-modal-footer">
+              <button 
+                className="audio-modal-cancel"
+                onClick={() => setShowAudioModal(false)}
+              >
+                取消
+              </button>
+            </div>
           </div>
         </div>
       )}

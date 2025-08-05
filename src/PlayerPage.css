@@ -952,7 +952,7 @@
   }
 
   .player-container {
-    max-height: calc(100vh - 140px);
+    max-height: calc(100vh - 10px);
   }
 
   /* 隐藏移动端的Swiper左右切换按钮 */
@@ -2677,166 +2677,27 @@
   font-weight: 600;
 }
 
-/* 音频列表样式 */
-.audio-list-section {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-height: 200px;
-  overflow-y: auto;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.audio-list-section h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-}
-
-.audio-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.audio-item {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  margin: 2px 0;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: rgba(0, 0, 0, 0.05);
-  color: #333;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.audio-item:hover {
-  background: rgba(102, 126, 234, 0.1);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.audio-item.active {
-  background: linear-gradient(135deg, #2a5fff60 0%, #24D6E260 100%);
-  color: white;
+/* 音频列表切换按钮样式 */
+.audio-list-toggle {
+  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982));
+  color: var(--theme-textLight, white);
   border: none;
-  box-shadow: 0 4px 12px rgba(42, 97, 255, 0.60);
-}
-
-.audio-item.active:hover {
-  background: linear-gradient(135deg, #2a5fff60 0%, #24D6E260 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(42, 97, 255, 0.60);
-}
-
-.audio-item .audio-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.audio-item.active .audio-icon {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.audio-item .audio-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.audio-item .audio-name {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.audio-item.active .audio-name {
-  font-weight: 600;
-}
-
-.audio-item .audio-meta {
-  font-size: 11px;
-  opacity: 0.7;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.audio-item .audio-status {
-  font-size: 11px;
-  opacity: 0.8;
-  margin-left: 6px;
-  white-space: nowrap;
-}
-
-/* 音频切换按钮样式 */
-.audio-nav-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 25px;
+  border-radius: 16px;
   padding: 8px 16px;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-
-.audio-nav-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.audio-nav-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* 音频列表切换按钮样式 */
-.audio-list-toggle {
-  background: linear-gradient(135deg, #2a5fff60 0%, #24D6E260 100%);
-  color: BLACK;
-  border: none;
-  border-radius: 16px;
-  padding: 6px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px #2a5fff60;
+  box-shadow: 0 2px 8px rgba(74, 201, 103, 0.3);
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
 }
 
 .audio-list-toggle:hover {
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px #2a5fff60;
+  box-shadow: 0 4px 12px rgba(74, 201, 103, 0.4);
+  background: linear-gradient(135deg, var(--theme-primaryHover, #88d982), var(--theme-primary, #4ac967));
 }
 
 /* 移动端适配 */
@@ -2854,46 +2715,8 @@
     font-size: 13px;
   }
   
-  .audio-list-section {
-    padding: 8px;
-    margin-top: 6px;
-    max-height: 180px;
-  }
-  
-  .audio-item {
-    padding: 6px;
-    margin: 1px 0;
-  }
-  
-  .audio-item .audio-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-    margin-right: 8px;
-  }
-  
-  .audio-item .audio-name {
-    font-size: 12px;
-    margin-bottom: 1px;
-  }
-  
-  .audio-item .audio-meta {
-    font-size: 10px;
-    gap: 6px;
-  }
-  
-  .audio-item .audio-status {
-    font-size: 10px;
-    margin-left: 4px;
-  }
-  
-  .audio-nav-btn {
-    padding: 4px 8px;
-    font-size: 11px;
-  }
-  
   .audio-list-toggle {
-    padding: 4px 8px;
+    padding: 6px 12px;
     font-size: 11px;
     border-radius: 12px;
   }
@@ -2913,61 +2736,376 @@
     font-size: 12px;
   }
   
-  .audio-list-section {
-    padding: 6px;
-    margin-top: 4px;
-    max-height: 160px;
-  }
-  
-  .audio-item {
-    padding: 5px;
-    margin: 1px 0;
-  }
-  
-  .audio-item .audio-icon {
-    width: 24px;
-    height: 24px;
-    font-size: 10px;
-    margin-right: 6px;
-  }
-  
-  .audio-item .audio-name {
-    font-size: 11px;
-    margin-bottom: 1px;
-  }
-  
-  .audio-item .audio-meta {
-    font-size: 9px;
-    gap: 4px;
-  }
-  
-  .audio-item .audio-status {
-    font-size: 9px;
-    margin-left: 3px;
-  }
-  
   .audio-list-toggle {
-    padding: 3px 6px;
+    padding: 4px 8px;
     font-size: 10px;
     border-radius: 10px;
   }
 }
 
-/* 滚动条样式 */
-.audio-list-section::-webkit-scrollbar {
-  width: 6px;
+
+
+/* 音频列表弹窗样式 */
+.audio-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 20px;
 }
 
-.audio-list-section::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
+.audio-modal-content {
+  background: var(--theme-containerBg, #ffffe6);
+  border-radius: 20px;
+  max-width: 90vw;
+  max-height: 80vh;
+  width: 500px;
+  box-shadow: var(--theme-cardShadow, 0 20px 60px rgba(45, 80, 22, 0.3), 0 10px 30px rgba(45, 80, 22, 0.2));
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.4));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
-.audio-list-section::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.5);
-  border-radius: 3px;
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.audio-list-section::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 126, 234, 0.7);
-} 
+.audio-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982));
+  color: var(--theme-textLight, white);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.audio-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  color: var(--theme-textLight, white);
+}
+
+.audio-modal-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  color: var(--theme-textLight, white);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.audio-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.audio-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  max-height: 400px;
+}
+
+.audio-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.audio-modal-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(74, 201, 103, 0.1);
+  position: relative;
+  overflow: hidden;
+  color: var(--theme-textSecondary, #333);
+}
+
+.audio-modal-item:hover {
+  background: rgba(74, 201, 103, 0.1);
+  border-color: rgba(74, 201, 103, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 201, 103, 0.15);
+}
+
+.audio-modal-item.active {
+  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982));
+  color: var(--theme-textLight, white);
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(74, 201, 103, 0.3);
+}
+
+.audio-modal-item.active:hover {
+  background: linear-gradient(135deg, var(--theme-primaryHover, #88d982), var(--theme-primary, #4ac967));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 201, 103, 0.4);
+}
+
+.audio-modal-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(74, 201, 103, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.audio-modal-item.active .audio-modal-icon {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.audio-modal-item:hover .audio-modal-icon {
+  background: rgba(74, 201, 103, 0.2);
+}
+
+.audio-modal-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.audio-modal-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  color: var(--theme-textPrimary, #2d5016);
+}
+
+.audio-modal-item.active .audio-modal-name {
+  font-weight: 700;
+  color: var(--theme-textLight, white);
+}
+
+.audio-modal-meta {
+  font-size: 12px;
+  opacity: 0.7;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--theme-textSecondary, #333);
+}
+
+.audio-modal-item.active .audio-modal-meta {
+  opacity: 0.9;
+  color: var(--theme-textLight, white);
+}
+
+.audio-modal-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--theme-primary, #4ac967);
+  margin-left: 12px;
+  white-space: nowrap;
+}
+
+.audio-modal-item.active .audio-modal-status {
+  color: var(--theme-textLight, white);
+}
+
+.audio-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--theme-border, rgba(0, 0, 0, 0.1));
+  display: flex;
+  justify-content: flex-end;
+}
+
+.audio-modal-cancel {
+  background: var(--theme-buttonBg, rgba(0, 0, 0, 0.1));
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: var(--theme-buttonText, #666);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+}
+
+.audio-modal-cancel:hover {
+  background: var(--theme-buttonHover, rgba(0, 0, 0, 0.15));
+  color: var(--theme-textPrimary, #333);
+  transform: translateY(-1px);
+}
+
+/* 移动端音频弹窗适配 */
+@media (max-width: 768px) {
+  .audio-modal-overlay {
+    padding: 16px;
+  }
+  
+  .audio-modal-content {
+    width: 100%;
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 16px;
+  }
+  
+  .audio-modal-header {
+    padding: 16px 20px;
+  }
+  
+  .audio-modal-header h3 {
+    font-size: 18px;
+  }
+  
+  .audio-modal-close {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+  
+  .audio-modal-body {
+    padding: 12px;
+    max-height: 350px;
+  }
+  
+  .audio-modal-item {
+    padding: 12px;
+    border-radius: 10px;
+  }
+  
+  .audio-modal-icon {
+    width: 36px;
+    height: 36px;
+    margin-right: 12px;
+    font-size: 16px;
+  }
+  
+  .audio-modal-name {
+    font-size: 14px;
+  }
+  
+  .audio-modal-meta {
+    font-size: 11px;
+    gap: 8px;
+  }
+  
+  .audio-modal-status {
+    font-size: 11px;
+    margin-left: 8px;
+  }
+  
+  .audio-modal-footer {
+    padding: 12px 20px;
+  }
+  
+  .audio-modal-cancel {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .audio-modal-overlay {
+    padding: 12px;
+  }
+  
+  .audio-modal-content {
+    max-height: 80vh;
+    border-radius: 14px;
+  }
+  
+  .audio-modal-header {
+    padding: 14px 16px;
+  }
+  
+  .audio-modal-header h3 {
+    font-size: 16px;
+  }
+  
+  .audio-modal-close {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+  }
+  
+  .audio-modal-body {
+    padding: 10px;
+    max-height: 300px;
+  }
+  
+  .audio-modal-item {
+    padding: 10px;
+    border-radius: 8px;
+  }
+  
+  .audio-modal-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    font-size: 14px;
+  }
+  
+  .audio-modal-name {
+    font-size: 13px;
+  }
+  
+  .audio-modal-meta {
+    font-size: 10px;
+    gap: 6px;
+  }
+  
+  .audio-modal-status {
+    font-size: 10px;
+    margin-left: 6px;
+  }
+  
+  .audio-modal-footer {
+    padding: 10px 16px;
+  }
+  
+  .audio-modal-cancel {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+/* 横屏模式音频弹窗优化 */
+@media (max-width: 900px) and (orientation: landscape) {
+  .audio-modal-content {
+    max-height: 70vh;
+  }
+  
+  .audio-modal-body {
+    max-height: 250px;
+  }
+}
+

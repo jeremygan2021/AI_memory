@@ -448,7 +448,7 @@
 /* iPad mini专用样式 (1024x768) */
 @media (min-width: 1024px) and (max-width: 1024px) and (orientation: landscape) {
   .comment-section {
-    margin-top: 60px;
+    margin-top: 100px;
     padding: 15px 20px;
     max-width: 900px;
     border-radius: 14px;
