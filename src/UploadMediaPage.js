@@ -49,6 +49,21 @@ const UploadMediaPage = () => {
     return `img_${currentSessionId}_${timestamp}_${random}_${uniqueId}`;
   };
 
+  // 从视频ID中提取session信息的辅助函数
+  const extractSessionFromVideoId = (videoId) => {
+    if (videoId && videoId.startsWith('vid_')) {
+      const idParts = videoId.split('_');
+      if (idParts.length >= 3) {
+        // 视频ID格式: vid_sessionId_timestamp_...
+        const extractedSessionId = idParts[1];
+        if (extractedSessionId && (extractedSessionId.length === 6 || extractedSessionId.length === 8)) {
+          return extractedSessionId;
+        }
+      }
+    }
+    return sessionid; // 默认返回当前session
+  };
+
   // 加载云端媒体文件（只加载当前userCode的图片和视频）
   const loadCloudMediaFiles = async () => {
     try {
@@ -641,8 +656,12 @@ const UploadMediaPage = () => {
       });
       
       if (videoId && typeof videoId === 'string') {
-        const targetUrl = `/${userCode}/video-player/${sessionid}/${videoId}?from=upload`;
-        console.log('UploadMediaPage: 跳转到视频播放页面:', targetUrl);
+        // 从视频ID中提取session信息
+        const targetSessionId = extractSessionFromVideoId(videoId);
+        console.log('UploadMediaPage: 从视频ID提取的session:', targetSessionId);
+        
+        const targetUrl = `/${userCode}/video-player/${targetSessionId}/${videoId}?from=upload`;
+        console.log('UploadMediaPage: 跳转到视频播放页面:', targetUrl, '使用session:', targetSessionId);
         navigate(targetUrl);
       } else {
         console.warn('UploadMediaPage: 视频ID无效:', videoId, '文件:', file);
@@ -658,9 +677,6 @@ const UploadMediaPage = () => {
 
   // 长按开始事件
   const handleLongPressStart = (file, e) => {
-    // 阻止默认的右键菜单和其他默认行为
-    e.preventDefault();
-    
     if (file.type === 'video') {
       // 添加长按开始的视觉反馈
       const mediaElement = e.currentTarget;
@@ -706,28 +722,30 @@ const UploadMediaPage = () => {
         alert('无法生成播放链接：视频ID无效');
         return;
       }
+      
+      // 从视频ID中提取session信息
+      const targetSessionId = extractSessionFromVideoId(videoId);
+      console.log('UploadMediaPage: 从视频ID提取的session:', targetSessionId);
+      
       // 生成完整的播放链接
       const baseUrl = window.location.origin;
-      const playLink = `${baseUrl}/${userCode}/video-player/${sessionid}/${videoId}?from=upload`;
-      console.log('UploadMediaPage: 生成的播放链接:', playLink);
-      // 检测iOS
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-      if (isIOS) {
-        window.prompt('请手动长按下方链接并选择"复制"', playLink);
-        return;
-      }
-      // 现代Clipboard API
+      const playLink = `${baseUrl}/${userCode}/video-player/${targetSessionId}/${videoId}?from=upload`;
+      console.log('UploadMediaPage: 生成的播放链接:', playLink, '使用session:', targetSessionId);
+      
+      // 优先使用现代Clipboard API
       if (navigator.clipboard && navigator.clipboard.writeText) {
         try {
-        await navigator.clipboard.writeText(playLink);
-        console.log('UploadMediaPage: 视频播放链接已复制到剪贴板');
-        alert('✅ 视频播放链接已复制到剪贴板！');
+          await navigator.clipboard.writeText(playLink);
+          console.log('UploadMediaPage: 视频播放链接已复制到剪贴板');
+          alert('✅ 视频播放链接已复制到剪贴板！');
+          return;
         } catch (err) {
+          console.log('Clipboard API失败，尝试降级方法:', err);
           // Clipboard API失败，降级
           fallbackCopyTextToClipboard(playLink);
         }
       } else {
-        // 直接降级
+        // 直接使用降级方法
         fallbackCopyTextToClipboard(playLink);
       }
     } catch (error) {
@@ -738,27 +756,46 @@ const UploadMediaPage = () => {
 
   // 降级复制方法
   function fallbackCopyTextToClipboard(text) {
-        const textArea = document.createElement('textarea');
+    const textArea = document.createElement('textarea');
     textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    textArea.style.opacity = '0';
+    textArea.style.pointerEvents = 'none';
+    textArea.setAttribute('readonly', '');
+    document.body.appendChild(textArea);
+    
+    // 尝试多种选择方法
+    try {
+      textArea.select();
+      textArea.setSelectionRange(0, textArea.value.length);
+    } catch (err) {
+      console.log('选择文本失败:', err);
+    }
+    
     let success = false;
-        try {
+    try {
       success = document.execCommand('copy');
-        } catch (err) {
+    } catch (err) {
+      console.log('execCommand复制失败:', err);
       success = false;
-        }
-        document.body.removeChild(textArea);
+    }
+    
+    document.body.removeChild(textArea);
+    
     if (success) {
+      console.log('UploadMediaPage: 降级方法复制成功');
       alert('✅ 视频播放链接已复制到剪贴板！');
     } else {
-      alert('复制失败，请手动复制链接：' + text);
+      console.log('UploadMediaPage: 所有复制方法都失败，显示手动复制提示');
+      // 最后的备选方案：显示可复制的提示框
+      const copyPrompt = window.prompt('请手动复制以下链接：', text);
+      if (copyPrompt !== null) {
+        alert('✅ 感谢您的操作！');
       }
     }
+  }
 
   const closePreview = () => {
     setPreviewFile(null);
@@ -1071,7 +1108,15 @@ const UploadMediaPage = () => {
                     onMouseDown={(e) => file.type === 'video' ? handleLongPressStart(file, e) : null}
                     onMouseUp={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
                     onMouseLeave={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
-                    onTouchStart={(e) => file.type === 'video' ? handleLongPressStart(file, e) : null}
+                    onTouchStart={(e) => {
+                      if (file.type === 'video') {
+                        // 确保事件不是被动的，以便可以调用preventDefault
+                        if (e.cancelable) {
+                          e.preventDefault();
+                        }
+                        handleLongPressStart(file, e);
+                      }
+                    }}
                     onTouchEnd={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
                     onTouchCancel={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
                     onContextMenu={(e) => file.type === 'video' ? e.preventDefault() : null}

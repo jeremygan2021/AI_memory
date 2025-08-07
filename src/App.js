@@ -17,6 +17,7 @@ import EnvironmentTest from './components/EnvironmentTest';
 import NavigationTest from './components/NavigationTest';
 import MiniProgramLayout from './components/MiniProgramLayout';
 import UserProfilePage from './components/UserProfilePage';
+import CopyTest from './components/CopyTest';
 import { isWechatMiniProgram, isH5Environment } from './utils/environment';
 
 // 折线图数据
@@ -1040,6 +1041,7 @@ function App() {
         <Route path="/comment-test" element={<CommentTest />} />
         <Route path="/environment-test" element={<EnvironmentTest />} />
         <Route path="/navigation-test" element={<NavigationTest />} />
+        <Route path="/copy-test" element={<CopyTest />} />
         <Route path="/:userid/profile" element={<UserProfilePage />} />
       </Routes>
     </MiniProgramLayout>
