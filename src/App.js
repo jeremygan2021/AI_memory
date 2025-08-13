@@ -9,6 +9,7 @@ import AudioLibrary from './AudioLibrary';
 import ModernSearchBox from './components/ModernSearchBox';
 import UploadMediaPage from './UploadMediaPage';
 import VideoPlayerPage from './VideoPlayerPage';
+import ImageViewerPage from './ImageViewerPage';
 import CommentTest from './components/CommentTest';
 import MemoryTimeline from './components/MemoryTimeline';
 import MiniProgramTabBar from './components/MiniProgramTabBar';
@@ -1036,6 +1037,7 @@ function App() {
         <Route path="/:userid/gallery" element={<UploadMediaPage />} />
         <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
         <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
+        <Route path="/:userid/image-viewer/:sessionid/:imageid" element={<ImageViewerPage />} />
         <Route path="/:userid/:id" element={<RecordPage />} />
         <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
         <Route path="/comment-test" element={<CommentTest />} />

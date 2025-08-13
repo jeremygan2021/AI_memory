@@ -64,6 +64,21 @@ const UploadMediaPage = () => {
     return sessionid; // 默认返回当前session
   };
 
+  // 从图片ID中提取session信息的辅助函数
+  const extractSessionFromImageId = (imageId) => {
+    if (imageId && imageId.startsWith('img_')) {
+      const idParts = imageId.split('_');
+      if (idParts.length >= 3) {
+        // 图片ID格式: img_sessionId_timestamp_...
+        const extractedSessionId = idParts[1];
+        if (extractedSessionId && (extractedSessionId.length === 6 || extractedSessionId.length === 8)) {
+          return extractedSessionId;
+        }
+      }
+    }
+    return sessionid; // 默认返回当前session
+  };
+
   // 加载云端媒体文件（只加载当前userCode的图片和视频）
   const loadCloudMediaFiles = async () => {
     try {
@@ -670,35 +685,53 @@ const UploadMediaPage = () => {
         setPreviewFile(file);
       }
     } else {
-      // 图片弹窗预览
-      setPreviewFile(file);
+      // 图片跳转到图片查看页面
+      const imageId = file.id;
+      if (imageId && typeof imageId === 'string') {
+        const targetSessionId = extractSessionFromImageId(imageId);
+        let targetUrl = `/${userCode}/image-viewer/${targetSessionId}/${imageId}?from=upload`;
+        // 若有objectKey，追加查询参数，便于查看页精准定位
+        if (file.objectKey) {
+          const ok = encodeURIComponent(file.objectKey);
+          targetUrl += `&ok=${ok}`;
+        }
+        console.log('UploadMediaPage: 跳转到图片查看页面:', targetUrl, '使用session:', targetSessionId, 'objectKey:', file.objectKey);
+        navigate(targetUrl);
+      } else {
+        console.warn('UploadMediaPage: 图片ID无效:', imageId, '文件:', file);
+        // 降级到弹窗预览
+        alert('图片ID无效，将使用弹窗预览模式');
+        setPreviewFile(file);
+      }
     }
   };
 
-  // 长按开始事件
+  // 长按开始事件（支持图片和视频）
   const handleLongPressStart = (file, e) => {
-    if (file.type === 'video') {
-      // 添加长按开始的视觉反馈
-      const mediaElement = e.currentTarget;
-      mediaElement.classList.add('long-pressing');
+    // 添加长按开始的视觉反馈
+    const mediaElement = e.currentTarget;
+    mediaElement.classList.add('long-pressing');
+    
+    const timer = setTimeout(() => {
+      setIsLongPress(true);
+      // 移除长按状态，添加成功状态
+      mediaElement.classList.remove('long-pressing');
+      mediaElement.classList.add('long-press-success');
       
-      const timer = setTimeout(() => {
-        setIsLongPress(true);
-        // 移除长按状态，添加成功状态
-        mediaElement.classList.remove('long-pressing');
-        mediaElement.classList.add('long-press-success');
-        
-        // 复制视频播放链接
+      // 复制对应的查看链接
+      if (file.type === 'video') {
         copyVideoLink(file);
-        
-        // 2秒后移除成功状态
-        setTimeout(() => {
-          mediaElement.classList.remove('long-press-success');
-        }, 600);
-      }, 500); // 500ms长按触发
+      } else if (file.type === 'image') {
+        copyImageLink(file);
+      }
       
-      setLongPressTimer(timer);
-    }
+      // 2秒后移除成功状态
+      setTimeout(() => {
+        mediaElement.classList.remove('long-press-success');
+      }, 600);
+    }, 500); // 500ms长按触发
+    
+    setLongPressTimer(timer);
   };
 
   // 长按结束事件
@@ -750,6 +783,51 @@ const UploadMediaPage = () => {
       }
     } catch (error) {
       console.error('复制链接失败:', error);
+      alert('复制链接失败，请稍后重试');
+    }
+  };
+
+  // 复制图片查看链接
+  const copyImageLink = async (file) => {
+    try {
+      const imageId = file.id;
+      console.log('UploadMediaPage: 开始复制图片链接', { imageId, file });
+      if (!imageId || typeof imageId !== 'string') {
+        console.error('UploadMediaPage: 图片ID无效:', imageId);
+        alert('无法生成查看链接：图片ID无效');
+        return;
+      }
+      
+      // 从图片ID中提取session信息
+      const targetSessionId = extractSessionFromImageId(imageId);
+      console.log('UploadMediaPage: 从图片ID提取的session:', targetSessionId);
+      
+      // 生成完整的查看链接
+      const baseUrl = window.location.origin;
+      let viewLink = `${baseUrl}/${userCode}/image-viewer/${targetSessionId}/${imageId}?from=upload`;
+      if (file.objectKey) {
+        viewLink += `&ok=${encodeURIComponent(file.objectKey)}`;
+      }
+      console.log('UploadMediaPage: 生成的图片查看链接:', viewLink, '使用session:', targetSessionId, 'objectKey:', file.objectKey);
+      
+      // 优先使用现代Clipboard API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(viewLink);
+          console.log('UploadMediaPage: 图片查看链接已复制到剪贴板');
+          alert('✅ 图片查看链接已复制到剪贴板！');
+          return;
+        } catch (err) {
+          console.log('Clipboard API失败，尝试降级方法:', err);
+          // Clipboard API失败，降级
+          fallbackCopyTextToClipboard(viewLink);
+        }
+      } else {
+        // 直接使用降级方法
+        fallbackCopyTextToClipboard(viewLink);
+      }
+    } catch (error) {
+      console.error('复制图片链接失败:', error);
       alert('复制链接失败，请稍后重试');
     }
   };
@@ -1105,24 +1183,22 @@ const UploadMediaPage = () => {
                   <div 
                     className="media-content" 
                     onClick={() => handleMediaClick(file)}
-                    onMouseDown={(e) => file.type === 'video' ? handleLongPressStart(file, e) : null}
-                    onMouseUp={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
-                    onMouseLeave={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
+                    onMouseDown={(e) => handleLongPressStart(file, e)}
+                    onMouseUp={(e) => handleLongPressEnd(e)}
+                    onMouseLeave={(e) => handleLongPressEnd(e)}
                     onTouchStart={(e) => {
-                      if (file.type === 'video') {
-                        // 确保事件不是被动的，以便可以调用preventDefault
-                        if (e.cancelable) {
-                          e.preventDefault();
-                        }
-                        handleLongPressStart(file, e);
+                      // 确保事件不是被动的，以便可以调用preventDefault
+                      if (e.cancelable) {
+                        e.preventDefault();
                       }
+                      handleLongPressStart(file, e);
                     }}
-                    onTouchEnd={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
-                    onTouchCancel={(e) => file.type === 'video' ? handleLongPressEnd(e) : null}
-                    onContextMenu={(e) => file.type === 'video' ? e.preventDefault() : null}
+                    onTouchEnd={(e) => handleLongPressEnd(e)}
+                    onTouchCancel={(e) => handleLongPressEnd(e)}
+                    onContextMenu={(e) => e.preventDefault()}
                     style={{ 
-                      userSelect: file.type === 'video' ? 'none' : 'auto',
-                      WebkitUserSelect: file.type === 'video' ? 'none' : 'auto'
+                      userSelect: 'none',
+                      WebkitUserSelect: 'none'
                     }}
                   >
                     {file.type === 'image' ? (

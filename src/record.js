@@ -36,9 +36,7 @@ const RecordComponent = () => {
   const [uploadStatus, setUploadStatus] = useState({}); // 上传状态 {recordingId: 'uploading'|'success'|'error'}
   const [uploadProgress, setUploadProgress] = useState({}); // 上传进度
   
-  // 新增：防止无限跳转的状态
-  const [justReturnedFromPlayer, setJustReturnedFromPlayer] = useState(false); // 是否刚从播放页面返回
-  const [isCheckingFiles, setIsCheckingFiles] = useState(false); // 是否正在检查文件存在性
+
   
 
   
@@ -88,40 +86,7 @@ const RecordComponent = () => {
       navigate('/');
     }
     
-    // 检查是否是从播放页面返回的或播放页面加载失败
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('deleted') === 'true') {
-      setJustReturnedFromPlayer(true);
-      // 清理URL参数
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-      
-      // 3秒后重置标记，允许正常跳转
-      setTimeout(() => {
-        setJustReturnedFromPlayer(false);
-      }, 3000);
-    } else if (urlParams.get('fromPlayer') === 'true') {
-      // 从播放页面正常返回，永久停止智能跳转
-      setJustReturnedFromPlayer(true);
-      // 清理URL参数
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-      
-      // 不再重置标记，永久停止智能跳转功能
-    } else if (urlParams.get('recordingNotFound') === 'true' || urlParams.get('loadError') === 'true') {
-      // 播放页面加载失败返回，暂停智能跳转5分钟防止循环
-      console.log('检测到播放页面加载失败，暂停智能跳转5分钟');
-      setJustReturnedFromPlayer(true);
-      // 清理URL参数
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-      
-      // 5分钟后重置标记
-      setTimeout(() => {
-        console.log('播放页面加载失败保护期结束，恢复智能跳转');
-        setJustReturnedFromPlayer(false);
-      }, 5 * 60 * 1000); // 5分钟
-    }
+
   }, [userid, navigate]);
 
   // 新增：检查录音文件是否存在于云端
@@ -211,8 +176,6 @@ const RecordComponent = () => {
   const cleanupDeletedRecordings = async () => {
     if (boundRecordings.length === 0) return;
     
-    setIsCheckingFiles(true);
-    
     try {
       // 检查所有绑定录音的存在性
       const existenceChecks = await Promise.all(
@@ -251,8 +214,6 @@ const RecordComponent = () => {
       const otherRecordings = boundRecordings.filter(recording => !recording.isAIGenerated);
       console.log('出错时保留AI生成的音乐:', aiGeneratedRecordings.length, '个');
       return [...aiGeneratedRecordings, ...otherRecordings];
-    } finally {
-      setIsCheckingFiles(false);
     }
   };
 
@@ -297,12 +258,6 @@ const RecordComponent = () => {
     try {
       console.log('开始上传音频文件:', { fileName, recordingId, blobSize: audioBlob.size });
       
-      // 设置上传状态为进行中
-      setUploadStatus(prev => ({
-        ...prev,
-        [recordingId]: 'uploading'
-      }));
-      
       // 创建FormData
       const formData = new FormData();
       
@@ -343,12 +298,6 @@ const RecordComponent = () => {
       const result = await response.json();
       
       if (result.success) {
-        // 上传成功
-        setUploadStatus(prev => ({
-          ...prev,
-          [recordingId]: 'success'
-        }));
-        
         console.log('音频上传成功:', result);
         
         // 返回上传结果
@@ -365,15 +314,6 @@ const RecordComponent = () => {
       
     } catch (error) {
       console.error('上传音频失败:', error);
-      
-      // 设置上传状态为失败
-      setUploadStatus(prev => ({
-        ...prev,
-        [recordingId]: 'error'
-      }));
-      
-      // 显示错误提示
-      alert(`音频上传失败: ${error.message}`);
       
       return {
         success: false,
@@ -534,25 +474,8 @@ const RecordComponent = () => {
         
         setRecordings(prev => [newRecording, ...prev]);
         
-        // 自动上传到云端
-        // 统一使用mp3扩展名以提高兼容性
-        const fileName = `recording_${newRecording.id}.mp3`;
-        const uploadResult = await uploadAudioFile(audioBlob, newRecording.id, fileName);
-        
-        if (uploadResult.success) {
-          // 更新录音记录，添加云端信息
-          setRecordings(prev => prev.map(recording => 
-            recording.id === newRecording.id 
-              ? {
-                  ...recording,
-                  cloudUrl: uploadResult.cloudUrl,
-                  objectKey: uploadResult.objectKey,
-                  etag: uploadResult.etag,
-                  uploaded: true
-                }
-              : recording
-          ));
-        }
+        // 不再自动上传到云端，等待用户绑定后再上传
+        console.log('录音完成，已添加到待绑定列表，等待用户绑定后上传到云端');
       };
       
       // 开始录音
@@ -648,32 +571,63 @@ const RecordComponent = () => {
   };
 
   // 绑定录音
-  const bindRecording = (recording) => {
-    const boundRecording = {
-      ...recording,
-      boundAt: new Date().toLocaleString('zh-CN'),
-      sessionId: id,
-      userCode: userCode,
-      // 保存原始录音ID以便播放页面能够匹配
-      originalRecordingId: recording.id,
-      // 如果有objectKey，也保存下来
-      objectKey: recording.objectKey || null,
-      // 保存云端URL
-      cloudUrl: recording.cloudUrl || null,
-      // 保存视频标识和文件信息
-      isVideo: recording.isVideo || false,
-      fileName: recording.fileName || null,
-      fileType: recording.fileType || null
-    };
-    
-    setBoundRecordings(prev => [boundRecording, ...prev]);
-    
-    // 从临时录音列表中移除
-    setRecordings(prev => prev.filter(r => r.id !== recording.id));
-    
-    // 显示成功提示
-    const uploadStatusText = recording.uploaded ? '(已上传到云端)' : '(本地存储)';
-    alert(`录音已绑定到会话 ${userCode}/${id} ${uploadStatusText}`);
+  const bindRecording = async (recording) => {
+    try {
+      // 如果录音还没有上传到云端，先上传
+      if (!recording.uploaded && recording.audioBlob) {
+        // 显示上传中提示
+        alert('正在上传录音到云端，请稍候...');
+        
+        // 统一使用mp3扩展名以提高兼容性
+        const fileName = `recording_${recording.id}.mp3`;
+        const uploadResult = await uploadAudioFile(recording.audioBlob, recording.id, fileName);
+        
+        if (uploadResult.success) {
+          // 更新录音记录，添加云端信息
+          recording = {
+            ...recording,
+            cloudUrl: uploadResult.cloudUrl,
+            objectKey: uploadResult.objectKey,
+            etag: uploadResult.etag,
+            uploaded: true
+          };
+          console.log('录音上传成功，已绑定到会话');
+        } else {
+          // 上传失败，但仍然可以绑定（本地存储）
+          console.warn('录音上传失败，将作为本地录音绑定');
+        }
+      }
+      
+      const boundRecording = {
+        ...recording,
+        boundAt: new Date().toLocaleString('zh-CN'),
+        sessionId: id,
+        userCode: userCode,
+        // 保存原始录音ID以便播放页面能够匹配
+        originalRecordingId: recording.id,
+        // 如果有objectKey，也保存下来
+        objectKey: recording.objectKey || null,
+        // 保存云端URL
+        cloudUrl: recording.cloudUrl || null,
+        // 保存视频标识和文件信息
+        isVideo: recording.isVideo || false,
+        fileName: recording.fileName || null,
+        fileType: recording.fileType || null
+      };
+      
+      setBoundRecordings(prev => [boundRecording, ...prev]);
+      
+      // 从临时录音列表中移除
+      setRecordings(prev => prev.filter(r => r.id !== recording.id));
+      
+      // 显示成功提示
+      const uploadStatusText = recording.uploaded ? '(已上传到云端)' : '(本地存储)';
+      alert(`录音已绑定到会话 ${userCode}/${id} ${uploadStatusText}`);
+      
+    } catch (error) {
+      console.error('绑定录音时出错:', error);
+      alert('绑定录音失败，请重试');
+    }
   };
 
   // 进入播放页面
@@ -844,7 +798,7 @@ const RecordComponent = () => {
       case 'error':
         return '❌'; // 上传失败
       default:
-        return '📱'; // 本地文件
+        return '📱'; // 本地存储
     }
   };
 
@@ -1229,46 +1183,8 @@ const RecordComponent = () => {
           console.warn('无法获取媒体时长:', error);
         }
 
-        // 上传到云端
-        try {
-          const uploadResult = await uploadAudioFile(processedFile, recordingId, uploadFileName);
-
-          if (uploadResult && uploadResult.success) {
-            // 更新录音记录，添加云端信息
-            setRecordings(prev => prev.map(recording => 
-              recording.id === recordingId 
-                ? {
-                    ...recording,
-                    cloudUrl: uploadResult.cloudUrl,
-                    objectKey: uploadResult.objectKey,
-                    etag: uploadResult.etag,
-                    uploaded: true
-                  }
-                : recording
-            ));
-
-            // 显示上传成功提示
-            const successMessage = audioOnly ? 
-              `视频(仅音频)上传成功！` : 
-              `录音上传成功！`;
-            alert(successMessage);
-
-            console.log('录音文件上传成功:', uploadResult);
-          } else {
-            const errorMsg = uploadResult?.error || '未知错误';
-            console.error('录音文件上传失败:', errorMsg);
-            alert(`录音上传失败: ${errorMsg}`);
-            
-            // 从录音列表中移除失败的文件
-            setRecordings(prev => prev.filter(r => r.id !== recordingId));
-          }
-        } catch (error) {
-          console.error('录音文件处理失败:', error);
-          alert(`录音处理失败: ${error.message}`);
-          
-          // 从录音列表中移除失败的文件
-          setRecordings(prev => prev.filter(r => r.id !== recordingId));
-        }
+        // 不再自动上传到云端，等待用户绑定后再上传
+        console.log('音频文件已添加到待绑定列表，等待用户绑定后上传到云端');
         
         // 关闭弹窗
         closeUploadModal();
@@ -1368,8 +1284,6 @@ const RecordComponent = () => {
 
   // 手动刷新录音列表
   const refreshRecordings = async () => {
-    if (isCheckingFiles) return; // 避免重复检查
-    
     await cleanupDeletedRecordings();
   };
 
@@ -1720,24 +1634,8 @@ const RecordComponent = () => {
         // 添加到录音列表
         setRecordings(prev => [newRecording, ...prev]);
         
-        // 上传到云端
-        const uploadResult = await uploadAudioFile(audioBlob, recordingId, fileName);
-        
-        if (uploadResult && uploadResult.success) {
-          setRecordings(prev => prev.map(recording => 
-            recording.id === recordingId 
-              ? {
-                  ...recording,
-                  cloudUrl: uploadResult.cloudUrl,
-                  objectKey: uploadResult.objectKey,
-                  etag: uploadResult.etag,
-                  uploaded: true
-                }
-              : recording
-          ));
-          
-          alert('移动端录音上传成功！');
-        }
+        // 不再自动上传到云端，等待用户绑定后再上传
+        console.log('移动端录音完成，已添加到待绑定列表，等待用户绑定后上传到云端');
         
         // 重置状态
         setIsMobileRecording(false);
@@ -1856,26 +1754,7 @@ const RecordComponent = () => {
     alert(`AI音乐《${localMusic.fileName || localMusic.title}》已保存并上传到云端，已添加到已绑定录音列表！`);
   };
 
-  // 检测已绑定录音，智能跳转到播放页面（用户从播放页面返回后永久停止此功能）
-  useEffect(() => {
-    // 防止无限循环跳转：如果用户曾从播放页面返回或正在检查文件，则永久停止自动跳转
-    if (justReturnedFromPlayer || isCheckingFiles) {
-      return;
-    }
 
-    if (boundRecordings && boundRecordings.length > 0 && userCode && id) {
-      // 先清理已删除的录音，然后决定是否跳转
-      cleanupDeletedRecordings().then((existingRecordings) => {
-        // 如果清理后还有录音存在，且没有刚从播放页面返回，则跳转
-        if (existingRecordings.length > 0 && !justReturnedFromPlayer) {
-          // 跳转到第一个已绑定录音的播放页面
-          const firstRecording = existingRecordings[0];
-          const recordingId = firstRecording.originalRecordingId || firstRecording.id;
-          navigate(`/${userCode}/${id}/play/${recordingId}`);
-        }
-      });
-    }
-  }, [boundRecordings, userCode, id, navigate, justReturnedFromPlayer, isCheckingFiles]);
 
   // 如果浏览器不支持录音
   if (!isSupported) {
@@ -2306,6 +2185,9 @@ const RecordComponent = () => {
               <div className="section-header">
                 <h3>待绑定的录音</h3>
                 <span className="section-count">({recordings.length})</span>
+                <div className="section-tip">
+                  💡 请先绑定录音，再把播放链接写入NFC标签
+                </div>
               </div>
               <div className="recordings-list-container">
                 {recordings.map((recording) => (
@@ -2334,11 +2216,7 @@ const RecordComponent = () => {
                         <button className="action-btn link-btn" onClick={() => bindRecording(recording)} title="绑定录音">
                           <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
                         </button>
-                        {uploadStatus[recording.id] === 'error' && (
-                          <button className="action-btn retry-box" onClick={() => retryUpload(recording)} title="重试上传">
-                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={25} height={25}/>
-                          </button>
-                        )}
+
                         <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
                           <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
                         </button>
@@ -2363,12 +2241,10 @@ const RecordComponent = () => {
                 <h3>已绑定的录音</h3>
                 <span className="section-count">({boundRecordings.length})</span>
                 {userCode && id && <span className="session-info">会议: {userCode}/{id}</span>}
-                {isCheckingFiles && <span className="checking-status">🔍 检查中...</span>}
                 {boundRecordings.length > 0 && (
                   <button 
                     className="refresh-btn" 
                     onClick={refreshRecordings}
-                    disabled={isCheckingFiles}
                     title="检查录音文件状态"
                   >
                     <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={16} height={16}/>
