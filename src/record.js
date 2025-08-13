@@ -2141,7 +2141,7 @@ const RecordComponent = () => {
               {recordingTime > 0 && !isRecording && (
                 <button className="record-reset-btn" onClick={resetRecording}>
                   <span className="btn-icon">
-                  <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" className="btn-icon" width={32} height={32}/>
+                  <img src="/images/refresh.svg" className="btn-icon" width={32} height={32}/>
                   </span>
                   <span className="btn-text">重置</span>
                 </button>
@@ -2214,11 +2214,11 @@ const RecordComponent = () => {
                       
                       <div className="recording-actions">
                         <button className="action-btn link-btn" onClick={() => bindRecording(recording)} title="绑定录音">
-                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/link2.svg" width={25} height={25}/>
+                          <img src="/images/link2.svg" width={25} height={25}/>
                         </button>
 
                         <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id)} title="删除录音">
-                          <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
+                          <img src="/images/delete2.svg"  width={25} height={25}/>
                         </button>
                       </div>
                     </div>
@@ -2247,7 +2247,7 @@ const RecordComponent = () => {
                     onClick={refreshRecordings}
                     title="检查录音文件状态"
                   >
-                    <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/refresh.svg" width={16} height={16}/>
+                    <img src="/images/refresh.svg" width={16} height={16}/>
                   </button>
                 )}
               </div>
@@ -2272,10 +2272,10 @@ const RecordComponent = () => {
                         </div>
                         <div className="recording-actions">
                           <button className="action-btn play-icon" onClick={() => enterPlayerMode(recording)} title="播放录音">
-                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/bf2.svg"  width={20} height={30}/>
+                            <img src="/images/bf2.svg"  width={20} height={30}/>
                           </button>
                           <button className="action-btn delete-btn" onClick={() => deleteRecording(recording.id, true)} title="删除录音">
-                            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/delete2.svg"  width={25} height={25}/>
+                            <img src="/images/delete2.svg"  width={25} height={25}/>
                           </button>
                         </div>
                       </div>
