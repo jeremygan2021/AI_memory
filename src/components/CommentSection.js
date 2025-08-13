@@ -8,8 +8,81 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [currentNickname, setCurrentNickname] = useState('');
+  const [currentAvatar, setCurrentAvatar] = useState('');
+  const [showNicknameInput, setShowNicknameInput] = useState(false);
+  const [customNickname, setCustomNickname] = useState('');
+  const [currentTheme, setCurrentTheme] = useState('default');
   const textareaRef = useRef(null);
   const commentsEndRef = useRef(null);
+
+  // 昵称生成器
+  const nicknames = [
+    '快乐小象', '智慧海豚', '温柔猫咪', '勇敢狮子', '可爱兔子', '聪明狐狸',
+    '善良熊猫', '活泼猴子', '优雅天鹅', '坚强老鹰', '友好狗狗', '神秘猫咪',
+    '阳光向日葵', '温柔月光', '快乐彩虹', '智慧星辰', '勇敢战士', '可爱精灵',
+    '善良天使', '活泼小丑', '优雅公主', '坚强骑士', '友好伙伴', '神秘巫师',
+    '快乐音符', '温柔微风', '智慧书籍', '勇敢船长', '可爱花朵', '善良心灵'
+  ];
+
+  // 头像图片列表（OSS地址）
+  const avatarImages = [
+    
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx1.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/imageskttx2.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx3.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx4.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx5.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx6.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx7.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx8.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx9.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx10.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx11.png'
+  ];
+
+  // 生成随机昵称
+  const generateRandomNickname = () => {
+    const randomIndex = Math.floor(Math.random() * nicknames.length);
+    return nicknames[randomIndex];
+  };
+
+  // 生成随机头像
+  const generateRandomAvatar = () => {
+    const randomIndex = Math.floor(Math.random() * avatarImages.length);
+    return avatarImages[randomIndex];
+  };
+
+  // 监听主题变化
+  useEffect(() => {
+    const handleThemeChange = (event) => {
+      const theme = event.detail?.theme;
+      if (theme) {
+        setCurrentTheme(theme.id);
+      }
+    };
+
+    // 获取当前主题
+    const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+    setCurrentTheme(savedTheme);
+
+    // 监听主题变化事件
+    window.addEventListener('themeChanged', handleThemeChange);
+    
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange);
+    };
+  }, []);
+
+  // 初始化昵称和头像
+  useEffect(() => {
+    if (!currentNickname) {
+      setCurrentNickname(generateRandomNickname());
+    }
+    if (!currentAvatar) {
+      setCurrentAvatar(generateRandomAvatar());
+    }
+  }, [currentNickname, currentAvatar]);
 
   // 滚动到评论底部
   // const scrollToBottom = () => {
@@ -134,7 +207,8 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
         recordingId,
         userCode,
         sessionId,
-        author: '访客' + Math.floor(Math.random() * 1000)
+        author: customNickname || currentNickname,
+        avatar: currentAvatar
       };
 
       // 更新评论列表
@@ -271,6 +345,25 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
     }
   };
 
+  // 重新生成昵称
+  const regenerateNickname = () => {
+    setCurrentNickname(generateRandomNickname());
+  };
+
+  // 重新生成头像
+  const regenerateAvatar = () => {
+    setCurrentAvatar(generateRandomAvatar());
+  };
+
+  // 确认自定义昵称
+  const confirmCustomNickname = () => {
+    if (customNickname.trim()) {
+      setCurrentNickname(customNickname.trim());
+      setCustomNickname('');
+      setShowNicknameInput(false);
+    }
+  };
+
   // 清理旧的评论文件（保留最新的3个）
   const cleanupOldCommentFiles = async (commentFiles) => {
     if (commentFiles.length <= 3) return; // 少于等于3个文件不需要清理
@@ -341,6 +434,79 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
       {/* 添加评论表单 */}
       {showCommentForm && (
         <div className="comment-form">
+          {/* 昵称和头像选择区域 */}
+          <div className="user-info-section">
+            <div className="avatar-section">
+              <img 
+                src={currentAvatar} 
+                alt="头像" 
+                className="current-avatar"
+                onClick={regenerateAvatar}
+                title="点击重新生成头像"
+              />
+              <button 
+                className="regenerate-avatar-btn"
+                onClick={regenerateAvatar}
+                title="重新生成头像"
+              >
+                🔄
+              </button>
+            </div>
+            
+            <div className="nickname-section">
+              <div className="nickname-display">
+                <span className="nickname-text">{currentNickname}</span>
+                <button 
+                  className="regenerate-nickname-btn"
+                  onClick={regenerateNickname}
+                  title="重新生成昵称"
+                >
+                  🔄
+                </button>
+              </div>
+              
+              <div className="nickname-actions">
+                <button 
+                  className="custom-nickname-btn"
+                  onClick={() => setShowNicknameInput(!showNicknameInput)}
+                >
+                  ✏️ 自定义昵称
+                </button>
+              </div>
+              
+              {showNicknameInput && (
+                <div className="custom-nickname-input">
+                  <input
+                    type="text"
+                    value={customNickname}
+                    onChange={(e) => setCustomNickname(e.target.value)}
+                    placeholder="输入自定义昵称..."
+                    maxLength="20"
+                    className="nickname-input"
+                  />
+                  <div className="nickname-input-actions">
+                    <button 
+                      className="confirm-nickname-btn"
+                      onClick={confirmCustomNickname}
+                      disabled={!customNickname.trim()}
+                    >
+                      确认
+                    </button>
+                    <button 
+                      className="cancel-nickname-btn"
+                      onClick={() => {
+                        setShowNicknameInput(false);
+                        setCustomNickname('');
+                      }}
+                    >
+                      取消
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="form-group">
             <textarea
               ref={textareaRef}
@@ -379,9 +545,17 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
           comments.map((comment) => (
             <div key={comment.id} className="comment-item">
               <div className="comment-avatar">
-                <div className="avatar-circle">
-                  {comment.author.charAt(0)}
-                </div>
+                {comment.avatar ? (
+                  <img 
+                    src={comment.avatar} 
+                    alt="头像" 
+                    className="avatar-image"
+                  />
+                ) : (
+                  <div className="avatar-circle">
+                    {comment.author.charAt(0)}
+                  </div>
+                )}
               </div>
               <div className="comment-content">
                 <div className="comment-header">
