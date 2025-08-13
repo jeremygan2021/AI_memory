@@ -259,7 +259,9 @@ export const useMusicGeneration = () => {
         originalSongId: song.id,
         uploadedToCloud: false,
         userCode,
-        sessionId
+        sessionId,
+        cloudUrl: null,
+        objectKey: null
       };
 
       // 保存到localStorage
@@ -271,12 +273,16 @@ export const useMusicGeneration = () => {
       // 如果需要上传到云端
       if (shouldUploadToCloud && song.audio_url) {
         try {
-          await uploadMusicToCloud(song, userCode, sessionId, onProgress);
+          const uploadRes = await uploadMusicToCloud(song, userCode, sessionId, onProgress);
           localMusic.uploadedToCloud = true;
+          localMusic.cloudUrl = uploadRes?.cloudUrl || localMusic.url;
+          localMusic.objectKey = uploadRes?.objectKey || null;
           
           // 更新localStorage中的记录
           const updatedMusic = savedMusic.map(music => 
-            music.id === localMusic.id ? { ...music, uploadedToCloud: true } : music
+            music.id === localMusic.id 
+              ? { ...music, uploadedToCloud: true, cloudUrl: localMusic.cloudUrl, objectKey: localMusic.objectKey } 
+              : music
           );
           localStorage.setItem(savedMusicKey, JSON.stringify(updatedMusic));
           
@@ -308,7 +314,8 @@ export const useMusicGeneration = () => {
       
       // 创建FormData
       const formData = new FormData();
-      const fileName = `ai_music_${song.id || Date.now()}.mp3`;
+      const safeTitle = (song.title || `AI生成音乐_${Date.now()}`).trim().replace(/[\\/:*?"<>|#%&{}$!@`~^+=,;]+/g, '').replace(/\s+/g, '_').slice(0, 60) || 'AI_音乐';
+      const fileName = `${safeTitle}_${song.id || Date.now()}.mp3`;
       const audioFile = new File([audioBlob], fileName, { 
         type: 'audio/mpeg' 
       });
@@ -343,6 +350,17 @@ export const useMusicGeneration = () => {
       
       if (onProgress) onProgress(100, '上传完成！');
       
+      // 将标题与对象键建立映射，供各页面显示
+      try {
+        const mapKey = 'customNames';
+        const raw = localStorage.getItem(mapKey);
+        const map = raw ? JSON.parse(raw) : {};
+        if (result.object_key) {
+          map[result.object_key] = song.title || safeTitle;
+          localStorage.setItem(mapKey, JSON.stringify(map));
+        }
+      } catch {}
+
       return {
         success: true,
         cloudUrl: result.file_url,

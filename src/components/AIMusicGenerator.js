@@ -381,7 +381,26 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
         <div className="generated-music">
           <h4>🎉 生成成功！</h4>
           <div className="music-info">
-            <p><strong>标题:</strong> {currentSong.title}</p>
+            <label htmlFor="ai-music-title" style={{ display: 'block', marginBottom: '8px' }}>
+              <strong>标题:</strong>
+            </label>
+            <input
+              id="ai-music-title"
+              type="text"
+              value={currentSong.title || ''}
+              onChange={(e) => setCurrentSong(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="请输入音乐标题"
+              className="title-input"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: '10px',
+                border: '1px solid #e5e7eb',
+                outline: 'none',
+                fontSize: '14px',
+                boxSizing: 'border-box'
+              }}
+            />
             {/* <p><strong>时长:</strong> {currentSong.duration}秒</p> */}
           </div>
           <audio controls src={currentSong.audio_url} className="music-player">

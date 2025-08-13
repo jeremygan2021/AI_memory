@@ -356,6 +356,12 @@
   font-size: 14px;
 }
 
+/* 标题输入样式（与整体风格一致） */
+.generated-music .title-input:focus {
+  border-color: #3bb6a6;
+  box-shadow: 0 0 0 3px rgba(59, 182, 166, 0.12);
+}
+
 .music-player {
   width: 100%;
   margin: 16px 0;
