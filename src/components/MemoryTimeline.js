@@ -80,7 +80,8 @@ const MemoryTimeline = ({ userCode }) => {
         } else if (isImage) {
           type = 'image';
           icon = '📷';
-          pageUrl = `/${userCode}/gallery`;
+          // 跳转到图片大图预览页面，携带对象键以直达原图
+          pageUrl = `/${userCode}/image-viewer/${sessionId}/${encodeURIComponent(nameWithoutExt)}?ok=${encodeURIComponent(objectKey)}`;
         } else if (isVideo) {
           type = 'video';
           icon = '🎬';
@@ -101,7 +102,8 @@ const MemoryTimeline = ({ userCode }) => {
           timestamp,
           previewUrl,
           pageUrl,
-          fileName
+          fileName,
+          objectKey
         };
       }).filter(Boolean);
 
