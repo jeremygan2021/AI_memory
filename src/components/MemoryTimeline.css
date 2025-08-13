@@ -294,4 +294,233 @@
 
 .memory-timeline::-webkit-scrollbar-thumb:hover {
   background: rgba(59, 182, 166, 0.5);
+}
+
+/* 日期筛选器样式 */
+.timeline-filters {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border-radius: 12px;
+  border: 2px solid rgba(59, 182, 166, 0.2);
+}
+
+.filter-toggle-btn {
+  background: linear-gradient(135deg, #3bb6a6, #10b981);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.3);
+}
+
+.filter-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 182, 166, 0.4);
+}
+
+.date-filter-panel {
+  margin-top: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid rgba(59, 182, 166, 0.2);
+}
+
+.date-inputs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+}
+
+.date-input-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.date-input-group input[type="date"] {
+  padding: 8px 12px;
+  border: 2px solid rgba(59, 182, 166, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.date-input-group input[type="date"]:focus {
+  outline: none;
+  border-color: #3bb6a6;
+  box-shadow: 0 0 0 3px rgba(59, 182, 166, 0.1);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.apply-filter-btn, .clear-filter-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apply-filter-btn {
+  background: linear-gradient(135deg, #3bb6a6, #10b981);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.3);
+}
+
+.apply-filter-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 182, 166, 0.4);
+}
+
+.clear-filter-btn {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.clear-filter-btn:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* 统计信息样式 */
+.timeline-stats {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: rgba(59, 182, 166, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid #3bb6a6;
+  font-size: 14px;
+  color: #374151;
+}
+
+.filter-info {
+  margin-left: 12px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* 分页控件样式 */
+.timeline-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border-radius: 12px;
+  border: 2px solid rgba(59, 182, 166, 0.2);
+}
+
+.pagination-btn {
+  background: linear-gradient(135deg, #3bb6a6, #10b981);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.3);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 182, 166, 0.4);
+}
+
+.pagination-btn:disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pagination-info {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  min-width: 120px;
+  text-align: center;
+}
+
+/* 响应式设计 - 日期筛选器 */
+@media (max-width: 768px) {
+  .timeline-filters {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .date-inputs {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .date-input-group {
+    min-width: auto;
+  }
+  
+  .filter-actions {
+    justify-content: center;
+  }
+  
+  .timeline-pagination {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .pagination-info {
+    min-width: 100px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-filters {
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .date-filter-panel {
+    padding: 12px;
+    margin-top: 12px;
+  }
+  
+  .filter-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .timeline-pagination {
+    padding: 8px;
+    gap: 8px;
+    flex-direction: column;
+  }
+  
+  .pagination-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
 } 

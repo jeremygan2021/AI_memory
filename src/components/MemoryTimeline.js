@@ -6,6 +6,12 @@ const MemoryTimeline = ({ userCode }) => {
   const navigate = useNavigate();
   const [timelineItems, setTimelineItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [allItems, setAllItems] = useState([]); // 存储所有项目
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20); // 每页显示20个项目
+  const [startDate, setStartDate] = useState(''); // 开始日期
+  const [endDate, setEndDate] = useState(''); // 结束日期
+  const [showDateFilter, setShowDateFilter] = useState(false); // 是否显示日期筛选器
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
@@ -23,7 +29,7 @@ const MemoryTimeline = ({ userCode }) => {
 
       const prefix = `recordings/${userCode}/`;
       const response = await fetch(
-        `${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=100`
+        `${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=1000`
       );
       
       if (!response.ok) throw new Error('获取文件失败');
@@ -96,18 +102,85 @@ const MemoryTimeline = ({ userCode }) => {
         };
       }).filter(Boolean);
 
-      // 按时间倒序排序，取最近的10项
+      // 按时间倒序排序
       const sortedItems = processedItems
-        .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime))
-        .slice(0, 10);
+        .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
 
-      setTimelineItems(sortedItems);
+      setAllItems(sortedItems);
+      setTimelineItems(sortedItems.slice(0, itemsPerPage));
+      setCurrentPage(1);
     } catch (error) {
       console.error('加载时间线数据失败:', error);
       setTimelineItems([]);
+      setAllItems([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  // 应用日期筛选
+  const applyDateFilter = () => {
+    let filtered = [...allItems];
+    
+    if (startDate) {
+      const start = new Date(startDate + 'T00:00:00');
+      filtered = filtered.filter(item => new Date(item.uploadTime) >= start);
+    }
+    
+    if (endDate) {
+      const end = new Date(endDate + 'T23:59:59');
+      filtered = filtered.filter(item => new Date(item.uploadTime) <= end);
+    }
+    
+    setTimelineItems(filtered.slice(0, itemsPerPage));
+    setCurrentPage(1);
+    setShowDateFilter(false); // 应用筛选后隐藏日期筛选面板
+  };
+
+  // 清除日期筛选
+  const clearDateFilter = () => {
+    setStartDate('');
+    setEndDate('');
+    setTimelineItems(allItems.slice(0, itemsPerPage));
+    setCurrentPage(1);
+  };
+
+  // 分页处理
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    
+    let filtered = [...allItems];
+    
+    if (startDate) {
+      const start = new Date(startDate + 'T00:00:00');
+      filtered = filtered.filter(item => new Date(item.uploadTime) >= start);
+    }
+    
+    if (endDate) {
+      const end = new Date(endDate + 'T23:59:59');
+      filtered = filtered.filter(item => new Date(item.uploadTime) <= end);
+    }
+    
+    setTimelineItems(filtered.slice(startIndex, endIndex));
+  };
+
+  // 获取总页数
+  const getTotalPages = () => {
+    let filtered = [...allItems];
+    
+    if (startDate) {
+      const start = new Date(startDate + 'T00:00:00');
+      filtered = filtered.filter(item => new Date(item.uploadTime) >= start);
+    }
+    
+    if (endDate) {
+      const end = new Date(endDate + 'T23:59:59');
+      filtered = filtered.filter(item => new Date(item.uploadTime) <= end);
+    }
+    
+    return Math.ceil(filtered.length / itemsPerPage);
   };
 
   // 生成友好的文件显示名称
@@ -163,7 +236,7 @@ const MemoryTimeline = ({ userCode }) => {
     );
   }
 
-  if (timelineItems.length === 0) {
+  if (allItems.length === 0) {
     return (
       <div className="memory-timeline">
         <div className="timeline-empty">
@@ -175,8 +248,64 @@ const MemoryTimeline = ({ userCode }) => {
     );
   }
 
+  const totalPages = getTotalPages();
+
   return (
     <div className="memory-timeline">
+      {/* 日期筛选器 */}
+      <div className="timeline-filters">
+        <button 
+          className="filter-toggle-btn"
+          onClick={() => setShowDateFilter(!showDateFilter)}
+        >
+          📅 {showDateFilter ? '隐藏' : '显示'}日期筛选
+        </button>
+        
+        {showDateFilter && (
+          <div className="date-filter-panel">
+            <div className="date-inputs">
+              <div className="date-input-group">
+                <label>开始日期:</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  max={endDate || undefined}
+                />
+              </div>
+              <div className="date-input-group">
+                <label>结束日期:</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate || undefined}
+                />
+              </div>
+            </div>
+            <div className="filter-actions">
+              <button onClick={applyDateFilter} className="apply-filter-btn">
+                应用筛选
+              </button>
+              <button onClick={clearDateFilter} className="clear-filter-btn">
+                清除筛选
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 统计信息 */}
+      <div className="timeline-stats">
+        <span>共找到 {allItems.length} 条回忆记录</span>
+        {(startDate || endDate) && (
+          <span className="filter-info">
+            (已筛选: {startDate || '不限'} 至 {endDate || '不限'})
+          </span>
+        )}
+      </div>
+
+      {/* 时间线列表 */}
       <div className="timeline-list">
         {timelineItems.map((item, index) => (
           <div 
@@ -225,6 +354,31 @@ const MemoryTimeline = ({ userCode }) => {
           </div>
         ))}
       </div>
+
+      {/* 分页控件 */}
+      {totalPages > 1 && (
+        <div className="timeline-pagination">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="pagination-btn"
+          >
+            上一页
+          </button>
+          
+          <span className="pagination-info">
+            第 {currentPage} 页，共 {totalPages} 页
+          </span>
+          
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="pagination-btn"
+          >
+            下一页
+          </button>
+        </div>
+      )}
     </div>
   );
 };
