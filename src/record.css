@@ -1356,3 +1356,357 @@ html, body {
   background: rgba(76, 175, 80, 0.3);
   color: #2E7D32;
 } 
+
+/* 上传媒体弹窗样式 */
+.upload-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.upload-modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.upload-modal-header {
+  background: linear-gradient(135deg, #9ee099, #319888);
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.upload-modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.upload-modal-session-info {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.upload-modal-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.upload-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.upload-modal-area {
+  padding: 40px 20px;
+  text-align: center;
+  border: 2px dashed #ddd;
+  margin: 20px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f9f9f9;
+}
+
+.upload-modal-area:hover,
+.upload-modal-area.drag-over {
+  border-color: #319888;
+  background: #f0f9ff;
+}
+
+.upload-modal-text {
+  font-size: 18px;
+  color: #666;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.upload-modal-files-container {
+  padding: 0 20px 20px;
+}
+
+.upload-modal-file-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.upload-modal-file-tab {
+  background: #f5f5f5;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.upload-modal-file-tab.active {
+  background: #319888;
+  color: white;
+}
+
+.upload-modal-file-tab:hover:not(.active) {
+  background: #e0e0e0;
+}
+
+.upload-modal-files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.upload-modal-media-item {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.upload-modal-media-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.upload-modal-media-content {
+  cursor: pointer;
+}
+
+.upload-modal-media-preview {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.upload-modal-image-preview,
+.upload-modal-video-preview {
+  position: relative;
+}
+
+.upload-modal-video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-modal-video-play-icon {
+  color: white;
+  font-size: 40px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.upload-modal-media-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.upload-modal-delete-media-btn {
+  background: rgba(255, 0, 0, 0.8);
+  border: none;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.upload-modal-delete-media-btn:hover {
+  background: rgba(255, 0, 0, 1);
+  transform: scale(1.1);
+}
+
+.upload-modal-image-id-display,
+.upload-modal-video-id-display {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.upload-modal-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.upload-modal-pagination-btn {
+  background: #f5f5f5;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.upload-modal-pagination-btn:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.upload-modal-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-modal-pagination-info {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.upload-modal-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.upload-modal-empty-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.upload-modal-empty-text {
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.upload-modal-empty-subtext {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* 预览弹窗样式 */
+.upload-modal-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.upload-modal-preview-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.upload-modal-preview-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-modal-preview-media {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.upload-modal-preview-modal.fullscreen .upload-modal-preview-media {
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .upload-modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .upload-modal-header {
+    padding: 15px;
+  }
+  
+  .upload-modal-header h2 {
+    font-size: 20px;
+  }
+  
+  .upload-modal-area {
+    padding: 30px 15px;
+    margin: 15px;
+  }
+  
+  .upload-modal-text {
+    font-size: 16px;
+  }
+  
+  .upload-modal-files-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  
+  .upload-modal-media-preview {
+    height: 120px;
+  }
+} 

@@ -1104,17 +1104,9 @@ const PlayerPage = () => {
 
       {/* 顶部导航 */}
       <header className="player-header">
-        <button onClick={() => navigate(`/${userCode}/${id}?fromPlayer=true`)} className="nav-back-btn">
-          <span className="back-icon">←</span>
-          <span>返回录音页面</span>
-        </button>
         
         {/* 主题切换器和操作按钮 */}
           <ThemeSwitcher onThemeChange={handleThemeChange} />
-          <button onClick={deleteRecording} className="delete-recording-btn">
-            <span>🗑️</span>
-            <span>删除</span>
-          </button>
       </header>
       
       <div className="session-info">
