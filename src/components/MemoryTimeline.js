@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MemoryTimeline.css';
+import { getCustomName, deriveDisplayNameFromFileName } from '../utils/displayName';
 
 const MemoryTimeline = ({ userCode }) => {
   const navigate = useNavigate();
@@ -88,11 +89,13 @@ const MemoryTimeline = ({ userCode }) => {
           pageUrl = `/${userCode}/video-player/${sessionId}/${videoId}`;
         }
 
+        const displayName = getCustomName(objectKey) || deriveDisplayNameFromFileName(fileName);
+
         return {
           id: `${type}_${sessionId}_${timestamp}_${uniqueId}`,
           type,
           icon,
-          title: getFileDisplayName(fileName, type),
+          title: displayName,
           sessionId,
           uploadTime,
           timestamp,

@@ -4,6 +4,7 @@ import './AudioLibrary.css';
 import { getUserCode, validateUserCode } from './utils/userCode';
 import SvgIcon from './components/SvgIcons';
 import ModernSearchBox from './components/ModernSearchBox';
+import { getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
 
 // API配置
 
@@ -124,9 +125,11 @@ const AudioLibrary = () => {
         
 
         
+        const displayName = getCustomName(objectKey) || deriveDisplayNameFromFileName(fileName);
+
         return {
           id: generatedId, // 使用生成的ID
-          name: fileName,
+          name: displayName,
           preview: ossUrl, // 直接用OSS直链
           ossUrl,
           type: isImage ? 'image' : 'video',
@@ -243,9 +246,11 @@ const AudioLibrary = () => {
         }
 
         const session = sessionsMap.get(sessionId);
+        const displayName = getCustomName(objectKey) || deriveDisplayNameFromFileName(fileName);
         session.recordings.push({
           id: recordingInfo.id,
           fileName: fileName,
+          displayName: displayName,
           objectKey: objectKey,
           fileUrl: file.file_url || file.fileUrl || file.url,
           size: file.size || 0,
@@ -274,7 +279,7 @@ const AudioLibrary = () => {
     });
 
     // 排序每个会话的录音（按时间倒序）
-    const sessions = Array.from(sessionsMap.values()).map(session => {
+        const sessions = Array.from(sessionsMap.values()).map(session => {
       session.recordings.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
       session.latestRecording = session.recordings[0];
       session.oldestRecording = session.recordings[session.recordings.length - 1];
@@ -297,6 +302,13 @@ const AudioLibrary = () => {
       const parts = nameWithoutExt.split('_');
       if (parts.length >= 2) {
         id = parts[1] || Date.now();
+      }
+    } else if (nameWithoutExt.includes('_')) {
+      // 无recording_前缀时，尝试取最后一个下划线后的片段作为ID
+      const parts = nameWithoutExt.split('_');
+      const last = parts[parts.length - 1];
+      if (last) {
+        id = last;
       }
     } else {
       // 使用文件的etag或其他唯一标识
@@ -1001,7 +1013,7 @@ const AudioLibrary = () => {
                         <h4 className="latest-title">最新录音</h4>
                         <div className="recording-preview">
                           <span className="recording-name">
-                            {session.latestRecording.fileName}
+                            {session.latestRecording.displayName || session.latestRecording.fileName}
                           </span>
                           <span className="recording-size">
                             {formatFileSize(session.latestRecording.size)}

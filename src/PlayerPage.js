@@ -7,6 +7,7 @@ import CommentSection from './components/CommentSection';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import ThemedIcon from './components/ThemedIcon';
 import { getCurrentTheme, applyTheme } from './themes/themeConfig';
+import { getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
 // Swiper相关引入
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -240,9 +241,11 @@ const PlayerPage = () => {
             }
             const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
             const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
+            const displayName = getCustomName(objectKey) || deriveDisplayNameFromFileName(fileName);
+
             return {
               id: generatedId,
-              name: fileName,
+              name: displayName,
               preview: ossUrl,
               url: ossUrl,
               type: isImage ? 'image' : 'video',
@@ -339,11 +342,13 @@ const PlayerPage = () => {
           const isVideo = fileName.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i) || 
                          (file.content_type && file.content_type.startsWith('video/'));
 
+          const displayName = getCustomName(objectKey) || deriveDisplayNameFromFileName(fileName);
+
           return {
             id: realUniqueId,
             objectKey: objectKey,
             signedUrl: signedUrl,
-            fileName: fileName,
+            fileName: displayName,
             size: file.size || 0,
             timestamp: formatDateFromString(file.last_modified || file.lastModified || file.modified || new Date().toISOString()),
             boundAt: formatDateFromString(file.last_modified || file.lastModified || file.modified || new Date().toISOString()),

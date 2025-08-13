@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import './UploadMediaPage.css'; // 复用现有样式
 import { validateUserCode } from './utils/userCode';
  import { isWechatMiniProgram } from './utils/environment';
+import { buildUploadFileName, sanitizeCustomName, setCustomName } from './utils/displayName';
 
 const buildRecordingPath = (sessionId, userCode) => {
   return `recordings/${userCode}/${sessionId}`;
@@ -252,7 +253,7 @@ const UploadMediaPage = () => {
   };
 
   // 上传媒体文件到服务器
-  const uploadMediaFile = async (file, tempId) => {
+  const uploadMediaFile = async (file, tempId, customBaseName) => {
     try {
       console.log('开始上传媒体文件:', { 
         fileName: file.name, 
@@ -265,7 +266,14 @@ const UploadMediaPage = () => {
       });
       
       const formData = new FormData();
-      formData.append('file', file);
+      let uploadFile = file;
+      if (customBaseName) {
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        const uniqueSuffix = Date.now().toString(36).slice(-8);
+        const newFileName = buildUploadFileName(customBaseName, uniqueSuffix, ext);
+        uploadFile = new File([file], newFileName, { type: file.type, lastModified: file.lastModified });
+      }
+      formData.append('file', uploadFile);
       
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -354,12 +362,12 @@ const UploadMediaPage = () => {
         
         console.log('媒体文件上传URL:', uploadUrl.toString());
         console.log('文件夹路径:', folderPath);
-        console.log('请求详情:', {
+          console.log('请求详情:', {
           method: 'POST',
           url: uploadUrl.toString(),
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type
+            fileName: uploadFile.name,
+            fileSize: uploadFile.size,
+            fileType: uploadFile.type
         });
         
         xhr.open('POST', uploadUrl);
@@ -495,16 +503,18 @@ const UploadMediaPage = () => {
       }
       
       if (isImage) {
+        const userInput = window.prompt('给这张图片起个名字（可选）', '');
+        const customName = userInput ? sanitizeCustomName(userInput) : '';
         // 处理图片文件
         const reader = new FileReader();
         reader.onload = (e) => {
           const uniqueId = generateUniqueImageId(); // 生成唯一图片ID
           const tempId = Date.now() + Math.random(); // 临时ID用于跟踪上传进度
           
-          const newFile = {
+           const newFile = {
             id: uniqueId,
             tempId: tempId,
-            name: processedFile.name,
+            name: customName || processedFile.name,
             url: e.target.result,
             file: processedFile,
             type: 'image',
@@ -517,10 +527,13 @@ const UploadMediaPage = () => {
           setUploadedFiles(prev => [...prev, newFile]);
           
           // 上传到服务器
-          uploadMediaFile(processedFile, tempId).then(result => {
+           uploadMediaFile(processedFile, tempId, customName).then(result => {
             if (result.success) {
               // 显示上传成功提示
               alert(`图片上传成功！`);
+               if (result.objectKey && customName) {
+                 setCustomName(result.objectKey, customName);
+               }
               // 重新加载云端文件
               loadCloudMediaFiles();
             }
@@ -530,6 +543,8 @@ const UploadMediaPage = () => {
         };
         reader.readAsDataURL(processedFile);
       } else if (isVideo) {
+        const userInput = window.prompt('给这个视频起个名字（可选）', '');
+        const customName = userInput ? sanitizeCustomName(userInput) : '';
         // 处理视频文件
         const uniqueId = generateUniqueVideoId(); // 生成唯一视频ID
         const tempId = Date.now() + Math.random(); // 临时ID用于跟踪上传进度
@@ -538,7 +553,7 @@ const UploadMediaPage = () => {
         const newFile = {
           id: uniqueId,
           tempId: tempId,
-          name: processedFile.name,
+          name: customName || processedFile.name,
           url: videoUrl,
           file: processedFile,
           type: 'video',
@@ -554,13 +569,16 @@ const UploadMediaPage = () => {
         setUploadedFiles(prev => [...prev, newFile]);
         
         // 上传到服务器
-        uploadMediaFile(processedFile, tempId).then(result => {
+        uploadMediaFile(processedFile, tempId, customName).then(result => {
           if (result.success) {
             // 显示上传成功提示，包含转换信息
             const successMessage = convertedFormat ? 
               `视频上传成功！(${originalFormat} → ${convertedFormat} 格式转换)` : 
               `视频上传成功！`;
             alert(successMessage);
+            if (result.objectKey && customName) {
+              setCustomName(result.objectKey, customName);
+            }
             // 重新加载云端文件
             loadCloudMediaFiles();
           }

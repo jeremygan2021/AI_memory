@@ -6,6 +6,7 @@ import AIMusicGenerator from './components/AIMusicGenerator';
 import { getUserCode, buildRecordingPath, buildSessionStorageKey, validateUserCode } from './utils/userCode';
 import recordButtonImg from './asset/record_button.png';
 import mic_icon from './asset/icon/mic.png'
+import { buildUploadFileName, sanitizeCustomName, setCustomName, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
 
 
 // API配置
@@ -254,7 +255,7 @@ const RecordComponent = () => {
   }, []);
 
   // 新增：上传音频文件到服务器
-  const uploadAudioFile = async (audioBlob, recordingId, fileName) => {
+  const uploadAudioFile = async (audioBlob, recordingId, fileName, customBaseName) => {
     try {
       console.log('开始上传音频文件:', { fileName, recordingId, blobSize: audioBlob.size });
       
@@ -262,7 +263,13 @@ const RecordComponent = () => {
       const formData = new FormData();
       
       // 创建文件对象，统一使用MP3 MIME类型
-      const audioFile = new File([audioBlob], fileName, { 
+      let finalFileName = fileName;
+      if (customBaseName) {
+        const ext = (fileName.split('.').pop() || 'mp3').toLowerCase();
+        // 保持最后下划线后为录音ID，兼容现有解析
+        finalFileName = buildUploadFileName(customBaseName, recordingId, ext);
+      }
+      const audioFile = new File([audioBlob], finalFileName, { 
         type: 'audio/mpeg' // 使用MP3的标准MIME类型
       });
       
@@ -326,8 +333,13 @@ const RecordComponent = () => {
   const retryUpload = async (recording) => {
     if (recording.audioBlob) {
       // 统一使用mp3扩展名以提高兼容性
+      const userInput = window.prompt('给这段录音起个名字（可选）', '');
+      const customName = userInput ? sanitizeCustomName(userInput) : '';
       const fileName = `recording_${recording.id}.mp3`;
-      await uploadAudioFile(recording.audioBlob, recording.id, fileName);
+      const result = await uploadAudioFile(recording.audioBlob, recording.id, fileName, customName);
+      if (result && result.success && result.objectKey && customName) {
+        setCustomName(result.objectKey, customName);
+      }
     }
   };
 
@@ -579,8 +591,10 @@ const RecordComponent = () => {
         alert('正在上传录音到云端，请稍候...');
         
         // 统一使用mp3扩展名以提高兼容性
+        const userInput = window.prompt('给这段录音起个名字（可选）', '');
+        const customName = userInput ? sanitizeCustomName(userInput) : '';
         const fileName = `recording_${recording.id}.mp3`;
-        const uploadResult = await uploadAudioFile(recording.audioBlob, recording.id, fileName);
+        const uploadResult = await uploadAudioFile(recording.audioBlob, recording.id, fileName, customName);
         
         if (uploadResult.success) {
           // 更新录音记录，添加云端信息
@@ -592,12 +606,24 @@ const RecordComponent = () => {
             uploaded: true
           };
           console.log('录音上传成功，已绑定到会话');
+          if (uploadResult.objectKey && customName) {
+            setCustomName(uploadResult.objectKey, customName);
+          }
         } else {
           // 上传失败，但仍然可以绑定（本地存储）
           console.warn('录音上传失败，将作为本地录音绑定');
         }
       }
       
+      // 计算展示名称
+      let computedDisplayName = null;
+      if (recording.objectKey) {
+        const fileNameFromKey = recording.objectKey.split('/').pop();
+        computedDisplayName = getCustomName(recording.objectKey) || deriveDisplayNameFromFileName(fileNameFromKey);
+      } else if (recording.fileName) {
+        computedDisplayName = deriveDisplayNameFromFileName(recording.fileName);
+      }
+
       const boundRecording = {
         ...recording,
         boundAt: new Date().toLocaleString('zh-CN'),
@@ -612,6 +638,7 @@ const RecordComponent = () => {
         // 保存视频标识和文件信息
         isVideo: recording.isVideo || false,
         fileName: recording.fileName || null,
+        displayName: recording.displayName || computedDisplayName || null,
         fileType: recording.fileType || null
       };
       
@@ -2259,7 +2286,7 @@ const RecordComponent = () => {
                       <div className="recording-first-row">
                         <div className="recording-item-info">
                           <div className="recording-timestamp">
-                            {recording.isAIGenerated ? recording.fileName : recording.timestamp}
+                            {recording.displayName || (recording.isAIGenerated ? recording.fileName : recording.timestamp)}
                             {recording.isAIGenerated && <span className="ai-badge">🤖</span>}
                             {recording.isVideo && <span className="video-badge">🎬</span>}
                           </div>
