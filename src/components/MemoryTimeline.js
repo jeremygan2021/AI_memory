@@ -129,8 +129,10 @@ const MemoryTimeline = ({ userCode }) => {
   // 格式化时间显示
   const formatTimeDisplay = (timestamp) => {
     const date = new Date(timestamp);
+    // 在云端时间基础上加8小时（东八区）
+    const adjustedDate = new Date(date.getTime() + 8 * 60 * 60 * 1000);
     const now = new Date();
-    const diffInHours = (now - date) / (1000 * 60 * 60);
+    const diffInHours = (now - adjustedDate) / (1000 * 60 * 60);
     
     if (diffInHours < 1) {
       return '刚刚';
@@ -139,7 +141,7 @@ const MemoryTimeline = ({ userCode }) => {
     } else if (diffInHours < 24 * 7) {
       return `${Math.floor(diffInHours / 24)}天前`;
     } else {
-      return date.toLocaleDateString('zh-CN');
+      return adjustedDate.toLocaleDateString('zh-CN');
     }
   };
 

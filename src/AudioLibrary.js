@@ -312,7 +312,10 @@ const AudioLibrary = () => {
   // 格式化日期字符串
   const formatDateFromString = (dateString) => {
     try {
-      return new Date(dateString).toLocaleString('zh-CN');
+      const date = new Date(dateString);
+      // 在云端时间基础上加8小时（东八区）
+      const adjustedDate = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return adjustedDate.toLocaleString('zh-CN');
     } catch {
       return dateString;
     }
@@ -1005,7 +1008,7 @@ const AudioLibrary = () => {
                           </span>
                         </div>
                         <div className="recording-date">
-                          {session.latestRecording.timestamp}
+                          {formatDateFromString(session.latestRecording.lastModified)}
                         </div>
                       </div>
 
