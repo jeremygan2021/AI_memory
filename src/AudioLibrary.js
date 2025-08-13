@@ -142,8 +142,9 @@ const AudioLibrary = () => {
         };
       }));
 
-      // 过滤空值并按上传时间倒序排序
-      const sortedFiles = mapped.filter(Boolean)
+      // 过滤空值并按上传时间倒序排序（媒体文件不过滤会话ID）
+      const sortedFiles = mapped
+        .filter(Boolean)
         .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
       setUploadedFiles(sortedFiles);
     } catch (error) {
@@ -226,6 +227,10 @@ const AudioLibrary = () => {
       const pathParts = objectKey.split('/');
       if (pathParts.length >= 4 && pathParts[0] === 'recordings' && pathParts[1] === userCode) {
         const sessionId = pathParts[2];
+        // 仅处理会话ID为8位的文件
+        if (!/^[a-zA-Z0-9]{8}$/.test(sessionId)) {
+          return;
+        }
         const fileName = pathParts[3];
         
         // 从文件名提取录音信息
