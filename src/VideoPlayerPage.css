@@ -524,7 +524,7 @@
   }
 
   .player-main {
-    min-height: calc(calc(var(--vh, 1vh) * 100) - 60px);
+    min-height: calc(calc(var(--vh, 1vh) * 100) + 60px);
     padding: 20px 12px; /* 减少padding */
   }
 
@@ -533,6 +533,7 @@
     padding: 70px 16px 20px; /* 优化padding，为图标预留空间 */
     margin: 0 auto; /* 居中 */
     border-radius: 20px; /* 稍小的圆角 */
+    min-height: fit-content;
   }
 
   .video-info {
@@ -817,7 +818,7 @@
 
 /* 进度控制 */
 .progress-section {
-  margin-top: 100px;
+  margin-top: 10px;
   margin-bottom: 15px;
 }
 

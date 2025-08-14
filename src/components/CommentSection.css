@@ -848,7 +848,6 @@
   }
 
   .user-info-section {
-    gap: 18px;
     padding: 14px;
   }
 
@@ -967,8 +966,6 @@
   }
 
   .user-info-section {
-    flex-direction: column;
-    gap: 15px;
     padding: 12px;
   }
 
@@ -1279,7 +1276,7 @@
 /* 横屏模式适配 */
 @media (max-width: 900px) and (orientation: landscape) {
   .comment-section {
-    margin-top: 60px;
+    /* margin-top: 60px; */
     padding: 15px;
   }
 

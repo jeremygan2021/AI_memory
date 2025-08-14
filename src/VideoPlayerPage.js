@@ -566,7 +566,7 @@ const VideoPlayerPage = () => {
       {/* 顶部导航 */}
       <div className="player-header">
         <div className="session-info">
-          <span>用户: {userCode} | 视频ID: {video.id.split('_').pop()}</span>
+          <span> {userCode} | {video.id.split('_').pop()}</span>
         </div>
         {/* 主题切换器和操作按钮 */}
         <ThemeSwitcher onThemeChange={handleThemeChange} />

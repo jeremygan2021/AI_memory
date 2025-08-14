@@ -1363,8 +1363,8 @@
   .player-container {
     padding: 40px 30px;
     max-width: 600px;
-    display: flex;
-    flex-direction: row;
+    /* display: flex;
+    flex-direction: row; */
     align-items: center;
     gap: 30px;
   }
@@ -2386,11 +2386,11 @@
   }
 
   .player-main {
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh + 300px);
   }
 
   .player-container {
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh + 200px);
   }
 }
 

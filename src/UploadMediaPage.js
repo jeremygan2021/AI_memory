@@ -503,7 +503,7 @@ const UploadMediaPage = () => {
       }
       
       if (isImage) {
-        const userInput = window.prompt('给这张图片起个名字（可选）', '');
+        const userInput = window.prompt('给这张图片起个名字（可选）\n\n支持：中英文、数字、空格、连字符(-_)、括号()[]', '');
         const customName = userInput ? sanitizeCustomName(userInput) : '';
         // 处理图片文件
         const reader = new FileReader();
@@ -543,7 +543,7 @@ const UploadMediaPage = () => {
         };
         reader.readAsDataURL(processedFile);
       } else if (isVideo) {
-        const userInput = window.prompt('给这个视频起个名字（可选）', '');
+        const userInput = window.prompt('给这个视频起个名字（可选）\n\n支持：中英文、数字、空格、连字符(-_)、括号()[]', '');
         const customName = userInput ? sanitizeCustomName(userInput) : '';
         // 处理视频文件
         const uniqueId = generateUniqueVideoId(); // 生成唯一视频ID

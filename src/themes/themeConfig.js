@@ -67,7 +67,7 @@ export const themes = {
     },
     assets: {
       backgroundImage: '/asset/wxbj.png',
-      elephantIcon: '/asset/sunflower.png',
+      elephantIcon: '/asset/sunFlower.png',
     }
   },
 

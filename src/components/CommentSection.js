@@ -470,7 +470,7 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
                   className="custom-nickname-btn"
                   onClick={() => setShowNicknameInput(!showNicknameInput)}
                 >
-                  ✏️ 自定义昵称
+                  自定义昵称
                 </button>
               </div>
               

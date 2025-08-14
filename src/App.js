@@ -210,7 +210,7 @@ const RecordPage = () => {
             color: '#4a90e2',
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
-          }}>用户: {userid} | 会话: {id}</span>
+          }}>{userid} | {id}</span>
         </div>
       </div>
       <RecordComponent />

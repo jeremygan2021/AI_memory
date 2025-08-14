@@ -333,7 +333,7 @@ const RecordComponent = () => {
   const retryUpload = async (recording) => {
     if (recording.audioBlob) {
       // 统一使用mp3扩展名以提高兼容性
-      const userInput = window.prompt('给这段录音起个名字（可选）', '');
+              const userInput = window.prompt('给这段录音起个名字（可选）\n\n支持：中英文、数字、空格、连字符(-_)、括号()[]', '');
       const customName = userInput ? sanitizeCustomName(userInput) : '';
       const fileName = `recording_${recording.id}.mp3`;
       const result = await uploadAudioFile(recording.audioBlob, recording.id, fileName, customName);
@@ -588,10 +588,10 @@ const RecordComponent = () => {
       // 如果录音还没有上传到云端，先上传
       if (!recording.uploaded && recording.audioBlob) {
         // 显示上传中提示
-        alert('正在上传录音到云端，请稍候...');
+        // alert('正在上传录音到云端，请稍候...');
         
         // 统一使用mp3扩展名以提高兼容性
-        const userInput = window.prompt('给这段录音起个名字（可选）', '');
+        const userInput = window.prompt('给这段录音起个名字（可选）\n\n支持：中英文、数字、空格、连字符(-_)、括号()[]', '');
         const customName = userInput ? sanitizeCustomName(userInput) : '';
         const fileName = `recording_${recording.id}.mp3`;
         const uploadResult = await uploadAudioFile(recording.audioBlob, recording.id, fileName, customName);
