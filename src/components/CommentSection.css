@@ -966,6 +966,8 @@
   }
 
   .user-info-section {
+    flex-direction: column;
+    gap: 10px;
     padding: 12px;
   }
 

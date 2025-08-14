@@ -29,7 +29,7 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
   const avatarImages = [
     
     'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx1.png',
-    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/imageskttx2.png',
+    'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx2.png',
     'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx3.png',
     'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx4.png',
     'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/kttx5.png',
