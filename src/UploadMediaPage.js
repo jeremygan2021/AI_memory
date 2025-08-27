@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import './UploadMediaPage.css'; // 复用现有样式
 import { validateUserCode } from './utils/userCode';
  import { isWechatMiniProgram } from './utils/environment';
-import { buildUploadFileName, sanitizeCustomName, setCustomName } from './utils/displayName';
+import { buildUploadFileName, sanitizeCustomName, setCustomName, setCustomNameWithCloudSync } from './utils/displayName';
 
 const buildRecordingPath = (sessionId, userCode) => {
   return `recordings/${userCode}/${sessionId}`;
@@ -29,6 +29,7 @@ const UploadMediaPage = () => {
   // 长按视频相关状态
   const [longPressTimer, setLongPressTimer] = useState(null);
   const [isLongPress, setIsLongPress] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
@@ -227,6 +228,17 @@ const UploadMediaPage = () => {
       document.removeEventListener('click', preventDoubleClick);
     };
   }, [isMobile]);
+
+  // 监听自定义名称更新事件
+  useEffect(() => {
+    const handleCustomNamesUpdated = (event) => {
+      console.log('收到自定义名称更新事件:', event.detail);
+      setRefreshTrigger(prev => prev + 1); // 触发重新加载
+    };
+
+    window.addEventListener('customNamesUpdated', handleCustomNamesUpdated);
+    return () => window.removeEventListener('customNamesUpdated', handleCustomNamesUpdated);
+  }, []);
 
   // 组件卸载时清理全屏预览状态
   useEffect(() => {
@@ -527,12 +539,12 @@ const UploadMediaPage = () => {
           setUploadedFiles(prev => [...prev, newFile]);
           
           // 上传到服务器
-           uploadMediaFile(processedFile, tempId, customName).then(result => {
+           uploadMediaFile(processedFile, tempId, customName).then(async result => {
             if (result.success) {
               // 显示上传成功提示
               alert(`图片上传成功！`);
                if (result.objectKey && customName) {
-                 setCustomName(result.objectKey, customName);
+                 await setCustomNameWithCloudSync(result.objectKey, customName, userCode, sessionid);
                }
               // 重新加载云端文件
               loadCloudMediaFiles();
@@ -569,7 +581,7 @@ const UploadMediaPage = () => {
         setUploadedFiles(prev => [...prev, newFile]);
         
         // 上传到服务器
-        uploadMediaFile(processedFile, tempId, customName).then(result => {
+        uploadMediaFile(processedFile, tempId, customName).then(async result => {
           if (result.success) {
             // 显示上传成功提示，包含转换信息
             const successMessage = convertedFormat ? 
@@ -577,7 +589,7 @@ const UploadMediaPage = () => {
               `视频上传成功！`;
             alert(successMessage);
             if (result.objectKey && customName) {
-              setCustomName(result.objectKey, customName);
+              await setCustomNameWithCloudSync(result.objectKey, customName, userCode, sessionid);
             }
             // 重新加载云端文件
             loadCloudMediaFiles();
@@ -1049,7 +1061,7 @@ const UploadMediaPage = () => {
     if (userCode) {
       loadCloudMediaFiles();
     }
-  }, [userCode]);
+  }, [userCode, refreshTrigger]);
 
   // 智能跳转到播放页面
   const goToPlayerPage = async () => {

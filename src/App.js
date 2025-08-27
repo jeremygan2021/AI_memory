@@ -19,7 +19,10 @@ import NavigationTest from './components/NavigationTest';
 import MiniProgramLayout from './components/MiniProgramLayout';
 import UserProfilePage from './components/UserProfilePage';
 import CopyTest from './components/CopyTest';
+import ThemeCloudTest from './components/ThemeCloudTest';
 import { isWechatMiniProgram, isH5Environment } from './utils/environment';
+import { syncThemeOnStartup } from './themes/themeConfig';
+import { syncCustomNamesFromCloud, syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
 
 // 折线图数据
 const chartData = [
@@ -222,6 +225,8 @@ const RecordPage = () => {
 const HomePage = () => {
   const navigate = useNavigate();
   const { userid } = useParams();
+  const [fileNameSyncTrigger, setFileNameSyncTrigger] = useState(0);
+  const [hasInitialSync, setHasInitialSync] = useState(false);
   const [userCode, setUserCode] = useState('');
   
   // 大图预览相关状态
@@ -351,9 +356,26 @@ const HomePage = () => {
     if (userid) {
       // 验证用户ID格式（4字符）
       if (userid.length === 4 && /^[A-Z0-9]{4}$/.test(userid.toUpperCase())) {
-        setUserCode(userid.toUpperCase());
+        const upperUserCode = userid.toUpperCase();
+        setUserCode(upperUserCode);
         // 同时存储到localStorage作为备份
-        localStorage.setItem('currentUserCode', userid.toUpperCase());
+        localStorage.setItem('currentUserCode', upperUserCode);
+        
+        // 用户代码更新后，同步所有会话的文件名映射
+        if (!hasInitialSync) {
+          syncAllCustomNamesFromCloud(upperUserCode).then(result => {
+            console.log('用户登录后文件名映射同步结果:', result);
+            if (result.success) {
+              console.log(`✅ 用户登录后已从 ${result.sessionsCount} 个会话同步文件名映射`);
+              // 手动触发一次文件重新加载，确保立即更新显示
+              setFileNameSyncTrigger(prev => prev + 1);
+            }
+            setHasInitialSync(true);
+          }).catch(error => {
+            console.warn('⚠️ 用户登录后文件名映射同步失败:', error);
+            setHasInitialSync(true);
+          });
+        }
       } else {
         // 如果URL中的用户ID格式不正确，跳转到默认页面
         navigate('/');
@@ -625,9 +647,15 @@ const HomePage = () => {
         const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
         if (!isImage && !isVideo) return null;
         const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
+        
+        // 获取显示名称：优先使用自定义名称，然后从文件名推导
+        const customName = getCustomName(objectKey);
+        const displayName = customName || deriveDisplayNameFromFileName(fileName);
+        
         return {
           id: fileName,
-          name: fileName,
+          name: displayName, // 使用自定义名称或推导的显示名称
+          fileName: fileName, // 保留原始文件名
           preview: ossUrl, // 直接用OSS直链
           ossUrl,
           type: isImage ? 'image' : 'video',
@@ -651,10 +679,44 @@ const HomePage = () => {
     }
   }, [userCode]);
 
-  // 删除localStorage监听，只加载云端
+  // 用户代码确定后，执行文件名同步（仅执行一次）
   useEffect(() => {
-    loadCloudMediaFiles();
-  }, [loadCloudMediaFiles]);
+    if (userCode && !hasInitialSync) {
+      console.log('HomePage: 开始初始文件名映射同步...');
+      syncAllCustomNamesFromCloud(userCode).then(result => {
+        console.log('HomePage: 初始文件名映射同步结果:', result);
+        if (result.success) {
+          console.log(`✅ HomePage: 已从 ${result.sessionsCount} 个会话同步文件名映射`);
+          setFileNameSyncTrigger(prev => prev + 1);
+        }
+        setHasInitialSync(true);
+      }).catch(error => {
+        console.warn('⚠️ HomePage: 初始文件名映射同步失败:', error);
+        setHasInitialSync(true);
+        // 即使同步失败，也要加载文件（只是不会有自定义名称）
+        setFileNameSyncTrigger(prev => prev + 1);
+      });
+    }
+  }, [userCode, hasInitialSync]);
+
+  // 删除localStorage监听，只加载云端 - 只在同步完成后或触发器更新时加载
+  useEffect(() => {
+    if (hasInitialSync || fileNameSyncTrigger > 0) {
+      loadCloudMediaFiles();
+    }
+  }, [loadCloudMediaFiles, fileNameSyncTrigger, hasInitialSync]);
+
+  // 监听自定义名称更新事件
+  useEffect(() => {
+    const handleCustomNamesUpdated = (event) => {
+      console.log('主页收到自定义名称更新事件:', event.detail);
+      // 触发文件名同步标记，这会重新加载文件
+      setFileNameSyncTrigger(prev => prev + 1);
+    };
+
+    window.addEventListener('customNamesUpdated', handleCustomNamesUpdated);
+    return () => window.removeEventListener('customNamesUpdated', handleCustomNamesUpdated);
+  }, []);
 
   // 判断是否为平板（iPad等，竖屏/横屏都覆盖）
   useEffect(() => {
@@ -1027,6 +1089,37 @@ const HomePage = () => {
 
 
 function App() {
+  // 应用启动时同步主题设置和文件名映射
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        console.log('应用启动，初始化设置...');
+        
+        // 1. 同步主题设置
+        const themeResult = await syncThemeOnStartup();
+        console.log('主题初始化结果:', themeResult);
+        
+        if (themeResult.success) {
+          if (themeResult.source === 'cloud') {
+            console.log(`✅ 已从云端同步主题: ${themeResult.themeId}`);
+          } else {
+            console.log(`✅ 使用本地主题: ${themeResult.themeId}`);
+          }
+        } else {
+          console.warn('⚠️ 主题初始化失败:', themeResult.error);
+        }
+
+        // 文件名映射同步移至HomePage组件中执行，避免时序问题
+        console.log('文件名映射同步将在具体页面组件中执行');
+        
+      } catch (error) {
+        console.error('❌ 应用初始化异常:', error);
+      }
+    };
+
+    initializeApp();
+  }, []);
+
   return (
     <MiniProgramLayout>
       <Routes>
@@ -1044,6 +1137,7 @@ function App() {
         <Route path="/environment-test" element={<EnvironmentTest />} />
         <Route path="/navigation-test" element={<NavigationTest />} />
         <Route path="/copy-test" element={<CopyTest />} />
+        <Route path="/theme-cloud-test" element={<ThemeCloudTest />} />
         <Route path="/:userid/profile" element={<UserProfilePage />} />
       </Routes>
     </MiniProgramLayout>

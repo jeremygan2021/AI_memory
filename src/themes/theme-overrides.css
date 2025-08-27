@@ -2,7 +2,10 @@
 
 /* 播放页面主题化 */
 .player-page {
-  background-image: var(--theme-backgroundImage, url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png'));
+  background-image: var(--theme-backgroundImage);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* 头部导航主题化 */

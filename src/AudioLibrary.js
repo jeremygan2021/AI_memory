@@ -12,7 +12,8 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
 
 const AudioLibrary = () => {
   const navigate = useNavigate();
-  const { userid } = useParams(); // 从URL获取用户ID
+  const { userid } = useParams();
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // 从URL获取用户ID
   const [audioSessions, setAudioSessions] = useState([]);
   const [cloudFiles, setCloudFiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +72,18 @@ const AudioLibrary = () => {
       loadCloudAudioFiles();
       loadCloudMediaFiles(); // 改为加载云端媒体文件
     }
-  }, [userCode]);
+  }, [userCode, refreshTrigger]);
+
+  // 监听自定义名称更新事件
+  useEffect(() => {
+    const handleCustomNamesUpdated = (event) => {
+      console.log('收到自定义名称更新事件:', event.detail);
+      setRefreshTrigger(prev => prev + 1); // 触发重新加载
+    };
+
+    window.addEventListener('customNamesUpdated', handleCustomNamesUpdated);
+    return () => window.removeEventListener('customNamesUpdated', handleCustomNamesUpdated);
+  }, []);
 
   // 加载云端媒体文件（只加载当前userCode的图片和视频）
   const loadCloudMediaFiles = async () => {

@@ -150,6 +150,21 @@ const PlayerPage = () => {
     }
   }, [userid, navigate]);
 
+  // 监听主题变化事件
+  useEffect(() => {
+    const handleThemeChanged = (event) => {
+      const { theme } = event.detail;
+      console.log('PlayerPage: 收到主题变化事件:', theme);
+      setCurrentTheme(theme);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChanged);
+    
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChanged);
+    };
+  }, []);
+
   // 主题切换处理
   const handleThemeChange = (newTheme) => {
     setCurrentTheme(newTheme);
@@ -1122,7 +1137,12 @@ const PlayerPage = () => {
       <main className="player-main">
         <div className="player-container">
           {/* 大象图标 - 右上角溢出一半 */}
-          <img src={currentTheme.assets.elephantIcon} alt="背景" className="elephant-icon" />
+          <img 
+            src={currentTheme.assets?.elephantIcon || '/asset/elephant.png'} 
+            alt="背景" 
+            className="elephant-icon"
+            key={currentTheme.id} // 强制重新渲染
+          />
           
           {/* 头像图标 - 上边缘居中溢出一半 */}
           <div className="avatar-icon">

@@ -28,6 +28,21 @@ const VideoPlayerPage = () => {
   const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/recordings/';
   // 注意：这里的ossUrl仅作为备用，实际URL从云端加载时动态构建
 
+  // 监听主题变化事件
+  useEffect(() => {
+    const handleThemeChanged = (event) => {
+      const { theme } = event.detail;
+      console.log('VideoPlayerPage: 收到主题变化事件:', theme);
+      setCurrentTheme(theme);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChanged);
+    
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChanged);
+    };
+  }, []);
+
   // 主题切换处理
   const handleThemeChange = (newTheme) => {
     setCurrentTheme(newTheme);
@@ -576,7 +591,12 @@ const VideoPlayerPage = () => {
       <div className="player-main">
         <div className="player-container">
           {/* 大象图标 - 右上角溢出一半 */}
-          <img src={currentTheme.assets.elephantIcon} alt="背景" className="elephant-icon" />
+          <img 
+            src={currentTheme.assets?.elephantIcon || '/asset/elephant.png'} 
+            alt="背景" 
+            className="elephant-icon"
+            key={currentTheme.id} // 强制重新渲染
+          />
           
           {/* 头像图标 - 上边缘居中溢出一半 */}
           <div className="avatar-icon">

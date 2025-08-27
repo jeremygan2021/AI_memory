@@ -11,18 +11,44 @@ const ThemeSwitcher = ({ onThemeChange }) => {
   const btnRef = useRef(null);
 
   useEffect(() => {
-    // 初始化应用当前主题
-    applyTheme(currentTheme.id);
+    // 初始化应用当前主题（不保存到云端，避免重复保存）
+    applyTheme(currentTheme.id, { saveToCloud: false });
+
+    // 监听外部主题变化事件
+    const handleExternalThemeChange = (event) => {
+      const { theme } = event.detail;
+      console.log('ThemeSwitcher: 收到外部主题变化事件:', theme);
+      setCurrentTheme(theme);
+    };
+
+    window.addEventListener('themeChanged', handleExternalThemeChange);
+    
+    return () => {
+      window.removeEventListener('themeChanged', handleExternalThemeChange);
+    };
   }, []);
 
-  const handleThemeChange = (themeId) => {
-    const newTheme = applyTheme(themeId);
-    setCurrentTheme(newTheme);
-    setIsOpen(false);
-    
-    // 通知父组件主题已更改
-    if (onThemeChange) {
-      onThemeChange(newTheme);
+  const handleThemeChange = async (themeId) => {
+    try {
+      // 应用主题（包含云端保存）
+      const newTheme = await applyTheme(themeId);
+      setCurrentTheme(newTheme);
+      setIsOpen(false);
+      
+      // 通知父组件主题已更改
+      if (onThemeChange) {
+        onThemeChange(newTheme);
+      }
+    } catch (error) {
+      console.error('主题切换失败:', error);
+      // 即使云端保存失败，也要更新本地主题
+      const newTheme = await applyTheme(themeId, { saveToCloud: false });
+      setCurrentTheme(newTheme);
+      setIsOpen(false);
+      
+      if (onThemeChange) {
+        onThemeChange(newTheme);
+      }
     }
   };
 
@@ -106,7 +132,7 @@ const ThemeSwitcher = ({ onThemeChange }) => {
             ))}
           </div>
           <div className="theme-panel-footer">
-            <p>主题设置会自动保存</p>
+            <p>主题设置会自动保存到云端</p>
           </div>
         </div>,
         document.body

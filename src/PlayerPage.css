@@ -276,7 +276,7 @@
   padding-left: max(20px, var(--safe-area-inset-left));
   padding-right: max(20px, var(--safe-area-inset-right));
   padding-bottom: max(40px, var(--safe-area-inset-bottom));
-  background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/asset/background2.png');
+  background-image: var(--theme-backgroundImage);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

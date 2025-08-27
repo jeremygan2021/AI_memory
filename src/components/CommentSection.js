@@ -165,7 +165,19 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
             if (commentResponse.ok) {
               const commentData = await commentResponse.json();
               console.log('加载的评论数据:', commentData);
-              setComments(commentData.comments || commentData || []);
+              
+              // 确保comments总是一个数组
+              let commentsArray = [];
+              if (commentData && commentData.comments && Array.isArray(commentData.comments)) {
+                commentsArray = commentData.comments;
+              } else if (commentData && Array.isArray(commentData)) {
+                commentsArray = commentData;
+              } else {
+                console.warn('评论数据格式不正确:', commentData);
+                commentsArray = [];
+              }
+              
+              setComments(commentsArray);
             } else {
               console.warn('评论文件获取失败:', commentResponse.status);
               setComments([]);
@@ -187,7 +199,19 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
       // 降级到本地存储
       const savedComments = localStorage.getItem(`comments_${recordingId}`);
       if (savedComments) {
-        setComments(JSON.parse(savedComments));
+        try {
+          const parsedComments = JSON.parse(savedComments);
+          // 确保是数组
+          if (Array.isArray(parsedComments)) {
+            setComments(parsedComments);
+          } else {
+            console.warn('本地存储的评论数据不是数组:', parsedComments);
+            setComments([]);
+          }
+        } catch (parseError) {
+          console.error('解析本地评论数据失败:', parseError);
+          setComments([]);
+        }
       } else {
         setComments([]);
       }
@@ -536,7 +560,7 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
 
       {/* 评论列表 */}
       <div className="comments-list">
-        {comments.length === 0 ? (
+        {!Array.isArray(comments) || comments.length === 0 ? (
           <div className="no-comments">
             <div className="no-comments-icon">💭</div>
             <p>还没有评论，快来发表第一条评论吧！</p>

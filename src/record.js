@@ -6,7 +6,7 @@ import AIMusicGenerator from './components/AIMusicGenerator';
 import { getUserCode, buildRecordingPath, buildSessionStorageKey, validateUserCode } from './utils/userCode';
 import recordButtonImg from './asset/record_button.png';
 import mic_icon from './asset/icon/mic.png'
-import { buildUploadFileName, sanitizeCustomName, setCustomName, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
+import { buildUploadFileName, sanitizeCustomName, setCustomName, setCustomNameWithCloudSync, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
 
 
 // API配置
@@ -338,7 +338,7 @@ const RecordComponent = () => {
       const fileName = `recording_${recording.id}.mp3`;
       const result = await uploadAudioFile(recording.audioBlob, recording.id, fileName, customName);
       if (result && result.success && result.objectKey && customName) {
-        setCustomName(result.objectKey, customName);
+        await setCustomNameWithCloudSync(result.objectKey, customName, userCode, id);
       }
     }
   };
@@ -607,7 +607,7 @@ const RecordComponent = () => {
           };
           console.log('录音上传成功，已绑定到会话');
           if (uploadResult.objectKey && customName) {
-            setCustomName(uploadResult.objectKey, customName);
+            await setCustomNameWithCloudSync(uploadResult.objectKey, customName, userCode, id);
           }
         } else {
           // 上传失败，但仍然可以绑定（本地存储）

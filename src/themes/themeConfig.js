@@ -1,4 +1,7 @@
 // 主题配置文件
+import { saveThemeToCloud, loadThemeFromCloud, syncThemeSettings } from '../services/themeCloudService.js';
+import { getUserCode } from '../utils/userCode.js';
+
 export const themes = {
   // 默认绿色主题（现有的）
   default: {
@@ -241,24 +244,70 @@ export const themes = {
 };
 
 // 主题工具函数
-export const applyTheme = (themeId) => {
+export const applyTheme = async (themeId, options = {}) => {
   const theme = themes[themeId] || themes.default;
   const root = document.documentElement;
+  
+  console.log('开始应用主题:', themeId, theme);
+  
+  // 强制清除所有现有的主题变量
+  const existingVars = Array.from(root.style).filter(prop => prop.startsWith('--theme-'));
+  existingVars.forEach(prop => {
+    root.style.removeProperty(prop);
+  });
+  
+  // 等待一帧确保清除完成
+  await new Promise(resolve => requestAnimationFrame(resolve));
   
   // 应用CSS变量
   Object.entries(theme.colors).forEach(([key, value]) => {
     root.style.setProperty(`--theme-${key}`, value);
+    console.log(`设置CSS变量: --theme-${key} = ${value}`);
   });
   
   // 新增：设置背景图片变量
-if (theme.assets && theme.assets.backgroundImage) {
-  root.style.setProperty('--theme-backgroundImage', `url('${theme.assets.backgroundImage}')`);
-} else {
-  root.style.setProperty('--theme-backgroundImage', '');
-}
+  if (theme.assets && theme.assets.backgroundImage) {
+    root.style.setProperty('--theme-backgroundImage', `url('${theme.assets.backgroundImage}')`);
+    console.log(`设置背景图片: --theme-backgroundImage = url('${theme.assets.backgroundImage}')`);
+  } else {
+    root.style.setProperty('--theme-backgroundImage', '');
+  }
+
+  // 强制触发重绘和重排
+  root.style.setProperty('--theme-update-timestamp', Date.now().toString());
+  
+  // 等待两帧确保所有变量都已应用
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  
+  console.log('主题CSS变量应用完成:', themeId);
 
   // 保存到localStorage
   localStorage.setItem('selectedTheme', themeId);
+  
+  // 保存到云端（如果启用）
+  if (options.saveToCloud !== false) {
+    try {
+      const userCode = getUserCode();
+      const sessionId = options.sessionId || 'global';
+      
+      if (userCode) {
+        console.log('保存主题到云端:', { themeId, userCode, sessionId });
+        
+        // 添加去重逻辑，避免重复保存
+        const saveResult = await saveThemeToCloud(themeId, userCode, sessionId);
+        
+        if (saveResult.success) {
+          console.log('主题云端保存成功:', saveResult.message);
+        } else {
+          console.warn('主题云端保存失败:', saveResult.message);
+        }
+      } else {
+        console.log('用户代码不存在，跳过云端保存');
+      }
+    } catch (error) {
+      console.error('主题云端保存异常:', error);
+    }
+  }
   
   // 触发主题变化事件，让组件能够响应
   window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
@@ -275,4 +324,89 @@ export const getCurrentTheme = () => {
 // 获取所有主题列表
 export const getAllThemes = () => {
   return Object.values(themes);
+};
+
+// 从云端加载主题设置
+export const loadThemeFromCloudAndApply = async (userCode, sessionId = 'global') => {
+  try {
+    const result = await loadThemeFromCloud(userCode, sessionId);
+    
+    if (result.success && result.themeId) {
+      // 应用加载的主题，但不再次保存到云端
+      await applyTheme(result.themeId, { saveToCloud: false });
+      return result;
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('加载云端主题失败:', error);
+    return {
+      success: false,
+      error: error.message,
+      fallback: 'local'
+    };
+  }
+};
+
+// 同步主题设置（应用启动时调用）
+export const syncThemeOnStartup = async () => {
+  try {
+    const userCode = getUserCode();
+    
+    if (!userCode) {
+      console.log('用户代码不存在，使用本地主题');
+      const localTheme = localStorage.getItem('selectedTheme') || 'default';
+      await applyTheme(localTheme, { saveToCloud: false });
+      return { success: true, source: 'local', themeId: localTheme };
+    }
+
+    console.log('应用启动时同步主题设置...', userCode);
+    const syncResult = await syncThemeSettings(userCode, 'global');
+    
+    if (syncResult.success && syncResult.themeId) {
+      // 应用同步的主题，不再次保存到云端（避免循环）
+      await applyTheme(syncResult.themeId, { saveToCloud: false });
+    }
+    
+    return syncResult;
+  } catch (error) {
+    console.error('启动时同步主题失败:', error);
+    
+    // 降级到本地主题
+    const localTheme = localStorage.getItem('selectedTheme') || 'default';
+    await applyTheme(localTheme, { saveToCloud: false });
+    
+    return {
+      success: false,
+      error: error.message,
+      themeId: localTheme,
+      source: 'local'
+    };
+  }
+};
+
+// 手动触发主题云端同步
+export const triggerThemeSync = async (sessionId = 'global') => {
+  try {
+    const userCode = getUserCode();
+    
+    if (!userCode) {
+      return { success: false, message: '用户代码不存在' };
+    }
+
+    console.log('手动触发主题同步...', { userCode, sessionId });
+    const syncResult = await syncThemeSettings(userCode, sessionId);
+    
+    if (syncResult.success && syncResult.themeId) {
+      await applyTheme(syncResult.themeId, { saveToCloud: false });
+    }
+    
+    return syncResult;
+  } catch (error) {
+    console.error('手动同步主题失败:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 }; 
