@@ -2,24 +2,25 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import './common.css';
 import './index.css';
-import FamilyPage from './FamilyPage';
-import RecordComponent from './record';
-import PlayerPage from './PlayerPage';
-import AudioLibrary from './AudioLibrary';
-import ModernSearchBox from './components/ModernSearchBox';
-import UploadMediaPage from './UploadMediaPage';
-import VideoPlayerPage from './VideoPlayerPage';
-import ImageViewerPage from './ImageViewerPage';
-import CommentTest from './components/CommentTest';
-import MemoryTimeline from './components/MemoryTimeline';
-import MiniProgramTabBar from './components/MiniProgramTabBar';
-import UserCodeInput from './components/UserCodeInput';
-import EnvironmentTest from './components/EnvironmentTest';
-import NavigationTest from './components/NavigationTest';
-import MiniProgramLayout from './components/MiniProgramLayout';
-import UserProfilePage from './components/UserProfilePage';
-import CopyTest from './components/CopyTest';
-import ThemeCloudTest from './components/ThemeCloudTest';
+import FamilyPage from './pages/Family/FamilyPage';
+import RecordComponent from './pages/Record/record';
+import PlayerPage from './pages/Player/PlayerPage';
+import AudioLibrary from './pages/AudioLibrary/AudioLibrary';
+import ModernSearchBox from './components/common/ModernSearchBox';
+import UploadMediaPage from './pages/UploadMedia/UploadMediaPage';
+import VideoPlayerPage from './pages/VideoPlayer/VideoPlayerPage';
+import ImageViewerPage from './pages/ImageViewer/ImageViewerPage';
+import CommentTest from './components/utils/CommentTest';
+import MemoryTimeline from './components/common/MemoryTimeline'; 
+import MiniProgramTabBar from './components/navigation/MiniProgramTabBar';
+import UserCodeInput from './components/common/UserCodeInput';
+import EnvironmentTest from './components/utils/EnvironmentTest';
+import NavigationTest from './components/utils/NavigationTest';
+import MiniProgramLayout from './components/navigation/MiniProgramLayout';
+import UserProfilePage from './pages/UserProfile/UserProfilePage';
+import CopyTest from './components/utils/CopyTest';
+import ThemeCloudTest from './components/theme/ThemeCloudTest';
+import AIConversationPage from './pages/AIConversation/AIConversationPage';
 import { isWechatMiniProgram, isH5Environment } from './utils/environment';
 import { syncThemeOnStartup } from './themes/themeConfig';
 import { syncCustomNamesFromCloud, syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
@@ -235,15 +236,9 @@ const HomePage = () => {
   const [searchValue, setSearchValue] = useState('');
   // 孩子年龄相关状态 (以月为单位)
   const [babyAgeMonths, setBabyAgeMonths] = useState(18);
-  // 活动列表状态
-  const [activities, setActivities] = useState([
-    { id: 1, text: '到公园散步', completed: false },
-    { id: 2, text: '一起阅读绘本故事', completed: false },
-    { id: 3, text: '玩扔球游戏', completed: false }
-  ]);
-  // 新活动输入状态
-  const [newActivity, setNewActivity] = useState('');
-  const [showAddInput, setShowAddInput] = useState(false);
+  // 书籍相关状态（简化版，主要用于统计）
+  const [booksCount, setBooksCount] = useState(1);
+  const [totalConversations, setTotalConversations] = useState(0);
   // 移动端相册下拉框状态
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [showAllVideos, setShowAllVideos] = useState(false);
@@ -498,51 +493,12 @@ const HomePage = () => {
     }
   }, [babyAgeMonths]);
 
-  // 添加新活动
-  const handleAddActivity = useCallback(() => {
-    if (newActivity.trim()) {
-      const newItem = {
-        id: Math.max(...activities.map(a => a.id), 0) + 1,
-        text: newActivity.trim(),
-        completed: false
-      };
-      setActivities([...activities, newItem]);
-      setNewActivity('');
-      setShowAddInput(false);
+  // 跳转到AI对话页面
+  const goToAIConversation = useCallback(() => {
+    if (userCode) {
+      navigate(`/${userCode}/ai-conversation`);
     }
-  }, [newActivity, activities]);
-
-  // 显示添加输入框
-  const showAddActivityInput = useCallback(() => {
-    setShowAddInput(true);
-  }, []);
-
-  // 取消添加
-  const cancelAddActivity = useCallback(() => {
-    setNewActivity('');
-    setShowAddInput(false);
-  }, []);
-
-  // 处理活动状态变化
-  const handleActivityToggle = useCallback((id) => {
-    setActivities(activities.map(activity => 
-      activity.id === id ? { ...activity, completed: !activity.completed } : activity
-    ));
-  }, [activities]);
-
-  // 删除活动
-  const handleActivityDelete = useCallback((id) => {
-    setActivities(activities.filter(activity => activity.id !== id));
-  }, [activities]);
-
-  // 处理输入框回车
-  const handleActivityInputKeyPress = useCallback((e) => {
-    if (e.key === 'Enter') {
-      handleAddActivity();
-    } else if (e.key === 'Escape') {
-      cancelAddActivity();
-    }
-  }, [handleAddActivity, cancelAddActivity]);
+  }, [userCode, navigate]);
 
   // 切换相册显示状态
   const togglePhotoDisplay = useCallback(() => {
@@ -893,54 +849,35 @@ const HomePage = () => {
             </button>
           </div>
 
-          {/* 亲子活动 */}
-          <div className="parent-activity">
-            <div className="activity-title">每天的亲子活动</div>
-            <ul className="activity-list">
-              {activities.map((activity) => (
-                <li key={activity.id} className={activity.completed ? 'completed' : ''}>
-                  <input 
-                    type="checkbox" 
-                    checked={activity.completed}
-                    onChange={() => handleActivityToggle(activity.id)}
-                  /> 
-                  <span className="activity-text">{activity.text}</span>
-                  <button 
-                    className="delete-activity-btn"
-                    onClick={() => handleActivityDelete(activity.id)}
-                    title="删除活动"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-              {showAddInput && (
-                <li className="add-activity-item">
-                  <input 
-                    type="text"
-                    className="add-activity-input"
-                    placeholder="输入新的活动..."
-                    value={newActivity}
-                    onChange={(e) => setNewActivity(e.target.value)}
-                    onKeyPress={handleActivityInputKeyPress}
-                    autoFocus
-                  />
-                  <div className="add-activity-buttons">
-                    <button className="confirm-btn" onClick={handleAddActivity}>✓</button>
-                    <button className="cancel-btn" onClick={cancelAddActivity}>×</button>
-                  </div>
-                </li>
-              )}
-            </ul>
-            {!showAddInput && (
-              <button className="activity-add" onClick={showAddActivityInput}>+</button>
-            )}
-          </div>
-
-          {/* 亲子活动时长图表 */}
-          <div className="activity-chart">
-            <div className="chart-title">亲子活动时长</div>
-            <LineChart />
+          {/* 回忆书籍模块 - 简化为入口卡片 */}
+          <div className="book-memory-card" onClick={goToAIConversation}>
+            <div className="book-card-header">
+              <div className="book-card-title">
+                <span className="book-icon">📚</span>
+                回忆书籍
+              </div>
+              <div className="book-card-stats">
+                <span className="stat-item">
+                  <span className="stat-number">{booksCount}</span>
+                  <span className="stat-label">书籍</span>
+                </span>
+                <span className="stat-item">
+                  <span className="stat-number">{totalConversations}</span>
+                  <span className="stat-label">对话</span>
+                </span>
+              </div>
+            </div>
+            <div className="book-card-content">
+              <p className="book-card-desc">导入书籍内容，与AI进行智能对话和内容检索</p>
+              <div className="book-card-features">
+                <span className="feature-tag">📖 书籍导入</span>
+                <span className="feature-tag">🤖 AI对话</span>
+                {/* <span className="feature-tag">🔍 内容检索</span> */}
+              </div>
+            </div>
+            <button className="book-card-action">
+              开始AI对话
+            </button>
           </div>
         </div>
 
@@ -1128,11 +1065,13 @@ function App() {
         <Route path="/family" element={<FamilyPage />} />
         <Route path="/:userid/audio-library" element={<AudioLibrary />} />
         <Route path="/:userid/gallery" element={<UploadMediaPage />} />
-        <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
-        <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
-        <Route path="/:userid/image-viewer/:sessionid/:imageid" element={<ImageViewerPage />} />
-        <Route path="/:userid/:id" element={<RecordPage />} />
-        <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
+                 <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
+         <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
+         <Route path="/:userid/image-viewer/:sessionid/:imageid" element={<ImageViewerPage />} />
+         <Route path="/:userid/ai-conversation" element={<AIConversationPage />} />
+         <Route path="/:userid/ai-conversation/:bookId" element={<AIConversationPage />} />
+         <Route path="/:userid/:id" element={<RecordPage />} />
+         <Route path="/:userid/:id/play/:recordingId" element={<PlayerPage />} />
         <Route path="/comment-test" element={<CommentTest />} />
         <Route path="/environment-test" element={<EnvironmentTest />} />
         <Route path="/navigation-test" element={<NavigationTest />} />

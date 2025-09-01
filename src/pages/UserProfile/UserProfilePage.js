@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { isWechatMiniProgram } from '../utils/environment';
-import SvgIcon from './SvgIcons';
+import { isWechatMiniProgram } from '../../utils/environment';
+import SvgIcon from '../../components/common/SvgIcons';
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAllThemes, getCurrentTheme, applyTheme } from '../themes/themeConfig';
+import { getAllThemes, getCurrentTheme, applyTheme } from '../../themes/themeConfig';
 import './ThemeSwitcher.css';
 import { createPortal } from 'react-dom';
 

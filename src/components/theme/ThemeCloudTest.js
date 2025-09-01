@@ -4,13 +4,13 @@ import {
   triggerThemeSync, 
   applyTheme, 
   getAllThemes 
-} from '../themes/themeConfig';
+} from '../../themes/themeConfig';
 import { 
   saveThemeToCloud, 
   loadThemeFromCloud, 
   checkThemeCloudUpdate 
-} from '../services/themeCloudService';
-import { getUserCode } from '../utils/userCode';
+} from '../../services/themeCloudService';
+import { getUserCode } from '../../utils/userCode';
 import ThemeSwitcher from './ThemeSwitcher';
 
 const ThemeCloudTest = () => {

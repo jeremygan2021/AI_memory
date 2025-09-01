@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MiniProgramTabBar from './MiniProgramTabBar';
-import { isWechatMiniProgram } from '../utils/environment';
+import { isWechatMiniProgram } from '../../utils/environment';
 import './MiniProgramLayout.css';
 
 const MiniProgramLayout = ({ children }) => {

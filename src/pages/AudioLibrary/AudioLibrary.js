@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './AudioLibrary.css';
-import { getUserCode, validateUserCode } from './utils/userCode';
-import SvgIcon from './components/SvgIcons';
-import ModernSearchBox from './components/ModernSearchBox';
-import { getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
+import { getUserCode, validateUserCode } from '../../utils/userCode';
+import SvgIcon from '../../components/common/SvgIcons';
+import ModernSearchBox from '../../components/common/ModernSearchBox';
+import { getCustomName, deriveDisplayNameFromFileName } from '../../utils/displayName';
 
 // API配置
 

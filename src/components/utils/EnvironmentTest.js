@@ -1,5 +1,5 @@
 import React from 'react';
-import { getDeviceInfo, isWechatMiniProgram, isH5Environment } from '../utils/environment';
+import { getDeviceInfo, isWechatMiniProgram, isH5Environment } from '../../utils/environment';
 import './EnvironmentTest.css';
 
 const EnvironmentTest = () => {

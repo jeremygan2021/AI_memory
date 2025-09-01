@@ -1,8 +1,8 @@
 // src/components/AIMusicGenerator.js
 import React, { useState } from 'react';
-import { useMusicGeneration } from '../hooks/useMusicGeneration';
-import CloudAudioSelector from './CloudAudioSelector';
-import sunoApi from '../services/sunoApi';
+import { useMusicGeneration } from '../../hooks/useMusicGeneration';
+import CloudAudioSelector from '../../pages/AudioLibrary/CloudAudioSelector';
+import sunoApi from '../../services/sunoApi';
 import './AIMusicGenerator.css';
 
 const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecordings = [], onMusicGenerated }) => {

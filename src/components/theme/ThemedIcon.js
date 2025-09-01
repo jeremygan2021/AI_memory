@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import SvgIcon from './SvgIcons';
-import { getCurrentTheme } from '../themes/themeConfig';
+import SvgIcon from '../common/SvgIcons';
+import { getCurrentTheme } from '../../themes/themeConfig';
 
 // 主题感知的图标组件
 const ThemedIcon = ({ 

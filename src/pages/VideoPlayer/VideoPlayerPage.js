@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './VideoPlayerPage.css';
-import CommentSection from './components/CommentSection';
-import ThemeSwitcher from './components/ThemeSwitcher';
-import ThemedIcon from './components/ThemedIcon';
-import { getCurrentTheme, applyTheme } from './themes/themeConfig'; 
+import CommentSection from '../../components/common/CommentSection';
+import ThemeSwitcher from '../../components/theme/ThemeSwitcher';
+import ThemedIcon from '../../components/theme/ThemedIcon';
+import { getCurrentTheme, applyTheme } from '../../themes/themeConfig'; 
 
 const VideoPlayerPage = () => {
   const { userid: userCode, sessionid: sessionId, videoid: videoId } = useParams();

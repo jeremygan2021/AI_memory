@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MemoryTimeline.css';
-import { getCustomName, deriveDisplayNameFromFileName } from '../utils/displayName';
+import { getCustomName, deriveDisplayNameFromFileName } from '../../utils/displayName';
 
 const MemoryTimeline = ({ userCode }) => {
   const navigate = useNavigate();

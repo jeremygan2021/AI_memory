@@ -1,0 +1,507 @@
+/* 回忆书籍模块样式 */
+.book-memory-module {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+}
+
+.book-module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.book-module-title {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.book-icon {
+  font-size: 28px;
+  margin-right: 10px;
+}
+
+.book-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.book-module-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  min-height: 400px;
+}
+
+/* 书籍列表区域 */
+.book-list-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.book-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.book-list-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.upload-book-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.upload-book-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.book-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.book-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.book-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.book-item.selected {
+  background: rgba(255, 215, 0, 0.3);
+  border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.book-info {
+  flex: 1;
+}
+
+.book-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.book-author {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.book-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.delete-book-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 0, 0, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.delete-book-btn:hover {
+  background: rgba(255, 0, 0, 0.5);
+  transform: scale(1.1);
+}
+
+/* 书籍详情区域 */
+.book-detail-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+}
+
+.book-detail-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.book-detail-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffd700;
+}
+
+.book-author-detail,
+.book-import-date {
+  margin: 4px 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* AI对话区域 */
+.ai-conversation-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.conversation-messages {
+  flex: 1;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.empty-conversation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.6;
+}
+
+.message {
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.message.user {
+  background: rgba(255, 255, 255, 0.2);
+  margin-left: auto;
+  text-align: right;
+}
+
+.message.ai {
+  background: rgba(255, 215, 0, 0.2);
+  margin-right: auto;
+}
+
+.message.error {
+  background: rgba(255, 0, 0, 0.2);
+  margin-right: auto;
+}
+
+.message-content {
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.message-time {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffd700;
+  animation: loading 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes loading {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.conversation-input {
+  display: flex;
+  gap: 10px;
+}
+
+.conversation-input input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 15px;
+  color: white;
+  font-size: 14px;
+}
+
+.conversation-input input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.conversation-input input:focus {
+  outline: none;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.send-btn {
+  background: #ffd700;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #ffed4e;
+  transform: translateY(-2px);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 搜索区域 */
+.search-area {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.search-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.search-input-group input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 15px;
+  color: white;
+  font-size: 14px;
+}
+
+.search-input-group input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.search-input-group input:focus {
+  outline: none;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.search-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.search-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.search-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search-results {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.search-results h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #ffd700;
+}
+
+.search-result-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-left: 3px solid #ffd700;
+}
+
+.result-content {
+  margin-bottom: 5px;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+.result-relevance {
+  font-size: 12px;
+  opacity: 0.7;
+  color: #ffd700;
+}
+
+/* 无书籍选中状态 */
+.no-book-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  text-align: center;
+}
+
+.no-book-selected .empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.no-book-selected p {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .book-module-content {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .book-module-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .book-stats {
+    gap: 15px;
+  }
+  
+  .conversation-input {
+    flex-direction: column;
+  }
+  
+  .search-input-group {
+    flex-direction: column;
+  }
+  
+  .book-list {
+    max-height: 200px;
+  }
+  
+  .conversation-messages {
+    max-height: 200px;
+  }
+}
+
+/* 滚动条样式 */
+.book-list::-webkit-scrollbar,
+.conversation-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.book-list::-webkit-scrollbar-track,
+.conversation-messages::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.book-list::-webkit-scrollbar-thumb,
+.conversation-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.book-list::-webkit-scrollbar-thumb:hover,
+.conversation-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

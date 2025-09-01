@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './PlayerPage.css';
-import './themes/theme-overrides.css';
-import { getUserCode, validateUserCode } from './utils/userCode';
-import CommentSection from './components/CommentSection';
-import ThemeSwitcher from './components/ThemeSwitcher';
-import ThemedIcon from './components/ThemedIcon';
-import { getCurrentTheme, applyTheme } from './themes/themeConfig';
-import { getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
+import '../../themes/theme-overrides.css';
+import { getUserCode, validateUserCode } from '../../utils/userCode';
+import CommentSection from '../../components/common/CommentSection';
+import ThemeSwitcher from '../../components/theme/ThemeSwitcher';
+import ThemedIcon from '../../components/theme/ThemedIcon';
+import { getCurrentTheme, applyTheme } from '../../themes/themeConfig';
+import { getCustomName, deriveDisplayNameFromFileName } from '../../utils/displayName';
 // Swiper相关引入
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';

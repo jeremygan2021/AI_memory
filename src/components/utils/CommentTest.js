@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import CommentSection from './CommentSection';
-import { applyTheme, getAllThemes } from '../themes/themeConfig';
+import CommentSection from '../common/CommentSection';
+import { applyTheme, getAllThemes } from '../../themes/themeConfig';
 
 const CommentTest = () => {
   const [currentTheme, setCurrentTheme] = useState('default');

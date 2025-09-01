@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ModernSearchBox from './components/ModernSearchBox';
+import ModernSearchBox from '../common/ModernSearchBox';
 
 const SearchBoxDemo = () => {
   const [searchValue1, setSearchValue1] = useState('');

@@ -1,5 +1,5 @@
 import React from 'react';
-import SvgIcon from './components/SvgIcons';
+import SvgIcon from '../common/SvgIcons';
 
 const SvgDemo = () => {
   return (

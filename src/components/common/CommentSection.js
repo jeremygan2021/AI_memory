@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './CommentSection.css';
-import '../themes/comment-theme-overrides.css';
-import { buildRecordingPath } from '../utils/userCode';
+import '../../themes/comment-theme-overrides.css';
+import { buildRecordingPath } from '../../utils/userCode';
 
 const CommentSection = ({ recordingId, userCode, sessionId }) => {
   const [comments, setComments] = useState([]);

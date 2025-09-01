@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './record.css';
-import UploadMediaPage from './UploadMediaPage';
-import AIMusicGenerator from './components/AIMusicGenerator';
-import { getUserCode, buildRecordingPath, buildSessionStorageKey, validateUserCode } from './utils/userCode';
-import recordButtonImg from './asset/record_button.png';
-import mic_icon from './asset/icon/mic.png'
-import { buildUploadFileName, sanitizeCustomName, setCustomName, setCustomNameWithCloudSync, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
+import UploadMediaPage from '../UploadMedia/UploadMediaPage';
+import AIMusicGenerator from '../../components/common/AIMusicGenerator';
+import { getUserCode, buildRecordingPath, buildSessionStorageKey, validateUserCode } from '../../utils/userCode';
+import recordButtonImg from '../../asset/record_button.png';
+import mic_icon from '../../asset/icon/mic.png'
+import { buildUploadFileName, sanitizeCustomName, setCustomName, setCustomNameWithCloudSync, getCustomName, deriveDisplayNameFromFileName } from '../../utils/displayName';
 
 
 // API配置

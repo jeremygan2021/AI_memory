@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './common.css';
 import './GalleryPage.css';
-import ThemedIcon from './components/ThemedIcon';
+import ThemedIcon from '../../components/theme/ThemedIcon';
 
 const GalleryPage = () => {
   const navigate = useNavigate();

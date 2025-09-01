@@ -947,24 +947,154 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   color: #3bb6a6;
 }
 
-/* 亲子活动 */
-.parent-activity {
-  background: white;
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
+/* 回忆书籍卡片样式 */
+.book-memory-card {
+  background: linear-gradient(135deg, #3bb6a6 0%, #2ea087 100%);
+  border-radius: 20px;
+  padding: 25px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 280px;
+  overflow: hidden;
 }
 
-.activity-title {
-  font-size: 1.3rem;
+.book-memory-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.book-memory-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.book-memory-card:hover::before {
+  opacity: 1;
+}
+
+.book-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.book-card-title {
+  display: flex;
+  align-items: center;
+  font-size: 48px;
+  font-weight: 700;
+  gap: 24px;
+}
+
+.book-icon {
+  font-size: 56px;
+}
+
+.book-card-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.book-card-stats .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.book-card-stats .stat-number {
+  font-size: 40px;
+  font-weight: 700;
+  color: #333;
+}
+
+.book-card-stats .stat-label {
+  font-size: 24px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.book-card-content {
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.book-card-desc {
+  font-size: 32px;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  opacity: 0.9;
+}
+
+.book-card-features {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.feature-tag {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 40px;
+  padding: 12px 24px;
+  font-size: 24px;
   font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+.book-card-action {
+  background: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 24px 48px;
   color: #3bb6a6;
-  margin-bottom: 16px;
-  text-align: left;
+  font-weight: 600;
+  font-size: 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.book-card-action:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .book-memory-card {
+    padding: 20px;
+  }
+  
+  .book-card-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .book-card-stats {
+    gap: 15px;
+  }
+  
+  .book-card-features {
+    justify-content: center;
+  }
 }
 
 .activity-title-container {

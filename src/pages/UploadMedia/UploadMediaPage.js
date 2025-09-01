@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './UploadMediaPage.css'; // 复用现有样式
-import { validateUserCode } from './utils/userCode';
- import { isWechatMiniProgram } from './utils/environment';
-import { buildUploadFileName, sanitizeCustomName, setCustomName, setCustomNameWithCloudSync } from './utils/displayName';
+import { validateUserCode } from '../../utils/userCode';
+import { isWechatMiniProgram } from '../../utils/environment';
+import { buildUploadFileName, sanitizeCustomName, setCustomName, setCustomNameWithCloudSync } from '../../utils/displayName';
 
 const buildRecordingPath = (sessionId, userCode) => {
   return `recordings/${userCode}/${sessionId}`;
