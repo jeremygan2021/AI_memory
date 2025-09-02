@@ -174,13 +174,21 @@ export const useMusicGeneration = () => {
                   console.log('从sunoData获取标题:', title);
                 }
                 
+                // 获取歌词prompt信息，优先使用item中的prompt，然后是sunoData中的prompt
+                let prompt = item.prompt || '';
+                if (!prompt && item.response?.sunoData && item.response.sunoData.length > 0) {
+                  const sunoData = item.response.sunoData[0];
+                  prompt = sunoData.prompt || sunoData.lyrics || '';
+                }
+                console.log('获取歌词prompt:', prompt);
+                
                 completedSongs.push({
                   id: item.id,
                   title: title,
                   audio_url: audioUrl,
                   image_url: item.image_url,
                   duration: duration,
-                  prompt: item.prompt || '',
+                  prompt: prompt, // 使用获取到的prompt信息
                   tags: item.tags || '',
                   model: item.model || 'V3_5'
                 });
@@ -248,6 +256,11 @@ export const useMusicGeneration = () => {
   // 保存音乐到本地
   const saveMusicLocally = useCallback(async (song, shouldUploadToCloud = false, userCode, sessionId, onProgress) => {
     try {
+      // 验证userCode是否有效
+      if (!userCode || userCode.trim() === '') {
+        throw new Error('用户代码无效，请刷新页面重试');
+      }
+      
       // 创建本地音乐记录
       const localMusic = {
         id: Date.now(),
@@ -261,19 +274,27 @@ export const useMusicGeneration = () => {
         userCode,
         sessionId,
         cloudUrl: null,
-        objectKey: null
+        objectKey: null,
+        prompt: song.prompt || '', // 添加歌词prompt信息
+        promptObjectKey: null, // 歌词文件的对象键
+        promptCloudUrl: null // 歌词文件的云端URL
       };
 
       // 保存到localStorage
       const savedMusicKey = 'ai_generated_music';
       const savedMusic = JSON.parse(localStorage.getItem(savedMusicKey) || '[]');
+      console.log('保存音乐到本地存储，当前音乐数量:', savedMusic.length);
       savedMusic.unshift(localMusic);
       localStorage.setItem(savedMusicKey, JSON.stringify(savedMusic));
+      console.log('本地保存成功，音乐ID:', localMusic.id);
 
       // 如果需要上传到云端
+      let uploadRes = null;
       if (shouldUploadToCloud && song.audio_url) {
+        console.log('开始上传音乐到云端...');
         try {
-          const uploadRes = await uploadMusicToCloud(song, userCode, sessionId, onProgress);
+          uploadRes = await uploadMusicToCloud(song, userCode, sessionId, onProgress);
+          console.log('云端上传返回结果:', uploadRes);
           localMusic.uploadedToCloud = true;
           localMusic.cloudUrl = uploadRes?.cloudUrl || localMusic.url;
           localMusic.objectKey = uploadRes?.objectKey || null;
@@ -281,14 +302,43 @@ export const useMusicGeneration = () => {
           // 更新localStorage中的记录
           const updatedMusic = savedMusic.map(music => 
             music.id === localMusic.id 
-              ? { ...music, uploadedToCloud: true, cloudUrl: localMusic.cloudUrl, objectKey: localMusic.objectKey } 
+              ? { 
+                  ...music, 
+                  uploadedToCloud: true, 
+                  cloudUrl: localMusic.cloudUrl, 
+                  objectKey: localMusic.objectKey,
+                  promptObjectKey: localMusic.promptObjectKey,
+                  promptCloudUrl: localMusic.promptCloudUrl
+                } 
               : music
           );
           localStorage.setItem(savedMusicKey, JSON.stringify(updatedMusic));
+          console.log('云端上传成功，已更新本地记录');
           
         } catch (uploadError) {
           console.error('上传到云端失败:', uploadError);
+          console.log('上传失败但本地保存成功');
           // 上传失败但本地保存成功
+        }
+        
+        // 如果上传结果中包含歌词文件信息，更新本地音乐记录
+        if (uploadRes && uploadRes.promptObjectKey) {
+          console.log('更新歌词文件信息到本地记录');
+          localMusic.promptObjectKey = uploadRes.promptObjectKey;
+          localMusic.promptCloudUrl = uploadRes.promptCloudUrl;
+          
+          // 更新localStorage中的记录
+          const updatedMusic = savedMusic.map(music => 
+            music.id === localMusic.id 
+              ? { 
+                  ...music, 
+                  promptObjectKey: localMusic.promptObjectKey,
+                  promptCloudUrl: localMusic.promptCloudUrl
+                } 
+              : music
+          );
+          localStorage.setItem(savedMusicKey, JSON.stringify(updatedMusic));
+          console.log('歌词文件信息已保存到本地记录');
         }
       }
 
@@ -299,17 +349,73 @@ export const useMusicGeneration = () => {
     }
   }, []);
 
+  // 检查网络连接状态
+  const checkNetworkConnection = useCallback(async () => {
+    try {
+      console.log('检查网络连接状态...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+      
+      const response = await fetch('https://www.google.com', {
+        method: 'HEAD',
+        signal: controller.signal,
+        mode: 'no-cors'
+      });
+      
+      clearTimeout(timeoutId);
+      console.log('网络连接正常');
+      return true;
+    } catch (error) {
+      console.error('网络连接检查失败:', error);
+      return false;
+    }
+  }, []);
+
   // 上传音乐到云端
   const uploadMusicToCloud = useCallback(async (song, userCode, sessionId, onProgress) => {
     try {
+      // 定义API基础URL、文件夹路径和结果对象
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+      const folderPath = `recordings/${userCode}/${sessionId || 'ai_generated'}`;
+      let result = {
+        promptObjectKey: null,
+        promptCloudUrl: null
+      };
+      
+      // 验证userCode是否有效
+      if (!userCode || userCode.trim() === '') {
+        throw new Error('用户代码无效，无法上传到云端');
+      }
+      
+      // 检查网络连接
+      const isNetworkOk = await checkNetworkConnection();
+      if (!isNetworkOk) {
+        throw new Error('网络连接不可用，请检查网络设置');
+      }
+      
       // 首先下载音频文件
+      console.log('开始下载音频文件:', song.audio_url);
       if (onProgress) onProgress(10, '下载音频文件...');
-      const response = await fetch(song.audio_url);
-      if (!response.ok) {
-        throw new Error('下载音频文件失败');
+      let response;
+      try {
+        response = await fetch(song.audio_url);
+        if (!response.ok) {
+          console.error('下载音频文件失败:', response.status, response.statusText);
+          throw new Error(`下载音频文件失败: ${response.status} ${response.statusText}`);
+        }
+        console.log('音频文件下载成功');
+      } catch (fetchError) {
+        console.error('下载音频文件时网络错误:', fetchError);
+        console.error('错误类型:', fetchError.name);
+        console.error('错误消息:', fetchError.message);
+        if (fetchError.name === 'TypeError' && fetchError.message === 'Failed to fetch') {
+          console.error('可能是网络连接问题或CORS策略阻止了请求');
+        }
+        throw new Error(`网络错误: ${fetchError.message}`);
       }
       
       const audioBlob = await response.blob();
+      console.log('音频文件大小:', (audioBlob.size / 1024 / 1024).toFixed(2), 'MB');
       if (onProgress) onProgress(30, '准备上传...');
       
       // 创建FormData
@@ -322,33 +428,119 @@ export const useMusicGeneration = () => {
       
       formData.append('file', audioFile);
       
+      // 添加歌词prompt信息到上传数据中
+      if (song.prompt) {
+        // 将歌词prompt作为FormData的一部分
+        formData.append('prompt', song.prompt);
+        
+        // 同时创建歌词文件并上传到同一个文件夹
+        const promptFileName = `${safeTitle}_${song.id || Date.now()}_prompt.txt`;
+        const promptFile = new File([song.prompt], promptFileName, { 
+          type: 'text/plain' 
+        });
+        
+        // 创建单独的FormData用于上传歌词文件
+        const promptFormData = new FormData();
+        promptFormData.append('file', promptFile);
+        
+        // 使用相同的文件夹路径
+        const promptUploadUrl = new URL(`${API_BASE_URL}/upload`);
+        promptUploadUrl.searchParams.append('folder', folderPath);
+        
+        // 异步上传歌词文件
+        console.log('开始上传歌词文件:', promptFileName);
+        const promptUploadPromise = fetch(promptUploadUrl, {
+          method: 'POST',
+          body: promptFormData,
+        });
+        
+        // 等待歌词文件上传完成
+        try {
+          const promptResponse = await promptUploadPromise;
+          if (!promptResponse.ok) {
+            console.error('歌词文件上传失败:', promptResponse.status, promptResponse.statusText);
+          } else {
+            const promptResult = await promptResponse.json();
+            if (promptResult.success) {
+                console.log('歌词文件上传成功:', promptResult);
+                console.log('歌词文件云端URL:', promptResult.file_url);
+                // 将歌词文件信息保存到返回结果中
+                result.promptObjectKey = promptResult.object_key;
+                result.promptCloudUrl = promptResult.file_url;
+              } else {
+                console.error('歌词文件上传返回失败:', promptResult.message);
+              }
+          }
+        } catch (promptError) {
+          console.error('歌词文件上传出错:', promptError);
+          console.error('歌词文件上传错误类型:', promptError.name);
+          console.error('歌词文件上传错误消息:', promptError.message);
+          if (promptError.name === 'TypeError' && promptError.message === 'Failed to fetch') {
+            console.error('歌词文件上传可能是网络连接问题或服务器问题');
+          }
+        }
+      }
+      
       // 构建上传URL
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
       const uploadUrl = new URL(`${API_BASE_URL}/upload`);
-      const folderPath = `recordings/${userCode}/${sessionId || 'ai_generated'}`;
       uploadUrl.searchParams.append('folder', folderPath);
       
+      console.log('开始上传音频文件到云端:', uploadUrl.toString());
+      console.log('上传文件夹路径:', folderPath);
       if (onProgress) onProgress(50, '上传到云端...');
       
       // 发送上传请求
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!uploadResponse.ok) {
-        throw new Error(`上传失败: ${uploadResponse.status}`);
+      console.log('发送音频文件上传请求...');
+      let uploadResponse;
+      try {
+        uploadResponse = await fetch(uploadUrl, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!uploadResponse.ok) {
+          console.error('音频文件上传失败:', uploadResponse.status, uploadResponse.statusText);
+          throw new Error(`上传失败: ${uploadResponse.status} ${uploadResponse.statusText}`);
+        }
+        console.log('音频文件上传请求成功');
+      } catch (uploadError) {
+        console.error('音频文件上传网络错误:', uploadError);
+        console.error('上传错误类型:', uploadError.name);
+        console.error('上传错误消息:', uploadError.message);
+        if (uploadError.name === 'TypeError' && uploadError.message === 'Failed to fetch') {
+          console.error('可能是网络连接问题、服务器不可用或防火墙阻止了请求');
+          console.error('上传URL:', uploadUrl.toString());
+          console.error('请检查网络连接和服务器状态');
+        }
+        throw new Error(`上传网络错误: ${uploadError.message}`);
       }
       
       if (onProgress) onProgress(80, '处理上传结果...');
       
-      const result = await uploadResponse.json();
+      console.log('解析上传响应...');
+      const uploadResult = await uploadResponse.json();
+      // 合并上传结果到result对象中
+      result = {
+        ...result,
+        ...uploadResult
+      };
       
       if (!result.success) {
+        console.error('上传处理失败:', result.message);
         throw new Error(result.message || '上传失败');
       }
+      console.log('音频文件上传成功:', result);
+      console.log('音频文件云端URL:', result.file_url);
       
       if (onProgress) onProgress(100, '上传完成！');
+      
+      console.log('所有文件上传完成');
+      console.log('最终上传结果:', {
+        audioUrl: result.file_url,
+        audioObjectKey: result.object_key,
+        promptUrl: result.promptCloudUrl,
+        promptObjectKey: result.promptObjectKey
+      });
       
       // 将标题与对象键建立映射，供各页面显示
       try {
@@ -358,14 +550,19 @@ export const useMusicGeneration = () => {
         if (result.object_key) {
           map[result.object_key] = song.title || safeTitle;
           localStorage.setItem(mapKey, JSON.stringify(map));
+          console.log('已保存文件名映射:', result.object_key, '->', song.title || safeTitle);
         }
-      } catch {}
+      } catch (mapError) {
+        console.error('保存文件名映射失败:', mapError);
+      }
 
       return {
         success: true,
         cloudUrl: result.file_url,
         objectKey: result.object_key,
-        etag: result.etag
+        etag: result.etag,
+        promptCloudUrl: result.promptCloudUrl,
+        promptObjectKey: result.promptObjectKey
       };
     } catch (error) {
       console.error('上传音乐到云端失败:', error);

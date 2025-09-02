@@ -41,6 +41,12 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // 验证userCode是否有效
+    if (!userCode || userCode.trim() === '') {
+      alert('用户代码无效，请刷新页面重试');
+      return;
+    }
+    
     if (!formData.demand || !formData.prompt) {
       alert('请填写音乐需求和创作提示');
       return;
@@ -401,6 +407,62 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
                 boxSizing: 'border-box'
               }}
             />
+            {/* 歌词prompt显示 */}
+            {currentSong.prompt && (
+              <div style={{ marginTop: '12px' }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#666' }}>
+                  <strong>歌词提示:</strong>
+                </label>
+                <div 
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    border: '1px solid #e5e7eb',
+                    backgroundColor: '#f9fafb',
+                    fontSize: '14px',
+                    lineHeight: '1.5',
+                    color: '#374151',
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  {currentSong.prompt.replace(/\[(Verse|Chorus|Verse 2|Bridge|Prechorus)\]/g, '').trim()}
+                </div>
+                {/* 歌词文件下载链接 */}
+                {currentSong.promptCloudUrl && (
+                  <div style={{ marginTop: '8px' }}>
+                    <a
+                      href={currentSong.promptCloudUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 12px',
+                        backgroundColor: '#e3f2fd',
+                        color: '#1976d2',
+                        textDecoration: 'none',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = '#bbdefb';
+                        e.target.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = '#e3f2fd';
+                        e.target.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      📄 下载歌词文件
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
             {/* <p><strong>时长:</strong> {currentSong.duration}秒</p> */}
           </div>
           <audio controls src={currentSong.audio_url} className="music-player">
@@ -457,7 +519,8 @@ const AIMusicGenerator = ({ userCode, sessionId, recordings = [], boundRecording
                       originalSongId: currentSong.id,
                       isBound: true,
                       userCode: userCode,
-                      sessionId: sessionId
+                      sessionId: sessionId,
+                      prompt: currentSong.prompt || '' // 添加歌词prompt信息
                     };
                     onMusicGenerated(newRecording);
                   }
