@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import './common.css';
 import './index.css';
+import './App.css';
 import FamilyPage from './pages/Family/FamilyPage';
 import RecordComponent from './pages/Record/record';
 import PlayerPage from './pages/Player/PlayerPage';
@@ -24,6 +25,13 @@ import AIConversationPage from './pages/AIConversation/AIConversationPage';
 import { isWechatMiniProgram, isH5Environment } from './utils/environment';
 import { syncThemeOnStartup } from './themes/themeConfig';
 import { syncCustomNamesFromCloud, syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
+import { getUserCode } from './utils/userCode';
+import { 
+  saveBabyBirthDateToCloud, 
+  loadBabyBirthDateFromCloud, 
+  calculateBabyAgeInMonths, 
+  formatBabyAge 
+} from './services/babyInfoCloudService';
 
 // 折线图数据
 const chartData = [
@@ -223,7 +231,7 @@ const RecordPage = () => {
 };
 
 // 主页组件 - 添加性能优化
-const HomePage = () => {
+const HomePage = ({ onNavigate }) => {
   const navigate = useNavigate();
   const { userid } = useParams();
   const [fileNameSyncTrigger, setFileNameSyncTrigger] = useState(0);
@@ -236,6 +244,11 @@ const HomePage = () => {
   const [searchValue, setSearchValue] = useState('');
   // 孩子年龄相关状态 (以月为单位)
   const [babyAgeMonths, setBabyAgeMonths] = useState(18);
+  // 宝宝出生日期相关状态
+  const [babyBirthDate, setBabyBirthDate] = useState('');
+  const [isEditingBirthDate, setIsEditingBirthDate] = useState(false);
+  const [tempBirthDate, setTempBirthDate] = useState('');
+  const [isLoadingBirthDate, setIsLoadingBirthDate] = useState(false);
   // 书籍相关状态（简化版，主要用于统计）
   const [booksCount, setBooksCount] = useState(1);
   const [totalConversations, setTotalConversations] = useState(0);
@@ -346,6 +359,134 @@ const HomePage = () => {
     }
   }, []);
   
+  // 加载宝宝出生日期
+  useEffect(() => {
+    const loadBabyBirthDate = async () => {
+      const currentUserCode = getUserCode();
+      if (!currentUserCode) return;
+      
+      setIsLoadingBirthDate(true);
+      
+      try {
+        // 首先尝试从云端加载
+        const cloudResult = await loadBabyBirthDateFromCloud(currentUserCode);
+        
+        if (cloudResult.success && cloudResult.birthDate) {
+          setBabyBirthDate(cloudResult.birthDate);
+          const months = calculateBabyAgeInMonths(cloudResult.birthDate);
+          setBabyAgeMonths(months);
+          console.log('从云端加载宝宝出生日期成功:', cloudResult.birthDate);
+        } else {
+          // 云端加载失败，尝试从本地存储加载
+          const localBirthDate = localStorage.getItem(`baby_birth_date_${currentUserCode}`);
+          if (localBirthDate) {
+            setBabyBirthDate(localBirthDate);
+            const months = calculateBabyAgeInMonths(localBirthDate);
+            setBabyAgeMonths(months);
+            console.log('从本地加载宝宝出生日期:', localBirthDate);
+          }
+        }
+      } catch (error) {
+        console.error('加载宝宝出生日期失败:', error);
+      } finally {
+        setIsLoadingBirthDate(false);
+      }
+    };
+    
+    loadBabyBirthDate();
+  }, [userCode]); // 添加userCode依赖，确保用户切换时重新加载
+
+  // 保存宝宝出生日期
+  const saveBabyBirthDate = async (date) => {
+    const currentUserCode = getUserCode();
+    if (!currentUserCode || !date) return;
+    
+    try {
+      // 保存到云端
+      const cloudResult = await saveBabyBirthDateToCloud(currentUserCode, date);
+      
+      if (cloudResult.success) {
+        setBabyBirthDate(date);
+        const months = calculateBabyAgeInMonths(date);
+        setBabyAgeMonths(months);
+        
+        // 同时保存到本地作为备份
+        localStorage.setItem(`baby_birth_date_${currentUserCode}`, date);
+        
+        // 触发宝宝出生日期更新事件，通知其他页面同步
+        const event = new CustomEvent('babyBirthDateUpdated', {
+          detail: {
+            birthDate: date,
+            userCode: currentUserCode,
+            timestamp: Date.now(),
+            source: 'save'
+          }
+        });
+        window.dispatchEvent(event);
+        
+        console.log('宝宝出生日期保存成功并触发同步事件:', date);
+      } else {
+        // 云端保存失败，至少保存到本地
+        setBabyBirthDate(date);
+        const months = calculateBabyAgeInMonths(date);
+        setBabyAgeMonths(months);
+        localStorage.setItem(`baby_birth_date_${currentUserCode}`, date);
+        
+        console.log('宝宝出生日期云端保存失败，已保存到本地:', date);
+      }
+    } catch (error) {
+      console.error('保存宝宝出生日期失败:', error);
+      
+      // 出错时也保存到本地
+      setBabyBirthDate(date);
+      const months = calculateBabyAgeInMonths(date);
+      setBabyAgeMonths(months);
+      localStorage.setItem(`baby_birth_date_${currentUserCode}`, date);
+    }
+  };
+
+  // 开始编辑出生日期
+  const startEditBirthDate = () => {
+    setTempBirthDate(babyBirthDate || '');
+    setIsEditingBirthDate(true);
+  };
+
+  // 取消编辑出生日期
+  const cancelEditBirthDate = () => {
+    setIsEditingBirthDate(false);
+    setTempBirthDate('');
+  };
+
+  // 确认保存出生日期
+  const confirmSaveBirthDate = async () => {
+    if (tempBirthDate) {
+      await saveBabyBirthDate(tempBirthDate);
+    }
+    setIsEditingBirthDate(false);
+    setTempBirthDate('');
+  };
+
+  // 计算滑块的最大值（根据宝宝年龄动态设置）
+  const calculateSliderMax = (currentAgeMonths) => {
+    if (currentAgeMonths < 6) {
+      return 12; // 6个月以下，最大显示1岁
+    } else if (currentAgeMonths < 12) {
+      return 24; // 6-12个月，最大显示2岁
+    } else if (currentAgeMonths < 24) {
+      return 36; // 1-2岁，最大显示3岁
+    } else if (currentAgeMonths < 36) {
+      return 48; // 2-3岁，最大显示4岁
+    } else {
+      return 60; // 3岁以上，最大显示5岁
+    }
+  };
+
+  // 处理月份滑块变化（禁用手动调节）
+  const handleAgeSliderChange = (e) => {
+    // 滑块已禁用，此函数不会被调用
+    // 保留函数以避免错误
+  };
+
   // 从URL参数获取用户代码
   useEffect(() => {
     if (userid) {
@@ -478,19 +619,7 @@ const HomePage = () => {
 
   // 格式化年龄显示 - 使用useMemo缓存
   const formattedAge = useMemo(() => {
-    if (babyAgeMonths < 12) {
-      return `${babyAgeMonths}月`;
-    } else if (babyAgeMonths === 12) {
-      return '1岁';
-    } else {
-      const years = Math.floor(babyAgeMonths / 12);
-      const remainingMonths = babyAgeMonths % 12;
-      if (remainingMonths === 0) {
-        return `${years}岁`;
-      } else {
-        return `${years}岁${remainingMonths}月`;
-      }
-    }
+    return formatBabyAge(babyAgeMonths);
   }, [babyAgeMonths]);
 
   // 跳转到AI对话页面
@@ -674,6 +803,88 @@ const HomePage = () => {
     return () => window.removeEventListener('customNamesUpdated', handleCustomNamesUpdated);
   }, []);
 
+  // 监听宝宝出生日期更新事件
+  useEffect(() => {
+    const handleBabyBirthDateUpdated = (event) => {
+      console.log('主页收到宝宝出生日期更新事件:', event.detail);
+      // 重新加载宝宝出生日期
+      const loadBabyBirthDate = async () => {
+        const currentUserCode = getUserCode();
+        if (!currentUserCode) return;
+        
+        setIsLoadingBirthDate(true);
+        
+        try {
+          // 首先尝试从云端加载
+          const cloudResult = await loadBabyBirthDateFromCloud(currentUserCode);
+          
+          if (cloudResult.success && cloudResult.birthDate) {
+            setBabyBirthDate(cloudResult.birthDate);
+            const months = calculateBabyAgeInMonths(cloudResult.birthDate);
+            setBabyAgeMonths(months);
+            console.log('从云端重新加载宝宝出生日期成功:', cloudResult.birthDate);
+          } else {
+            // 云端加载失败，尝试从本地存储加载
+            const localBirthDate = localStorage.getItem(`baby_birth_date_${currentUserCode}`);
+            if (localBirthDate) {
+              setBabyBirthDate(localBirthDate);
+              const months = calculateBabyAgeInMonths(localBirthDate);
+              setBabyAgeMonths(months);
+              console.log('从本地重新加载宝宝出生日期:', localBirthDate);
+            }
+          }
+        } catch (error) {
+          console.error('重新加载宝宝出生日期失败:', error);
+        } finally {
+          setIsLoadingBirthDate(false);
+        }
+      };
+      
+      loadBabyBirthDate();
+    };
+
+    window.addEventListener('babyBirthDateUpdated', handleBabyBirthDateUpdated);
+    return () => window.removeEventListener('babyBirthDateUpdated', handleBabyBirthDateUpdated);
+  }, []);
+
+  // 定期检查云端宝宝出生日期更新
+  useEffect(() => {
+    if (!userCode) return;
+    
+    const checkCloudUpdates = async () => {
+      try {
+        const cloudResult = await loadBabyBirthDateFromCloud(userCode);
+        
+        if (cloudResult.success && cloudResult.birthDate) {
+          // 检查云端数据是否与本地不同
+          if (cloudResult.birthDate !== babyBirthDate) {
+            console.log('检测到云端宝宝出生日期更新，正在同步...');
+            setBabyBirthDate(cloudResult.birthDate);
+            const months = calculateBabyAgeInMonths(cloudResult.birthDate);
+            setBabyAgeMonths(months);
+            
+            // 更新本地缓存
+            localStorage.setItem(`baby_birth_date_${userCode}`, cloudResult.birthDate);
+            
+            console.log('宝宝出生日期已同步到最新云端数据:', cloudResult.birthDate);
+          }
+        }
+      } catch (error) {
+        console.error('检查云端宝宝出生日期更新失败:', error);
+      }
+    };
+    
+    // 每30秒检查一次云端更新
+    const intervalId = setInterval(checkCloudUpdates, 30000);
+    
+    // 立即执行一次检查
+    checkCloudUpdates();
+    
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [userCode, babyBirthDate]);
+
   // 判断是否为平板（iPad等，竖屏/横屏都覆盖）
   useEffect(() => {
     const handleResize = () => {
@@ -809,20 +1020,89 @@ const HomePage = () => {
             <div className="baby-info">
               <div className="baby-info-top">
                 <div className="baby-avatar" />
-                <div className="baby-age">{formattedAge}BABY</div>
+                <div className="baby-age-display">
+                  <span className="age-label">宝宝年龄:</span>
+                  <span className="age-value">{formattedAge}</span>
+                  <span className="age-value">Baby</span>
+                  
+                  {isLoadingBirthDate ? (
+                    <span className="loading-indicator">加载中...</span>
+                  ) : (
+                    <button 
+                      className="edit-birth-date-btn" 
+                      onClick={startEditBirthDate}
+                      title="设置宝宝出生日期"
+                    >
+                      设置生日
+                    </button>
+                  )}
+                </div>
               </div>
+              
+              {isEditingBirthDate && (
+                <div className="birth-date-editor">
+                  <div className="editor-title">设置宝宝出生日期</div>
+                  <input
+                    type="date"
+                    value={tempBirthDate}
+                    onChange={(e) => setTempBirthDate(e.target.value)}
+                    className="birth-date-input"
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                  <div className="editor-buttons">
+                    <button 
+                      className="cancel-btn" 
+                      onClick={cancelEditBirthDate}
+                    >
+                      取消
+                    </button>
+                    <button 
+                      className="save-btn" 
+                      onClick={confirmSaveBirthDate}
+                      disabled={!tempBirthDate}
+                    >
+                      保存
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {babyBirthDate && !isEditingBirthDate && (
+                <div className="birth-date-display">
+                  <span className="birth-date-label">出生日期:</span>
+                  <span className="birth-date-value">
+                    {new Date(babyBirthDate).toLocaleDateString('zh-CN', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+              )}
+              
               <div className="baby-progress">
-                <input
-                  type="range"
-                  min="1"
-                  max="36"
-                  value={babyAgeMonths}
-                  onChange={handleAgeChange}
-                  className="age-slider"
-                />
-                <div className="age-labels">
-                  <span>1月</span>
-                  <span>3岁</span>
+                <div className="age-slider-container">
+                  {/* <div className="slider-label">
+                    年龄调节: {babyAgeMonths}个月
+                  </div> */}
+                  <input
+                    type="range"
+                    min="1"
+                    max={calculateSliderMax(babyAgeMonths)}
+                    value={babyAgeMonths}
+                    onChange={handleAgeSliderChange}
+                    className="age-slider"
+                    disabled
+                    readOnly
+                  />
+                  <div className="slider-marks">
+                    <span>1月</span>
+                    <span>
+                      {calculateSliderMax(babyAgeMonths) >= 12 
+                        ? `${Math.floor(calculateSliderMax(babyAgeMonths) / 12)}岁` 
+                        : `${calculateSliderMax(babyAgeMonths)}月`}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -947,6 +947,33 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   color: #3bb6a6;
 }
 
+.slider-marks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  width: 100%;
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+
+.slider-marks span:first-child {
+  flex: 0 0 auto;
+  text-align: left;
+  margin-left: 8px;
+}
+
+.slider-marks span:last-child {
+  flex: 0 0 auto;
+  text-align: right;
+  margin-right: 8px;
+}
+
+.slider-marks span {
+  font-size: 20px;
+  color: rgba(74, 197, 180, 1);
+  font-weight: 500;
+}
+
 /* 回忆书籍卡片样式 */
 .book-memory-card {
   background: linear-gradient(135deg, #3bb6a6 0%, #2ea087 100%);
