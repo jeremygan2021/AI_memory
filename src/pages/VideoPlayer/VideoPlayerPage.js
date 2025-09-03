@@ -4,7 +4,8 @@ import './VideoPlayerPage.css';
 import CommentSection from '../../components/common/CommentSection';
 import ThemeSwitcher from '../../components/theme/ThemeSwitcher';
 import ThemedIcon from '../../components/theme/ThemedIcon';
-import { getCurrentTheme, applyTheme } from '../../themes/themeConfig'; 
+import { getCurrentTheme, applyTheme } from '../../themes/themeConfig';
+import WelcomeScreen from '../../components/common/WelcomeScreen'; 
 
 const VideoPlayerPage = () => {
   const { userid: userCode, sessionid: sessionId, videoid: videoId } = useParams();
@@ -24,6 +25,7 @@ const VideoPlayerPage = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSpeedControl, setShowSpeedControl] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(getCurrentTheme()); // 当前主题
+  const [showWelcome, setShowWelcome] = useState(true); // 控制欢迎屏幕显示
 
   const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/recordings/';
   // 注意：这里的ossUrl仅作为备用，实际URL从云端加载时动态构建
@@ -377,14 +379,14 @@ const VideoPlayerPage = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
 
-    const handleCanPlay = () => {
-      // 视频可以播放时自动开始播放
-      if (userInteracted) {
-        videoElement.play().catch(err => {
-          console.log('自动播放失败:', err);
-        });
-      }
-    };
+    // const handleCanPlay = () => {
+    //   // 视频可以播放时自动开始播放
+    //   if (userInteracted) {
+    //     videoElement.play().catch(err => {
+    //       console.log('自动播放失败:', err);
+    //     });
+    //   }
+    // };
 
     videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
     videoElement.addEventListener('timeupdate', handleTimeUpdate);
@@ -393,7 +395,7 @@ const VideoPlayerPage = () => {
     videoElement.addEventListener('ended', handleEnded);
     videoElement.addEventListener('volumechange', handleVolumeChange);
     videoElement.addEventListener('ratechange', handleRateChange);
-    videoElement.addEventListener('canplay', handleCanPlay);
+    // videoElement.addEventListener('canplay', handleCanPlay);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
@@ -404,7 +406,7 @@ const VideoPlayerPage = () => {
       videoElement.removeEventListener('ended', handleEnded);
       videoElement.removeEventListener('volumechange', handleVolumeChange);
       videoElement.removeEventListener('ratechange', handleRateChange);
-      videoElement.removeEventListener('canplay', handleCanPlay);
+      // videoElement.removeEventListener('canplay', handleCanPlay);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [video]);
@@ -565,6 +567,12 @@ const VideoPlayerPage = () => {
 
   return (
     <div className="video-player-page">
+      {/* 欢迎屏幕 */}
+      <WelcomeScreen 
+        visible={showWelcome} 
+        onWelcomeComplete={() => setShowWelcome(false)} 
+      />
+      
       {/* 背景装饰 */}
       <div 
         className="background-decoration"
@@ -751,4 +759,4 @@ const VideoPlayerPage = () => {
   );
 };
 
-export default VideoPlayerPage; 
+export default VideoPlayerPage;

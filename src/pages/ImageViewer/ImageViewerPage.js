@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import WelcomeScreen from '../../components/common/WelcomeScreen';
 
 const ImageViewerPage = () => {
   const { userid: userCode, sessionid: sessionId, imageid: imageId } = useParams();
   const navigate = useNavigate();
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(true); // 控制欢迎屏幕显示
   const longPressTimerRef = useRef(null);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
@@ -169,6 +171,12 @@ const ImageViewerPage = () => {
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', background: '#000', color: '#fff' }}>
+      {/* 欢迎屏幕 */}
+      <WelcomeScreen 
+        visible={showWelcome} 
+        onWelcomeComplete={() => setShowWelcome(false)} 
+      />
+      
       <div style={{ padding: 12 }}>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12 }}>

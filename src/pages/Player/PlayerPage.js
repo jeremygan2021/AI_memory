@@ -8,6 +8,7 @@ import ThemeSwitcher from '../../components/theme/ThemeSwitcher';
 import ThemedIcon from '../../components/theme/ThemedIcon';
 import { getCurrentTheme, applyTheme } from '../../themes/themeConfig';
 import { getCustomName, deriveDisplayNameFromFileName } from '../../utils/displayName';
+import WelcomeScreen from '../../components/common/WelcomeScreen';
 // Swiper相关引入
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -47,6 +48,7 @@ const PlayerPage = () => {
   const videoPreviewRef = useRef(null); // 视频预览引用
   const [videoThumbnails, setVideoThumbnails] = useState({}); // 视频缩略图缓存
   const [currentTheme, setCurrentTheme] = useState(getCurrentTheme()); // 当前主题
+  const [showWelcome, setShowWelcome] = useState(true); // 控制欢迎屏幕显示
   // 歌词相关状态
   const [lyricsText, setLyricsText] = useState('');
   const [lyricsUrl, setLyricsUrl] = useState('');
@@ -1409,6 +1411,12 @@ const PlayerPage = () => {
 
   return (
     <div className="player-page">
+      {/* 欢迎屏幕 */}
+      <WelcomeScreen 
+        visible={showWelcome} 
+        onWelcomeComplete={() => setShowWelcome(false)} 
+      />
+      
       {/* 背景装饰 */}
       <div className="background-decoration1">
         
@@ -1951,57 +1959,6 @@ const PlayerPage = () => {
         </div>
       )}
 
-      {/* 移动端用户交互提示 */}
-      {isMobile && !userInteracted && (
-        <div className="mobile-interaction-prompt" style={{
-          position: 'fixed',
-          top: -1000,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          color: 'white',
-          textAlign: 'center',
-          padding: '20px'
-        }}>
-          <div>
-            <h3>音频播放需要用户交互</h3>
-            <p>移动设备需要用户操作才能播放音频</p>
-            <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '16px' }}>请点击下方按钮启用音频播放功能</p>
-            <button 
-              onClick={() => {
-                setUserInteracted(true);
-                // 立即尝试初始化音频
-                const audio = audioRef.current;
-                if (audio && recording) {
-                  const audioUrl = recording.signedUrl || recording.cloudUrl || recording.url;
-                  if (audioUrl && !audio.src) {
-                    audio.src = audioUrl;
-                    audio.load();
-                  }
-                }
-              }}
-              style={{
-                backgroundColor: '#007AFF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '12px 24px',
-                fontSize: '16px',
-                marginTop: '100px',
-                minWidth: '120px',
-                cursor: 'pointer'
-              }}
-            >
-              启用音频播放
-            </button>
-          </div>
-        </div>
-      )}
 
 
     </div>
