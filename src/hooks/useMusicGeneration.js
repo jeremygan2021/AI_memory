@@ -352,22 +352,32 @@ export const useMusicGeneration = () => {
   // 检查网络连接状态
   const checkNetworkConnection = useCallback(async () => {
     try {
-      console.log('检查网络连接状态...');
+      // 首先使用浏览器原生在线状态判断
+      if (typeof navigator !== 'undefined' && navigator && 'onLine' in navigator) {
+        if (!navigator.onLine) {
+          console.warn('当前离线: navigator.onLine=false');
+          return false;
+        }
+      }
+
+      // 轻量级探测（不阻断上传）：尝试 ping 应用 API，但任何错误都视为“仍可尝试上传”
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
-      
-      const response = await fetch('https://www.google.com', {
-        method: 'HEAD',
-        signal: controller.signal,
-        mode: 'no-cors'
-      });
-      
-      clearTimeout(timeoutId);
-      console.log('网络连接正常');
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      try {
+        await fetch(`${API_BASE_URL}/health`, { method: 'GET', signal: controller.signal, cache: 'no-store' });
+      } catch (e) {
+        // 忽略探测失败，返回 true 允许后续上传自行判断
+        console.warn('健康检查失败或超时，继续尝试上传:', e?.name || e);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
       return true;
     } catch (error) {
-      console.error('网络连接检查失败:', error);
-      return false;
+      // 任何异常不阻断上传
+      console.warn('网络检查异常但不阻断上传:', error);
+      return true;
     }
   }, []);
 
@@ -376,7 +386,8 @@ export const useMusicGeneration = () => {
     try {
       // 定义API基础URL、文件夹路径和结果对象
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
-      const folderPath = `recordings/${userCode}/${sessionId || 'ai_generated'}`;
+      const audioFolderPath = `recordings/${userCode}/${sessionId || 'ai_generated'}/audio`;
+      const lyricsFolderPath = `recordings/${userCode}/${sessionId || 'ai_generated'}/lyrics`;
       let result = {
         promptObjectKey: null,
         promptCloudUrl: null
@@ -387,10 +398,10 @@ export const useMusicGeneration = () => {
         throw new Error('用户代码无效，无法上传到云端');
       }
       
-      // 检查网络连接
+      // 检查网络连接（非阻断）
       const isNetworkOk = await checkNetworkConnection();
       if (!isNetworkOk) {
-        throw new Error('网络连接不可用，请检查网络设置');
+        console.warn('网络可能不可用，仍尝试上传以由服务器判定');
       }
       
       // 首先下载音频文件
@@ -421,72 +432,25 @@ export const useMusicGeneration = () => {
       // 创建FormData
       const formData = new FormData();
       const safeTitle = (song.title || `AI生成音乐_${Date.now()}`).trim().replace(/[\\/:*?"<>|#%&{}$!@`~^+=,;]+/g, '').replace(/\s+/g, '_').slice(0, 60) || 'AI_音乐';
-      const fileName = `${safeTitle}_${song.id || Date.now()}.mp3`;
+      const baseName = `${safeTitle}_${song.id || Date.now()}`;
+      const fileName = `${baseName}.mp3`;
       const audioFile = new File([audioBlob], fileName, { 
         type: 'audio/mpeg' 
       });
       
       formData.append('file', audioFile);
       
-      // 添加歌词prompt信息到上传数据中
+      // 将歌词prompt内容附带在音频表单中（不依赖此字段生成同名）
       if (song.prompt) {
-        // 将歌词prompt作为FormData的一部分
         formData.append('prompt', song.prompt);
-        
-        // 同时创建歌词文件并上传到同一个文件夹
-        const promptFileName = `${safeTitle}_${song.id || Date.now()}_prompt.txt`;
-        const promptFile = new File([song.prompt], promptFileName, { 
-          type: 'text/plain' 
-        });
-        
-        // 创建单独的FormData用于上传歌词文件
-        const promptFormData = new FormData();
-        promptFormData.append('file', promptFile);
-        
-        // 使用相同的文件夹路径
-        const promptUploadUrl = new URL(`${API_BASE_URL}/upload`);
-        promptUploadUrl.searchParams.append('folder', folderPath);
-        
-        // 异步上传歌词文件
-        console.log('开始上传歌词文件:', promptFileName);
-        const promptUploadPromise = fetch(promptUploadUrl, {
-          method: 'POST',
-          body: promptFormData,
-        });
-        
-        // 等待歌词文件上传完成
-        try {
-          const promptResponse = await promptUploadPromise;
-          if (!promptResponse.ok) {
-            console.error('歌词文件上传失败:', promptResponse.status, promptResponse.statusText);
-          } else {
-            const promptResult = await promptResponse.json();
-            if (promptResult.success) {
-                console.log('歌词文件上传成功:', promptResult);
-                console.log('歌词文件云端URL:', promptResult.file_url);
-                // 将歌词文件信息保存到返回结果中
-                result.promptObjectKey = promptResult.object_key;
-                result.promptCloudUrl = promptResult.file_url;
-              } else {
-                console.error('歌词文件上传返回失败:', promptResult.message);
-              }
-          }
-        } catch (promptError) {
-          console.error('歌词文件上传出错:', promptError);
-          console.error('歌词文件上传错误类型:', promptError.name);
-          console.error('歌词文件上传错误消息:', promptError.message);
-          if (promptError.name === 'TypeError' && promptError.message === 'Failed to fetch') {
-            console.error('歌词文件上传可能是网络连接问题或服务器问题');
-          }
-        }
       }
       
       // 构建上传URL
       const uploadUrl = new URL(`${API_BASE_URL}/upload`);
-      uploadUrl.searchParams.append('folder', folderPath);
+      uploadUrl.searchParams.append('folder', audioFolderPath);
       
       console.log('开始上传音频文件到云端:', uploadUrl.toString());
-      console.log('上传文件夹路径:', folderPath);
+      console.log('音频文件上传路径:', audioFolderPath);
       if (onProgress) onProgress(50, '上传到云端...');
       
       // 发送上传请求
@@ -531,6 +495,83 @@ export const useMusicGeneration = () => {
       }
       console.log('音频文件上传成功:', result);
       console.log('音频文件云端URL:', result.file_url);
+      
+      // 基于服务器返回的音频 object_key 构造同名歌词并上传
+      if (song.prompt && result.object_key) {
+        try {
+          const audioObjectKey = result.object_key; // recordings/{user}/{session}/audio/XXXX.ext
+          const audioFileName = audioObjectKey.split('/').pop() || '';
+          const audioBaseName = audioFileName.replace(/\.[^/.]+$/, '');
+          const lyricsObjectKeyDir = audioObjectKey.replace(/\/audio\/.*/, '/lyrics/');
+          const promptFileName = `${audioBaseName}.txt`;
+
+          // 构建上传到 lyrics 目录的URL
+          const promptUploadUrl = new URL(`${API_BASE_URL}/upload`);
+          // 取目录部分（去掉文件名）并确保是 lyrics 目录
+          const parts = lyricsObjectKeyDir.split('/');
+          // 去掉最后一个空/文件片段，保留目录到 lyrics
+          const folderPath = parts.slice(0, parts.length - 1).join('/');
+          // 如果正则替换失败，降级为 recordings/{user}/{session}/lyrics
+          let finalLyricsFolder = folderPath && folderPath.includes('/lyrics') ? folderPath : '';
+          if (!finalLyricsFolder) {
+            const p = audioObjectKey.split('/');
+            if (p.length >= 3) {
+              finalLyricsFolder = `recordings/${p[1]}/${p[2]}/lyrics`;
+            }
+          }
+          promptUploadUrl.searchParams.append('folder', finalLyricsFolder);
+
+          const promptFormData = new FormData();
+          const promptFile = new File([song.prompt], promptFileName, { type: 'text/plain' });
+          promptFormData.append('file', promptFile);
+
+          // 为避免服务器因同名已存在而改名：尝试删除同名旧歌词（忽略404）
+          try {
+            const desiredObjectKey = `${finalLyricsFolder}/${promptFileName}`;
+            const delResp = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(desiredObjectKey)}`, { method: 'DELETE' });
+            if (!delResp.ok && delResp.status !== 404) {
+              console.warn('删除旧歌词失败(可忽略):', delResp.status, delResp.statusText);
+            }
+          } catch (delErr) {
+            // 忽略删除错误
+          }
+
+          console.log('开始上传同名歌词文件:', promptFileName);
+          const promptResp = await fetch(promptUploadUrl, { method: 'POST', body: promptFormData });
+          if (promptResp.ok) {
+            const promptJson = await promptResp.json();
+            if (promptJson.success) {
+              result.promptObjectKey = promptJson.object_key;
+              result.promptCloudUrl = promptJson.file_url;
+              console.log('同名歌词上传成功:', promptJson);
+
+              // 记录 音频objectKey -> 歌词objectKey 映射，供播放页精确匹配
+              try {
+                const mapKey = 'audio_lyrics_map';
+                const raw = localStorage.getItem(mapKey);
+                const map = raw ? JSON.parse(raw) : {};
+                if (result.object_key && result.promptObjectKey) {
+                  map[result.object_key] = {
+                    lyricsObjectKey: result.promptObjectKey,
+                    lyricsUrl: result.promptCloudUrl || '',
+                    savedAt: Date.now()
+                  };
+                  localStorage.setItem(mapKey, JSON.stringify(map));
+                  console.log('已保存音频与歌词映射:', result.object_key, '->', result.promptObjectKey);
+                }
+              } catch (e) {
+                console.warn('保存音频-歌词映射失败(可忽略):', e);
+              }
+            } else {
+              console.warn('同名歌词上传返回失败:', promptJson.message);
+            }
+          } else {
+            console.warn('同名歌词上传失败:', promptResp.status, promptResp.statusText);
+          }
+        } catch (e) {
+          console.warn('同名歌词上传过程出错:', e);
+        }
+      }
       
       if (onProgress) onProgress(100, '上传完成！');
       

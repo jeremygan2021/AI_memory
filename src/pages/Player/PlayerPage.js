@@ -47,6 +47,13 @@ const PlayerPage = () => {
   const videoPreviewRef = useRef(null); // 视频预览引用
   const [videoThumbnails, setVideoThumbnails] = useState({}); // 视频缩略图缓存
   const [currentTheme, setCurrentTheme] = useState(getCurrentTheme()); // 当前主题
+  // 歌词相关状态
+  const [lyricsText, setLyricsText] = useState('');
+  const [lyricsUrl, setLyricsUrl] = useState('');
+  const [lyricsLoading, setLyricsLoading] = useState(false);
+  const [lyricsError, setLyricsError] = useState('');
+  const [lyricsLines, setLyricsLines] = useState([]);
+  const [currentLyricIndex, setCurrentLyricIndex] = useState(-1);
 
   // 新增音频列表相关状态
   const [audioFiles, setAudioFiles] = useState([]); // 会话下的所有音频文件
@@ -354,7 +361,7 @@ const PlayerPage = () => {
           }
           
           // 检查是否为视频文件
-          const isVideo = fileName.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/i) || 
+          const isVideo = fileName.match(/\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i) || 
                          (file.content_type && file.content_type.startsWith('video/'));
 
           const displayName = getCustomName(objectKey) || deriveDisplayNameFromFileName(fileName);
@@ -438,6 +445,12 @@ const PlayerPage = () => {
           const targetRecording = sortedAudioFiles[targetIndex];
           console.log('设置当前录音:', targetRecording);
           setRecording(targetRecording);
+          // 预加载对应歌词
+          try {
+            await loadLyricsForRecording(targetRecording);
+          } catch (e) {
+            // 忽略单次歌词加载失败
+          }
         } else {
           console.log('未找到任何音频文件');
           navigate(`/${userCode}/${id}?recordingNotFound=true`);
@@ -452,6 +465,73 @@ const PlayerPage = () => {
       setLoading(false);
     }
   };
+
+  // 歌词容器引用
+  const lyricsContainerRef = useRef(null);
+  
+  // 歌词滚动效果
+  useEffect(() => {
+    if (!lyricsContainerRef.current || !lyricsLines || lyricsLines.length === 0 || !isPlaying) return;
+    
+    const container = lyricsContainerRef.current;
+    let scrollInterval;
+    
+    // 开始滚动
+    const startScrolling = () => {
+      scrollInterval = setInterval(() => {
+        if (container) {
+          // 每次向下滚动两行的高度
+          const lineHeight = parseInt(window.getComputedStyle(container).lineHeight) || 22; // 默认行高
+          const scrollAmount = lineHeight * 2; // 两行的高度
+          
+          // 检查是否已经滚动到底部
+          if (container.scrollTop + container.clientHeight >= container.scrollHeight - scrollAmount) {
+            // 如果已经接近底部，等待10秒后再重置到顶部
+            setTimeout(() => {
+              if (container) {
+                container.scrollTo({
+                  top: 0,
+                  behavior: 'smooth'
+                });
+              }
+            }, 15000);
+          } else {
+            // 否则向下滚动
+            container.scrollTo({
+              top: container.scrollTop + scrollAmount,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 10000); // 每10秒滚动一次
+    };
+    
+    startScrolling();
+    
+    // 清理函数
+    return () => {
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
+      }
+    };
+  }, [lyricsLines, isPlaying]);
+  
+  // 当歌词变化时重置滚动位置
+  useEffect(() => {
+    if (lyricsContainerRef.current) {
+      lyricsContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [lyricsText]);
+  
+  // 当播放状态改变时，如果停止播放则停止滚动
+  useEffect(() => {
+    if (!isPlaying && lyricsContainerRef.current) {
+      // 停止播放时保持当前位置，不做处理
+    }
+  }, [isPlaying]);
 
   // 格式化日期字符串
   const formatDateFromString = (dateString) => {
@@ -483,11 +563,13 @@ const PlayerPage = () => {
       console.log('音频可以播放');
       console.log('音频准备状态:', audio.readyState);
       setAudioReady(true);
+      setLoading(false);
     };
 
     const handleCanPlayThrough = () => {
       console.log('音频完全加载，可以无中断播放');
       setAudioReady(true);
+      setLoading(false);
     };
 
     const handleLoadedData = () => {
@@ -507,6 +589,8 @@ const PlayerPage = () => {
       
       // 重置播放状态
       setIsPlaying(false);
+      setAudioReady(false);
+      setLoading(false);
     };
 
     const handleTimeUpdate = () => {
@@ -598,6 +682,7 @@ const PlayerPage = () => {
     try {
       if (isPlaying) {
         audio.pause();
+        setIsPlaying(false); // 确保状态立即更新
       } else {
         // 移动设备特殊处理
         if (isMobile) {
@@ -617,6 +702,7 @@ const PlayerPage = () => {
         // 确保音频已经准备好播放
         if (audio.readyState >= 2) { // HAVE_CURRENT_DATA
           await audio.play();
+          setIsPlaying(true); // 确保状态立即更新
         } else {
           console.log('音频还未准备好，等待加载完成...');
           
@@ -630,6 +716,7 @@ const PlayerPage = () => {
               clearTimeout(timeout);
               try {
                 await audio.play();
+                setIsPlaying(true); // 确保状态立即更新
                 audio.removeEventListener('canplay', handleCanPlay);
                 audio.removeEventListener('error', handleError);
                 resolve();
@@ -761,6 +848,14 @@ const PlayerPage = () => {
       setDuration(0);
       setAudioReady(false);
       setIsPlaying(false);
+      // 切换时清空并加载对应歌词
+      setLyricsText('');
+      setLyricsUrl('');
+      setLyricsError('');
+      // 异步加载对应歌词
+      setTimeout(() => {
+        loadLyricsForRecording(audioFiles[index]).catch(() => {});
+      }, 0);
       
       // 重置音频元素
       if (audioRef.current) {
@@ -818,7 +913,7 @@ const PlayerPage = () => {
     
     try {
       // 从路径中获取文件名: recordings/vmu3wwah/20250611_000019_b2c5932f.webm
-      const fileName = objectKey.split('/').pop(); // 20250611_000019_b2c5932f.webm
+      const fileName = objectKey.split('/').pop(); // 20250611_000019_b2c5932f
       
       // 移除扩展名: 20250611_000019_b2c5932f
       const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
@@ -849,6 +944,203 @@ const PlayerPage = () => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // ===== 歌词加载逻辑 =====
+  const cleanLyricsText = (text) => {
+    if (!text) return '';
+    // 移除常见段落标签
+    const removedTags = text.replace(/\[(Verse|Chorus|Verse 2|Bridge|Prechorus)\]/gi, '');
+    return removedTags;
+  };
+
+  // 当歌词文本变化时解析为行
+  useEffect(() => {
+    try {
+      const cleaned = cleanLyricsText(lyricsText);
+      const lines = cleaned
+        .split(/\r?\n/) // 按行切分
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
+      setLyricsLines(lines);
+      setCurrentLyricIndex(lines.length > 0 ? 0 : -1);
+    } catch {
+      setLyricsLines([]);
+      setCurrentLyricIndex(-1);
+    }
+  }, [lyricsText]);
+
+  // 根据播放进度计算当前歌词行（均匀分配）
+  useEffect(() => {
+    if (!Array.isArray(lyricsLines) || lyricsLines.length === 0) return;
+    if (!isFinite(duration) || duration <= 0) return;
+    if (!isFinite(currentTime) || currentTime < 0) return;
+    const perLine = duration / lyricsLines.length;
+    if (!isFinite(perLine) || perLine <= 0) return;
+    const idx = Math.min(lyricsLines.length - 1, Math.max(0, Math.floor(currentTime / perLine)));
+    setCurrentLyricIndex(idx);
+  }, [currentTime, duration, lyricsLines]);
+  const getFileNameFromObjectKey = (objectKey) => {
+    try {
+      if (!objectKey) return '';
+      const name = objectKey.split('/').pop() || '';
+      return name;
+    } catch {
+      return '';
+    }
+  };
+
+  const getBaseName = (fileName) => {
+    if (!fileName) return '';
+    return fileName.replace(/\.[^/.]+$/, '');
+  };
+
+  const tryFetchText = async (url) => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const text = await res.text();
+      return text;
+    } catch {
+      return null;
+    }
+  };
+
+  const buildOssUrl = (objectKeyCandidate) => {
+    if (!objectKeyCandidate) return '';
+    // objectKeyCandidate 期望形如 recordings/...
+    return `${OSS_BASE_URL}/${objectKeyCandidate}`;
+  };
+
+  const loadLyricsForRecording = async (rec) => {
+    try {
+      setLyricsLoading(true);
+      setLyricsError('');
+      setLyricsText('');
+      setLyricsUrl('');
+
+      // 拿到文件名与基础名
+      const objectKey = rec?.objectKey || '';
+      const fileName = getFileNameFromObjectKey(objectKey);
+      const base = getBaseName(fileName);
+
+      // 1) 本地精确映射：audio objectKey -> lyrics objectKey
+      try {
+        const mapRaw = localStorage.getItem('audio_lyrics_map');
+        if (mapRaw && objectKey) {
+          const map = JSON.parse(mapRaw);
+          const mapped = map[objectKey];
+          if (mapped && mapped.lyricsObjectKey) {
+            const mappedUrl = buildOssUrl(mapped.lyricsObjectKey);
+            const txt = await tryFetchText(mappedUrl);
+            if (txt && txt.trim().length > 0) {
+              setLyricsText(txt);
+              setLyricsUrl(mappedUrl);
+              setLyricsLoading(false);
+              return;
+            }
+          }
+        }
+      } catch {}
+
+      // 候选 objectKey 列表（优先顺序）
+      const candidates = [];
+
+      if (objectKey) {
+        // 1) 同目录同名改后缀为 .txt
+        const sameDirTxt = objectKey.replace(/\.[^/.]+$/, '.txt');
+        candidates.push(sameDirTxt);
+
+        // 2) audio -> lyrics 目录映射，并改后缀
+        const mappedDirTxt = objectKey
+          .replace('/audio/', '/lyrics/')
+          .replace(/\.[^/.]+$/, '.txt');
+        if (mappedDirTxt !== sameDirTxt) candidates.push(mappedDirTxt);
+
+        // 3) 如果路径中没有 audio/lyrics 子目录，则尝试歌词标准目录
+        const pathParts = objectKey.split('/');
+        // recordings/userCode/sessionId/.../file
+        if (pathParts.length >= 3) {
+          const user = pathParts[1];
+          const session = pathParts[2];
+          const lyricsKey = `recordings/${user}/${session}/lyrics/${base}.txt`;
+          candidates.push(lyricsKey);
+        }
+      }
+
+      // 4) 直接基于当前播放 URL 构建 .txt（处理没有 objectKey 的情况）
+      if ((!objectKey || !base) && rec?.fileName) {
+        const fallbackBase = getBaseName(rec.fileName);
+        if (fallbackBase) {
+          const pathParts = (rec.objectKey || '').split('/');
+          if (pathParts.length >= 3) {
+            const user = pathParts[1];
+            const session = pathParts[2];
+            candidates.push(`recordings/${user}/${session}/lyrics/${fallbackBase}.txt`);
+          }
+        }
+      }
+
+      // 去重
+      const uniqCandidates = Array.from(new Set(candidates.filter(Boolean)));
+
+      // 逐个尝试直链
+      for (const key of uniqCandidates) {
+        const url = buildOssUrl(key);
+        const txt = await tryFetchText(url);
+        if (txt && txt.trim().length > 0) {
+          setLyricsText(txt);
+          setLyricsUrl(url);
+          setLyricsLoading(false);
+          return;
+        }
+      }
+
+      // 若直链未找到，则列目录匹配同名 .txt
+      if (userCode && id) {
+        const prefix = `recordings/${userCode}/${id}/`;
+        try {
+          const listRes = await fetch(`${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=1000`);
+          if (listRes.ok) {
+            const result = await listRes.json();
+            const files = result.files || result.data || result.objects || result.items || result.results || [];
+            const targetBase = base || getBaseName(rec?.fileName || '');
+            // 2) 完全同名匹配
+            let match = files.find(f => {
+              const k = f.object_key || f.objectKey || f.key || f.name || '';
+              const name = k.split('/').pop() || '';
+              return name.toLowerCase().endsWith('.txt') && getBaseName(name) === targetBase;
+            });
+            // 3) 同名前缀模糊匹配：去掉最后一个下划线段再比
+            if (!match && targetBase && targetBase.includes('_')) {
+              const prefixBase = targetBase.replace(/_[^_]+$/, '');
+              match = files.find(f => {
+                const k = f.object_key || f.objectKey || f.key || f.name || '';
+                const name = k.split('/').pop() || '';
+                return name.toLowerCase().endsWith('.txt') && getBaseName(name).startsWith(prefixBase);
+              });
+            }
+            if (match) {
+              const k = match.object_key || match.objectKey || match.key || match.name || '';
+              const url = buildOssUrl(k);
+              const txt = await tryFetchText(url);
+              if (txt && txt.trim().length > 0) {
+                setLyricsText(txt);
+                setLyricsUrl(url);
+                setLyricsLoading(false);
+                return;
+              }
+            }
+          }
+        } catch {}
+      }
+
+      setLyricsLoading(false);
+      setLyricsError('');
+    } catch (e) {
+      setLyricsLoading(false);
+      setLyricsError('歌词加载失败');
+    }
   };
 
   // 获取进度百分比
@@ -1291,6 +1583,44 @@ const PlayerPage = () => {
             </div>
           )}
 
+          {/* 歌词显示区域 */}
+          <div className="lyrics-section" style={{ marginTop: '8px', marginBottom: '8px' }}>
+            {lyricsLoading ? (
+              <div style={{ fontSize: '12px', opacity: 0.7 }}>歌词加载中...</div>
+            ) : lyricsLines && lyricsLines.length > 0 ? (
+              <div 
+                className="lyrics-content" 
+                ref={lyricsContainerRef}
+                style={{
+                  fontSize: '14px',
+                  lineHeight: 1.6,
+                  color: '#333',
+                  background: 'rgba(255,255,255,0.6)',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  maxHeight: '220px',
+                  overflowY: 'auto'
+                }}
+              >
+                {lyricsLines.map((line, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      padding: '2px 0',
+                      fontWeight: 400,
+                      color: '#555',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {line}
+                  </div>
+                ))}
+              </div>
+            ) : lyricsError ? (
+              <div style={{ fontSize: '12px', color: '#c00', opacity: 0.8 }}>{lyricsError}</div>
+            ) : null}
+          </div>
+
           {/* 进度条 */}
           <div className="progress-section">
             <div className="time-display">
@@ -1466,12 +1796,43 @@ const PlayerPage = () => {
         controls={false}
         muted={false}
         autoPlay={false} // 禁用自动播放，遵循移动端政策
-        onLoadedMetadata={() => console.log('音频URL:', recording?.signedUrl || recording?.cloudUrl || recording?.url)}
+        onLoadedMetadata={() => {
+          console.log('音频元数据加载完成');
+          console.log('音频URL:', recording?.signedUrl || recording?.cloudUrl || recording?.url);
+          // 元数据加载完成后，设置一个超时检查音频是否可以播放
+          setTimeout(() => {
+            const audio = audioRef.current;
+            if (audio && audio.readyState >= 2) { // HAVE_FUTURE_DATA 或更高
+              setAudioReady(true);
+              setLoading(false);
+              console.log('音频已准备就绪（超时检查）');
+            }
+          }, 1000);
+        }}
+        onCanPlay={() => {
+          console.log('音频可以播放');
+          // 只在初始加载时设置状态，避免干扰播放/暂停
+          if (!audioReady) {
+            setAudioReady(true);
+            setLoading(false);
+          }
+        }}
+        onCanPlayThrough={() => {
+          console.log('音频可以完整播放');
+          // 只在初始加载时设置状态，避免干扰播放/暂停
+          if (!audioReady) {
+            setAudioReady(true);
+            setLoading(false);
+          }
+        }}
         onError={(e) => {
           console.error('音频元素错误:', e);
           console.error('当前src:', e.target.src);
           console.error('错误代码:', e.target.error?.code);
           console.error('错误信息:', e.target.error?.message);
+          // 出错时重置状态
+          setLoading(false);
+          setAudioReady(false);
           // 移动端错误处理
           if (isMobile) {
             console.error('移动端音频播放错误，可能的原因：');
@@ -1647,4 +2008,4 @@ const PlayerPage = () => {
   );
 };
 
-export default PlayerPage; 
+export default PlayerPage;

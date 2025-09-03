@@ -115,22 +115,15 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
         const result = await response.json();
         const files = result.files || result.data || result.objects || result.items || result.results || [];
         
-        // 过滤出评论文件（以comments_开头，.txt结尾）
+        // 过滤出评论文件：排除 lyrics 目录，文件名必须以 comments_${recordingId}_ 开头且 .txt 结尾
         const commentFiles = files.filter(file => {
-          const objectKey = file.object_key || file.objectKey || file.key || file.name;
-          const fileName = objectKey ? objectKey.split('/').pop() : '';
-          // 先查找所有 .txt 文件，然后检查是否是评论文件
-          const isTxtFile = fileName.endsWith('.txt');
-        //   const isCommentFile = fileName.startsWith(`comments_${recordingId}_`);
-          
-          console.log('检查文件:', fileName, {
-            isTxtFile,
-            // isCommentFile,
-            recordingId,
-            expectedPrefix: `${recordingId}_`
-          });
-          
-          return isTxtFile;
+          const objectKey = file.object_key || file.objectKey || file.key || file.name || '';
+          const fileName = objectKey.split('/').pop() || '';
+          const inLyricsDir = objectKey.includes('/lyrics/');
+          const isTxtFile = fileName.toLowerCase().endsWith('.txt');
+          const isCommentForThis = fileName.startsWith(`comments_${recordingId}_`);
+
+          return !inLyricsDir && isTxtFile && isCommentForThis;
         });
         
         console.log('所有文件:', files.map(f => ({
@@ -161,9 +154,18 @@ const CommentSection = ({ recordingId, userCode, sessionId }) => {
           const ossUrl = `https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/${objectKey}`;
           
           try {
-            const commentResponse = await fetch(ossUrl);
+            const commentResponse = await fetch(ossUrl, { cache: 'no-store' });
             if (commentResponse.ok) {
-              const commentData = await commentResponse.json();
+              // 评论文件是JSON文本（.txt），用text再手动JSON.parse，防止错误文件触发解析异常
+              const rawText = await commentResponse.text();
+              let commentData = {};
+              try {
+                commentData = JSON.parse(rawText);
+              } catch (e) {
+                console.warn('评论文件不是有效JSON，忽略该文件:', objectKey);
+                setComments([]);
+                return;
+              }
               console.log('加载的评论数据:', commentData);
               
               // 确保comments总是一个数组
