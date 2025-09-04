@@ -87,7 +87,13 @@ const RecordComponent = () => {
       navigate('/');
     }
     
-
+    // 检查URL中是否有aiMusic参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const aiMusicParam = urlParams.get('aiMusic');
+    if (aiMusicParam === 'true') {
+      // 自动打开AI音乐生成器
+      setShowAIMusicGenerator(true);
+    }
   }, [userid, navigate]);
 
   // 新增：检查录音文件是否存在于云端
