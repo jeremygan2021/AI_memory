@@ -1,3 +1,5 @@
+// WavStreamPlayer Slot
+
 import { useEffect } from "react";
 import { ReadyState } from "react-use-websocket";
 import useDeviceStore from "./use-device-store";
