@@ -80,8 +80,6 @@
   min-height: calc(100vh - 80px);
 }
 
-
-
 /* 全屏对话区域 */
 .ai-conversation-main-full {
   background: rgba(255, 255, 255, 0.1);
@@ -95,8 +93,6 @@
   height: fit-content;
   min-height: calc(100vh - 120px);
 }
-
-
 
 /* 对话信息面板 */
 .conversation-info-panel {
@@ -127,8 +123,8 @@
 
 .status-indicator.active {
   background: rgba(76, 175, 80, 0.3);
-  border: 2px solid #4CAF50;
-  color: #4CAF50;
+  border: 2px solid #4caf50;
+  color: #4caf50;
 }
 
 .status-indicator.inactive {
@@ -141,7 +137,7 @@
   font-size: 36px;
   font-weight: 700;
   color: #fff;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   background: rgba(0, 0, 0, 0.3);
   padding: 10px 20px;
   border-radius: 15px;
@@ -187,7 +183,7 @@
 
 .ai-control-btn.start-btn:not(:disabled) {
   background: rgba(76, 175, 80, 0.3);
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .ai-control-btn.start-btn:not(:disabled):hover {
@@ -196,7 +192,7 @@
 
 .ai-control-btn.end-btn:not(:disabled) {
   background: rgba(244, 67, 54, 0.3);
-  border-color: #F44336;
+  border-color: #f44336;
 }
 
 .ai-control-btn.end-btn:not(:disabled):hover {
@@ -205,7 +201,7 @@
 
 .ai-control-btn.mute-btn:not(:disabled).muted {
   background: rgba(255, 152, 0, 0.3);
-  border-color: #FF9800;
+  border-color: #ff9800;
 }
 
 .ai-control-btn.mute-btn:not(:disabled).muted:hover {
@@ -378,29 +374,29 @@
     gap: 15px;
     padding: 15px;
   }
-  
+
   .ai-conversation-main {
     padding: 20px;
   }
-  
+
   .book-info-header {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .conversation-controls {
     gap: 15px;
   }
-  
+
   .ai-control-btn {
     min-width: 150px;
     padding: 15px 20px;
   }
-  
+
   .btn-text {
     font-size: 20px;
   }
-  
+
   .btn-icon {
     font-size: 24px;
   }
@@ -411,43 +407,41 @@
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .ai-books-sidebar {
     max-height: 300px;
   }
-  
+
   .ai-page-nav {
     flex-direction: column;
     gap: 15px;
     text-align: center;
   }
-  
+
   .conversation-controls {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .ai-control-btn {
     width: 100%;
     max-width: 300px;
   }
-  
+
   .conversation-status {
     flex-direction: column;
     gap: 15px;
     text-align: center;
   }
-  
+
   .conversation-messages {
     max-height: 300px;
   }
-  
 
-  
   .conversation-tips {
     max-width: 100%;
   }
-  
+
   .conversation-tips li {
     font-size: 24px;
   }
@@ -471,5 +465,3 @@
 .conversation-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
-
-
