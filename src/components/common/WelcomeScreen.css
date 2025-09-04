@@ -1,14 +1,11 @@
 .welcome-screen {
   position: fixed;
-  top: 0;
-  left: 0;
+  /* top: 0; */
+  /* left: 0; */
   width: 100vw;
   height: 100vh;
   display: flex;
-  background-image: var(--theme-backgroundImage);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: linear-gradient(135deg, #efb8c6, #f6e4de, #d1a6e1);
   justify-content: center;
   align-items: center;
   z-index: 9999;
@@ -20,38 +17,8 @@
   opacity: 0;
 }
 
-.welcome-text {
-  font-size: 7rem;
-  font-weight: bold;
-  color: var(--theme-textLight, white);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  text-align: center;
-  padding: 20px;
-  animation: fadeIn 1.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .welcome-text {
-    font-size: 4.5rem;
-    padding: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .welcome-text {
-    font-size: 3rem;
-    padding: 10px;
-  }
+.welcome-image {
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
 }

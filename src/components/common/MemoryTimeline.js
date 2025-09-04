@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MemoryTimeline.css';
-import { getCustomName, deriveDisplayNameFromFileName, syncAllCustomNamesFromCloud } from '../../utils/displayName';
+import { getCustomName, deriveDisplayNameFromFileName } from '../../utils/displayName';
 
 const MemoryTimeline = ({ userCode }) => {
   const navigate = useNavigate();
@@ -13,43 +13,13 @@ const MemoryTimeline = ({ userCode }) => {
   const [startDate, setStartDate] = useState(''); // 开始日期
   const [endDate, setEndDate] = useState(''); // 结束日期
   const [showDateFilter, setShowDateFilter] = useState(false); // 是否显示日期筛选器
-  const [syncing, setSyncing] = useState(false); // 是否正在同步
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
   useEffect(() => {
     if (userCode) {
-      // 先从云端同步自定义名称
-      syncAllCustomNamesFromCloud(userCode)
-        .then(result => {
-          console.log('自定义名称云端同步结果:', result);
-          // 同步完成后加载时间线数据
-          loadTimelineData();
-        })
-        .catch(error => {
-          console.error('自定义名称云端同步失败:', error);
-          // 同步失败仍然加载时间线数据，使用本地存储的自定义名称
-          loadTimelineData();
-        });
+      loadTimelineData();
     }
-  }, [userCode]);
-
-  // 监听自定义名称更新事件
-  useEffect(() => {
-    const handleCustomNamesUpdated = () => {
-      // 当自定义名称更新时，重新加载时间线数据
-      if (userCode) {
-        loadTimelineData();
-      }
-    };
-
-    // 添加事件监听器
-    window.addEventListener('customNamesUpdated', handleCustomNamesUpdated);
-
-    // 清理函数，组件卸载时移除事件监听器
-    return () => {
-      window.removeEventListener('customNamesUpdated', handleCustomNamesUpdated);
-    };
   }, [userCode]);
 
   // 加载时间线数据
@@ -180,34 +150,6 @@ const MemoryTimeline = ({ userCode }) => {
     setCurrentPage(1);
   };
 
-  // 手动同步自定义名称
-  const handleSyncCustomNames = async () => {
-    if (!userCode || syncing) return;
-    
-    try {
-      setSyncing(true);
-      console.log('开始手动同步自定义名称...');
-      
-      const result = await syncAllCustomNamesFromCloud(userCode);
-      console.log('手动同步自定义名称结果:', result);
-      
-      // 同步完成后重新加载时间线数据
-      await loadTimelineData();
-      
-      // 显示同步结果提示
-      if (result.success) {
-        alert(`同步成功！从 ${result.sessionsCount || 0} 个会话同步了 ${result.totalMappings || 0} 个自定义名称`);
-      } else {
-        alert(`同步失败：${result.error || result.message || '未知错误'}`);
-      }
-    } catch (error) {
-      console.error('手动同步自定义名称失败:', error);
-      alert(`同步失败：${error.message}`);
-    } finally {
-      setSyncing(false);
-    }
-  };
-
   // 分页处理
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -317,14 +259,12 @@ const MemoryTimeline = ({ userCode }) => {
     <div className="memory-timeline">
       {/* 日期筛选器 */}
       <div className="timeline-filters">
-        <div className="filter-buttons">
-          <button 
-            className="filter-toggle-btn"
-            onClick={() => setShowDateFilter(!showDateFilter)}
-          >
-            📅 {showDateFilter ? '隐藏' : '显示'}日期筛选
-          </button>
-        </div>
+        <button 
+          className="filter-toggle-btn"
+          onClick={() => setShowDateFilter(!showDateFilter)}
+        >
+          📅 {showDateFilter ? '隐藏' : '显示'}日期筛选
+        </button>
         
         {showDateFilter && (
           <div className="date-filter-panel">
@@ -448,4 +388,4 @@ const MemoryTimeline = ({ userCode }) => {
   );
 };
 
-export default MemoryTimeline;
+export default MemoryTimeline; 

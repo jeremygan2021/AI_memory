@@ -43,11 +43,6 @@ export function setCustomName(objectKey, customName) {
     const map = raw ? JSON.parse(raw) : {};
     map[objectKey] = safe;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-    
-    // 触发自定义名称更新事件，通知其他组件刷新
-    window.dispatchEvent(new CustomEvent('customNamesUpdated', { 
-      detail: { customNames: map }
-    }));
   } catch {
     // 忽略存储失败
   }
@@ -72,11 +67,6 @@ export async function setCustomNameWithCloudSync(objectKey, customName, userCode
       console.log('文件名云端同步结果:', result);
       return result.success;
     }
-    
-    // 如果没有用户代码，也需要触发事件，通知其他组件刷新
-    window.dispatchEvent(new CustomEvent('customNamesUpdated', { 
-      detail: { objectKey, customName }
-    }));
     
     return true;
   } catch (error) {

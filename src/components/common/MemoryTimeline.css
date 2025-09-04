@@ -305,13 +305,6 @@
   border: 2px solid rgba(59, 182, 166, 0.2);
 }
 
-.filter-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-}
-
 .filter-toggle-btn {
   background: linear-gradient(135deg, #3bb6a6, #10b981);
   color: white;
@@ -328,53 +321,6 @@
 .filter-toggle-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(59, 182, 166, 0.4);
-}
-
-/* 同步按钮样式 */
-.sync-btn {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-  margin-left: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sync-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-}
-
-.sync-btn:disabled {
-  background: #d1d5db;
-  color: #9ca3af;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.sync-btn.syncing {
-  position: relative;
-  pointer-events: none;
-}
-
-.sync-btn.syncing::after {
-  content: '';
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  margin: auto;
-  border: 2px solid transparent;
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
 }
 
 .date-filter-panel {
@@ -527,16 +473,6 @@
     margin-bottom: 16px;
   }
   
-  .filter-buttons {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .sync-btn {
-    margin-left: 0;
-    margin-top: 8px;
-  }
-  
   .date-inputs {
     flex-direction: column;
     gap: 12px;
@@ -587,4 +523,4 @@
     padding: 6px 12px;
     font-size: 13px;
   }
-}
+} 
