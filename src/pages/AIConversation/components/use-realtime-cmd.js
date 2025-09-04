@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
+import { useAgentStore } from "./use-agent-store";
 import { useConversationStore } from "./use-conversation-store";
-import { useAgentStore } from "@/lib/use-agent-store";
 
 const useRealtimeCmd = () => {
   const { agent } = useAgentStore();

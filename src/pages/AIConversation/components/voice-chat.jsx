@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mic } from "lucide-react";
+import { ReadyState } from "react-use-websocket";
 
-import useDeviceStore from "./useDeviceStore.js";
-import useConversationStore from "./useConversationStore.js";
-import useRealtimeCmd from "./useRealtimeCmd.js";
-import { arrayBufferToBase64 } from "./audioUtils.js";
+import useDeviceStore from "./use-device-store";
+import useConversationStore from "./use-conversation-store";
+import useRealtimeCmd from "./use-realtime-cmd";
+import { arrayBufferToBase64 } from "./audio-utils";
 
-export default function VoiceChat() {
+function VoiceChat() {
   const { wavRecorder, wavStreamPlayer } = useDeviceStore();
   const { wsInstance, setWsConnected } = useConversationStore();
-  const { appendUserVoice, commitUserVoice } = useRealtimeCmd();
+  const { appendUserVoice, sendPrompt, createHello, createResponse } =
+    useRealtimeCmd();
 
   const [isRecording, setIsRecording] = useState(false);
 
@@ -32,14 +34,22 @@ export default function VoiceChat() {
   }
 
   async function stopRecord() {
-    try {
-      await wavRecorder.end();
-      setIsRecording(false);
-      commitUserVoice();
-    } catch (error) {
-      console.error("停止录音失败:", error);
-    }
+    // try {
+    //   await wavRecorder.end();
+    //   setIsRecording(false);
+    //   commitUserVoice();
+    // } catch (error) {
+    //   console.error("停止录音失败:", error);
+    // }
   }
+
+  useEffect(() => {
+    if (wsInstance?.readyState === ReadyState.OPEN) {
+      sendPrompt();
+      createHello("你好");
+      createResponse();
+    }
+  }, [wsInstance?.readyState]);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -64,3 +74,6 @@ export default function VoiceChat() {
     </div>
   );
 }
+
+export default VoiceChat;
+export { VoiceChat };

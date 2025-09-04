@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import useWebSocket from "react-use-websocket";
-import useConversationStore from "./useConversationStore.js";
-import useRealtimeMsgEffect from "./useRealtimeMsgEffect.js";
+import useConversationStore from "./use-conversation-store";
+import useRealtimeMsgEffect from "./use-realtime-msg-effect";
 
 function WebSocketSlot({ children }) {
   const { wsConnected, setWsConnected, setWsInstance } = useConversationStore();
