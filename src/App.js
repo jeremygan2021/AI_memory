@@ -9,23 +9,22 @@ import PlayerPage from './pages/Player/PlayerPage';
 import AudioLibrary from './pages/AudioLibrary/AudioLibrary';
 import ModernSearchBox from './components/common/ModernSearchBox';
 import UploadMediaPage from './pages/UploadMedia/UploadMediaPage';
-import GalleryPage from './pages/UploadMedia/GalleryPage';
 import VideoPlayerPage from './pages/VideoPlayer/VideoPlayerPage';
 import ImageViewerPage from './pages/ImageViewer/ImageViewerPage';
 import CommentTest from './components/utils/CommentTest';
 import MemoryTimeline from './components/common/MemoryTimeline'; 
-import MiniProgramLayout from './components/navigation/MiniProgramLayout';
+import MiniProgramTabBar from './components/navigation/MiniProgramTabBar';
 import UserCodeInput from './components/common/UserCodeInput';
 import EnvironmentTest from './components/utils/EnvironmentTest';
 import NavigationTest from './components/utils/NavigationTest';
+import MiniProgramLayout from './components/navigation/MiniProgramLayout';
 import UserProfilePage from './pages/UserProfile/UserProfilePage';
 import CopyTest from './components/utils/CopyTest';
 import ThemeCloudTest from './components/theme/ThemeCloudTest';
 import AIConversationPage from './pages/AIConversation/AIConversationPage';
-import SimpleHomePage from './SimpleHomePage';
-import { isWechatMiniProgram } from './utils/environment';
+import { isWechatMiniProgram, isH5Environment } from './utils/environment';
 import { syncThemeOnStartup } from './themes/themeConfig';
-import { syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
+import { syncCustomNamesFromCloud, syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
 import { getUserCode } from './utils/userCode';
 import { 
   saveBabyBirthDateToCloud, 
@@ -46,7 +45,6 @@ const chartData = [
 ];
 
 // 折线图组件 - 添加React.memo优化
-// eslint-disable-next-line no-unused-vars
 const LineChart = React.memo(() => {
   const width = 320;
   const height = 150;
@@ -73,11 +71,6 @@ const LineChart = React.memo(() => {
 
     return { isMobile, leftPadding, maxTime, points, pathData };
   }, []); // 空依赖数组，因为chartData是静态的
-  
-  // 使用组件以避免未使用变量警告
-  useEffect(() => {
-    console.debug('LineChart component rendered with isMobile:', isMobile);
-  }, [isMobile]);
 
   return (
     <div className="line-chart-container">
@@ -257,14 +250,8 @@ const HomePage = ({ onNavigate }) => {
   const [tempBirthDate, setTempBirthDate] = useState('');
   const [isLoadingBirthDate, setIsLoadingBirthDate] = useState(false);
   // 书籍相关状态（简化版，主要用于统计）
-  const [booksCount] = useState(1);
-  const [totalConversations] = useState(0);
-  
-  // 使用booksCount和totalConversations变量以避免未使用变量警告
-  useEffect(() => {
-    // 确保变量被使用，但不执行任何操作
-    console.debug('booksCount:', booksCount, 'totalConversations:', totalConversations);
-  }, [booksCount, totalConversations]);
+  const [booksCount, setBooksCount] = useState(1);
+  const [totalConversations, setTotalConversations] = useState(0);
   // 移动端相册下拉框状态
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [showAllVideos, setShowAllVideos] = useState(false);
@@ -533,7 +520,7 @@ const HomePage = ({ onNavigate }) => {
       // 如果没有用户ID，显示输入提示
       setUserCode('');
     }
-  }, [userid, navigate, hasInitialSync]);
+  }, [userid, navigate]);
 
   // 优化窗口大小监听 - 使用防抖
   useEffect(() => {
@@ -577,20 +564,14 @@ const HomePage = ({ onNavigate }) => {
     }
   }, [userCode, navigate]);
 
-  // 大图预览相关函数 - 使用useCallback优化（保留函数以避免错误）
+  // 大图预览相关函数 - 使用useCallback优化
   const openPreview = useCallback((idx) => {
-    const mediaFiles = uploadedFiles.length > 0 ? uploadedFiles : 
+    const albumData = uploadedFiles.length > 0 ? uploadedFiles : 
       ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
     
     setPreviewIndex(idx);
-    setPreviewFile(mediaFiles[idx]);
+    setPreviewFile(albumData[idx]);
   }, [uploadedFiles]);
-  
-  // 使用openPreview变量以避免未使用变量警告
-  useEffect(() => {
-    // 确保函数被使用，但不执行任何操作
-    console.debug('openPreview function is available');
-  }, [openPreview]);
   
   const closePreview = useCallback(() => {
     setPreviewIndex(null);
@@ -631,23 +612,15 @@ const HomePage = ({ onNavigate }) => {
     }
   }, [handleSearch]);
 
-  // 处理年龄调节（保留函数以避免错误）
+  // 处理年龄调节
   const handleAgeChange = useCallback((e) => {
     setBabyAgeMonths(parseInt(e.target.value));
   }, []);
-  
-  // 使用handleAgeChange变量以避免未使用变量警告
-  useEffect(() => {
-    // 确保函数被使用，但不执行任何操作
-    console.debug('handleAgeChange function is available');
-  }, [handleAgeChange]);
 
   // 格式化年龄显示 - 使用useMemo缓存
   const formattedAge = useMemo(() => {
     return formatBabyAge(babyAgeMonths);
   }, [babyAgeMonths]);
-
-
 
   // 跳转到AI对话页面
   const goToAIConversation = useCallback(() => {
@@ -656,16 +629,7 @@ const HomePage = ({ onNavigate }) => {
     }
   }, [userCode, navigate]);
 
-  // 跳转到录音页面并启用AI音乐功能
-  const goToAIMusic = useCallback(() => {
-    if (userCode) {
-      // 生成唯一的会话ID（8位随机字符）
-      const randomId = Math.random().toString(36).substr(2, 8);
-      navigate(`/${userCode}/${randomId}?aiMusic=true`); 
-    }
-  }, [userCode, navigate]);
-
-  // 切换相册显示状态（保留函数以避免错误）
+  // 切换相册显示状态
   const togglePhotoDisplay = useCallback(() => {
     setShowAllPhotos(!showAllPhotos);
   }, [showAllPhotos]);
@@ -673,12 +637,6 @@ const HomePage = ({ onNavigate }) => {
   const toggleVideoDisplay = useCallback(() => {
     setShowAllVideos(!showAllVideos);
   }, [showAllVideos]);
-  
-  // 使用togglePhotoDisplay和toggleVideoDisplay变量以避免未使用变量警告
-  useEffect(() => {
-    // 确保函数被使用，但不执行任何操作
-    console.debug('togglePhotoDisplay and toggleVideoDisplay functions are available');
-  }, [togglePhotoDisplay, toggleVideoDisplay]);
 
   // 处理上传照片和视频
   const handleUpload = useCallback((type) => {
@@ -745,18 +703,10 @@ const HomePage = ({ onNavigate }) => {
     return uploadedVideos.length > 0 ? uploadedVideos : [];
   }, [uploadedVideos]);
 
-  // 准备相册数据（保留原有兼容性，避免错误）
+  // 准备相册数据（保留原有兼容性）
   const albumData = useMemo(() => {
     return uploadedFiles.length > 0 ? uploadedFiles : [];
   }, [uploadedFiles]);
-  
-  // 使用albumData变量以避免未使用变量警告
-  useEffect(() => {
-    if (albumData.length > 0) {
-      // 确保albumData被使用，但不执行任何操作
-      console.debug('albumData loaded with', albumData.length, 'items');
-    }
-  }, [albumData]);
 
   // 云端相册加载逻辑
   const loadCloudMediaFiles = useCallback(async () => {
@@ -1179,7 +1129,7 @@ const HomePage = ({ onNavigate }) => {
             </button>
           </div>
 
-          {/* 回忆书籍模块 - 只保留AI对话入口 */}
+          {/* 回忆书籍模块 - 简化为入口卡片 */}
           <div className="book-memory-card" onClick={goToAIConversation}>
             <div className="book-card-header">
               <div className="book-card-title">
@@ -1198,10 +1148,10 @@ const HomePage = ({ onNavigate }) => {
               </div>
             </div>
             <div className="book-card-content">
-              <p className="book-card-desc">与AI进行智能对话和内容检索</p>
+              <p className="book-card-desc">导入书籍内容，与AI进行智能对话和内容检索</p>
               <div className="book-card-features">
+                <span className="feature-tag">📖 书籍导入</span>
                 <span className="feature-tag">🤖 AI对话</span>
-                <span className="feature-tag">📚 云端书籍</span>
                 {/* <span className="feature-tag">🔍 内容检索</span> */}
               </div>
             </div>
@@ -1209,31 +1159,10 @@ const HomePage = ({ onNavigate }) => {
               开始AI对话
             </button>
           </div>
-
-          {/* AI音乐生成模块 - 新增入口卡片 */}
-          <div className="ai-music-card" onClick={goToAIMusic}>
-            <div className="ai-music-card-header">
-              <div className="ai-music-card-title">
-                <span className="ai-music-icon">🎵</span>
-                AI音乐生成
-              </div>
-            </div>
-            <div className="ai-music-card-content">
-              <p className="ai-music-card-desc">使用AI技术创作个性化音乐，为您的回忆增添美妙旋律</p>
-              <div className="ai-music-card-features">
-                <span className="feature-tag">🎼 智能创作</span>
-                <span className="feature-tag">🎹 多种风格</span>
-                <span className="feature-tag">🎧 高品质音效</span>
-              </div>
-            </div>
-            <button className="ai-music-card-action">
-              生成AI音乐
-            </button>
-          </div>
         </div>
 
-        {/* 右侧：亲子相册 - 桌面端和平板端显示 */}
-        {(!isMobileView || isTabletView) && (
+        {/* 右侧：亲子相册 - 仅桌面端显示 */}
+        {!isMobileView && (
           <div className="memory-right">
             {/* 合并的亲子媒体模块 */}
             <div className="activity-board media-board media-board-right">
@@ -1369,8 +1298,6 @@ const HomePage = ({ onNavigate }) => {
         </div>
       )}
 
-
-
           </div>
   );
 };
@@ -1415,11 +1342,9 @@ function App() {
       <Routes>
         <Route path="/" element={<UserCodeInput />} />
         <Route path="/:userid" element={<HomePage />} />
-        <Route path="/:userid/simple" element={<SimpleHomePage />} />
         <Route path="/family" element={<FamilyPage />} />
         <Route path="/:userid/audio-library" element={<AudioLibrary />} />
         <Route path="/:userid/gallery" element={<UploadMediaPage />} />
-        <Route path="/:userid/gallerys" element={<GalleryPage />} />
                  <Route path="/:userid/upload-media/:sessionid" element={<UploadMediaPage />} />
          <Route path="/:userid/video-player/:sessionid/:videoid" element={<VideoPlayerPage />} />
          <Route path="/:userid/image-viewer/:sessionid/:imageid" element={<ImageViewerPage />} />

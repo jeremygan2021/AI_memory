@@ -5,7 +5,23 @@ const WelcomeScreen = ({ onFinished }) => {
   const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   
+  // 根据屏幕宽度选择不同的欢迎图片
+  const getWelcomeImage = () => {
+    return window.innerWidth >= 768 
+      ? '/images/welcome2.png' 
+      : '/images/welcome.png';
+  };
+  
+  const [welcomeImage, setWelcomeImage] = useState(getWelcomeImage());
+  
   useEffect(() => {
+    // 监听窗口大小变化，更新欢迎图片
+    const handleResize = () => {
+      setWelcomeImage(getWelcomeImage());
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
     // 3秒后开始淡出
     const timer = setTimeout(() => {
       setFadeOut(true);
@@ -22,6 +38,7 @@ const WelcomeScreen = ({ onFinished }) => {
     }, 3000);
     
     return () => {
+      window.removeEventListener('resize', handleResize);
       clearTimeout(timer);
     };
   }, [onFinished]);
@@ -30,7 +47,11 @@ const WelcomeScreen = ({ onFinished }) => {
   
   return (
     <div className={`welcome-screen ${fadeOut ? 'fade-out' : ''}`}>
-      <div className="welcome-text">欢迎来到我的回忆</div>
+      <img 
+        src={welcomeImage} 
+        alt="欢迎" 
+        className="welcome-image"
+      />
     </div>
   );
 };

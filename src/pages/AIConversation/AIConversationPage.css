@@ -72,31 +72,166 @@
 
 /* 主要内容区域 */
 .ai-page-content {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 20px;
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
   min-height: calc(100vh - 80px);
 }
 
+/* 左侧书籍列表 */
+.ai-books-sidebar {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  height: fit-content;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
 
+.books-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
 
-/* 全屏对话区域 */
-.ai-conversation-main-full {
+.books-header h3 {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 600;
+}
+
+.upload-book-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 16px 32px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.upload-book-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.books-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.book-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.book-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.book-item.selected {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: #fff;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.book-info {
+  flex: 1;
+}
+
+.book-title {
+  font-weight: 600;
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.book-author {
+  font-size: 28px;
+  opacity: 0.8;
+  margin-bottom: 16px;
+}
+
+.book-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24px;
+  opacity: 0.7;
+}
+
+.delete-book-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 0, 0, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  color: white;
+  cursor: pointer;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.delete-book-btn:hover {
+  background: rgba(255, 0, 0, 0.5);
+  transform: scale(1.1);
+}
+
+/* 右侧对话区域 */
+.ai-conversation-main {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   padding: 30px;
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 800px;
   height: fit-content;
   min-height: calc(100vh - 120px);
 }
 
+/* 书籍信息头部 */
+.book-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
 
+.book-detail h2 {
+  margin: 0 0 16px 0;
+  font-size: 56px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.book-detail .book-author,
+.book-detail .book-import-date {
+  margin: 8px 0;
+  font-size: 32px;
+  opacity: 0.8;
+}
 
 /* 对话信息面板 */
 .conversation-info-panel {
@@ -156,7 +291,7 @@
   flex-wrap: wrap;
 }
 
-.ai-control-btn {
+.control-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
@@ -173,42 +308,42 @@
   justify-content: center;
 }
 
-.ai-control-btn:hover:not(:disabled) {
+.control-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.3);
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
-.ai-control-btn:disabled {
+.control-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
-.ai-control-btn.start-btn:not(:disabled) {
+.control-btn.start-btn:not(:disabled) {
   background: rgba(76, 175, 80, 0.3);
   border-color: #4CAF50;
 }
 
-.ai-control-btn.start-btn:not(:disabled):hover {
+.control-btn.start-btn:not(:disabled):hover {
   background: rgba(76, 175, 80, 0.5);
 }
 
-.ai-control-btn.end-btn:not(:disabled) {
+.control-btn.end-btn:not(:disabled) {
   background: rgba(244, 67, 54, 0.3);
   border-color: #F44336;
 }
 
-.ai-control-btn.end-btn:not(:disabled):hover {
+.control-btn.end-btn:not(:disabled):hover {
   background: rgba(244, 67, 54, 0.5);
 }
 
-.ai-control-btn.mute-btn:not(:disabled).muted {
+.control-btn.mute-btn:not(:disabled).muted {
   background: rgba(255, 152, 0, 0.3);
   border-color: #FF9800;
 }
 
-.ai-control-btn.mute-btn:not(:disabled).muted:hover {
+.control-btn.mute-btn:not(:disabled).muted:hover {
   background: rgba(255, 152, 0, 0.5);
 }
 
@@ -392,7 +527,7 @@
     gap: 15px;
   }
   
-  .ai-control-btn {
+  .control-btn {
     min-width: 150px;
     padding: 15px 20px;
   }
@@ -427,7 +562,7 @@
     align-items: center;
   }
   
-  .ai-control-btn {
+  .control-btn {
     width: 100%;
     max-width: 300px;
   }
@@ -442,7 +577,13 @@
     max-height: 300px;
   }
   
-
+  .book-info-header {
+    text-align: center;
+  }
+  
+  .book-stats {
+    align-self: center;
+  }
   
   .conversation-tips {
     max-width: 100%;
@@ -454,22 +595,24 @@
 }
 
 /* 滚动条样式 */
+.ai-books-sidebar::-webkit-scrollbar,
 .conversation-messages::-webkit-scrollbar {
   width: 6px;
 }
 
+.ai-books-sidebar::-webkit-scrollbar-track,
 .conversation-messages::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
 
+.ai-books-sidebar::-webkit-scrollbar-thumb,
 .conversation-messages::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
   border-radius: 3px;
 }
 
+.ai-books-sidebar::-webkit-scrollbar-thumb:hover,
 .conversation-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
-
-
