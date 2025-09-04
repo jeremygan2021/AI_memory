@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, Fragment } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { WebSocketSlot } from "./components/websocket-slot";
+import { WavStreamPlayerSlot } from "./components/wav-stream-player-slot";
 import { VoiceChat } from "./components/voice-chat";
 import "./AIConversationPage.css";
 
@@ -78,6 +79,7 @@ const AIConversationPage = () => {
   return (
     <Fragment>
       <WebSocketSlot />
+      <WavStreamPlayerSlot />
       <div className="ai-conversation-page">
         {/* 顶部导航栏 */}
         <div className="ai-page-header">
