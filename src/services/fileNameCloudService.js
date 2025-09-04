@@ -371,6 +371,11 @@ export const syncCustomNames = async (userCode, sessionId = 'global', forceUploa
       // 更新本地存储
       localStorage.setItem('customNames', JSON.stringify(mergedNames));
       
+      // 触发自定义名称更新事件，通知其他组件刷新
+      window.dispatchEvent(new CustomEvent('customNamesUpdated', { 
+        detail: { customNames: mergedNames }
+      }));
+      
       console.log('从云端同步文件名映射成功并合并到本地');
       return {
         success: true,
@@ -465,6 +470,13 @@ export const saveFileNameAfterUpload = async (userCode, sessionId, objectKey, cu
 
     // 上传到云端
     const result = await saveCustomNamesToCloud(userCode, sessionId, localCustomNames);
+    
+    // 如果成功保存到云端，触发自定义名称更新事件
+    if (result.success) {
+      window.dispatchEvent(new CustomEvent('customNamesUpdated', { 
+        detail: { customNames: localCustomNames }
+      }));
+    }
     
     return {
       success: result.success,
@@ -646,6 +658,11 @@ const processAllSessionsFileNameMappings = async (files, userCode) => {
   }
 
   console.log(`成功从 ${loadedSessionsCount} 个会话加载了 ${Object.keys(allCustomNames).length} 个文件名映射`);
+
+  // 触发自定义名称更新事件，通知其他组件刷新
+  window.dispatchEvent(new CustomEvent('customNamesUpdated', { 
+    detail: { customNames: allCustomNames }
+  }));
 
   return {
     success: true,

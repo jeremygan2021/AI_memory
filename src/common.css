@@ -587,7 +587,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0px 4px 13px rgba(191, 224, 202, 1);
-  max-height: 625px;
+  max-height: 1020px;
   overflow-y: auto;
   transition: all 0.3s ease;
 }
@@ -627,6 +627,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   transition: all 0.4s ease;
   text-align: center;
   width: 100%;
+  height: 300px;
 }
 
 .center-voice-card:hover {
@@ -818,7 +819,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  height: 90%;
+  height: 100%;
   margin: 0;
   max-width: 45%;
   min-width: 350px;
@@ -985,6 +986,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  
 }
 
 .book-memory-card:hover {
@@ -1103,6 +1105,104 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
 }
 
+
+
+/* ai音乐卡片样式 */
+.ai-music-card {
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  border-radius: 20px;
+  padding: 25px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.ai-music-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.ai-music-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ai-music-card:hover::before {
+  opacity: 1;
+}
+
+.ai-music-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.ai-music-card-title {
+  display: flex;
+  align-items: center;
+  font-size: 48px;
+  font-weight: 700;
+  gap: 24px;
+}
+
+.ai-music-icon {
+  font-size: 56px;
+}
+
+.ai-music-card-content {
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.ai-music-card-desc {
+  font-size: 32px;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  opacity: 0.9;
+}
+
+.ai-music-card-features {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-music-card-action {
+  background: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 24px 48px;
+  color: #9b59b6;
+  font-weight: 600;
+  font-size: 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.ai-music-card-action:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .book-memory-card {
@@ -1120,6 +1220,20 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   }
   
   .book-card-features {
+    justify-content: center;
+  }
+  
+  .ai-music-card {
+    padding: 20px;
+  }
+  
+  .ai-music-card-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .ai-music-card-features {
     justify-content: center;
   }
 }
@@ -1401,7 +1515,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   flex: 1;
   max-width: min(900px, 40vw);
   min-width: min(500px, 35vw);
-  height: fit-content;
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1457,9 +1571,7 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 /* 媒体标签样式 */
 .media-board {
   flex: 1;
-  height: auto;
-  min-height: 1027px;
-  max-height: 600px;
+  min-height: 80%;
   width: 100%;
   max-width: 100%;
   background: rgba(255, 255, 255, 0.9);
@@ -3959,3 +4071,28 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
     -webkit-touch-callout: default !important;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
