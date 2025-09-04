@@ -4,6 +4,7 @@ import './App.css';
 import MemoryTimeline from './components/common/MemoryTimeline';
 import WelcomeScreen from './components/common/WelcomeScreen';
 import { getUserCode } from './utils/userCode';
+import { uploadPdfToCloud, listPdfsFromCloud } from './services/bookCloudService';
 import {
   calculateBabyAgeInMonths,
   formatBabyAge,
@@ -32,6 +33,10 @@ const SimpleHomePage = () => {
   const [booksCount, setBooksCount] = useState(0);
   const [totalConversations, setTotalConversations] = useState(0);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
+  const [pdfFiles, setPdfFiles] = useState([]);
+  const [showPdfList, setShowPdfList] = useState(false);
+  const [pdfMessage, setPdfMessage] = useState('');
   
   // 从URL参数获取用户代码
   useEffect(() => {
@@ -427,6 +432,52 @@ const SimpleHomePage = () => {
     return formatBabyAge(babyAgeMonths);
   }, [babyAgeMonths]);
 
+  // 回忆书籍（PDF）相关逻辑
+  const fileInputRef = React.useRef(null);
+  const onClickUploadPdf = useCallback(() => {
+    if (!userCode) return;
+    if (fileInputRef.current) fileInputRef.current.click();
+  }, [userCode]);
+
+  const onChoosePdf = useCallback(async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setPdfMessage('');
+    setIsUploadingPdf(true);
+    try {
+      const result = await uploadPdfToCloud(userCode, file);
+      if (result.success) {
+        setPdfMessage('PDF上传成功');
+        // 上传成功后刷新列表
+        const list = await listPdfsFromCloud(userCode);
+        if (list.success) setPdfFiles(list.files);
+        setShowPdfList(true);
+      } else {
+        setPdfMessage(result.error || 'PDF上传失败');
+      }
+    } catch (err) {
+      setPdfMessage(err.message || 'PDF上传异常');
+    } finally {
+      setIsUploadingPdf(false);
+      // 清空 input 以便下次选择同一文件也能触发
+      if (e.target) e.target.value = '';
+    }
+  }, [userCode]);
+
+  const onViewPdfs = useCallback(async () => {
+    if (!userCode) return;
+    setPdfMessage('');
+    const list = await listPdfsFromCloud(userCode);
+    if (list.success) {
+      setPdfFiles(list.files);
+      setShowPdfList(true);
+    } else {
+      setPdfFiles([]);
+      setShowPdfList(true);
+      setPdfMessage(list.error || '获取PDF列表失败');
+    }
+  }, [userCode]);
+
   // 如果没有用户ID，显示输入界面
   if (!userid) {
     // 无论是小程序还是H5都显示用户代码输入界面
@@ -535,7 +586,7 @@ const SimpleHomePage = () => {
         </div>
         
         {/* 回忆书籍模块 */}
-        <div className="book-memory-card" style={{top:'20px'}} onClick={goToAIConversation}>
+        <div className="book-memory-card" style={{top:'20px'}}>
           <div className="book-card-header">
             <div className="book-card-title">
               <span className="book-icon">📚</span>
@@ -559,9 +610,36 @@ const SimpleHomePage = () => {
               <span className="feature-tag">🤖 AI对话</span>
             </div>
           </div>
-          <button className="book-card-action">
-            开始AI对话
-          </button>
+          <div style={{ display:'flex', gap:'10px', flexWrap:'wrap' }}>
+            <button className="book-card-action" onClick={goToAIConversation}>
+              开始AI对话
+            </button>
+            <button className="book-card-action" onClick={onViewPdfs} disabled={!userCode}>
+              查看书籍列表
+            </button>
+          </div>
+          {pdfMessage && (
+            <div style={{ marginTop: 8, color: '#4a90e2', fontSize: 12 }}>{pdfMessage}</div>
+          )}
+          {showPdfList && (
+            <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed #e0e0e0', paddingTop: 10 }}>
+              {pdfFiles.length === 0 ? (
+                <div style={{ color:'#999', fontSize: 12 }}>暂无回忆书籍</div>
+              ) : (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {pdfFiles.map((f, idx) => (
+                    <li key={f.objectKey || idx} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 0' }}>
+                      <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'70%' }}>我的回忆书籍</span>
+                      <a href={f.url} target="_blank" rel="noreferrer" className="book-card-action1" style={{ padding:'6px 10px' }}>
+                        查看
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+          <input ref={fileInputRef} type="file" accept="application/pdf" style={{ display:'none' }} onChange={onChoosePdf} />
         </div>
         
         {/* 相册入口 */}

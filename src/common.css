@@ -21,7 +21,7 @@
   /* 添加后备字体,提高兼容性 */
   font-family: 'MUYAO-SOFTBRUSH', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', '微软雅黑', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   /* 使用相对单位,提高响应式 */
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   font-weight: 400;
   /* 添加平滑滚动效果 */
   scroll-behavior: smooth;
@@ -1082,6 +1082,21 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   font-size: 24px;
   font-weight: 600;
   backdrop-filter: blur(10px);
+}
+
+.book-card-action1 {
+  background: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 24px 48px;
+  color: #3bb6a6;
+  font-weight: 600;
+  font-size: 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  width: 18%;
 }
 
 .book-card-action {

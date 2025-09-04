@@ -27,6 +27,7 @@ import { isWechatMiniProgram } from './utils/environment';
 import { syncThemeOnStartup } from './themes/themeConfig';
 import { syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
 import { getUserCode } from './utils/userCode';
+import { uploadPdfToCloud, listPdfsFromCloud, deletePdfFromCloud } from './services/bookCloudService';
 import { 
   saveBabyBirthDateToCloud, 
   loadBabyBirthDateFromCloud, 
@@ -282,6 +283,12 @@ const HomePage = ({ onNavigate }) => {
     const w = window.innerWidth;
     return w >= 768 && w <= 1366;
   });
+  // 回忆书籍（PDF）
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
+  const [pdfFiles, setPdfFiles] = useState([]);
+  const [showPdfList, setShowPdfList] = useState(false);
+  const [pdfMessage, setPdfMessage] = useState('');
+  const fileInputRef = React.useRef(null);
 
   // 移动端滚动性能优化
   useEffect(() => {
@@ -655,6 +662,77 @@ const HomePage = ({ onNavigate }) => {
       navigate(`/${userCode}/ai-conversation`);
     }
   }, [userCode, navigate]);
+  // PDF 上传与查看
+  const onClickUploadPdf = useCallback(() => {
+    if (!userCode) return;
+    if (fileInputRef.current) fileInputRef.current.click();
+  }, [userCode]);
+
+  const onChoosePdf = useCallback(async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setPdfMessage('');
+    setIsUploadingPdf(true);
+    try {
+      const result = await uploadPdfToCloud(userCode, file);
+      if (result.success) {
+        setPdfMessage('PDF上传成功');
+        const list = await listPdfsFromCloud(userCode);
+        if (list.success) setPdfFiles(list.files);
+        setShowPdfList(true);
+      } else {
+        setPdfMessage(result.error || 'PDF上传失败');
+      }
+    } catch (err) {
+      setPdfMessage(err.message || 'PDF上传异常');
+    } finally {
+      setIsUploadingPdf(false);
+      if (e.target) e.target.value = '';
+    }
+  }, [userCode]);
+
+  const onViewPdfs = useCallback(async () => {
+    if (!userCode) return;
+    setPdfMessage('');
+    try {
+      const list = await listPdfsFromCloud(userCode);
+      if (list.success) {
+        setPdfFiles(list.files);
+        setShowPdfList(true);
+      } else {
+        setPdfFiles([]);
+        setShowPdfList(true);
+        setPdfMessage(list.error || '获取PDF列表失败');
+      }
+    } catch (e) {
+      setPdfFiles([]);
+      setShowPdfList(true);
+      setPdfMessage(e.message || '获取PDF列表异常');
+    }
+  }, [userCode]);
+
+  const onDeletePdf = useCallback(async (objectKey) => {
+    if (!userCode || !objectKey) return;
+    setPdfMessage('');
+    try {
+      const result = await deletePdfFromCloud(userCode, objectKey);
+      if (result.success) {
+        setPdfMessage('PDF删除成功');
+        // 刷新PDF列表
+        const list = await listPdfsFromCloud(userCode);
+        if (list.success) {
+          setPdfFiles(list.files);
+        } else {
+          setPdfFiles([]);
+          setPdfMessage(list.error || '获取PDF列表失败');
+        }
+      } else {
+        setPdfMessage(result.error || 'PDF删除失败');
+      }
+    } catch (e) {
+      setPdfMessage(e.message || 'PDF删除异常');
+    }
+  }, [userCode]);
 
   // 跳转到录音页面并启用AI音乐功能
   const goToAIMusic = useCallback(() => {
@@ -1179,8 +1257,8 @@ const HomePage = ({ onNavigate }) => {
             </button>
           </div>
 
-          {/* 回忆书籍模块 - 只保留AI对话入口 */}
-          <div className="book-memory-card" onClick={goToAIConversation}>
+          {/* 回忆书籍模块：AI对话 + PDF上传/查看 */}
+          <div className="book-memory-card">
             <div className="book-card-header">
               <div className="book-card-title">
                 <span className="book-icon">📚</span>
@@ -1205,9 +1283,53 @@ const HomePage = ({ onNavigate }) => {
                 {/* <span className="feature-tag">🔍 内容检索</span> */}
               </div>
             </div>
-            <button className="book-card-action">
-              开始AI对话
-            </button>
+            <div style={{ display:'flex', gap:'10px', flexWrap:'wrap' }}>
+              <button className="book-card-action" onClick={goToAIConversation}>
+                开始AI对话
+              </button>
+              <button className="book-card-action" onClick={onClickUploadPdf} disabled={!userCode || isUploadingPdf}>
+                {isUploadingPdf ? '上传中...' : '上传书籍（PDF格式）'}
+              </button>
+              <button className="book-card-action" onClick={onViewPdfs} disabled={!userCode}>
+                查看书籍列表
+              </button>
+            </div>
+            {pdfMessage && (
+              <div style={{ marginTop: 8, color: '#4a90e2', fontSize: 16 }}>{pdfMessage}</div>
+            )}
+            {showPdfList && (
+              <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed #e0e0e0', paddingTop: 10 }}>
+                {pdfFiles.length === 0 ? (
+                  <div style={{ color:'#999', fontSize: 12 }}>暂无回忆书籍</div>
+                ) : (
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {pdfFiles.map((f, idx) => (
+                      <li key={f.objectKey || idx} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 0', gap:'10px' }}>
+                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%' }}>{f.name}</span>
+                        <div style={{display: 'flex' , flex: '1' , gap:'5px', alignItems:'end'}}>
+                          <a href={f.url} target="_blank" rel="noreferrer" className="book-card-action1" style={{ padding:'6px 10px' }}>
+                            查看
+                          </a>
+                          <button 
+                            className="book-card-action1" 
+                            style={{ padding:'6px 10px', background:'#ff4d4f', borderColor:'#ff4d4f' }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (window.confirm('确定要删除这个PDF文件吗？')) {
+                                onDeletePdf(f.objectKey);
+                              }
+                            }}
+                          >
+                            删除
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+            <input ref={fileInputRef} type="file" accept="application/pdf" style={{ display:'none' }} onChange={onChoosePdf} />
           </div>
 
           {/* AI音乐生成模块 - 新增入口卡片 */}
