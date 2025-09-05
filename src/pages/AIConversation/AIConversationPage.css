@@ -1,15 +1,15 @@
 /* AI对话页面样式 */
 .ai-conversation-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #3bb6a6 0%, #2ea087 100%);
+  background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png');
   color: white;
 }
 
 /* 顶部导航栏 */
 .ai-page-header {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(46, 125, 50, 0.3);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.3);
   padding: 15px 20px;
   position: sticky;
   top: 0;
@@ -25,8 +25,8 @@
 }
 
 .back-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(56, 142, 60, 0.5);
+  border: 1px solid rgba(76, 175, 80, 0.6);
   border-radius: 25px;
   padding: 20px 40px;
   color: white;
@@ -40,7 +40,7 @@
 }
 
 .back-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(76, 175, 80, 0.4);
   transform: translateY(-2px);
 }
 
@@ -61,13 +61,13 @@
 }
 
 .user-code-display {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(56, 142, 60, 0.5);
+  border: 1px solid rgba(76, 175, 80, 0.6);
   border-radius: 20px;
   padding: 16px 32px;
   font-size: 28px;
   font-weight: 600;
-  color: #fff;
+  color: #e8f5e9;
 }
 
 /* 主要内容区域 */
@@ -89,19 +89,19 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 800px;
+  max-width: 100%;
   height: fit-content;
   min-height: calc(100vh - 120px);
 }
 
 /* 对话信息面板 */
 .conversation-info-panel {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(46, 125, 50, 0.2);
   border-radius: 20px;
   padding: 25px;
   margin-bottom: 30px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .conversation-status {
@@ -119,45 +119,42 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  width: auto;
+  height: auto;
 }
 
 .status-indicator.active {
   background: rgba(76, 175, 80, 0.3);
-  border: 2px solid #4caf50;
-  color: #4caf50;
+  border: 2px solid #66bb6a;
+  color: #81c784;
 }
 
 .status-indicator.inactive {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(56, 142, 60, 0.2);
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  color: white; 
 }
 
-.conversation-timer {
-  font-size: 36px;
-  font-weight: 700;
-  color: #fff;
-  font-family: "Courier New", monospace;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 10px 20px;
-  border-radius: 15px;
-  min-width: 120px;
-  text-align: center;
-}
+
 
 .conversation-controls {
   display: flex;
   gap: 20px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: 25px;
+  padding: 15px;
+  background: rgba(46, 125, 50, 0.15);
+  border-radius: 15px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .ai-control-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(56, 142, 60, 0.3);
+  border: 2px solid rgba(76, 175, 80, 0.4);
   border-radius: 20px;
   padding: 20px 30px;
-  color: white;
+  color: #e8f5e9;
   font-size: 28px;
   font-weight: 600;
   cursor: pointer;
@@ -170,9 +167,7 @@
 }
 
 .ai-control-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.3);
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .ai-control-btn:disabled {
@@ -182,47 +177,78 @@
 }
 
 .ai-control-btn.start-btn:not(:disabled) {
-  background: rgba(76, 175, 80, 0.3);
-  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.4);
+  border-color: #66bb6a;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 .ai-control-btn.start-btn:not(:disabled):hover {
-  background: rgba(76, 175, 80, 0.5);
+  background: rgba(76, 175, 80, 0.6);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
 }
 
 .ai-control-btn.end-btn:not(:disabled) {
-  background: rgba(244, 67, 54, 0.3);
-  border-color: #f44336;
+  background: rgba(211, 47, 47, 0.4);
+  border-color: #e53935;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
 }
 
 .ai-control-btn.end-btn:not(:disabled):hover {
-  background: rgba(244, 67, 54, 0.5);
+  background: rgba(211, 47, 47, 0.6);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(211, 47, 47, 0.4);
+}
+
+.ai-control-btn.mute-btn:not(:disabled) {
+  background: rgba(76, 175, 80, 0.4);
+  border-color: #66bb6a;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.ai-control-btn.mute-btn:not(:disabled):hover {
+  background: rgba(76, 175, 80, 0.6);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
 }
 
 .ai-control-btn.mute-btn:not(:disabled).muted {
-  background: rgba(255, 152, 0, 0.3);
-  border-color: #ff9800;
+  background: rgba(139, 195, 74, 0.4);
+  border-color: #8bc34a;
+  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
 }
 
 .ai-control-btn.mute-btn:not(:disabled).muted:hover {
-  background: rgba(255, 152, 0, 0.5);
+  background: rgba(139, 195, 74, 0.6);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(139, 195, 74, 0.4);
 }
 
 .btn-icon {
   font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
 }
 
 .btn-text {
   font-size: 24px;
+  font-weight: 600;
+  text-align: center;
 }
 
 /* 实时对话包装器 */
 .realtime-conversation-wrapper {
   flex: 1;
   min-height: 400px;
+  max-height: calc(100vh - 320px);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 
 /* 对话容器 */
@@ -231,20 +257,26 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
 }
 
 .conversation-messages {
   flex: 1;
-  max-height: 500px;
   overflow-y: auto;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 25px;
+  background: rgba(0, 0, 0, 0.25);
   border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  scroll-behavior: smooth;
+  /* 添加渐变背景效果 */
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)),
+    linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(27, 94, 32, 0.1) 100%);
 }
 
 .empty-conversation {
   display: flex;
+  margin-top: 15%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -255,27 +287,29 @@
 .empty-conversation .empty-icon {
   font-size: 128px;
   margin-bottom: 40px;
-  opacity: 0.6;
+  opacity: 0.7;
+  color: #a5d6a7;
 }
 
 .empty-conversation p {
   font-size: 36px;
   margin-bottom: 40px;
-  opacity: 0.8;
+  color: #e8f5e9;
 }
 
 .conversation-tips {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(46, 125, 50, 0.15);
   border-radius: 12px;
   padding: 20px;
   text-align: left;
   max-width: 400px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
 }
 
 .conversation-tips p {
   margin: 0 0 24px 0;
   font-weight: 600;
-  color: #fff;
+  color: #e8f5e9;
   font-size: 28px;
 }
 
@@ -287,56 +321,70 @@
 .conversation-tips li {
   margin-bottom: 16px;
   font-size: 28px;
-  opacity: 0.9;
+  color: rgba(232, 245, 233, 0.9);
 }
 
 /* 消息样式 */
 .message {
-  margin-bottom: 20px;
-  padding: 15px 20px;
-  border-radius: 15px;
+  margin-bottom: 25px;
+  padding: 18px 25px;
+  border-radius: 18px;
   max-width: 80%;
   position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .message.user {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(56, 142, 60, 0.3) 100%);
   margin-left: auto;
   text-align: right;
   border-bottom-right-radius: 5px;
+  border-left: 3px solid rgba(129, 199, 132, 0.8);
 }
 
 .message.ai {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(102, 187, 106, 0.3) 0%, rgba(67, 160, 71, 0.3) 100%);
   margin-right: auto;
   border-bottom-left-radius: 5px;
+  border-right: 3px solid rgba(102, 187, 106, 0.8);
 }
 
 .message.system {
   background: rgba(255, 255, 255, 0.15);
-  margin: 0 auto;
+  margin: 15px auto;
   text-align: center;
   border-radius: 30px;
   max-width: 60%;
   font-style: italic;
   opacity: 0.8;
+  padding: 12px 20px;
+  font-size: 26px;
 }
 
 .message.error {
-  background: rgba(255, 0, 0, 0.2);
+  background: rgba(211, 47, 47, 0.2);
   margin-right: auto;
   border-bottom-left-radius: 5px;
+  border-right: 3px solid rgba(211, 47, 47, 0.6);
 }
 
 .message-content {
   margin-bottom: 16px;
   line-height: 1.6;
   font-size: 30px;
+  word-wrap: break-word;
 }
 
 .message-time {
   font-size: 22px;
   opacity: 0.6;
+  font-family: 'Courier New', monospace;
 }
 
 /* 无书籍选中状态 */
@@ -386,6 +434,7 @@
 
   .conversation-controls {
     gap: 15px;
+    padding: 12px;
   }
 
   .ai-control-btn {
@@ -399,6 +448,30 @@
 
   .btn-icon {
     font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .realtime-conversation-wrapper {
+    max-height: calc(100vh - 350px);
+    min-height: 350px;
+  }
+
+  .conversation-messages {
+    padding: 20px;
+  }
+
+  .message {
+    margin-bottom: 18px;
+    padding: 15px 20px;
+  }
+
+  .message-content {
+    font-size: 28px;
+  }
+
+  .message-time {
+    font-size: 20px;
   }
 }
 
@@ -421,6 +494,7 @@
   .conversation-controls {
     flex-direction: column;
     align-items: center;
+    padding: 12px;
   }
 
   .ai-control-btn {
@@ -434,16 +508,42 @@
     text-align: center;
   }
 
+  .realtime-conversation-wrapper {
+    max-height: calc(100vh - 380px);
+    min-height: 300px;
+  }
+
   .conversation-messages {
     max-height: 300px;
+    padding: 15px;
+  }
+
+  .message {
+    margin-bottom: 15px;
+    padding: 12px 18px;
+    max-width: 90%;
+  }
+
+  .message-content {
+    font-size: 26px;
+  }
+
+  .message-time {
+    font-size: 18px;
   }
 
   .conversation-tips {
     max-width: 100%;
+    padding: 15px;
+  }
+
+  .conversation-tips p {
+    font-size: 24px;
   }
 
   .conversation-tips li {
-    font-size: 24px;
+    font-size: 22px;
+    margin-bottom: 12px;
   }
 }
 
@@ -453,15 +553,15 @@
 }
 
 .conversation-messages::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(46, 125, 50, 0.2);
   border-radius: 3px;
 }
 
 .conversation-messages::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(129, 199, 132, 0.5);
   border-radius: 3px;
 }
 
 .conversation-messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(129, 199, 132, 0.8);
 }

@@ -68,21 +68,14 @@ function VoiceChat() {
     <div className="flex flex-col items-center gap-4">
       <button
         onClick={isRecording ? stopRecord : startRecord}
-        className={`control-btn rounded-full ${
-          isRecording ? "bg-red-500" : "bg-blue-500"
-        }`}
+        className={`ai-control-btn ${isRecording ? "end-btn" : "start-btn"}`}
       >
-        {isRecording ? (
-          <>
-            <Mic className="mr-2" />
-            停止对话
-          </>
-        ) : (
-          <>
-            <Mic className="mr-2" />
-            开始对话
-          </>
-        )}
+        <span className="btn-icon">
+          <Mic />
+        </span>
+        <span className="btn-text">
+          {isRecording ? "停止对话" : "开始对话"}
+        </span>
       </button>
     </div>
   );

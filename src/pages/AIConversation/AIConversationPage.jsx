@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, Fragment } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { VolumeX, Volume2 } from "lucide-react";
 import { WebSocketSlot } from "./components/websocket-slot";
 import { WavStreamPlayerSlot } from "./components/wav-stream-player-slot";
 import { VoiceChat } from "./components/voice-chat";
@@ -92,7 +93,7 @@ const AIConversationPage = () => {
               <span className="ai-icon">
                 <img src="/images/AIBot.png" alt="AI" width={64} height={64} />
               </span>
-              实时语音对话
+              AI书籍对话
             </div>
             <div className="user-code-display">{userid}</div>
           </div>
@@ -102,7 +103,7 @@ const AIConversationPage = () => {
           {/* 对话区域 - 全屏显示 */}
           <div className="ai-conversation-main-full">
             {/* 对话信息面板 */}
-            <div className="conversation-info-panel">
+            {/* <div className="conversation-info-panel">
               <div className="conversation-status">
                 <div
                   className={`status-indicator ${
@@ -116,24 +117,7 @@ const AIConversationPage = () => {
                 </div>
               </div>
 
-              <div className="conversation-controls">
-                {/* 使用VoiceChat组件 */}
-                <VoiceChat />
-
-                <button
-                  className={`ai-control-btn mute-btn ${
-                    isMuted ? "muted" : ""
-                  }`}
-                  onClick={toggleMute}
-                  disabled={!isConversationActive}
-                >
-                  <span className="btn-icon">{isMuted ? "🔇" : "🔊"}</span>
-                  <span className="btn-text">
-                    {isMuted ? "取消静音" : "静音"}
-                  </span>
-                </button>
-              </div>
-            </div>
+            </div> */}
 
             {/* 实时语音对话区域 */}
             <div className="realtime-conversation-wrapper">
@@ -168,6 +152,25 @@ const AIConversationPage = () => {
                 </div>
               </div>
             </div>
+             <div className="conversation-controls">
+                {/* 使用VoiceChat组件 */}
+                <VoiceChat />
+
+                <button
+                  className={`ai-control-btn mute-btn ${
+                    isMuted ? "muted" : ""
+                  }`}
+                  onClick={toggleMute}
+                  disabled={!isConversationActive}
+                >
+                  <span className="btn-icon">
+                    {isMuted ? <Volume2 /> : <VolumeX />}
+                  </span>
+                  <span className="btn-text">
+                    {isMuted ? "取消静音" : "静音"}
+                  </span>
+                </button>
+              </div>
           </div>
         </div>
       </div>
