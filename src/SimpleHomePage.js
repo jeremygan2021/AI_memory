@@ -299,17 +299,8 @@ const SimpleHomePage = () => {
 
   // 计算滑块的最大值（根据宝宝年龄动态设置）
   const calculateSliderMax = (currentAgeMonths) => {
-    if (currentAgeMonths < 6) {
-      return 12; // 6个月以下，最大显示1岁
-    } else if (currentAgeMonths < 12) {
-      return 24; // 6-12个月，最大显示2岁
-    } else if (currentAgeMonths < 24) {
-      return 36; // 1-2岁，最大显示3岁
-    } else if (currentAgeMonths < 36) {
-      return 48; // 2-3岁，最大显示4岁
-    } else {
-      return 60; // 3岁以上，最大显示5岁
-    }
+    // 根据实际年龄加一岁（12个月）计算最大值
+    return currentAgeMonths + 12;
   };
 
   // 处理月份滑块变化（禁用手动调节）
