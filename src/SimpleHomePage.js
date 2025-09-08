@@ -610,7 +610,7 @@ const SimpleHomePage = () => {
             </button>
           </div>
           {pdfMessage && (
-            <div style={{ marginTop: 8, color: '#4a90e2', fontSize: 12 }}>{pdfMessage}</div>
+            <div style={{ marginTop: 8, color: 'red', fontSize: 24 }}>{pdfMessage}</div>
           )}
           {showPdfList && (
             <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed #e0e0e0', paddingTop: 10 }}>

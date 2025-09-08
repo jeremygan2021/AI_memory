@@ -1082,6 +1082,18 @@ const HomePage = ({ onNavigate }) => {
           >
             上传
           </span>
+          <span 
+            className="menu-item" 
+            onClick={() => {
+              if (userCode) {
+                const sessionId = Math.random().toString(36).substr(2, 6);
+                navigate(`/${userCode}/simple`);
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            回忆
+          </span>
         </div>
       )}
 
@@ -1286,7 +1298,7 @@ const HomePage = ({ onNavigate }) => {
               </button>
             </div>
             {pdfMessage && (
-              <div style={{ marginTop: 8, color: '#4a90e2', fontSize: 16 }}>{pdfMessage}</div>
+              <div style={{ marginTop: 8, color: 'red', fontSize: 24 }}>{pdfMessage}</div>
             )}
             {showPdfList && (
               <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed #e0e0e0', paddingTop: 10 }}>

@@ -31,8 +31,8 @@ const AIConversationPage = () => {
   }, [isConversationActive, conversationStartTime]);
 
   const goBack = useCallback(() => {
-    navigate(`/${userid}`);
-  }, [userid, navigate]);
+    navigate(-1);
+  }, [navigate]);
 
   // 开始对话
   const startConversation = useCallback(() => {
