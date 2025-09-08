@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { VolumeX, Volume2 } from "lucide-react";
 import { WebSocketSlot } from "./components/websocket-slot";
 import { WavStreamPlayerSlot } from "./components/wav-stream-player-slot";
+import { BubbleList } from "./components/bubble-list";
+import { BubbleEmpty } from "./components/bubble-empty";
 import { VoiceChat } from "./components/voice-chat";
 import "./AIConversationPage.css";
 
@@ -123,54 +125,26 @@ const AIConversationPage = () => {
             <div className="realtime-conversation-wrapper">
               <div className="conversation-container">
                 <div className="conversation-messages">
-                  {conversationMessages.length === 0 ? (
-                    <div className="empty-conversation">
-                      <div className="empty-icon">💬</div>
-                      <p>暂无对话记录</p>
-                      <div className="conversation-tips">
-                        <p>对话提示：</p>
-                        <ul>
-                          <li>点击"开始对话"按钮开始语音对话</li>
-                          <li>对话过程中可以随时静音或结束</li>
-                          <li>对话内容将实时显示在这里</li>
-                        </ul>
-                      </div>
-                    </div>
-                  ) : (
-                    conversationMessages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`message ${message.type}`}
-                      >
-                        <div className="message-content">{message.content}</div>
-                        <div className="message-time">
-                          {message.timestamp.toLocaleTimeString()}
-                        </div>
-                      </div>
-                    ))
-                  )}
+                  <BubbleList />
+                  <BubbleEmpty />
                 </div>
               </div>
             </div>
-             <div className="conversation-controls">
-                {/* 使用VoiceChat组件 */}
-                <VoiceChat />
-
-                <button
-                  className={`ai-control-btn mute-btn ${
-                    isMuted ? "muted" : ""
-                  }`}
-                  onClick={toggleMute}
-                  disabled={!isConversationActive}
-                >
-                  <span className="btn-icon">
-                    {isMuted ? <Volume2 /> : <VolumeX />}
-                  </span>
-                  <span className="btn-text">
-                    {isMuted ? "取消静音" : "静音"}
-                  </span>
-                </button>
-              </div>
+            <div className="conversation-controls">
+              <VoiceChat />
+              <button
+                className={`ai-control-btn mute-btn ${isMuted ? "muted" : ""}`}
+                onClick={toggleMute}
+                disabled={!isConversationActive}
+              >
+                <span className="btn-icon">
+                  {isMuted ? <Volume2 /> : <VolumeX />}
+                </span>
+                <span className="btn-text">
+                  {isMuted ? "取消静音" : "静音"}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
