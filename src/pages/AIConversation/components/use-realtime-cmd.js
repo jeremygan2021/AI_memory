@@ -1,10 +1,48 @@
 import { v4 as uuidv4 } from "uuid";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useAgentStore } from "./use-agent-store";
 import { useConversationStore } from "./use-conversation-store";
 
 const useRealtimeCmd = () => {
+  const { userid } = useParams();
   const { agent } = useAgentStore();
   const { wsInstance } = useConversationStore();
+
+  const [tools, setTools] = useState([]);
+
+  useEffect(() => {
+    if (userid === "FRD1") {
+      setTools([
+        {
+          type: "retrieval",
+          function: {
+            description:
+              "本知识库可以回答用户【生命的织锦：家族与传承的交织故事】相关问题",
+            options: {
+              // 文本检索
+              vector_store_id: "276921286739320832",
+              prompt_template:
+                "严格从文档{{knowledge}}中找到问题{{query}}的答案。根据文档内容中的语句找到答案, 如果文档中没用答案则告诉用户找不到",
+            },
+          },
+        },
+        {
+          type: "retrieval",
+          function: {
+            description:
+              "本知识库可以回答用户【生命的织锦：家族与传承的交织故事】相关问题",
+            options: {
+              // 图片检索
+              vector_store_id: "276946092016758784",
+              prompt_template:
+                "严格从文档{{knowledge}}中找到问题{{query}}的答案。根据文档内容中的语句找到答案, 如果文档中没用答案则告诉用户找不到",
+            },
+          },
+        },
+      ]);
+    }
+  }, [userid]);
 
   /** @description 创建/更新 Session - 支持实时对话 */
   function sendPrompt() {
@@ -20,7 +58,7 @@ const useRealtimeCmd = () => {
         turn_detection: {
           type: "server_vad",
         },
-        tools: [],
+        tools,
       },
     });
   }
