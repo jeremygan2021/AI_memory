@@ -34,7 +34,6 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
   align-items: center;
   gap: 16px;
 }
@@ -486,7 +485,7 @@
   }
 
   .ai-page-nav {
-    flex-direction: column;
+    flex-direction: row;
     gap: 15px;
     text-align: center;
   }
@@ -514,7 +513,7 @@
   }
 
   .conversation-messages {
-    max-height: 300px;
+    max-height: 900px;
     padding: 15px;
   }
 

@@ -6,6 +6,8 @@ import { WavStreamPlayerSlot } from "./components/wav-stream-player-slot";
 import { BubbleList } from "./components/bubble-list";
 import { BubbleEmpty } from "./components/bubble-empty";
 import { VoiceChat } from "./components/voice-chat";
+import useDeviceStore from "./components/use-device-store";
+import useRealtimeCmd from "./components/use-realtime-cmd";
 import "./AIConversationPage.css";
 
 const AIConversationPage = () => {
@@ -70,6 +72,21 @@ const AIConversationPage = () => {
     setIsMuted((prev) => !prev);
   }, []);
 
+  // 停止音频播放
+  const { wavStreamPlayer } = useDeviceStore();
+  const { cancelResponse, clearAudioBuffer } = useRealtimeCmd();
+  const stopAudioPlayback = useCallback(() => {
+    try {
+      // 立即中断本地播放器
+      wavStreamPlayer.interrupt();
+      // 通知后端取消当前响应并清空缓冲
+      cancelResponse();
+      clearAudioBuffer();
+    } catch (e) {
+      // 忽略
+    }
+  }, [wavStreamPlayer, cancelResponse, clearAudioBuffer]);
+
   // 格式化时间
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -88,7 +105,6 @@ const AIConversationPage = () => {
         <div className="ai-page-header">
           <div className="ai-page-nav">
             <button className="back-btn" onClick={goBack}>
-              <span className="back-icon">←</span>
               返回主页
             </button>
             <div className="ai-page-title">
@@ -133,16 +149,10 @@ const AIConversationPage = () => {
             <div className="conversation-controls">
               <VoiceChat />
               <button
-                className={`ai-control-btn mute-btn ${isMuted ? "muted" : ""}`}
-                onClick={toggleMute}
-                disabled={!isConversationActive}
+                className="ai-control-btn stop-btn"
+                onClick={stopAudioPlayback}
               >
-                <span className="btn-icon">
-                  {isMuted ? <Volume2 /> : <VolumeX />}
-                </span>
-                <span className="btn-text">
-                  {isMuted ? "取消静音" : "静音"}
-                </span>
+                <span className="btn-text">停止播放</span>
               </button>
             </div>
           </div>
