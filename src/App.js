@@ -23,6 +23,7 @@ import CopyTest from './components/utils/CopyTest';
 import ThemeCloudTest from './components/theme/ThemeCloudTest';
 import AIConversationPage from './pages/AIConversation/AIConversationPage';
 import SimpleHomePage from './SimpleHomePage';
+import BusinessHomePage from './pages/Business/BusinessHomePage';
 import { isWechatMiniProgram } from './utils/environment';
 import { syncThemeOnStartup } from './themes/themeConfig';
 import { syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
@@ -1541,6 +1542,7 @@ function App() {
         <Route path="/" element={<UserCodeInput />} />
         <Route path="/:userid" element={<HomePage />} />
         <Route path="/:userid/simple" element={<SimpleHomePage />} />
+        <Route path="/bus/A1B2" element={<BusinessHomePage />} />
         <Route path="/family" element={<FamilyPage />} />
         <Route path="/:userid/audio-library" element={<AudioLibrary />} />
         <Route path="/:userid/gallery" element={<UploadMediaPage />} />
