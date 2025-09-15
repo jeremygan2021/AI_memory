@@ -24,8 +24,9 @@ import ThemeCloudTest from './components/theme/ThemeCloudTest';
 import AIConversationPage from './pages/AIConversation/AIConversationPage';
 import SimpleHomePage from './SimpleHomePage';
 import BusinessHomePage from './pages/Business/BusinessHomePage';
+import CombinedHomePage from './pages/Combined/CombinedHomePage';
+import ThemeSwitcher from './components/theme/ThemeSwitcher';
 import { isWechatMiniProgram } from './utils/environment';
-import { syncThemeOnStartup } from './themes/themeConfig';
 import { syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
 import { getUserCode } from './utils/userCode';
 import { uploadPdfToCloud, listPdfsFromCloud, deletePdfFromCloud } from './services/bookCloudService';
@@ -1044,6 +1045,7 @@ const HomePage = ({ onNavigate }) => {
           <div className="navbar-right">
             <span className="memory-icon bell" />
             <span className="memory-icon settings" />
+            <ThemeSwitcher forceGreenTheme={true} />
             <span className="memory-icon user" />
           </div>
         </div>
@@ -1104,9 +1106,23 @@ const HomePage = ({ onNavigate }) => {
         <div className="memory-left">
           <div className="memory-left-top">
             {/* 用户账户信息 */}
-            <div className="user-account-card">
-              <div className="user-code">{userCode}</div>
-              <div className="user-status">✓ 已激活</div>
+            <div className="user-account-card" style={{
+              background: '#ffffff',
+              border: '1px solid #b7e5df',
+              borderRadius: '12px',
+              padding: '16px',
+              boxShadow: '0 4px 12px rgba(59, 182, 166, 0.1)'
+            }}>
+              <div className="user-code" style={{
+                color: '#3bb6a6',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                marginBottom: '8px'
+              }}>{userCode}</div>
+              <div className="user-status" style={{
+                color: '#3bb6a6',
+                fontSize: '14px'
+              }}>✓ 已激活</div>
             </div>
             {/* 平板专用：录音和相册入口，录音在前 */}
             {isTabletView && (
@@ -1146,24 +1162,63 @@ const HomePage = ({ onNavigate }) => {
                     </div>
                   </div>
                 )}
-              </>
-            )}
-            {/* 宝宝信息 */}
-            <div className="baby-info">
-              <div className="baby-info-top">
-                <div className="baby-avatar" />
-                <div className="baby-age-display">
-                  <span className="age-label">宝宝年龄:</span>
-                  <span className="age-value">{formattedAge}</span>
-                  <span className="age-value">Baby</span>
+              </>            )}
+            {/* 用户信息 */}
+            <div className="baby-info" style={{
+              background: '#ffffff',
+              border: '1px solid #b7e5df',
+              borderRadius: '12px',
+              padding: '16px',
+              boxShadow: '0 4px 12px rgba(59, 182, 166, 0.1)'
+            }}>
+              <div className="baby-info-top" style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '12px'
+              }}>
+              <div className="baby-avatar" style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                background: '#e3f6f2',
+                marginRight: '12px'
+              }} />
+                <div className="baby-age-display" style={{
+                  flex: 1
+                }}>
+                  <span className="age-label" style={{
+                    color: '#3bb6a6',
+                    fontSize: '14px',
+                    marginRight: '8px'
+                  }}>年龄:</span>
+                  <span className="age-value" style={{
+                    color: '#3bb6a6',
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                  }}>{formattedAge}</span>
+
                   
                   {isLoadingBirthDate ? (
-                    <span className="loading-indicator">加载中...</span>
+                    <span className="loading-indicator" style={{
+                      color: '#3bb6a6',
+                      fontSize: '12px',
+                      marginLeft: '8px'
+                    }}>加载中...</span>
                   ) : (
                     <button 
                       className="edit-birth-date-btn" 
                       onClick={startEditBirthDate}
-                      title="设置宝宝出生日期"
+                      title="设置用户出生日期"
+                      style={{
+                        background: '#e3f6f2',
+                        border: '1px solid #b7e5df',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        color: '#3bb6a6',
+                        cursor: 'pointer',
+                        marginLeft: '8px'
+                      }}
                     >
                       设置生日
                     </button>
@@ -1172,19 +1227,51 @@ const HomePage = ({ onNavigate }) => {
               </div>
               
               {isEditingBirthDate && (
-                <div className="birth-date-editor">
-                  <div className="editor-title">设置宝宝出生日期</div>
+                <div className="birth-date-editor" style={{
+                  background: '#e3f6f2',
+                  border: '1px solid #b7e5df',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  marginTop: '12px'
+                }}>
+                  <div className="editor-title" style={{
+                    color: '#3bb6a6',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    marginBottom: '8px'
+                  }}>设置用户出生日期</div>
                   <input
                     type="date"
                     value={tempBirthDate}
                     onChange={(e) => setTempBirthDate(e.target.value)}
                     className="birth-date-input"
                     max={new Date().toISOString().split('T')[0]}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #b7e5df',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      marginBottom: '12px'
+                    }}
                   />
-                  <div className="editor-buttons">
+                  <div className="editor-buttons" style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '8px'
+                  }}>
                     <button 
                       className="cancel-btn" 
                       onClick={cancelEditBirthDate}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #b7e5df',
+                        borderRadius: '4px',
+                        padding: '6px 12px',
+                        fontSize: '14px',
+                        color: '#3bb6a6',
+                        cursor: 'pointer'
+                      }}
                     >
                       取消
                     </button>
@@ -1192,6 +1279,15 @@ const HomePage = ({ onNavigate }) => {
                       className="save-btn" 
                       onClick={confirmSaveBirthDate}
                       disabled={!tempBirthDate}
+                      style={{
+                        background: tempBirthDate ? '#3bb6a6' : '#b7e5df',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '6px 12px',
+                        fontSize: '14px',
+                        color: '#ffffff',
+                        cursor: tempBirthDate ? 'pointer' : 'not-allowed'
+                      }}
                     >
                       保存
                     </button>
@@ -1200,9 +1296,18 @@ const HomePage = ({ onNavigate }) => {
               )}
               
               {babyBirthDate && !isEditingBirthDate && (
-                <div className="birth-date-display">
-                  <span className="birth-date-label">出生日期:</span>
-                  <span className="birth-date-value">
+                <div className="birth-date-display" style={{
+                  marginTop: '12px'
+                }}>
+                  <span className="birth-date-label" style={{
+                    color: '#3bb6a6',
+                    fontSize: '14px',
+                    marginRight: '8px'
+                  }}>出生日期:</span>
+                  <span className="birth-date-value" style={{
+                    color: '#3bb6a6',
+                    fontSize: '14px'
+                  }}>
                     {new Date(babyBirthDate).toLocaleDateString('zh-CN', {
                       year: 'numeric',
                       month: 'long',
@@ -1212,8 +1317,12 @@ const HomePage = ({ onNavigate }) => {
                 </div>
               )}
               
-              <div className="baby-progress">
-                <div className="age-slider-container">
+              <div className="baby-progress" style={{
+                marginTop: '16px'
+              }}>
+                <div className="age-slider-container" style={{
+                  position: 'relative'
+                }}>
                   {/* <div className="slider-label">
                     年龄调节: {babyAgeMonths}个月
                   </div> */}
@@ -1226,10 +1335,40 @@ const HomePage = ({ onNavigate }) => {
                     className="age-slider"
                     disabled
                     readOnly
+                    style={{
+                      width: '100%',
+                      height: '6px',
+                      borderRadius: '3px',
+                      background: 'rgba(59, 182, 166, 0.3)',
+                      outline: 'none',
+                      WebkitAppearance: 'none',
+                      margin: '8px 0'
+                    }}
                   />
-                  <div className="slider-marks">
-                    <span>1月</span>
-                    <span>
+                  <div className="slider-marks" style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: '4px',
+                    width: '100%',
+                    padding: '0 2px',
+                    boxSizing: 'border-box'
+                  }}>
+                    <span style={{
+                      flex: '0 0 auto',
+                      textAlign: 'left',
+                      marginLeft: '8px',
+                      fontSize: '14px',
+                      color: '#3bb6a6',
+                      fontWeight: '500'
+                    }}>1月</span>
+                    <span style={{
+                      flex: '0 0 auto',
+                      textAlign: 'right',
+                      marginRight: '8px',
+                      fontSize: '14px',
+                      color: '#3bb6a6',
+                      fontWeight: '500'
+                    }}>
                       {calculateSliderMax(babyAgeMonths) >= 12 
                         ? `${Math.floor(calculateSliderMax(babyAgeMonths) / 12)}岁` 
                         : `${calculateSliderMax(babyAgeMonths)}月`}
@@ -1262,61 +1401,166 @@ const HomePage = ({ onNavigate }) => {
           </div>
 
           {/* 回忆书籍模块：AI对话 + PDF上传/查看 */}
-          <div className="book-memory-card">
-            <div className="book-card-header">
-              <div className="book-card-title">
-                <span className="book-icon">📚</span>
+          <div className="book-memory-card" style={{
+  background: '#ffffff',
+  border: '1px solid #b7e5df',
+  borderRadius: '12px',
+  padding: '16px',
+  marginBottom: '16px',
+  boxShadow: '0 2px 4px rgba(59, 182, 166, 0.05)'
+}}>
+            <div className="book-card-header" style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '12px'
+            }}>
+              <div className="book-card-title" style={{
+                color: '#3bb6a6',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span className="book-icon" style={{
+                  fontSize: '20px'
+                }}>📚</span>
                 回忆书籍
               </div>
-              <div className="book-card-stats">
-                <span className="stat-item">
-                  <span className="stat-number">{booksCount}</span>
-                  <span className="stat-label">书籍</span>
+              <div className="book-card-stats" style={{
+                display: 'flex',
+                gap: '16px'
+              }}>
+                <span className="stat-item" style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}>
+                  <span className="stat-number" style={{
+                    color: '#3bb6a6',
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                  }}>{booksCount}</span>
+                  <span className="stat-label" style={{
+                    color: '#3bb6a6',
+                    fontSize: '12px'
+                  }}>书籍</span>
                 </span>
-                <span className="stat-item">
-                  <span className="stat-number">{totalConversations}</span>
-                  <span className="stat-label">对话</span>
+                <span className="stat-item" style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}>
+                  <span className="stat-number" style={{
+                    color: '#3bb6a6',
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                  }}>{totalConversations}</span>
+                  <span className="stat-label" style={{
+                    color: '#3bb6a6',
+                    fontSize: '12px'
+                  }}>对话</span>
                 </span>
               </div>
             </div>
             <div className="book-card-content">
-              <p className="book-card-desc">与AI进行智能对话和内容检索</p>
-              <div className="book-card-features">
-                <span className="feature-tag">🤖 AI对话</span>
-                <span className="feature-tag">📚 云端书籍</span>
-                {/* <span className="feature-tag">🔍 内容检索</span> */}
+              <p className="book-card-desc" style={{
+                color: '#3bb6a6',
+                fontSize: '14px',
+                marginBottom: '12px'
+              }}>与AI进行智能对话和内容检索</p>
+              <div className="book-card-features" style={{
+                display: 'flex',
+                gap: '8px',
+                marginBottom: '16px'
+              }}>
+                <span className="feature-tag" style={{
+                  background: '#e3f6f2',
+                  color: '#3bb6a6',
+                  borderRadius: '12px',
+                  padding: '4px 8px',
+                  fontSize: '12px'
+                }}>🤖 AI对话</span>
+                <span className="feature-tag" style={{
+                  background: '#e3f6f2',
+                  color: '#3bb6a6',
+                  borderRadius: '12px',
+                  padding: '4px 8px',
+                  fontSize: '12px'
+                }}>📚 云端书籍</span>
               </div>
             </div>
             <div style={{ display:'flex', gap:'10px', flexWrap:'wrap' }}>
-              <button className="book-card-action" onClick={goToAIConversation}>
+              <button className="book-card-action" onClick={goToAIConversation} style={{
+                background: '#3bb6a6',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 12px',
+                fontSize: '14px',
+                color: '#ffffff',
+                cursor: 'pointer'
+              }}>
                 开始AI对话
               </button>
-              <button className="book-card-action" onClick={onClickUploadPdf} disabled={!userCode || isUploadingPdf}>
+              <button className="book-card-action" onClick={onClickUploadPdf} disabled={!userCode || isUploadingPdf} style={{
+                background: (!userCode || isUploadingPdf) ? '#b7e5df' : '#e3f6f2',
+                border: '1px solid #b7e5df',
+                borderRadius: '6px',
+                padding: '8px 12px',
+                fontSize: '14px',
+                color: '#3bb6a6',
+                cursor: (!userCode || isUploadingPdf) ? 'not-allowed' : 'pointer'
+              }}>
                 {isUploadingPdf ? '上传中...' : '上传书籍（PDF格式）'}
               </button>
-              <button className="book-card-action" onClick={onViewPdfs} disabled={!userCode}>
+              <button className="book-card-action" onClick={onViewPdfs} disabled={!userCode} style={{
+                background: userCode ? '#e3f6f2' : '#b7e5df',
+                border: '1px solid #b7e5df',
+                borderRadius: '6px',
+                padding: '8px 12px',
+                fontSize: '14px',
+                color: '#3bb6a6',
+                cursor: userCode ? 'pointer' : 'not-allowed'
+              }}>
                 查看书籍列表
               </button>
             </div>
             {pdfMessage && (
-              <div style={{ marginTop: 8, color: 'red', fontSize: 24 }}>{pdfMessage}</div>
+              <div style={{ marginTop: 8, color: '#3bb6a6', fontSize: 14 }}>{pdfMessage}</div>
             )}
             {showPdfList && (
-              <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed #e0e0e0', paddingTop: 10 }}>
+              <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed #b7e5df', paddingTop: 10 }}>
                 {pdfFiles.length === 0 ? (
-                  <div style={{ color:'#999', fontSize: 12 }}>暂无回忆书籍</div>
+                  <div style={{ color:'#3bb6a6', fontSize: 12 }}>暂无回忆书籍</div>
                 ) : (
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {pdfFiles.map((f, idx) => (
                       <li key={f.objectKey || idx} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 0', gap:'10px' }}>
-                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%' }}>{f.name}</span>
+                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%', color: '#3bb6a6', fontSize: 14 }}>{f.name}</span>
                         <div style={{display: 'flex' , flex: '1' , gap:'5px', alignItems:'end'}}>
-                          <a href={f.url} target="_blank" rel="noreferrer" className="book-card-action1" style={{ padding:'6px 10px' }}>
+                          <a href={f.url} target="_blank" rel="noreferrer" className="book-card-action1" style={{ 
+                            padding:'6px 10px',
+                            background: '#e3f6f2',
+                            color: '#3bb6a6',
+                            textDecoration: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            border: '1px solid #b7e5df'
+                          }}>
                             查看
                           </a>
                           <button 
                             className="book-card-action1" 
-                            style={{ padding:'6px 10px', background:'#ff4d4f', borderColor:'#ff4d4f' }}
+                            style={{ 
+                              padding:'6px 10px', 
+                              background:'#e3f6f2', 
+                              borderColor:'#b7e5df',
+                              color: '#3bb6a6',
+                              border: '1px solid #b7e5df',
+                              borderRadius: '4px',
+                              fontSize: '12px'
+                            }}
                             onClick={(e) => {
                               e.preventDefault();
                               if (window.confirm('确定要删除这个PDF文件吗？')) {
@@ -1505,26 +1749,36 @@ const HomePage = ({ onNavigate }) => {
 
 
 function App() {
-  // 应用启动时同步主题设置和文件名映射
+  // 应用启动时初始化主题
   useEffect(() => {
     const initializeApp = async () => {
       try {
         console.log('应用启动，初始化设置...');
         
-        // 1. 同步主题设置
-        const themeResult = await syncThemeOnStartup();
-        console.log('主题初始化结果:', themeResult);
+        // 初始化主题设置
+        console.log('初始化主题设置');
         
-        if (themeResult.success) {
-          if (themeResult.source === 'cloud') {
-            console.log(`✅ 已从云端同步主题: ${themeResult.themeId}`);
-          } else {
-            console.log(`✅ 使用本地主题: ${themeResult.themeId}`);
-          }
-        } else {
-          console.warn('⚠️ 主题初始化失败:', themeResult.error);
+        // 导入主题相关函数
+        const { applyTheme, loadThemeFromCloudAndApply, syncThemeOnStartup } = await import('./themes/themeConfig');
+        const { checkThemeCloudUpdate } = await import('./services/themeCloudService');
+        const { getUserCode } = await import('./utils/userCode');
+        
+        // 获取用户代码
+        const userCode = getUserCode();
+        console.log('用户代码:', userCode);
+        
+        // 使用同步主题函数，它会自动处理云端和本地主题
+        const syncResult = await syncThemeOnStartup();
+        console.log('主题同步结果:', syncResult);
+        
+        // 如果同步失败，使用默认主题
+        if (!syncResult.success) {
+          console.log('主题同步失败，使用默认主题');
+          await applyTheme('default', { saveToCloud: false });
         }
-
+        
+        console.log('主题初始化完成');
+        
         // 文件名映射同步移至HomePage组件中执行，避免时序问题
         console.log('文件名映射同步将在具体页面组件中执行');
         
@@ -1542,6 +1796,7 @@ function App() {
         <Route path="/" element={<UserCodeInput />} />
         <Route path="/:userid" element={<HomePage />} />
         <Route path="/:userid/simple" element={<SimpleHomePage />} />
+        <Route path="/:userid/combined" element={<CombinedHomePage />} />
         <Route path="/bus/A1B2" element={<BusinessHomePage />} />
         <Route path="/family" element={<FamilyPage />} />
         <Route path="/:userid/audio-library" element={<AudioLibrary />} />

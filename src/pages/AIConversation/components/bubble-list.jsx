@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useConversationStore } from "./use-conversation-store";
 import { Bubble } from "./bubble";
+import { BubbleEmpty } from "./bubble-empty";
 
 function BubbleList() {
   const { currentSessionId, sessionList } = useConversationStore();
@@ -92,17 +93,16 @@ function BubbleList() {
   }, [sessionList, currentSessionId, isUserScrolling, isAtBottom]);
 
   return (
-    <div ref={scrollContainerRef}>
-      <div>
-        {sessionList
-          .filter((session) => session.id === currentSessionId)
-          .at(0)
-          ?.message.map((item) => {
-            if (item.msgType === "realtime") {
-              return <Bubble key={item.itemId} msg={item} />;
-            }
-          })}
-      </div>
+    <div className="conversation-messages" ref={scrollContainerRef}>
+      {sessionList
+        .filter((session) => session.id === currentSessionId)
+        .at(0)
+        ?.message.map((item) => {
+          if (item.msgType === "realtime") {
+            return <Bubble key={item.itemId} msg={item} />;
+          }
+        })}
+      <BubbleEmpty />
     </div>
   );
 }

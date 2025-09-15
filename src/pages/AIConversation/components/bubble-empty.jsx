@@ -11,7 +11,7 @@ function BubbleEmpty() {
       }}
     >
       <div className="empty-icon">💬</div>
-      <p>暂无对话记录</p>
+      <p></p>
       <div className="conversation-tips">
         <p>对话提示：</p>
         <ul>

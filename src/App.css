@@ -21,6 +21,13 @@ body {
   overflow: auto;
 }
 
+/* 主题切换按钮容器样式 */
+.theme-switcher-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
 /* 顶部导航栏 */
 .header {
   display: flex;
@@ -712,8 +719,8 @@ body {
 }
 
 .user-code-display {
-  background: #f8f9fa;
-  border: 2px solid #4a90e2;
+  background: var(--theme-containerBg, #f8f9fa);
+  border: 2px solid var(--theme-primary, #4a90e2);
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
@@ -725,7 +732,8 @@ body {
   display: block;
   font-size: 24px;
   font-weight: bold;
-  color: #4a90e2;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 2px;
   font-family: monospace;
 }
@@ -733,7 +741,8 @@ body {
 .status-text {
   display: block;
   font-size: 12px;
-  color: #4CAF50;
+  color: #ffffff;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.5);
   font-weight: 500;
   margin-top: 8px;
 }
@@ -815,7 +824,7 @@ body {
   }
 }
 
-/* 宝宝出生日期功能样式 */
+/* 用户出生日期功能样式 */
 .baby-age-display {
   display: flex;
   align-items: center;
@@ -1105,7 +1114,6 @@ body {
 /* 移动端适配 */
 @media (max-width: 768px) {
   .baby-age-display {
-    flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }

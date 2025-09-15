@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useEffect, Fragment } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { VolumeX, Volume2 } from "lucide-react";
+import { VolumeX, Volume2, ArrowLeft, Square } from "lucide-react";
 import { WebSocketSlot } from "./components/websocket-slot";
 import { WavStreamPlayerSlot } from "./components/wav-stream-player-slot";
 import { BubbleList } from "./components/bubble-list";
 import { BubbleEmpty } from "./components/bubble-empty";
 import { VoiceChat } from "./components/voice-chat";
+import ThemeSwitcher from "../../components/theme/ThemeSwitcher";
 import useDeviceStore from "./components/use-device-store";
 import useRealtimeCmd from "./components/use-realtime-cmd";
 import "./AIConversationPage.css";
@@ -105,15 +106,18 @@ const AIConversationPage = () => {
         <div className="ai-page-header">
           <div className="ai-page-nav">
             <button className="back-btn" onClick={goBack}>
-              返回主页
+              <span>返回</span>
             </button>
-            <div className="ai-page-title">
+            {/* <div className="ai-page-title">
               <span className="ai-icon">
                 <img src="/images/AIBot.png" alt="AI" width={64} height={64} />
               </span>
               AI书籍对话
+            </div> */}
+            <div className="ai-page-actions">
+              <ThemeSwitcher />
+              <div className="user-code-display">{userid}</div>
             </div>
-            <div className="user-code-display">{userid}</div>
           </div>
         </div>
 
@@ -140,10 +144,7 @@ const AIConversationPage = () => {
             {/* 实时语音对话区域 */}
             <div className="realtime-conversation-wrapper">
               <div className="conversation-container">
-                <div className="conversation-messages">
-                  <BubbleList />
-                  <BubbleEmpty />
-                </div>
+                <BubbleList />
               </div>
             </div>
             <div className="conversation-controls">
@@ -152,6 +153,7 @@ const AIConversationPage = () => {
                 className="ai-control-btn stop-btn"
                 onClick={stopAudioPlayback}
               >
+                <Square className="btn-icon" />
                 <span className="btn-text">停止播放</span>
               </button>
             </div>

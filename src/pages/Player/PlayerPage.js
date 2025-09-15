@@ -1426,7 +1426,7 @@ const PlayerPage = () => {
       <header className="player-header">
         
         {/* 主题切换器和操作按钮 */}
-          <ThemeSwitcher onThemeChange={handleThemeChange} />
+          {!showWelcome && <ThemeSwitcher onThemeChange={handleThemeChange} />}
       </header>
       
       <div className="session-info">

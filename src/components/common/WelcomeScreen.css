@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   display: flex;
   background-image: var(--theme-backgroundImage);
   background-size: cover;
@@ -21,6 +21,11 @@
 }
 
 .welcome-text {
+  position: fixed;
+  top: 10%;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   font-size: 7rem;
   font-weight: bold;
   color: var(--theme-textLight, white);

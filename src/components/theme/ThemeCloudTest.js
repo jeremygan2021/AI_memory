@@ -48,10 +48,11 @@ const ThemeCloudTest = () => {
         return;
       }
 
-      const result = await saveThemeToCloud('ocean', userCode, sessionId);
+      // 由于我们强制使用默认主题，这里保存默认主题
+      const result = await saveThemeToCloud('default', userCode, sessionId);
       
       if (result.success) {
-        addTestResult('保存主题', '✅ 成功', `主题 ocean 已保存到云端: ${result.objectKey}`);
+        addTestResult('保存主题', '✅ 成功', `默认主题已保存到云端: ${result.objectKey}`);
       } else {
         addTestResult('保存主题', '❌ 失败', result.message || result.error);
       }
@@ -76,13 +77,18 @@ const ThemeCloudTest = () => {
       
       if (result.success) {
         addTestResult('加载主题', '✅ 成功', `从云端加载主题: ${result.themeId}`);
-        // 应用加载的主题
+        // 应用加载的主题（会被强制改为默认主题）
         await applyTheme(result.themeId, { saveToCloud: false });
+        addTestResult('主题应用', '🔄 信息', '已强制应用默认主题');
       } else {
         addTestResult('加载主题', '⚠️ 降级', result.message || '使用本地主题');
+        // 应用默认主题
+        await applyTheme('default', { saveToCloud: false });
       }
     } catch (error) {
       addTestResult('加载主题', '❌ 异常', error.message);
+      // 应用默认主题
+      await applyTheme('default', { saveToCloud: false });
     } finally {
       setIsLoading(false);
     }
@@ -102,6 +108,7 @@ const ThemeCloudTest = () => {
       
       const status = result.hasUpdate ? '🔄 有更新' : '✅ 已是最新';
       addTestResult('检查更新', status, `原因: ${result.reason}, 云端: ${result.cloudTheme}, 本地: ${result.localTheme}`);
+      addTestResult('更新应用', '🔄 信息', '已强制应用默认主题，忽略云端更新');
     } catch (error) {
       addTestResult('检查更新', '❌ 异常', error.message);
     } finally {
@@ -116,8 +123,7 @@ const ThemeCloudTest = () => {
       const result = await syncThemeOnStartup();
       
       if (result.success) {
-        const source = result.source === 'cloud' ? '云端' : '本地';
-        addTestResult('启动同步', '✅ 成功', `从${source}加载主题: ${result.themeId}`);
+        addTestResult('启动同步', '✅ 成功', `已强制应用默认主题: ${result.themeId}`);
       } else {
         addTestResult('启动同步', '❌ 失败', result.error || '同步失败');
       }
@@ -135,8 +141,7 @@ const ThemeCloudTest = () => {
       const result = await triggerThemeSync(sessionId);
       
       if (result.success) {
-        const action = result.action === 'loaded_from_cloud' ? '从云端同步' : '使用本地';
-        addTestResult('手动同步', '✅ 成功', `${action}: ${result.themeId}`);
+        addTestResult('手动同步', '✅ 成功', `已强制应用默认主题: ${result.themeId}`);
         
         // 强制更新ThemeSwitcher状态
         setTimeout(() => {
@@ -157,7 +162,7 @@ const ThemeCloudTest = () => {
   const testForceThemeRefresh = async () => {
     setIsLoading(true);
     try {
-      const currentThemeId = localStorage.getItem('selectedTheme') || 'default';
+      const currentThemeId = 'default'; // 强制使用默认主题
       addTestResult('强制刷新', '🔄 开始', `当前主题: ${currentThemeId}`);
       
       // 检查当前CSS变量状态
@@ -165,15 +170,15 @@ const ThemeCloudTest = () => {
       const primaryBg = getComputedStyle(root).getPropertyValue('--theme-primaryBg');
       addTestResult('CSS检查', '📋 信息', `当前主背景: ${primaryBg.substring(0, 50)}...`);
       
-      // 强制重新应用主题
-      await applyTheme(currentThemeId, { saveToCloud: false });
+      // 强制重新应用默认主题
+      await applyTheme('default', { saveToCloud: false });
       
       // 验证CSS变量是否正确应用
       const newPrimaryBg = getComputedStyle(root).getPropertyValue('--theme-primaryBg');
       addTestResult('CSS验证', '📋 信息', `新主背景: ${newPrimaryBg.substring(0, 50)}...`);
       
       // 获取完整的主题对象并触发事件
-      const theme = getAllThemes().find(t => t.id === currentThemeId) || { id: currentThemeId, name: currentThemeId };
+      const theme = getAllThemes().find(t => t.id === 'default') || { id: 'default', name: '默认主题' };
       window.dispatchEvent(new CustomEvent('themeChanged', { 
         detail: { theme } 
       }));
@@ -201,7 +206,7 @@ const ThemeCloudTest = () => {
         });
       }
       
-      addTestResult('强制刷新', '✅ 完成', '主题显示已强制刷新');
+      addTestResult('强制刷新', '✅ 完成', '默认主题显示已强制刷新');
       
     } catch (error) {
       addTestResult('强制刷新', '❌ 异常', error.message);

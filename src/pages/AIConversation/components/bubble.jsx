@@ -1,26 +1,31 @@
 function Bubble(props) {
   const { msg } = props;
 
+  // 根据消息角色确定头像
+  const getAvatar = () => {
+    if (msg.role === 'user') {
+      return '/images/user.png'; // 用户头像
+    } else if (msg.role === 'assistant' || msg.role === 'ai') {
+      return '/images/AIBot.png'; // AI头像
+    }
+    return null; // 系统消息不显示头像
+  };
+
+  const avatar = getAvatar();
+
   return (
-    <div style={{ marginTop: 8, display: "flex", flexDirection: "column" }}>
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: msg.role === "assistant" ? "row" : "row-reverse",
-        }}
-      >
-        <p
-          style={{
-            color: msg.role === "assistant" ? "#5D5D5D" : "#82AF75",
-            backgroundColor: "white",
-            borderRadius: 8,
-            marginTop: 8,
-            marginBottom: 8,
-          }}
-        >
+    <div className={`message ${msg.role}`}>
+      {avatar && (
+        <img 
+          className="message-avatar" 
+          src={avatar} 
+          alt={msg.role === 'user' ? '用户' : 'AI'} 
+        />
+      )}
+      <div className="message-content-wrapper">
+        <div className="message-content">
           {msg.textDelta ?? msg.textFinal ?? ""}
-        </p>
+        </div>
       </div>
     </div>
   );

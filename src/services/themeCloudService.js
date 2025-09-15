@@ -5,12 +5,12 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai
 
 /**
  * 保存主题设置到云端
- * @param {string} themeId - 主题ID
  * @param {string} userCode - 用户代码
+ * @param {string} themeId - 主题ID
  * @param {string} sessionId - 会话ID (可选，用于会话级别的主题设置)
  * @returns {Promise<object>} 保存结果
  */
-export const saveThemeToCloud = async (themeId, userCode, sessionId = 'global') => {
+export const saveThemeToCloud = async (userCode, themeId, sessionId = 'global') => {
   try {
     console.log('开始保存主题到云端:', { themeId, userCode, sessionId });
 

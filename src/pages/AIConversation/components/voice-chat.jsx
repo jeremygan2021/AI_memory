@@ -65,19 +65,17 @@ function VoiceChat() {
   }, [wsInstance?.readyState]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <button
-        onClick={isRecording ? stopRecord : startRecord}
-        className={`ai-control-btn ${isRecording ? "end-btn" : "start-btn"}`}
-      >
-        <span className="btn-icon">
-          <Mic />
-        </span>
-        <span className="btn-text">
-          {isRecording ? "停止对话" : "开始对话"}
-        </span>
-      </button>
-    </div>
+    <button
+      onClick={isRecording ? stopRecord : startRecord}
+      className={`ai-control-btn ${isRecording ? "end-btn" : "start-btn"}`}
+    >
+      <span className="btn-icon">
+        <Mic />
+      </span>
+      <span className="btn-text">
+        {isRecording ? "停止对话" : "开始对话"}
+      </span>
+    </button>
   );
 }
 

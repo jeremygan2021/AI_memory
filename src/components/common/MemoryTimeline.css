@@ -4,6 +4,8 @@
   height: 100%;
   overflow-y: auto;
   padding-right: 8px;
+  background: var(--theme-containerBg, #ffffe6);
+  border-radius: 12px;
 }
 
 /* 时间线列表 */
@@ -25,7 +27,7 @@
 }
 
 .timeline-item:hover {
-  background: rgba(59, 182, 166, 0.08);
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
   transform: translateX(4px);
 }
 
@@ -40,10 +42,10 @@
   top: 16px;
   width: 14px;
   height: 14px;
-  background: #3bb6a6;
+  background: var(--theme-primary, #4ac967);
   border-radius: 50%;
-  border: 3px solid #ffffff;
-  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.3);
+  border: 3px solid var(--theme-containerBg, #ffffe6);
+  box-shadow: 0 2px 8px var(--theme-shadow, rgba(45, 80, 22, 0.15));
   z-index: 2;
   flex-shrink: 0;
 }
@@ -51,7 +53,7 @@
 .timeline-dot-inner {
   width: 6px;
   height: 6px;
-  background: #ffffff;
+  background: var(--theme-containerBg, #ffffe6);
   border-radius: 50%;
   position: absolute;
   top: 50%;
@@ -67,9 +69,10 @@
   bottom: -24px;
   width: 2px;
   background: linear-gradient(to bottom, 
-    rgba(59, 182, 166, 0.3) 0%, 
-    rgba(59, 182, 166, 0.1) 100%);
+    var(--theme-primary, #4ac967) 0%, 
+    rgba(74, 201, 103, 0.1) 100%);
   z-index: 1;
+  opacity: 0.3;
 }
 
 /* 时间线内容 */
@@ -89,9 +92,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  background: var(--theme-buttonBg, #f8fae6);
   border-radius: 8px;
-  border: 2px solid rgba(59, 182, 166, 0.2);
+  border: 2px solid var(--theme-border, rgba(255, 255, 255, 0.3));
   flex-shrink: 0;
 }
 
@@ -104,20 +107,20 @@
 .timeline-title {
   font-size: 14px;
   font-weight: 600;
-  color: #3bb6a6;
+  color: var(--theme-textPrimary, #2d5016);
   margin-bottom: 4px;
   font-family: 'Muyao-Softbrush-Regular', sans-serif;
 }
 
 .timeline-time {
   font-size: 12px;
-  color: #64748b;
+  color: var(--theme-textSecondary, #333);
   margin-bottom: 2px;
 }
 
 .timeline-session {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--theme-textSecondary, #333);
   opacity: 0.8;
 }
 
@@ -128,7 +131,7 @@
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
-  background: #f8fafc;
+  background: var(--theme-buttonBg, #f8fae6);
 }
 
 .preview-image,
@@ -162,14 +165,14 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #64748b;
+  color: var(--theme-textSecondary, #333);
 }
 
 .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid rgba(59, 182, 166, 0.2);
-  border-top: 3px solid #3bb6a6;
+  border: 3px solid var(--theme-border, rgba(255, 255, 255, 0.3));
+  border-top: 3px solid var(--theme-primary, #4ac967);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -199,14 +202,15 @@
 .empty-text {
   font-size: 16px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--theme-textSecondary, #333);
   margin-bottom: 8px;
   font-family: 'Muyao-Softbrush-Regular', sans-serif;
 }
 
 .empty-desc {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--theme-textSecondary, #333);
+  opacity: 0.8;
 }
 
 /* 响应式设计 */
@@ -283,26 +287,28 @@
 }
 
 .memory-timeline::-webkit-scrollbar-track {
-  background: rgba(59, 182, 166, 0.1);
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
   border-radius: 3px;
 }
 
 .memory-timeline::-webkit-scrollbar-thumb {
-  background: rgba(59, 182, 166, 0.3);
+  background: var(--theme-primary, #4ac967);
   border-radius: 3px;
+  opacity: 0.3;
 }
 
 .memory-timeline::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 182, 166, 0.5);
+  background: var(--theme-primary, #4ac967);
+  opacity: 0.5;
 }
 
 /* 日期筛选器样式 */
 .timeline-filters {
   margin-bottom: 20px;
   padding: 16px;
-  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  background: var(--theme-buttonBg, #f8fae6);
   border-radius: 12px;
-  border: 2px solid rgba(59, 182, 166, 0.2);
+  border: 2px solid var(--theme-border, rgba(255, 255, 255, 0.3));
 }
 
 .filter-buttons {
@@ -313,8 +319,8 @@
 }
 
 .filter-toggle-btn {
-  background: linear-gradient(135deg, #3bb6a6, #10b981);
-  color: white;
+  background: var(--theme-primary, #4ac967);
+  color: var(--theme-textLight, white);
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
@@ -322,12 +328,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.3);
+  box-shadow: 0 2px 8px var(--theme-shadow, rgba(45, 80, 22, 0.15));
 }
 
 .filter-toggle-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 182, 166, 0.4);
+  box-shadow: 0 4px 12px var(--theme-shadow, rgba(45, 80, 22, 0.2));
 }
 
 /* 同步按钮样式 */
@@ -380,9 +386,9 @@
 .date-filter-panel {
   margin-top: 16px;
   padding: 16px;
-  background: white;
+  background: var(--theme-containerBg, #ffffe6);
   border-radius: 8px;
-  border: 1px solid rgba(59, 182, 166, 0.2);
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
 }
 
 .date-inputs {
@@ -402,21 +408,23 @@
 .date-input-group label {
   font-size: 12px;
   font-weight: 600;
-  color: #374151;
+  color: var(--theme-textPrimary, #2d5016);
 }
 
 .date-input-group input[type="date"] {
   padding: 8px 12px;
-  border: 2px solid rgba(59, 182, 166, 0.3);
+  border: 2px solid var(--theme-border, rgba(255, 255, 255, 0.3));
   border-radius: 6px;
   font-size: 14px;
   transition: all 0.3s ease;
+  background: var(--theme-containerBg, #ffffe6);
+  color: var(--theme-textPrimary, #2d5016);
 }
 
 .date-input-group input[type="date"]:focus {
   outline: none;
-  border-color: #3bb6a6;
-  box-shadow: 0 0 0 3px rgba(59, 182, 166, 0.1);
+  border-color: var(--theme-primary, #4ac967);
+  box-shadow: 0 0 0 3px var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
 }
 
 .filter-actions {
@@ -436,41 +444,41 @@
 }
 
 .apply-filter-btn {
-  background: linear-gradient(135deg, #3bb6a6, #10b981);
-  color: white;
-  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.3);
+  background: var(--theme-primary, #4ac967);
+  color: var(--theme-textLight, white);
+  box-shadow: 0 2px 8px var(--theme-shadow, rgba(45, 80, 22, 0.15));
 }
 
 .apply-filter-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 182, 166, 0.4);
+  box-shadow: 0 4px 12px var(--theme-shadow, rgba(45, 80, 22, 0.2));
 }
 
 .clear-filter-btn {
-  background: #f3f4f6;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
+  color: var(--theme-textSecondary, #333);
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
 }
 
 .clear-filter-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.5));
+  color: var(--theme-textPrimary, #2d5016);
 }
 
 /* 统计信息样式 */
 .timeline-stats {
   margin-bottom: 20px;
   padding: 12px 16px;
-  background: rgba(59, 182, 166, 0.05);
+  background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
   border-radius: 8px;
-  border-left: 4px solid #3bb6a6;
+  border-left: 4px solid var(--theme-primary, #4ac967);
   font-size: 14px;
-  color: #374151;
+  color: var(--theme-textPrimary, #2d5016);
 }
 
 .filter-info {
   margin-left: 12px;
-  color: #6b7280;
+  color: var(--theme-textSecondary, #333);
   font-size: 13px;
 }
 
@@ -482,14 +490,14 @@
   gap: 16px;
   margin-top: 24px;
   padding: 16px;
-  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  background: var(--theme-buttonBg, #f8fae6);
   border-radius: 12px;
-  border: 2px solid rgba(59, 182, 166, 0.2);
+  border: 2px solid var(--theme-border, rgba(255, 255, 255, 0.3));
 }
 
 .pagination-btn {
-  background: linear-gradient(135deg, #3bb6a6, #10b981);
-  color: white;
+  background: var(--theme-primary, #4ac967);
+  color: var(--theme-textLight, white);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -497,12 +505,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(59, 182, 166, 0.3);
+  box-shadow: 0 2px 8px var(--theme-shadow, rgba(45, 80, 22, 0.15));
 }
 
 .pagination-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 182, 166, 0.4);
+  box-shadow: 0 4px 12px var(--theme-shadow, rgba(45, 80, 22, 0.2));
 }
 
 .pagination-btn:disabled {
@@ -515,7 +523,7 @@
 .pagination-info {
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: var(--theme-textPrimary, #2d5016);
   min-width: 120px;
   text-align: center;
 }

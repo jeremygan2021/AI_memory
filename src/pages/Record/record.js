@@ -2059,16 +2059,6 @@ const RecordComponent = () => {
     <div>
       {/* 背景装饰 */}
       <div className="background-decoration">
-        <style jsx global>{`
-          .background-decoration {
-            background-image: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/background2.png') !important;
-            background-size: 100% 100% !important;
-            height: 100% !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
-            background-attachment: scroll !important; /* iOS优化 */
-          }
-        `}</style>
       </div>
       
       {/* 顶部导航栏 */}

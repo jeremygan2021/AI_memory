@@ -592,7 +592,7 @@ const VideoPlayerPage = () => {
           <span> {userCode} | {video.id.split('_').pop()}</span>
         </div>
         {/* 主题切换器和操作按钮 */}
-        <ThemeSwitcher onThemeChange={handleThemeChange} />
+        {!showWelcome && <ThemeSwitcher onThemeChange={handleThemeChange} />}
       </div>
 
       {/* 主播放区域 */}

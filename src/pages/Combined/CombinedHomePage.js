@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import './App.css';
-import './themes/pink-theme-overrides.css';
-import MemoryTimeline from './components/common/MemoryTimeline';
-import WelcomeScreen from './components/common/WelcomeScreen';
-import ThemeSwitcher from './components/theme/ThemeSwitcher';
-import { getUserCode } from './utils/userCode';
-import { uploadPdfToCloud, listPdfsFromCloud } from './services/bookCloudService';
+import '../Business/BusinessHomePage.css';
+import WelcomeScreen from '../../components/common/WelcomeScreen';
+import MemoryTimeline from '../../components/common/MemoryTimeline';
+import ThemeSwitcher from '../../components/theme/ThemeSwitcher';
+import { getUserCode } from '../../utils/userCode';
 import {
   calculateBabyAgeInMonths,
   formatBabyAge,
   loadBabyBirthDateFromCloud,
   saveBabyBirthDateToCloud
-} from './services/babyInfoCloudService';
-import { syncThemeOnStartup } from './themes/themeConfig';
+} from '../../services/babyInfoCloudService';
+import { listPdfsFromCloud } from '../../services/bookCloudService';
+import { syncThemeOnStartup } from '../../themes/themeConfig';
 
-const SimpleHomePage = () => {
+const CombinedHomePage = () => {
   const { userid } = useParams();
   const navigate = useNavigate();
   const [userCode, setUserCode] = useState('');
@@ -24,19 +23,9 @@ const SimpleHomePage = () => {
   const [isEditingBirthDate, setIsEditingBirthDate] = useState(false);
   const [tempBirthDate, setTempBirthDate] = useState('');
   const [isLoadingBirthDate, setIsLoadingBirthDate] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(false);
-  const [isTabletView, setIsTabletView] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [uploadedPhotos, setUploadedPhotos] = useState([]);
-  const [uploadedVideos, setUploadedVideos] = useState([]);
-  const [previewIndex, setPreviewIndex] = useState(null);
-  const [previewFile, setPreviewFile] = useState(null);
-  const [previewPhoto, setPreviewPhoto] = useState(null);
-  const [activeMediaTab, setActiveMediaTab] = useState('photos');
   const [booksCount, setBooksCount] = useState(0);
   const [totalConversations, setTotalConversations] = useState(0);
   const [showWelcome, setShowWelcome] = useState(true);
-  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
   const [pdfFiles, setPdfFiles] = useState([]);
   const [showPdfList, setShowPdfList] = useState(false);
   const [pdfMessage, setPdfMessage] = useState('');
@@ -97,99 +86,6 @@ const SimpleHomePage = () => {
     loadBabyBirthDate();
   }, [userCode]);
 
-  // 优化窗口大小监听 - 使用防抖
-  useEffect(() => {
-    let resizeTimer;
-    
-    const checkMobileView = () => {
-      // 防抖处理，避免频繁更新
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        const newIsMobileView = window.innerWidth <= 768;
-        const newIsTabletView = window.innerWidth >= 768 && window.innerWidth <= 1366;
-        if (newIsMobileView !== isMobileView) {
-          setIsMobileView(newIsMobileView);
-        }
-        if (newIsTabletView !== isTabletView) {
-          setIsTabletView(newIsTabletView);
-        }
-      }, 100);
-    };
-    
-    // 初始检查
-    setIsMobileView(window.innerWidth <= 768);
-    setIsTabletView(window.innerWidth >= 768 && window.innerWidth <= 1366);
-    
-    window.addEventListener('resize', checkMobileView);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobileView);
-      clearTimeout(resizeTimer);
-    };
-  }, [isMobileView, isTabletView]);
-
-  // 加载云端相册
-  const loadCloudMediaFiles = useCallback(async () => {
-    if (!userCode) return;
-    const prefix = `recordings/${userCode}/`;
-    const API_BASE_URL = 'https://data.tangledup-ai.com';
-    const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
-    try {
-      const response = await fetch(`${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=1000`);
-      if (!response.ok) throw new Error('云端文件获取失败');
-      const result = await response.json();
-      const files = result.files || result.data || result.objects || result.items || result.results || [];
-      // 只保留图片和视频
-      const mapped = files.map(file => {
-        const objectKey = file.object_key || file.objectKey || file.key || file.name;
-        let ossKey = objectKey;
-        if (ossKey && ossKey.startsWith('recordings/')) {
-          ossKey = ossKey.substring('recordings/'.length);
-        }
-        const fileName = objectKey ? objectKey.split('/').pop() : '';
-        const contentType = file.content_type || '';
-        const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
-        const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
-        if (!isImage && !isVideo) return null;
-        const ossUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
-        
-        // 获取显示名称：优先使用自定义名称，然后从文件名推导
-        const displayName = fileName ? fileName.split('.')[0] : '未命名';
-        
-        return {
-          id: fileName,
-          name: displayName, // 使用自定义名称或推导的显示名称
-          fileName: fileName, // 保留原始文件名
-          preview: ossUrl, // 直接用OSS直链
-          ossUrl,
-          type: isImage ? 'image' : 'video',
-          uploadTime: file.last_modified || file.lastModified || file.modified || '',
-          objectKey,
-          sessionId: objectKey && objectKey.split('/')[2],
-          userCode,
-        };
-      }).filter(Boolean);
-      // 按上传时间倒序，取前6个
-      const sortedFiles = mapped.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
-      setUploadedFiles(sortedFiles.slice(0, 6));
-      setUploadedPhotos(sortedFiles.filter(f => f.type === 'image').slice(0, 6));
-      setUploadedVideos(sortedFiles.filter(f => f.type === 'video').slice(0, 6));
-    } catch (e) {
-      // 云端失败时清空，不再回退本地
-      setUploadedFiles([]);
-      setUploadedPhotos([]);
-      setUploadedVideos([]);
-      console.error('云端相册加载失败:', e);
-    }
-  }, [userCode]);
-
-  // 加载相册数据
-  useEffect(() => {
-    if (userCode) {
-      loadCloudMediaFiles();
-    }
-  }, [userCode, loadCloudMediaFiles]);
-  
   // 同步宝宝出生日期
   useEffect(() => {
     const handleBirthDateUpdate = (event) => {
@@ -234,11 +130,11 @@ const SimpleHomePage = () => {
   useEffect(() => {
     const syncTheme = async () => {
       try {
-        console.log('SimpleHomePage: 开始同步主题设置');
+        console.log('CombinedHomePage: 开始同步主题设置');
         const result = await syncThemeOnStartup();
-        console.log('SimpleHomePage: 主题同步结果:', result);
+        console.log('CombinedHomePage: 主题同步结果:', result);
       } catch (error) {
-        console.error('SimpleHomePage: 主题同步失败:', error);
+        console.error('CombinedHomePage: 主题同步失败:', error);
       }
     };
     
@@ -248,7 +144,7 @@ const SimpleHomePage = () => {
   // 监听主题变化事件
   useEffect(() => {
     const handleThemeChange = (event) => {
-      console.log('SimpleHomePage: 收到主题变化事件:', event.detail.theme);
+      console.log('CombinedHomePage: 收到主题变化事件:', event.detail.theme);
       // 可以在这里添加主题变化后的处理逻辑
     };
     
@@ -340,27 +236,6 @@ const SimpleHomePage = () => {
     // 滑块已禁用，此函数不会被调用
     // 保留函数以避免错误
   };
-  
-  // 打开预览（保留函数以避免错误）
-  const openPreview = useCallback((idx) => {
-    // 预览功能已集成到其他函数中
-  }, []);
-  
-  // 切换照片显示（保留函数以避免错误）
-  const togglePhotoDisplay = useCallback(() => {
-    // 照片显示功能已集成到其他函数中
-  }, []);
-  
-  // 切换视频显示（保留函数以避免错误）
-  const toggleVideoDisplay = useCallback(() => {
-    // 视频显示功能已集成到其他函数中
-  }, []);
-  
-  // 使用openPreview、togglePhotoDisplay和toggleVideoDisplay变量以避免未使用变量警告
-  useEffect(() => {
-    // 确保函数被使用，但不执行任何操作
-    console.debug('openPreview, togglePhotoDisplay and toggleVideoDisplay functions are available');
-  }, [openPreview, togglePhotoDisplay, toggleVideoDisplay]);
 
   // 跳转到AI对话页面
   const goToAIConversation = useCallback(() => {
@@ -369,124 +244,26 @@ const SimpleHomePage = () => {
     }
   }, [userCode, navigate]);
 
-  // 跳转到相册页面（无上传功能）
+  // 跳转到相册页面
   const goToGallery = useCallback(() => {
     if (userCode) {
       navigate(`/${userCode}/gallerys`);
     }
   }, [userCode, navigate]);
 
-
-  // 大图预览相关函数
-  const closePreview = useCallback(() => {
-    setPreviewIndex(null);
-    setPreviewFile(null);
-  }, []);
-  
-  const showPrev = useCallback((e) => {
-    e.stopPropagation();
-    const mediaFiles = uploadedFiles.length > 0 ? uploadedFiles : 
-      ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
-    
-    const newIndex = previewIndex !== null ? (previewIndex + mediaFiles.length - 1) % mediaFiles.length : null;
-    setPreviewIndex(newIndex);
-    setPreviewFile(mediaFiles[newIndex]);
-  }, [uploadedFiles, previewIndex]);
-  
-  const showNext = useCallback((e) => {
-    e.stopPropagation();
-    const mediaFiles = uploadedFiles.length > 0 ? uploadedFiles : 
-      ['', '', '', '', '', ''].map(src => ({ preview: src, type: 'image' }));
-    
-    const newIndex = previewIndex !== null ? (previewIndex + 1) % mediaFiles.length : null;
-    setPreviewIndex(newIndex);
-    setPreviewFile(mediaFiles[newIndex]);
-  }, [uploadedFiles, previewIndex]);
-
-  // 打开照片预览
-  const openPhotoPreview = useCallback((idx) => {
-    setPreviewPhoto(uploadedPhotos[idx]);
-    setPreviewIndex(idx);
-  }, [uploadedPhotos]);
-
-  // 关闭照片预览
-  const closePhotoPreview = useCallback(() => {
-    setPreviewPhoto(null);
-    setPreviewIndex(null);
-  }, []);
-
-  // 照片预览 - 上一张
-  const showPrevPhoto = useCallback((e) => {
-    e.stopPropagation();
-    if (previewIndex !== null && uploadedPhotos.length > 0) {
-      const newIndex = (previewIndex + uploadedPhotos.length - 1) % uploadedPhotos.length;
-      setPreviewIndex(newIndex);
-      setPreviewPhoto(uploadedPhotos[newIndex]);
+  // 跳转到音频库页面
+  const goToAudioLibrary = useCallback(() => {
+    if (userCode) {
+      navigate(`/${userCode}/audio-library`);
     }
-  }, [previewIndex, uploadedPhotos]);
-
-  // 照片预览 - 下一张
-  const showNextPhoto = useCallback((e) => {
-    e.stopPropagation();
-    if (previewIndex !== null && uploadedPhotos.length > 0) {
-      const newIndex = (previewIndex + 1) % uploadedPhotos.length;
-      setPreviewIndex(newIndex);
-      setPreviewPhoto(uploadedPhotos[newIndex]);
-    }
-  }, [previewIndex, uploadedPhotos]);
-
-  // 打开视频播放器（改为弹窗，不跳转）
-  const openVideoPlayer = useCallback((idx) => {
-    setPreviewFile(uploadedVideos[idx]);
-    setPreviewIndex(idx);
-  }, [uploadedVideos]);
-
-  // 准备相册数据 - 使用useMemo优化
-  const photoData = useMemo(() => {
-    return uploadedPhotos.length > 0 ? uploadedPhotos : [];
-  }, [uploadedPhotos]);
-  
-  const videoData = useMemo(() => {
-    return uploadedVideos.length > 0 ? uploadedVideos : [];
-  }, [uploadedVideos]);
+  }, [userCode, navigate]);
 
   // 格式化年龄显示 - 使用useMemo缓存
   const formattedAge = useMemo(() => {
     return formatBabyAge(babyAgeMonths);
   }, [babyAgeMonths]);
 
-  // 回忆书籍（PDF）相关逻辑
-  const fileInputRef = React.useRef(null);
-  const onClickUploadPdf = useCallback(() => {
-    if (!userCode) return;
-    if (fileInputRef.current) fileInputRef.current.click();
-  }, [userCode]);
-
-  const onChoosePdf = useCallback(async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    setPdfMessage('');
-    setIsUploadingPdf(true);
-    try {
-      const result = await uploadPdfToCloud(userCode, file);
-      if (result.success) {
-        setPdfMessage('PDF上传成功');
-        // 上传成功后刷新列表
-        const list = await listPdfsFromCloud(userCode);
-        if (list.success) setPdfFiles(list.files);
-        setShowPdfList(true);
-      } else {
-        setPdfMessage(result.error || 'PDF上传失败');
-      }
-    } catch (err) {
-      setPdfMessage(err.message || 'PDF上传异常');
-    } finally {
-      setIsUploadingPdf(false);
-      // 清空 input 以便下次选择同一文件也能触发
-      if (e.target) e.target.value = '';
-    }
-  }, [userCode]);
-
+  // PDF相关功能
   const onViewPdfs = useCallback(async () => {
     if (!userCode) return;
     setPdfMessage('');
@@ -503,12 +280,11 @@ const SimpleHomePage = () => {
 
   // 如果没有用户ID，显示输入界面
   if (!userid) {
-    // 无论是小程序还是H5都显示用户代码输入界面
     return <div>请输入用户代码</div>;
   }
 
   return (
-    <div className={`memory-app-bg`}>
+    <div className="chronos-app">
       {/* 欢迎页面 */}
       {showWelcome && <WelcomeScreen />}
 
@@ -519,10 +295,7 @@ const SimpleHomePage = () => {
           <div className="user-account-card">
             <div className="user-code">{userCode}</div>
             <div className="user-status">✓ 已激活</div>
-            {/* 主题切换按钮 */}
-            <div className="theme-switcher-container">
-              <ThemeSwitcher compact={true} />
-            </div>
+            <ThemeSwitcher compact={true} forceGreenTheme={true} />
           </div>
         )}
         
@@ -548,7 +321,7 @@ const SimpleHomePage = () => {
               )}
             </div>
           </div>
-      
+          
           {isEditingBirthDate && (
             <div className="birth-date-editor">
               <div className="editor-title">设置用户出生日期</div>
@@ -668,7 +441,6 @@ const SimpleHomePage = () => {
               )}
             </div>
           )}
-          <input ref={fileInputRef} type="file" accept="application/pdf" style={{ display:'none' }} onChange={onChoosePdf} />
         </div>
         
         {/* 相册入口 */}
@@ -677,58 +449,20 @@ const SimpleHomePage = () => {
             <div className="gallery-icon">📸</div>
             <div className="gallery-title">亲子相册</div>
             <div className="gallery-desc">点击查看相册</div>
-            
-            {/* 显示最近6个媒体文件小图，一行3张 */}
-            {uploadedFiles.length > 0 && (
-              <div className="gallery-preview">
-                {uploadedFiles.slice(0, 6).map((file, index) => (
-                  <div 
-                    key={file.id || index} 
-                    className={`preview-thumb ${file.type === 'video' ? 'video-thumb' : 'photo-thumb'}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (file.type === 'image') {
-                        openPhotoPreview(index);
-                      } else {
-                        openVideoPlayer(index);
-                      }
-                    }}
-                  >
-                    {file.type === 'image' ? (
-                      <img 
-                        src={file.preview} 
-                        alt={file.name} 
-                        className="preview-image"
-                      />
-                    ) : (
-                      <div className="video-preview-container">
-                        <img 
-                          src={file.preview} 
-                          alt={file.name} 
-                          className="preview-image"
-                        />
-                        <div className="video-play-icon">▶</div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            
             <button className="enter-gallery-btn">查看相册</button>
           </div>
         </div>
       </div>
 
       {/* 回忆时间线 - 移动端和平板端显示在底部 */}
-        <div className="memory-timeline-mobile">
-          <div className="memory-left-title">回忆时间线</div>
-          <div className="memory-timeline-container">
-            <MemoryTimeline userCode={userCode} />
-          </div>
+      <div className="memory-timeline-mobile">
+        <div className="memory-left-title">回忆时间线</div>
+        <div className="memory-timeline-container">
+          <MemoryTimeline userCode={userCode} />
         </div>
+      </div>
     </div>
   );
 };
 
-export default SimpleHomePage;
+export default CombinedHomePage;

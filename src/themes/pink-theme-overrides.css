@@ -1,0 +1,266 @@
+/* 粉色甜心主题样式覆盖 */
+
+/* 用户账户卡片粉色主题优化 */
+.user-account-card {
+  background: var(--theme-primary, linear-gradient(135deg, #fff0f5, #ffe4ec)) !important;
+  border: 2px solid rgba(255, 182, 193, 0.3) !important;
+  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.15) !important;
+}
+
+.user-account-card .user-code {
+  color: #ffffff !important;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.5) !important;
+}
+
+.user-account-card .user-status {
+  color: #ffffff !important;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 宝宝信息粉色主题优化 */
+.baby-info {
+  box-shadow: 0px 4px 13px rgba(255, 182, 193, 0.3) !important;
+}
+
+.baby-avatar {
+  background: var(--theme-primary, #ff69b4) !important;
+}
+
+.baby-age {
+  color: var(--theme-primary, #ff69b4) !important;
+}
+
+.age-slider {
+  background: #ffe4ec !important;
+}
+
+.age-slider::-webkit-slider-thumb {
+  background: var(--theme-primary, #ff69b4) !important;
+  box-shadow: 0 2px 6px rgba(255, 105, 180, 0.3) !important;
+}
+
+.age-slider::-moz-range-thumb {
+  background: var(--theme-primary, #ff69b4) !important;
+  box-shadow: 0 2px 6px rgba(255, 105, 180, 0.3) !important;
+}
+
+.progress-bar {
+  background: #ffe4ec !important;
+}
+
+.progress-inner {
+  background: linear-gradient(90deg, var(--theme-primary, #ff69b4), var(--theme-primaryHover, #ff91a4)) !important;
+}
+
+.age-labels {
+  color: var(--theme-primary, #ff69b4) !important;
+}
+
+.slider-marks span {
+  color: var(--theme-primary, #ff69b4) !important;
+}
+
+/* 回忆书籍卡片粉色主题优化 */
+.book-memory-card {
+  background: linear-gradient(135deg, var(--theme-primary, #ff69b4) 0%, var(--theme-primaryHover, #ff91a4) 100%) !important;
+  box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2) !important;
+}
+
+.book-memory-card:hover {
+  box-shadow: 0 15px 40px rgba(255, 105, 180, 0.3) !important;
+}
+
+.book-memory-card::before {
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+}
+
+/* 移动端相册入口粉色主题优化 */
+.mobile-gallery-card {
+  background: var(--theme-containerBg, rgba(255, 240, 245, 0.95)) !important;
+  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  box-shadow: 0 8px 32px var(--theme-shadow, rgba(255, 105, 180, 0.1)) !important;
+}
+
+.mobile-gallery-card:hover {
+  box-shadow: 0 12px 40px var(--theme-shadow, rgba(255, 105, 180, 0.15)) !important;
+}
+
+.gallery-icon {
+  box-shadow: 0px 15px 30px var(--theme-primary, rgba(255, 105, 180, 0.5)) !important;
+}
+
+.mobile-gallery-card .gallery-title {
+  color: var(--theme-primary, #ff69b4) !important;
+}
+
+.gallery-desc {
+  color: var(--theme-textSecondary, #ff91a4) !important;
+}
+
+.preview-thumb {
+  border: 2px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+}
+
+.enter-gallery-btn {
+  background: linear-gradient(135deg, var(--theme-primary, #ff69b4) 0%, var(--theme-tertiary, #ffb6c1) 100%) !important;
+  box-shadow: 0 4px 15px var(--theme-primary, rgba(255, 105, 180, 0.3)) !important;
+}
+
+.enter-gallery-btn:hover {
+  background: linear-gradient(135deg, var(--theme-tertiary, #ffb6c1) 0%, var(--theme-primaryHover, #ff91a4) 100%) !important;
+  box-shadow: 0 6px 20px var(--theme-primary, rgba(255, 105, 180, 0.4)) !important;
+}
+
+/* 回忆时间线容器粉色主题优化 */
+.memory-timeline-container {
+  box-shadow: 0px 4px 13px var(--theme-shadow, rgba(255, 182, 193, 1)) !important;
+}
+
+.memory-timeline-container:hover {
+  box-shadow: 0px 6px 20px var(--theme-shadow, rgba(255, 182, 193, 1)) !important;
+}
+
+/* 记忆卡片粉色主题优化 */
+.memory-card {
+  box-shadow: 0px 4px 13px rgba(255, 182, 193, 1) !important;
+}
+
+.memory-card:hover {
+  box-shadow: 0px 6px 20px rgba(255, 182, 193, 1) !important;
+}
+
+/* 中心录音功能卡片粉色主题优化 */
+.center-voice-card {
+  background: linear-gradient(135deg, #fff0f5, #ffe4ec) !important;
+  border: 3px solid var(--theme-primary, #ff69b4) !important;
+  box-shadow: 0px 15px 40px rgba(255, 105, 180, 0.3) !important;
+}
+
+.center-voice-card:hover {
+  box-shadow: 0px 25px 60px rgba(255, 105, 180, 0.5) !important;
+  border-color: var(--theme-primaryHover, #ff91a4) !important;
+}
+
+.center-voice-card .voice-icon {
+  color: var(--theme-primary, #ff69b4) !important;
+  box-shadow: 0px 15px 30px rgba(255, 105, 180, 0.5) !important;
+}
+
+.center-voice-card .voice-title {
+  color: var(--theme-primary, #ff69b4) !important;
+}
+
+.center-voice-card .voice-action {
+  background: var(--theme-primary, #ff69b4) !important;
+}
+
+.center-voice-card .voice-action:hover {
+  background: var(--theme-primaryHover, #ff91a4) !important;
+}
+
+/* 突出显示录音功能卡片粉色主题优化 */
+.memory-card.featured-voice {
+  background: linear-gradient(135deg, #fff0f5, #ffe4ec) !important;
+  border: 2px solid var(--theme-primary, #ff69b4) !important;
+  box-shadow: 0px 8px 25px rgba(255, 105, 180, 0.3) !important;
+}
+
+.memory-card.featured-voice:hover {
+  box-shadow: 0px 12px 35px rgba(255, 105, 180, 0.4) !important;
+}
+
+/* 编辑出生日期按钮粉色主题优化 */
+.edit-birth-date-btn {
+  background: var(--theme-buttonBg, #fff0f5) !important;
+  color: var(--theme-primary, #ff69b4) !important;
+  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+}
+
+.edit-birth-date-btn:hover {
+  background: var(--theme-buttonHover, rgba(255, 182, 193, 0.35)) !important;
+}
+
+/* 出生日期编辑器粉色主题优化 */
+.birth-date-editor {
+  background: var(--theme-containerBg, #fff0f5) !important;
+  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  box-shadow: 0 4px 15px var(--theme-shadow, rgba(255, 105, 180, 0.1)) !important;
+}
+
+.birth-date-input {
+  background: var(--theme-buttonBg, #fff0f5) !important;
+  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  color: var(--theme-textPrimary, #2d3436) !important;
+}
+
+.cancel-btn {
+  background: var(--theme-buttonBg, #fff0f5) !important;
+  color: var(--theme-textPrimary, #2d3436) !important;
+  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+}
+
+.cancel-btn:hover {
+  background: var(--theme-buttonHover, rgba(255, 182, 193, 0.35)) !important;
+}
+
+.save-btn {
+  background: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-textLight, white) !important;
+  border: none !important;
+}
+
+.save-btn:hover {
+  background: var(--theme-primaryHover, #ff91a4) !important;
+}
+
+/* 出生日期显示粉色主题优化 */
+.birth-date-label {
+  color: var(--theme-textSecondary, #ff91a4) !important;
+}
+
+.birth-date-value {
+  color: var(--theme-textPrimary, #2d3436) !important;
+}
+
+/* 书籍卡片按钮粉色主题优化 */
+.book-card-action {
+  background: var(--theme-buttonBg, #fff0f5) !important;
+  color: var(--theme-primary, #ff69b4) !important;
+  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+}
+
+.book-card-action:hover {
+  background: var(--theme-buttonHover, rgba(255, 182, 193, 0.35)) !important;
+}
+
+.book-card-action1 {
+  color: var(--theme-primary, #ff69b4) !important;
+  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+}
+
+/* 回忆时间线标题粉色主题优化 */
+.memory-left-title {
+  color: var(--theme-primary, #ff69b4) !important;
+}
+
+/* 年龄显示粉色主题优化 */
+.age-label {
+  color: var(--theme-textSecondary, #ff91a4) !important;
+}
+
+.age-value {
+  color: var(--theme-primary, #ff69b4) !important;
+}
+
+/* 加载指示器粉色主题优化 */
+.loading-indicator {
+  color: var(--theme-primary, #ff69b4) !important;
+}
+
+/* 主题切换器容器粉色主题优化 */
+.theme-switcher-container {
+  background: var(--theme-buttonBg, #fff0f5) !important;
+  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+}

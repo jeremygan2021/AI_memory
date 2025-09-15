@@ -4,6 +4,27 @@
   z-index: 9999; /* 提升到最高层级 */
 }
 
+/* 紧凑型主题切换按钮 - 用于用户信息卡片 */
+.theme-switcher.compact .theme-toggle-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  min-height: 32px;
+  border-radius: 16px;
+  gap: 4px;
+}
+
+.theme-switcher.compact .theme-icon {
+  font-size: 14px;
+}
+
+.theme-switcher.compact .theme-name {
+  display: none; /* 在紧凑模式下隐藏主题名称 */
+}
+
+.theme-switcher.compact .arrow {
+  font-size: 10px;
+}
+
 /* 主题切换按钮 */
 .theme-toggle-btn {
   display: flex;
@@ -363,4 +384,4 @@
   .theme-overlay {
     background: rgba(0, 0, 0, 0.5);
   }
-} 
+}

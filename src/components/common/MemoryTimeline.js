@@ -52,6 +52,23 @@ const MemoryTimeline = ({ userCode }) => {
     };
   }, [userCode]);
 
+  // 监听主题变化事件
+  useEffect(() => {
+    const handleThemeChange = (event) => {
+      console.log('MemoryTimeline: 收到主题变化事件');
+      // 主题变化时强制重新渲染组件
+      // 由于样式使用CSS变量，会自动应用新主题
+    };
+
+    // 添加主题变化事件监听器
+    window.addEventListener('themeChanged', handleThemeChange);
+
+    // 清理函数，组件卸载时移除事件监听器
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange);
+    };
+  }, []);
+
   // 加载时间线数据
   const loadTimelineData = async () => {
     try {

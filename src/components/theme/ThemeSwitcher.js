@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAllThemes, getCurrentTheme, applyTheme } from '../../themes/themeConfig';
+import { getAllThemes, getCurrentTheme, applyTheme, loadThemeFromCloudAndApply } from '../../themes/themeConfig';
+import { checkThemeCloudUpdate } from '../../services/themeCloudService';
 import './ThemeSwitcher.css';
 import { createPortal } from 'react-dom';
+import { getUserCode } from '../../utils/userCode';
 
-const ThemeSwitcher = ({ onThemeChange }) => {
+const ThemeSwitcher = ({ onThemeChange, forceGreenTheme = false }) => {
   const [currentTheme, setCurrentTheme] = useState(getCurrentTheme());
   const [isOpen, setIsOpen] = useState(false);
   const [themes] = useState(getAllThemes());
@@ -23,10 +25,40 @@ const ThemeSwitcher = ({ onThemeChange }) => {
 
     window.addEventListener('themeChanged', handleExternalThemeChange);
     
+    // 设置定期检查云端主题更新的定时器
+    const cloudSyncInterval = setInterval(async () => {
+      try {
+        const userCode = getUserCode();
+        if (userCode) {
+          console.log('定期检查云端主题更新...');
+          const updateCheck = await checkThemeCloudUpdate(userCode, 'global');
+          
+          if (updateCheck.hasUpdate) {
+            console.log('检测到云端主题更新，正在同步...');
+            const result = await loadThemeFromCloudAndApply(userCode, 'global');
+            
+            if (result.success && result.source === 'cloud') {
+              const newTheme = themes.find(t => t.id === result.themeId);
+              if (newTheme && newTheme.id !== currentTheme.id) {
+                console.log('云端主题已更新:', newTheme.id);
+                setCurrentTheme(newTheme);
+                if (onThemeChange) {
+                  onThemeChange(newTheme);
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('检查云端主题更新失败:', error);
+      }
+    }, 30000); // 每30秒检查一次
+    
     return () => {
       window.removeEventListener('themeChanged', handleExternalThemeChange);
+      clearInterval(cloudSyncInterval);
     };
-  }, []);
+  }, [themes, onThemeChange, currentTheme.id]);
 
   const handleThemeChange = async (themeId) => {
     try {
@@ -158,4 +190,4 @@ const ThemeSwitcher = ({ onThemeChange }) => {
   );
 };
 
-export default ThemeSwitcher; 
+export default ThemeSwitcher;
