@@ -1333,17 +1333,17 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--theme-primary, rgba(255, 255, 255, 0.1));
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  background: var(--theme-primary, linear-gradient(135deg, #4CAF50, #66BB6A));
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #66BB6A, #4CAF50);
+  background: var(--theme-primaryHover, linear-gradient(135deg, #66BB6A, #4CAF50));
 }
 
 /* 选择文本时的颜色 */
@@ -1709,4 +1709,4 @@ html, body {
   .upload-modal-media-preview {
     height: 120px;
   }
-} 
+}

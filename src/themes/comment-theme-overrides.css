@@ -1,4 +1,4 @@
-/* 评论区主题覆盖样式 */
+/* 评论区主题覆盖样式 - 优化后的配色 */
 
 /* 评论区域主题化 */
 .comment-section {
@@ -13,13 +13,13 @@
 }
 
 .add-comment-btn {
-  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982));
+  background: linear-gradient(135deg, var(--theme-primary, #66bb6a), var(--theme-primaryHover, #81c784));
   color: var(--theme-textLight, white);
 }
 
 .add-comment-btn:hover {
-  background: linear-gradient(135deg, var(--theme-primaryHover, #88d982), var(--theme-primary, #4ac967));
-  box-shadow: 0 6px 20px var(--theme-shadow, rgba(74, 201, 103, 0.4));
+  background: linear-gradient(135deg, var(--theme-primaryHover, #81c784), var(--theme-primary, #66bb6a));
+  box-shadow: 0 6px 20px var(--theme-shadow, rgba(102, 187, 106, 0.4));
 }
 
 /* 评论表单主题化 */
@@ -30,13 +30,13 @@
 
 .comment-textarea {
   background: var(--theme-containerBg, rgba(255, 255, 255, 0.9));
-  border: 2px solid var(--theme-border, rgba(74, 201, 103, 0.3));
+  border: 2px solid var(--theme-border, rgba(102, 187, 106, 0.3));
   color: var(--theme-textSecondary, #333);
 }
 
 .comment-textarea:focus {
-  border-color: var(--theme-primary, #4ac967);
-  box-shadow: 0 0 0 3px var(--theme-shadow, rgba(74, 201, 103, 0.1));
+  border-color: var(--theme-primary, #66bb6a);
+  box-shadow: 0 0 0 3px var(--theme-shadow, rgba(102, 187, 106, 0.1));
   background: var(--theme-containerBg, rgba(255, 255, 255, 1));
 }
 
@@ -46,14 +46,14 @@
 
 /* 提交按钮主题化 */
 .submit-comment-btn {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
   color: var(--theme-textLight, white);
-  border: 1px solid var(--theme-primary, #4ac967);
+  border: 1px solid var(--theme-primary, #66bb6a);
 }
 
 .submit-comment-btn:hover {
-  background: var(--theme-primaryHover, #88d982);
-  border-color: var(--theme-primaryHover, #88d982);
+  background: var(--theme-primaryHover, #81c784);
+  border-color: var(--theme-primaryHover, #81c784);
 }
 
 .submit-comment-btn:disabled {
@@ -63,7 +63,7 @@
 }
 
 .cancel-comment-btn {
-  background: var(--theme-buttonBg, #f8fae6);
+  background: var(--theme-buttonBg, #e8f5e9);
   color: var(--theme-buttonText, #2d5016);
   border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
 }
@@ -79,7 +79,7 @@
 }
 
 .comment-author {
-  color: var(--theme-primary, #4ac967);
+  color: var(--theme-primary, #66bb6a);
   font-weight: 600;
 }
 
@@ -95,25 +95,25 @@
 
 /* 评论头像主题化 */
 .avatar-circle {
-  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982)) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #66bb6a), var(--theme-primaryHover, #81c784)) !important;
   color: var(--theme-textLight, white) !important;
-  box-shadow: 0 4px 12px var(--theme-shadow, rgba(74, 201, 103, 0.3)) !important;
+  box-shadow: 0 4px 12px var(--theme-shadow, rgba(102, 187, 106, 0.3)) !important;
 }
 
 .comment-content {
-  border-bottom: 2px solid var(--theme-border, rgba(74, 201, 103, 0.2)) !important;
+  border-bottom: 2px solid var(--theme-border, rgba(102, 187, 106, 0.2)) !important;
 }
 
 /* 评论操作按钮主题化 */
 .comment-edit-btn,
 .comment-delete-btn {
-  background: var(--theme-buttonBg, #f8fae6);
+  background: var(--theme-buttonBg, #e8f5e9);
   color: var(--theme-buttonText, #2d5016);
   border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
 }
 
 .comment-edit-btn:hover {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
   color: var(--theme-textLight, white);
 }
 
@@ -177,4 +177,4 @@
     width: 100%;
     justify-content: center;
   }
-} 
+}

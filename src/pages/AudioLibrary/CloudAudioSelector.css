@@ -348,17 +348,17 @@
 }
 
 .audio-grid::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--theme-primary, rgba(255, 255, 255, 0.1));
   border-radius: 3px;
 }
 
 .audio-grid::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #3bb6a6, #4ecdc4);
+  background: var(--theme-primary, linear-gradient(135deg, #3bb6a6, #4ecdc4));
   border-radius: 3px;
 }
 
 .audio-grid::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #4ecdc4, #3bb6a6);
+  background: var(--theme-primaryHover, linear-gradient(135deg, #4ecdc4, #3bb6a6));
 }
 
 /* 移动端适配 */

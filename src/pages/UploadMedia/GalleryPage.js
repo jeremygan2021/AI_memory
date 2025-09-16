@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import './UploadMediaPage.css'; // 复用现有样式
+import './GalleryPage.css'; // 使用专门的样式文件
 import { validateUserCode } from '../../utils/userCode';
 import { isWechatMiniProgram } from '../../utils/environment';
+import { getCurrentTheme } from '../../themes/themeConfig';
 
 const GalleryPage = () => {
   const { userid } = useParams();
@@ -13,6 +14,7 @@ const GalleryPage = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [userCode, setUserCode] = useState('');
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'photos' 或 'videos'
+  const [currentTheme, setCurrentTheme] = useState(getCurrentTheme());
   const filesPerPage = 12;
   const videoRef = useRef(null);
   const [videoAutoFullscreenTried, setVideoAutoFullscreenTried] = useState(false);
@@ -135,6 +137,21 @@ const GalleryPage = () => {
     }
   }, [userid, navigate]);
 
+  // 监听主题变化
+  useEffect(() => {
+    const handleThemeChange = (event) => {
+      const { theme } = event.detail;
+      console.log('GalleryPage: 主题已更新:', theme.name);
+      setCurrentTheme(theme);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange);
+    
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange);
+    };
+  }, []);
+
   // 检测移动设备
   useEffect(() => {
     const checkMobile = () => {
@@ -153,7 +170,11 @@ const GalleryPage = () => {
     if (file.type === 'image') {
       setPreviewFile(file);
     } else if (file.type === 'video') {
-      setPreviewFile(file);
+      // 从视频ID中提取session信息
+      const targetSessionId = extractSessionFromVideoId(file.id);
+      
+      // 跳转到视频播放页面
+      navigate(`/${userCode}/video-player/${targetSessionId}/${file.id}?from=upload${file.objectKey ? `&ok=${encodeURIComponent(file.objectKey)}` : ''}`);
     }
   };
 
@@ -477,29 +498,29 @@ const GalleryPage = () => {
   }, [userCode, refreshTrigger]);
 
   return (
-    <div className="upload-page">
+    <div className="gallery-upload-page">
       {/* 顶部导航 - 小程序环境下隐藏 */}
       {!isWechatMiniProgram() && (
-      <div className="upload-header">
-        <div className="back-button" onClick={goBack}>
-          <span className="back-text">
+      <div className="gallery-upload-header">
+        <div className="gallery-back-button" onClick={goBack}>
+            <span className="gallery-back-text">
             返回主页
           </span>
         </div>
         
-        <div className="session-info">
+        <div className="gallery-session-info">
           <span>用户: {userCode}</span>
         </div>
       </div>
       )}
 
       {/* 文件展示区域 */}
-      <div className="photos-container">
-        <div className="all-photos-section">
+      <div className="gallery-photos-container">
+        <div className="gallery-all-photos-section">
           {/* 文件类型标签 */}
-          <div className="file-type-tabs">
+          <div className="gallery-file-type-tabs">
             <button 
-              className={`file-tab ${activeTab === 'all' ? 'active' : ''}`}
+              className={`gallery-file-tab ${activeTab === 'all' ? 'active' : ''}`}
               onClick={() => {
                 setActiveTab('all');
                 setCurrentPage(1);
@@ -508,7 +529,7 @@ const GalleryPage = () => {
               📁 全部 ({uploadedFiles.length})
             </button>
             <button 
-              className={`file-tab ${activeTab === 'photos' ? 'active' : ''}`}
+              className={`gallery-file-tab ${activeTab === 'photos' ? 'active' : ''}`}
               onClick={() => {
                 setActiveTab('photos');
                 setCurrentPage(1);
@@ -517,7 +538,7 @@ const GalleryPage = () => {
               📷 照片 ({uploadedFiles.filter(f => f.type === 'image').length})
             </button>
             <button 
-              className={`file-tab ${activeTab === 'videos' ? 'active' : ''}`}
+              className={`gallery-file-tab ${activeTab === 'videos' ? 'active' : ''}`}
               onClick={() => {
                 setActiveTab('videos');
                 setCurrentPage(1);
@@ -527,9 +548,9 @@ const GalleryPage = () => {
             </button>
           </div>
           
-          <div className="section-header">
+          <div className="gallery-section-header">
             {totalPages > 1 && (
-              <div className="pagination-info">
+              <div className="gallery-pagination-info">
                 第 {currentPage} 页，共 {totalPages} 页
               </div>
             )}
@@ -537,11 +558,11 @@ const GalleryPage = () => {
           
           {filteredFiles.length > 0 ? (
             <>
-              <div className="photos-grid">
+              <div className="gallery-photos-grid">
                 {currentFiles.map(file => (
-                  <div key={file.id} className="media-item">
+                  <div key={file.id} className="gallery-media-item">
                     <div 
-                      className="media-content" 
+                      className="gallery-media-content" 
                       onClick={() => handleMediaClick(file)}
                       onMouseDown={(e) => handleLongPressStart(file, e)}
                       onMouseUp={(e) => handleLongPressEnd(e)}
@@ -562,13 +583,13 @@ const GalleryPage = () => {
                       }}
                     >
                       {file.type === 'image' ? (
-                        <div className="image-preview">
-                          <img src={file.ossUrl || file.preview || file.url} alt={file.name} className="media-preview" 
+                        <div className="gallery-image-preview">
+                          <img src={file.ossUrl || file.preview || file.url} alt={file.name} className="gallery-media-preview" 
                             onError={e => { console.error('图片加载失败', file.ossUrl || file.preview || file.url, file); e.target.style.background = '#fdd'; }}
                           />
                           {/* 显示图片ID，区分是否从录音页面上传 */}
                           {file.id && typeof file.id === 'string' && file.id.startsWith('img_') && (
-                            <div className="image-id-display1">
+                            <div className="gallery-image-id-display1">
                               {/* 检查ID格式：img_sessionId_timestamp_random_uniqueId */}
                               {(() => {
                                 const idParts = file.id.split('_');
@@ -600,21 +621,21 @@ const GalleryPage = () => {
                           )}
                         </div>
                       ) : (
-                        <div className="video-preview">
+                        <div className="gallery-video-preview">
                           <video 
                             src={file.ossUrl || file.preview || file.url} 
-                            className="media-preview"
+                              className="gallery-media-preview"
                             muted
                             preload="metadata"
                             onLoadedMetadata={(e) => { e.target.currentTime = 1; }}
                             onError={e => { console.error('视频加载失败', file.ossUrl || file.preview || file.url, file); e.target.style.background = '#fdd'; }}
                           />
-                          <div className="video-overlay">
-                            <div className="video-play-icon">▶</div>
+                          <div className="gallery-video-overlay">
+                            <div className="gallery-video-play-icon">▶</div>
                           </div>
                           {/* 显示视频ID，区分是否从录音页面上传 */}
                           {file.id && typeof file.id === 'string' && file.id.startsWith('vid_') && (
-                            <div className="video-id-display1">
+                            <div className="gallery-video-id-display1">
                               {/* 检查ID格式：vid_sessionId_timestamp_random_uniqueId */}
                               {(() => {
                                 const idParts = file.id.split('_');
@@ -653,18 +674,18 @@ const GalleryPage = () => {
 
               {/* 分页控件 */}
               {totalPages > 1 && (
-                <div className="pagination pagination-row">
+                <div className="gallery-pagination gallery-pagination-row">
                   <button 
-                    className="pagination-btn"
+                    className="gallery-pagination-btn"
                     onClick={goToPrevPage}
                     disabled={currentPage === 1}
                   >
                     上一页
                   </button>
-                  <span className="pagination-current-page">{currentPage}</span>
-                  <span className="pagination-total-page">/ {totalPages} 页</span>
+                  <span className="gallery-pagination-current-page">{currentPage}</span>
+                  <span className="gallery-pagination-total-page">/ {totalPages} 页</span>
                   <button 
-                    className="pagination-btn"
+                    className="gallery-pagination-btn"
                     onClick={goToNextPage}
                     disabled={currentPage === totalPages}
                   >
@@ -674,14 +695,14 @@ const GalleryPage = () => {
               )}
             </>
           ) : (
-            <div className="empty-state">
-              <div className="empty-icon">
+            <div className="gallery-empty-state">
+              <div className="gallery-empty-icon">
                 {activeTab === 'all' ? '📁' : activeTab === 'photos' ? '📷' : '🎬'}
               </div>
-              <p className="empty-text">
+              <p className="gallery-empty-text">
                 还没有{activeTab === 'all' ? '任何文件' : activeTab === 'photos' ? '照片' : '视频'}
               </p>
-              <p className="empty-subtext">请上传文件后查看</p>
+              <p className="gallery-empty-subtext">请上传文件后查看</p>
             </div>
           )}
         </div>
@@ -690,7 +711,7 @@ const GalleryPage = () => {
       {/* 预览弹窗 - 移动端全屏，PC端图片 */}
       {previewFile && (
         <div className={`preview-modal${isMobile ? ' fullscreen' : ''}`} onClick={closePreview}>
-          <div className="preview-content" onClick={e => e.stopPropagation()}>
+          <div className="gallery-preview-content" onClick={e => e.stopPropagation()}>
             {previewFile.type === 'image' ? (
               <img 
                 src={previewFile.ossUrl || previewFile.preview || previewFile.url} 

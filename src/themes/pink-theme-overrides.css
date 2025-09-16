@@ -1,10 +1,10 @@
-/* 粉色甜心主题样式覆盖 */
+/* 粉色甜心主题样式覆盖 - 优化后的配色 */
 
 /* 用户账户卡片粉色主题优化 */
 .user-account-card {
-  background: var(--theme-primary, linear-gradient(135deg, #fff0f5, #ffe4ec)) !important;
-  border: 2px solid rgba(255, 182, 193, 0.3) !important;
-  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.15) !important;
+  background: var(--theme-primary, linear-gradient(135deg, #f48fb1, #f06292)) !important;
+  border: 2px solid rgba(236, 64, 122, 0.3) !important;
+  box-shadow: 0 6px 20px rgba(136, 14, 79, 0.12) !important;
 }
 
 .user-account-card .user-code {
@@ -19,55 +19,55 @@
 
 /* 宝宝信息粉色主题优化 */
 .baby-info {
-  box-shadow: 0px 4px 13px rgba(255, 182, 193, 0.3) !important;
+  box-shadow: 0px 4px 13px rgba(236, 64, 122, 0.3) !important;
 }
 
 .baby-avatar {
-  background: var(--theme-primary, #ff69b4) !important;
+  background: var(--theme-primary, #ec407a) !important;
 }
 
 .baby-age {
-  color: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-primary, #ec407a) !important;
 }
 
 .age-slider {
-  background: #ffe4ec !important;
+  background: var(--theme-containerBg, #fce4ec) !important;
 }
 
 .age-slider::-webkit-slider-thumb {
-  background: var(--theme-primary, #ff69b4) !important;
-  box-shadow: 0 2px 6px rgba(255, 105, 180, 0.3) !important;
+  background: var(--theme-primary, #ec407a) !important;
+  box-shadow: 0 2px 6px rgba(236, 64, 122, 0.3) !important;
 }
 
 .age-slider::-moz-range-thumb {
-  background: var(--theme-primary, #ff69b4) !important;
-  box-shadow: 0 2px 6px rgba(255, 105, 180, 0.3) !important;
+  background: var(--theme-primary, #ec407a) !important;
+  box-shadow: 0 2px 6px rgba(236, 64, 122, 0.3) !important;
 }
 
 .progress-bar {
-  background: #ffe4ec !important;
+  background: #fce4ec !important;
 }
 
 .progress-inner {
-  background: linear-gradient(90deg, var(--theme-primary, #ff69b4), var(--theme-primaryHover, #ff91a4)) !important;
+  background: linear-gradient(90deg, var(--theme-primary, #ec407a), var(--theme-primaryHover, #f06292)) !important;
 }
 
 .age-labels {
-  color: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-primary, #ec407a) !important;
 }
 
 .slider-marks span {
-  color: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-primary, #ec407a) !important;
 }
 
 /* 回忆书籍卡片粉色主题优化 */
 .book-memory-card {
-  background: linear-gradient(135deg, var(--theme-primary, #ff69b4) 0%, var(--theme-primaryHover, #ff91a4) 100%) !important;
-  box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #ec407a) 0%, var(--theme-primaryHover, #f06292) 100%) !important;
+  box-shadow: 0 10px 30px rgba(136, 14, 79, 0.12) !important;
 }
 
 .book-memory-card:hover {
-  box-shadow: 0 15px 40px rgba(255, 105, 180, 0.3) !important;
+  box-shadow: 0 15px 40px rgba(136, 14, 79, 0.18) !important;
 }
 
 .book-memory-card::before {
@@ -76,191 +76,191 @@
 
 /* 移动端相册入口粉色主题优化 */
 .mobile-gallery-card {
-  background: var(--theme-containerBg, rgba(255, 240, 245, 0.95)) !important;
-  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
-  box-shadow: 0 8px 32px var(--theme-shadow, rgba(255, 105, 180, 0.1)) !important;
+  background: var(--theme-containerBg, rgba(252, 228, 236, 0.95)) !important;
+  border: 1px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
+  box-shadow: 0 8px 24px var(--theme-shadow, rgba(136, 14, 79, 0.12)) !important;
 }
 
 .mobile-gallery-card:hover {
-  box-shadow: 0 12px 40px var(--theme-shadow, rgba(255, 105, 180, 0.15)) !important;
+  box-shadow: 0 12px 30px var(--theme-shadow, rgba(136, 14, 79, 0.18)) !important;
 }
 
 .gallery-icon {
-  box-shadow: 0px 15px 30px var(--theme-primary, rgba(255, 105, 180, 0.5)) !important;
+  box-shadow: 0px 15px 30px var(--theme-primary, rgba(236, 64, 122, 0.5)) !important;
 }
 
 .mobile-gallery-card .gallery-title {
-  color: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-primary, #ec407a) !important;
 }
 
 .gallery-desc {
-  color: var(--theme-textSecondary, #ff91a4) !important;
+  color: var(--theme-textSecondary, #ad1457) !important;
 }
 
 .preview-thumb {
-  border: 2px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  border: 2px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
 }
 
 .enter-gallery-btn {
-  background: linear-gradient(135deg, var(--theme-primary, #ff69b4) 0%, var(--theme-tertiary, #ffb6c1) 100%) !important;
-  box-shadow: 0 4px 15px var(--theme-primary, rgba(255, 105, 180, 0.3)) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #ec407a) 0%, var(--theme-tertiary, #f48fb1) 100%) !important;
+  box-shadow: 0 4px 15px var(--theme-primary, rgba(236, 64, 122, 0.3)) !important;
 }
 
 .enter-gallery-btn:hover {
-  background: linear-gradient(135deg, var(--theme-tertiary, #ffb6c1) 0%, var(--theme-primaryHover, #ff91a4) 100%) !important;
-  box-shadow: 0 6px 20px var(--theme-primary, rgba(255, 105, 180, 0.4)) !important;
+  background: linear-gradient(135deg, var(--theme-tertiary, #f48fb1) 0%, var(--theme-primaryHover, #f06292) 100%) !important;
+  box-shadow: 0 6px 20px var(--theme-primary, rgba(236, 64, 122, 0.4)) !important;
 }
 
 /* 回忆时间线容器粉色主题优化 */
 .memory-timeline-container {
-  box-shadow: 0px 4px 13px var(--theme-shadow, rgba(255, 182, 193, 1)) !important;
+  box-shadow: 0px 4px 13px var(--theme-shadow, rgba(236, 64, 122, 0.3)) !important;
 }
 
 .memory-timeline-container:hover {
-  box-shadow: 0px 6px 20px var(--theme-shadow, rgba(255, 182, 193, 1)) !important;
+  box-shadow: 0px 6px 20px var(--theme-shadow, rgba(236, 64, 122, 0.4)) !important;
 }
 
 /* 记忆卡片粉色主题优化 */
 .memory-card {
-  box-shadow: 0px 4px 13px rgba(255, 182, 193, 1) !important;
+  box-shadow: 0px 4px 13px rgba(236, 64, 122, 0.3) !important;
 }
 
 .memory-card:hover {
-  box-shadow: 0px 6px 20px rgba(255, 182, 193, 1) !important;
+  box-shadow: 0px 6px 20px rgba(236, 64, 122, 0.4) !important;
 }
 
 /* 中心录音功能卡片粉色主题优化 */
 .center-voice-card {
-  background: linear-gradient(135deg, #fff0f5, #ffe4ec) !important;
-  border: 3px solid var(--theme-primary, #ff69b4) !important;
-  box-shadow: 0px 15px 40px rgba(255, 105, 180, 0.3) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #ec407a), var(--theme-tertiary, #f48fb1)) !important;
+  border: 3px solid var(--theme-primary, #ec407a) !important;
+  box-shadow: 0px 15px 40px rgba(136, 14, 79, 0.12) !important;
 }
 
 .center-voice-card:hover {
-  box-shadow: 0px 25px 60px rgba(255, 105, 180, 0.5) !important;
-  border-color: var(--theme-primaryHover, #ff91a4) !important;
+  box-shadow: 0px 25px 60px rgba(136, 14, 79, 0.18) !important;
+  border-color: var(--theme-primaryHover, #f06292) !important;
 }
 
 .center-voice-card .voice-icon {
-  color: var(--theme-primary, #ff69b4) !important;
-  box-shadow: 0px 15px 30px rgba(255, 105, 180, 0.5) !important;
+  color: var(--theme-primary, #ec407a) !important;
+  box-shadow: 0px 15px 30px var(--theme-primary, rgba(236, 64, 122, 0.5)) !important;
 }
 
 .center-voice-card .voice-title {
-  color: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-primary, #ec407a) !important;
 }
 
 .center-voice-card .voice-action {
-  background: var(--theme-primary, #ff69b4) !important;
+  background: var(--theme-primary, #ec407a) !important;
 }
 
 .center-voice-card .voice-action:hover {
-  background: var(--theme-primaryHover, #ff91a4) !important;
+  background: var(--theme-primaryHover, #f06292) !important;
 }
 
 /* 突出显示录音功能卡片粉色主题优化 */
 .memory-card.featured-voice {
-  background: linear-gradient(135deg, #fff0f5, #ffe4ec) !important;
-  border: 2px solid var(--theme-primary, #ff69b4) !important;
-  box-shadow: 0px 8px 25px rgba(255, 105, 180, 0.3) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #ec407a), var(--theme-tertiary, #f48fb1)) !important;
+  border: 2px solid var(--theme-primary, #ec407a) !important;
+  box-shadow: 0px 8px 25px rgba(136, 14, 79, 0.12) !important;
 }
 
 .memory-card.featured-voice:hover {
-  box-shadow: 0px 12px 35px rgba(255, 105, 180, 0.4) !important;
+  box-shadow: 0px 12px 35px rgba(136, 14, 79, 0.18) !important;
 }
 
 /* 编辑出生日期按钮粉色主题优化 */
 .edit-birth-date-btn {
-  background: var(--theme-buttonBg, #fff0f5) !important;
-  color: var(--theme-primary, #ff69b4) !important;
-  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  background: var(--theme-buttonBg, #ec407a) !important;
+  color: var(--theme-textLight, #ffffff) !important;
+  border: 1px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
 }
 
 .edit-birth-date-btn:hover {
-  background: var(--theme-buttonHover, rgba(255, 182, 193, 0.35)) !important;
+  background: var(--theme-buttonHover, #f06292) !important;
 }
 
 /* 出生日期编辑器粉色主题优化 */
 .birth-date-editor {
-  background: var(--theme-containerBg, #fff0f5) !important;
-  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
-  box-shadow: 0 4px 15px var(--theme-shadow, rgba(255, 105, 180, 0.1)) !important;
+  background: var(--theme-containerBg, #fce4ec) !important;
+  border: 1px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
+  box-shadow: 0 4px 15px var(--theme-shadow, rgba(136, 14, 79, 0.12)) !important;
 }
 
 .birth-date-input {
-  background: var(--theme-buttonBg, #fff0f5) !important;
-  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
-  color: var(--theme-textPrimary, #2d3436) !important;
+  background: var(--theme-buttonBg, #fce4ec) !important;
+  border: 1px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
+  color: var(--theme-textPrimary, #880e4f) !important;
 }
 
 .cancel-btn {
-  background: var(--theme-buttonBg, #fff0f5) !important;
-  color: var(--theme-textPrimary, #2d3436) !important;
-  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  background: var(--theme-buttonBg, #fce4ec) !important;
+  color: var(--theme-textPrimary, #880e4f) !important;
+  border: 1px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
 }
 
 .cancel-btn:hover {
-  background: var(--theme-buttonHover, rgba(255, 182, 193, 0.35)) !important;
+  background: var(--theme-buttonHover, rgba(236, 64, 122, 0.2)) !important;
 }
 
 .save-btn {
-  background: var(--theme-primary, #ff69b4) !important;
-  color: var(--theme-textLight, white) !important;
+  background: var(--theme-primary, #ec407a) !important;
+  color: var(--theme-textLight, #ffffff) !important;
   border: none !important;
 }
 
 .save-btn:hover {
-  background: var(--theme-primaryHover, #ff91a4) !important;
+  background: var(--theme-primaryHover, #f06292) !important;
 }
 
 /* 出生日期显示粉色主题优化 */
 .birth-date-label {
-  color: var(--theme-textSecondary, #ff91a4) !important;
+  color: var(--theme-textSecondary, #ad1457) !important;
 }
 
 .birth-date-value {
-  color: var(--theme-textPrimary, #2d3436) !important;
+  color: var(--theme-textPrimary, #880e4f) !important;
 }
 
 /* 书籍卡片按钮粉色主题优化 */
 .book-card-action {
-  background: var(--theme-buttonBg, #fff0f5) !important;
-  color: var(--theme-primary, #ff69b4) !important;
-  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  background: var(--theme-buttonBg, #ec407a) !important;
+  color: var(--theme-textLight, #ffffff) !important;
+  border: 1px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
 }
 
 .book-card-action:hover {
-  background: var(--theme-buttonHover, rgba(255, 182, 193, 0.35)) !important;
+  background: var(--theme-buttonHover, #f06292) !important;
 }
 
 .book-card-action1 {
-  color: var(--theme-primary, #ff69b4) !important;
-  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  color: var(--theme-primary, #ec407a) !important;
+  border: 1px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
 }
 
 /* 回忆时间线标题粉色主题优化 */
 .memory-left-title {
-  color: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-primary, #ec407a) !important;
 }
 
 /* 年龄显示粉色主题优化 */
 .age-label {
-  color: var(--theme-textSecondary, #ff91a4) !important;
+  color: var(--theme-textSecondary, #ad1457) !important;
 }
 
 .age-value {
-  color: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-primary, #ec407a) !important;
 }
 
 /* 加载指示器粉色主题优化 */
 .loading-indicator {
-  color: var(--theme-primary, #ff69b4) !important;
+  color: var(--theme-primary, #ec407a) !important;
 }
 
 /* 主题切换器容器粉色主题优化 */
 .theme-switcher-container {
-  background: var(--theme-buttonBg, #fff0f5) !important;
-  border: 1px solid var(--theme-border, rgba(255, 182, 193, 0.3)) !important;
+  background: var(--theme-buttonBg, #fce4ec) !important;
+  border: 1px solid var(--theme-border, rgba(236, 64, 122, 0.3)) !important;
   border-radius: 8px !important;
   padding: 4px !important;
 }

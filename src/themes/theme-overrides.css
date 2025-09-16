@@ -1,4 +1,4 @@
-/* 主题变量覆盖样式 */
+/* 主题变量覆盖样式 - 优化后的配色 */
 
 /* 播放页面主题化 */
 .player-page {
@@ -22,7 +22,7 @@
 
 .nav-back-btn,
 .delete-recording-btn {
-  background: var(--theme-buttonBg, #f8fae6);
+  background: var(--theme-buttonBg, #e8f5e9);
   color: var(--theme-buttonText, #2d5016);
   border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
 }
@@ -32,13 +32,13 @@
 }
 
 .delete-recording-btn:hover {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
   color: var(--theme-textLight, white);
 }
 
 /* 会话信息主题化 */
 .session-info {
-  background: var(--theme-containerBg, #ffffe6);
+  background: var(--theme-containerBg, #ffffff);
   border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
   border-radius: 20px;
   padding: 8px 16px;
@@ -62,7 +62,7 @@
 
 
 .player-container {
-  background: var(--theme-containerBg, #ffffe6);
+  background: var(--theme-containerBg, #ffffff);
   box-shadow: var(--theme-cardShadow, 0 25px 80px rgba(45, 80, 22, 0.15), 0 10px 35px rgba(45, 80, 22, 0.1));
   border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.4));
   position: relative;
@@ -94,7 +94,7 @@
   width: 120px !important;
   height: 120px !important;
   border-radius: 50% !important;
-  background: var(--theme-containerBg, #f3fadf) !important;
+  background: var(--theme-containerBg, #e8f5e9) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -106,20 +106,20 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   cursor: pointer !important;
   box-shadow: 
-    0 8px 32px 0 var(--theme-shadow, rgba(74, 201, 103, 0.18)),
-    0 2px 8px 0 var(--theme-shadow, rgba(74, 201, 103, 0.10)),
-    0 0 0 8px var(--theme-containerBg, #f3fadf),
-    0 0 0 20px var(--theme-buttonBg, #f7fbe9) !important;
-  border: 2px solid var(--theme-border, #e2f5c2) !important;
+    0 8px 32px 0 var(--theme-shadow, rgba(102, 187, 106, 0.18)),
+    0 2px 8px 0 var(--theme-shadow, rgba(102, 187, 106, 0.10)),
+    0 0 0 8px var(--theme-containerBg, #e8f5e9),
+    0 0 0 20px var(--theme-buttonBg, #c8e6c9) !important;
+  border: 2px solid var(--theme-border, #a5d6a7) !important;
 }
 
 .avatar-icon:hover {
   transform: translateX(-50%) scale(1.05) !important;
   box-shadow:
-    0 16px 40px 0 var(--theme-shadow, rgba(74, 201, 103, 0.22)),
-    0 0 0 8px var(--theme-primaryHover, #eaf7d0),
-    0 0 0 20px var(--theme-containerBg, #f3fadf) !important;
-  background: var(--theme-primaryHover, #eaf7d0) !important;
+    0 16px 40px 0 var(--theme-shadow, rgba(102, 187, 106, 0.22)),
+    0 0 0 8px var(--theme-primaryHover, #c8e6c9),
+    0 0 0 20px var(--theme-containerBg, #e8f5e9) !important;
+  background: var(--theme-primaryHover, #c8e6c9) !important;
 }
 
 /* 移动端图标可见性保障 */
@@ -174,33 +174,33 @@
 
 /* 进度条主题化 */
 .progress-fill {
-  background: linear-gradient(90deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982)) !important;
+  background: linear-gradient(90deg, var(--theme-primary, #66bb6a), var(--theme-primaryHover, #81c784)) !important;
 }
 
 .progress-container {
-  background: var(--theme-border, rgba(74, 201, 103, 0.2)) !important;
+  background: var(--theme-border, rgba(102, 187, 106, 0.2)) !important;
 }
 
 .progress-slider::-webkit-slider-thumb {
-  background: var(--theme-primary, #4ac967) !important;
-  border: 2px solid var(--theme-containerBg, #ffffe6) !important;
-  box-shadow: 0 2px 8px var(--theme-shadow, rgba(74, 201, 103, 0.5)) !important;
+  background: var(--theme-primary, #66bb6a) !important;
+  border: 2px solid var(--theme-containerBg, #ffffff) !important;
+  box-shadow: 0 2px 8px var(--theme-shadow, rgba(102, 187, 106, 0.5)) !important;
 }
 
 .progress-slider::-webkit-slider-thumb:hover {
-  background: var(--theme-primaryHover, #88d982) !important;
-  box-shadow: 0 4px 15px var(--theme-shadow, rgba(74, 201, 103, 0.7)) !important;
+  background: var(--theme-primaryHover, #81c784) !important;
+  box-shadow: 0 4px 15px var(--theme-shadow, rgba(102, 187, 106, 0.7)) !important;
 }
 
 .progress-slider::-moz-range-thumb {
-  background: var(--theme-primary, #4ac967) !important;
-  border: 2px solid var(--theme-containerBg, #ffffe6) !important;
-  box-shadow: 0 2px 8px var(--theme-shadow, rgba(74, 201, 103, 0.5)) !important;
+  background: var(--theme-primary, #66bb6a) !important;
+  border: 2px solid var(--theme-containerBg, #ffffff) !important;
+  box-shadow: 0 2px 8px var(--theme-shadow, rgba(102, 187, 106, 0.5)) !important;
 }
 
 .progress-slider::-moz-range-thumb:hover {
-  background: var(--theme-primaryHover, #88d982) !important;
-  box-shadow: 0 4px 15px var(--theme-shadow, rgba(74, 201, 103, 0.7)) !important;
+  background: var(--theme-primaryHover, #81c784) !important;
+  box-shadow: 0 4px 15px var(--theme-shadow, rgba(102, 187, 106, 0.7)) !important;
 }
 
 /* 时间显示主题化 */
@@ -208,18 +208,32 @@
   color: var(--theme-textSecondary, #333) !important;
 }
 
-/* 全局滚动条隐藏 */
+/* 全局滚动条样式主题化 */
 * {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 和 Edge */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--theme-primary, #3bb6a6) transparent;
+  -ms-overflow-style: auto; /* IE 和 Edge */
 }
 
-/* Webkit浏览器滚动条隐藏 */
+/* Webkit浏览器滚动条样式 */
 ::-webkit-scrollbar {
-  display: none;
+  width: 8px;
+  height: 8px;
 }
 
-/* 所有滚动条都已全局隐藏，无需特殊处理 */
+::-webkit-scrollbar-track {
+  background: var(--theme-primary, rgba(59, 182, 166, 0.1));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-primary, rgba(59, 182, 166, 0.6));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-primaryHover, rgba(59, 182, 166, 0.8));
+}
 
 /* 控制按钮主题化 */
 .main-controls {
@@ -237,7 +251,7 @@
 
 /* 速度按钮主题化 */
 .speed-btn {
-  background: var(--theme-buttonBg, #f8fae6) !important;
+  background: var(--theme-buttonBg, #e8f5e9) !important;
   color: var(--theme-buttonText, #2d5016) !important;
   border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3)) !important;
 }
@@ -248,15 +262,15 @@
 }
 
 .speed-btn.active {
-  background: var(--theme-primary, #4ac967) !important;
+  background: var(--theme-primary, #66bb6a) !important;
   color: var(--theme-textLight, white) !important;
-  border-color: var(--theme-primary, #4ac967) !important;
+  border-color: var(--theme-primary, #66bb6a) !important;
 }
 
 /* 录音元数据主题化 */
 .recording-metadata .metadata-item {
-  background: var(--theme-buttonBg, rgba(74, 201, 103, 0.08)) !important;
-  border-left: 3px solid var(--theme-primary, #4ac967) !important;
+  background: var(--theme-buttonBg, rgba(102, 187, 106, 0.08)) !important;
+  border-left: 3px solid var(--theme-primary, #66bb6a) !important;
 }
 
 .recording-metadata .metadata-item .label {
@@ -269,7 +283,7 @@
 
 /* 录音标题主题化 */
 .recording-title {
-  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982)) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #66bb6a), var(--theme-primaryHover, #81c784)) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
@@ -277,12 +291,12 @@
 
 /* 播放控制按钮主题化 */
 .play-box {
-  background: linear-gradient(135deg, var(--theme-primary, #4ac967), var(--theme-primaryHover, #88d982)) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #66bb6a), var(--theme-primaryHover, #81c784)) !important;
 }
 
 .play-box:hover {
-  background: linear-gradient(135deg, var(--theme-primaryHover, #88d982), var(--theme-primary, #4ac967)) !important;
-  box-shadow: 0 10px 25px var(--theme-shadow, rgba(74, 201, 103, 0.5)) !important;
+  background: linear-gradient(135deg, var(--theme-primaryHover, #81c784), var(--theme-primary, #66bb6a)) !important;
+  box-shadow: 0 10px 25px var(--theme-shadow, rgba(102, 187, 106, 0.5)) !important;
 }
 
 /* 按钮标签主题化 */
@@ -298,11 +312,11 @@
 
 /* 音量控制主题化 */
 .volume-slider::-webkit-slider-thumb {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
 }
 
 .volume-slider::-moz-range-thumb {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
 }
 
 /* 轮播图区域主题化 */
@@ -313,7 +327,7 @@
 }
 
 /* .swiper-swipe-tip {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
   color: var(--theme-textLight, white);
 } */
 
@@ -323,14 +337,14 @@
 }
 
 .swiper-pagination-bullet-active {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
 }
 
 /* Swiper导航按钮主题化 */
 .swiper-button-next,
 .swiper-button-prev {
-  color: var(--theme-primary, #4ac967);
-  background: var(--theme-containerBg, #ffffe6);
+  color: var(--theme-primary, #66bb6a);
+  background: var(--theme-containerBg, #ffffff);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -338,7 +352,7 @@
 
 .swiper-button-next:hover,
 .swiper-button-prev:hover {
-  color: var(--theme-primaryHover, #88d982);
+  color: var(--theme-primaryHover, #81c784);
   background: var(--theme-buttonHover, rgba(255, 255, 255, 0.35));
 }
 
@@ -348,17 +362,17 @@
 }
 
 .preview-content {
-  background: var(--theme-containerBg, #ffffe6);
+  background: var(--theme-containerBg, #ffffff);
   border: 2px solid var(--theme-border, rgba(255, 255, 255, 0.3));
 }
 
 .preview-close {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
   color: var(--theme-textLight, white);
 }
 
 .preview-close:hover {
-  background: var(--theme-primaryHover, #88d982);
+  background: var(--theme-primaryHover, #81c784);
   transform: rotate(90deg);
 }
 
@@ -369,12 +383,12 @@
 }
 
 .mobile-interaction-prompt button {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
   color: var(--theme-textLight, white);
 }
 
 .mobile-interaction-prompt button:hover {
-  background: var(--theme-primaryHover, #88d982);
+  background: var(--theme-primaryHover, #81c784);
 }
 
 /* 错误页面主题化 */
@@ -385,7 +399,7 @@
 }
 
 .back-btn {
-  background: var(--theme-primary, #4ac967);
+  background: var(--theme-primary, #66bb6a);
   color: var(--theme-textLight, white);
   border: none;
   border-radius: 25px;
@@ -397,7 +411,7 @@
 }
 
 .back-btn:hover {
-  background: var(--theme-primaryHover, #88d982);
+  background: var(--theme-primaryHover, #81c784);
   transform: translateY(-2px);
 }
 
@@ -408,7 +422,7 @@
 
 .spinner {
   border: 4px solid var(--theme-border, rgba(255, 255, 255, 0.3));
-  border-top: 4px solid var(--theme-primary, #4ac967);
+  border-top: 4px solid var(--theme-primary, #66bb6a);
 }
 
 /* 时间显示优化 */
@@ -421,7 +435,7 @@
   font-size: 18px;
   font-weight: 600;
   color: var(--theme-textPrimary, #2d5016);
-  background: var(--theme-buttonBg, #f8fae6);
+  background: var(--theme-buttonBg, #e8f5e9);
   padding: 8px 16px;
   border-radius: 20px;
   border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.3));
@@ -656,4 +670,4 @@
     padding: 12px 10px 10px !important;  /* 减少主区域padding */
     overflow-y: hidden !important;
   }
-} 
+}

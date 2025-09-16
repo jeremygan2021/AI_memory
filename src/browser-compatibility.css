@@ -64,7 +64,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, mark,
 /* 确保所有浏览器的滚动条样式一致 */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3bb6a6 transparent;
+  scrollbar-color: var(--theme-primary, #3bb6a6) transparent;
 }
 
 /* Webkit浏览器滚动条样式 */
@@ -74,17 +74,17 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, mark,
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(59, 182, 166, 0.1);
+  background: var(--theme-primary, rgba(59, 182, 166, 0.1));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(59, 182, 166, 0.6);
+  background: var(--theme-primary, rgba(59, 182, 166, 0.6));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 182, 166, 0.8);
+  background: var(--theme-primaryHover, rgba(59, 182, 166, 0.8));
 }
 
 /* 打印样式 */

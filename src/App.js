@@ -309,7 +309,10 @@ const HomePage = ({ onNavigate }) => {
           transform: 'translate3d(0, 0, 0)',
           willChange: 'auto',
           backfaceVisibility: 'hidden',
-          webkitBackfaceVisibility: 'hidden'
+          webkitBackfaceVisibility: 'hidden',
+          // 添加滚动条样式变量
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'var(--theme-primary, #3bb6a6) var(--theme-containerBg, #ffffff)'
         });
       }
       
@@ -331,7 +334,10 @@ const HomePage = ({ onNavigate }) => {
         webkitOverflowScrolling: 'touch',
         transform: 'translate3d(0, 0, 0)',
         backfaceVisibility: 'hidden',
-        webkitBackfaceVisibility: 'hidden'
+        webkitBackfaceVisibility: 'hidden',
+        // 添加滚动条样式变量
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'var(--theme-primary, #3bb6a6) var(--theme-containerBg, #ffffff)'
       });
       
       Object.assign(document.documentElement.style, {
@@ -340,7 +346,10 @@ const HomePage = ({ onNavigate }) => {
         webkitOverflowScrolling: 'touch',
         transform: 'translate3d(0, 0, 0)',
         backfaceVisibility: 'hidden',
-        webkitBackfaceVisibility: 'hidden'
+        webkitBackfaceVisibility: 'hidden',
+        // 添加滚动条样式变量
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'var(--theme-primary, #3bb6a6) var(--theme-containerBg, #ffffff)'
       });
 
       // 3. 禁用页面缩放以提升性能
@@ -1025,7 +1034,7 @@ const HomePage = ({ onNavigate }) => {
   return (
     <div className={`memory-app-bg ${isWechatMiniProgram() ? 'miniprogram' : ''}`}>
       {/* 顶部导航栏 - 小程序环境下隐藏 */}
-      {!isWechatMiniProgram() && (
+      {/* {!isWechatMiniProgram() && (
         <div className="memory-navbar">
           <div className="navbar-left">
             <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/shouye.png" className="memory-logo" alt="logo" />
@@ -1045,11 +1054,11 @@ const HomePage = ({ onNavigate }) => {
           <div className="navbar-right">
             <span className="memory-icon bell" />
             <span className="memory-icon settings" />
-            <ThemeSwitcher forceGreenTheme={true} />
             <span className="memory-icon user" />
+            <ThemeSwitcher forceGreenTheme={true} />
           </div>
         </div>
-      )}
+      )} */}
 
       {/* 菜单栏 - 小程序环境下隐藏，H5环境下修改为三个页面导航 */}
       {!isWechatMiniProgram() && (
@@ -1107,20 +1116,20 @@ const HomePage = ({ onNavigate }) => {
           <div className="memory-left-top">
             {/* 用户账户信息 */}
             <div className="user-account-card" style={{
-              background: '#ffffff',
-              border: '1px solid #b7e5df',
+              background: 'var(--theme-containerBg)',
+              border: '1px solid var(--theme-border)',
               borderRadius: '12px',
               padding: '16px',
-              boxShadow: '0 4px 12px rgba(59, 182, 166, 0.1)'
+              boxShadow: 'var(--theme-cardShadow)'
             }}>
               <div className="user-code" style={{
-                color: '#3bb6a6',
+                color: 'var(--theme-primary)',
                 fontSize: '24px',
                 fontWeight: 'bold',
                 marginBottom: '8px'
               }}>{userCode}</div>
               <div className="user-status" style={{
-                color: '#3bb6a6',
+                color: 'var(--theme-primary)',
                 fontSize: '14px'
               }}>✓ 已激活</div>
             </div>
@@ -1165,11 +1174,11 @@ const HomePage = ({ onNavigate }) => {
               </>            )}
             {/* 用户信息 */}
             <div className="baby-info" style={{
-              background: '#ffffff',
-              border: '1px solid #b7e5df',
+              background: 'var(--theme-containerBg)',
+              border: '1px solid var(--theme-border)',
               borderRadius: '12px',
               padding: '16px',
-              boxShadow: '0 4px 12px rgba(59, 182, 166, 0.1)'
+              boxShadow: 'var(--theme-cardShadow)'
             }}>
               <div className="baby-info-top" style={{
                 display: 'flex',
@@ -1180,19 +1189,19 @@ const HomePage = ({ onNavigate }) => {
                 width: '50px',
                 height: '50px',
                 borderRadius: '50%',
-                background: '#e3f6f2',
+                background: 'var(--theme-secondaryBg)',
                 marginRight: '12px'
               }} />
                 <div className="baby-age-display" style={{
                   flex: 1
                 }}>
                   <span className="age-label" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '14px',
                     marginRight: '8px'
                   }}>年龄:</span>
                   <span className="age-value" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '18px',
                     fontWeight: 'bold'
                   }}>{formattedAge}</span>
@@ -1200,7 +1209,7 @@ const HomePage = ({ onNavigate }) => {
                   
                   {isLoadingBirthDate ? (
                     <span className="loading-indicator" style={{
-                      color: '#3bb6a6',
+                      color: 'var(--theme-primary)',
                       fontSize: '12px',
                       marginLeft: '8px'
                     }}>加载中...</span>
@@ -1210,12 +1219,12 @@ const HomePage = ({ onNavigate }) => {
                       onClick={startEditBirthDate}
                       title="设置用户出生日期"
                       style={{
-                        background: '#e3f6f2',
-                        border: '1px solid #b7e5df',
+                        background: 'var(--theme-secondaryBg)',
+                        border: '1px solid var(--theme-border)',
                         borderRadius: '4px',
                         padding: '4px 8px',
                         fontSize: '12px',
-                        color: '#3bb6a6',
+                        color: 'var(--theme-primary)',
                         cursor: 'pointer',
                         marginLeft: '8px'
                       }}
@@ -1228,14 +1237,14 @@ const HomePage = ({ onNavigate }) => {
               
               {isEditingBirthDate && (
                 <div className="birth-date-editor" style={{
-                  background: '#e3f6f2',
-                  border: '1px solid #b7e5df',
+                  background: 'var(--theme-secondaryBg)',
+                  border: '1px solid var(--theme-border)',
                   borderRadius: '8px',
                   padding: '12px',
                   marginTop: '12px'
                 }}>
                   <div className="editor-title" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '16px',
                     fontWeight: 'bold',
                     marginBottom: '8px'
@@ -1249,7 +1258,7 @@ const HomePage = ({ onNavigate }) => {
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid #b7e5df',
+                      border: '1px solid var(--theme-border)',
                       borderRadius: '4px',
                       fontSize: '14px',
                       marginBottom: '12px'
@@ -1264,12 +1273,12 @@ const HomePage = ({ onNavigate }) => {
                       className="cancel-btn" 
                       onClick={cancelEditBirthDate}
                       style={{
-                        background: '#ffffff',
-                        border: '1px solid #b7e5df',
+                        background: 'var(--theme-containerBg)',
+                        border: '1px solid var(--theme-border)',
                         borderRadius: '4px',
                         padding: '6px 12px',
                         fontSize: '14px',
-                        color: '#3bb6a6',
+                        color: 'var(--theme-primary)',
                         cursor: 'pointer'
                       }}
                     >
@@ -1280,12 +1289,12 @@ const HomePage = ({ onNavigate }) => {
                       onClick={confirmSaveBirthDate}
                       disabled={!tempBirthDate}
                       style={{
-                        background: tempBirthDate ? '#3bb6a6' : '#b7e5df',
+                        background: tempBirthDate ? 'var(--theme-primary)' : 'var(--theme-border)',
                         border: 'none',
                         borderRadius: '4px',
                         padding: '6px 12px',
                         fontSize: '14px',
-                        color: '#ffffff',
+                        color: 'var(--theme-buttonText)',
                         cursor: tempBirthDate ? 'pointer' : 'not-allowed'
                       }}
                     >
@@ -1300,12 +1309,12 @@ const HomePage = ({ onNavigate }) => {
                   marginTop: '12px'
                 }}>
                   <span className="birth-date-label" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '14px',
                     marginRight: '8px'
                   }}>出生日期:</span>
                   <span className="birth-date-value" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '14px'
                   }}>
                     {new Date(babyBirthDate).toLocaleDateString('zh-CN', {
@@ -1339,7 +1348,7 @@ const HomePage = ({ onNavigate }) => {
                       width: '100%',
                       height: '6px',
                       borderRadius: '3px',
-                      background: 'rgba(59, 182, 166, 0.3)',
+                      background: 'var(--theme-secondaryBg)',
                       outline: 'none',
                       WebkitAppearance: 'none',
                       margin: '8px 0'
@@ -1358,7 +1367,7 @@ const HomePage = ({ onNavigate }) => {
                       textAlign: 'left',
                       marginLeft: '8px',
                       fontSize: '14px',
-                      color: '#3bb6a6',
+                      color: 'var(--theme-primary)',
                       fontWeight: '500'
                     }}>1月</span>
                     <span style={{
@@ -1366,7 +1375,7 @@ const HomePage = ({ onNavigate }) => {
                       textAlign: 'right',
                       marginRight: '8px',
                       fontSize: '14px',
-                      color: '#3bb6a6',
+                      color: 'var(--theme-primary)',
                       fontWeight: '500'
                     }}>
                       {calculateSliderMax(babyAgeMonths) >= 12 
@@ -1402,12 +1411,12 @@ const HomePage = ({ onNavigate }) => {
 
           {/* 回忆书籍模块：AI对话 + PDF上传/查看 */}
           <div className="book-memory-card" style={{
-  background: '#ffffff',
-  border: '1px solid #b7e5df',
+  background: 'var(--theme-containerBg)',
+  border: '1px solid var(--theme-border)',
   borderRadius: '12px',
   padding: '16px',
   marginBottom: '16px',
-  boxShadow: '0 2px 4px rgba(59, 182, 166, 0.05)'
+  boxShadow: 'var(--theme-cardShadow)'
 }}>
             <div className="book-card-header" style={{
               display: 'flex',
@@ -1416,7 +1425,7 @@ const HomePage = ({ onNavigate }) => {
               marginBottom: '12px'
             }}>
               <div className="book-card-title" style={{
-                color: '#3bb6a6',
+                color: 'var(--theme-primary)',
                 fontSize: '18px',
                 fontWeight: 'bold',
                 display: 'flex',
@@ -1438,12 +1447,12 @@ const HomePage = ({ onNavigate }) => {
                   alignItems: 'center'
                 }}>
                   <span className="stat-number" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '18px',
                     fontWeight: 'bold'
                   }}>{booksCount}</span>
                   <span className="stat-label" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '12px'
                   }}>书籍</span>
                 </span>
@@ -1453,12 +1462,12 @@ const HomePage = ({ onNavigate }) => {
                   alignItems: 'center'
                 }}>
                   <span className="stat-number" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '18px',
                     fontWeight: 'bold'
                   }}>{totalConversations}</span>
                   <span className="stat-label" style={{
-                    color: '#3bb6a6',
+                    color: 'var(--theme-primary)',
                     fontSize: '12px'
                   }}>对话</span>
                 </span>
@@ -1466,7 +1475,7 @@ const HomePage = ({ onNavigate }) => {
             </div>
             <div className="book-card-content">
               <p className="book-card-desc" style={{
-                color: '#3bb6a6',
+                color: 'var(--theme-primary)',
                 fontSize: '14px',
                 marginBottom: '12px'
               }}>与AI进行智能对话和内容检索</p>
@@ -1476,15 +1485,15 @@ const HomePage = ({ onNavigate }) => {
                 marginBottom: '16px'
               }}>
                 <span className="feature-tag" style={{
-                  background: '#e3f6f2',
-                  color: '#3bb6a6',
+                  background: 'var(--theme-secondaryBg)',
+                  color: 'var(--theme-primary)',
                   borderRadius: '12px',
                   padding: '4px 8px',
                   fontSize: '12px'
                 }}>🤖 AI对话</span>
                 <span className="feature-tag" style={{
-                  background: '#e3f6f2',
-                  color: '#3bb6a6',
+                  background: 'var(--theme-secondaryBg)',
+                  color: 'var(--theme-primary)',
                   borderRadius: '12px',
                   padding: '4px 8px',
                   fontSize: '12px'
@@ -1493,60 +1502,60 @@ const HomePage = ({ onNavigate }) => {
             </div>
             <div style={{ display:'flex', gap:'10px', flexWrap:'wrap' }}>
               <button className="book-card-action" onClick={goToAIConversation} style={{
-                background: '#3bb6a6',
+                background: 'var(--theme-primary)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '8px 12px',
                 fontSize: '14px',
-                color: '#ffffff',
+                color: 'var(--theme-buttonText)',
                 cursor: 'pointer'
               }}>
                 开始AI对话
               </button>
               <button className="book-card-action" onClick={onClickUploadPdf} disabled={!userCode || isUploadingPdf} style={{
-                background: (!userCode || isUploadingPdf) ? '#b7e5df' : '#e3f6f2',
-                border: '1px solid #b7e5df',
+                background: (!userCode || isUploadingPdf) ? 'var(--theme-border)' : 'var(--theme-secondaryBg)',
+                border: '1px solid var(--theme-border)',
                 borderRadius: '6px',
                 padding: '8px 12px',
                 fontSize: '14px',
-                color: '#3bb6a6',
+                color: 'var(--theme-primary)',
                 cursor: (!userCode || isUploadingPdf) ? 'not-allowed' : 'pointer'
               }}>
                 {isUploadingPdf ? '上传中...' : '上传书籍（PDF格式）'}
               </button>
               <button className="book-card-action" onClick={onViewPdfs} disabled={!userCode} style={{
-                background: userCode ? '#e3f6f2' : '#b7e5df',
-                border: '1px solid #b7e5df',
+                background: userCode ? 'var(--theme-secondaryBg)' : 'var(--theme-border)',
+                border: '1px solid var(--theme-border)',
                 borderRadius: '6px',
                 padding: '8px 12px',
                 fontSize: '14px',
-                color: '#3bb6a6',
+                color: 'var(--theme-primary)',
                 cursor: userCode ? 'pointer' : 'not-allowed'
               }}>
                 查看书籍列表
               </button>
             </div>
             {pdfMessage && (
-              <div style={{ marginTop: 8, color: '#3bb6a6', fontSize: 14 }}>{pdfMessage}</div>
+              <div style={{ marginTop: 8, color: 'var(--theme-primary)', fontSize: 14 }}>{pdfMessage}</div>
             )}
             {showPdfList && (
-              <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed #b7e5df', paddingTop: 10 }}>
+              <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed var(--theme-border)', paddingTop: 10, scrollbarWidth: 'thin', scrollbarColor: 'var(--theme-primary, #3bb6a6) var(--theme-containerBg, #ffffff)' }}>
                 {pdfFiles.length === 0 ? (
-                  <div style={{ color:'#3bb6a6', fontSize: 12 }}>暂无回忆书籍</div>
+                  <div style={{ color:'var(--theme-primary)', fontSize: 12 }}>暂无回忆书籍</div>
                 ) : (
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {pdfFiles.map((f, idx) => (
                       <li key={f.objectKey || idx} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 0', gap:'10px' }}>
-                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%', color: '#3bb6a6', fontSize: 14 }}>{f.name}</span>
+                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%', color: 'var(--theme-primary)', fontSize: 14 }}>{f.name}</span>
                         <div style={{display: 'flex' , flex: '1' , gap:'5px', alignItems:'end'}}>
                           <a href={f.url} target="_blank" rel="noreferrer" className="book-card-action1" style={{ 
                             padding:'6px 10px',
-                            background: '#e3f6f2',
-                            color: '#3bb6a6',
+                            background: 'var(--theme-secondaryBg)',
+                            color: 'var(--theme-primary)',
                             textDecoration: 'none',
                             borderRadius: '4px',
                             fontSize: '12px',
-                            border: '1px solid #b7e5df'
+                            border: '1px solid var(--theme-border)'
                           }}>
                             查看
                           </a>
@@ -1554,10 +1563,10 @@ const HomePage = ({ onNavigate }) => {
                             className="book-card-action1" 
                             style={{ 
                               padding:'6px 10px', 
-                              background:'#e3f6f2', 
-                              borderColor:'#b7e5df',
-                              color: '#3bb6a6',
-                              border: '1px solid #b7e5df',
+                              background:'var(--theme-secondaryBg)', 
+                              borderColor:'var(--theme-border)',
+                              color: 'var(--theme-primary)',
+                              border: '1px solid var(--theme-border)',
                               borderRadius: '4px',
                               fontSize: '12px'
                             }}
@@ -1645,7 +1654,7 @@ const HomePage = ({ onNavigate }) => {
                         <div className="empty-desc">点击"上传照片"开始记录美好时光</div>
                       </div>
                     ) : (
-                      photoData.slice(0, 6).map((file, idx) => (
+                      photoData.slice(0, 3).map((file, idx) => (
                         <div
                           key={file.id || idx}
                           className="album-item"
@@ -1670,7 +1679,7 @@ const HomePage = ({ onNavigate }) => {
                         <div className="empty-desc">点击"上传视频"开始记录美好时光</div>
                       </div>
                     ) : (
-                      videoData.slice(0, 6).map((file, idx) => (
+                      videoData.slice(0, 3).map((file, idx) => (
                         <div
                           key={file.id || idx}
                           className="album-item"

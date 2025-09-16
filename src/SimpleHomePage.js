@@ -672,19 +672,72 @@ const SimpleHomePage = () => {
         </div>
         
         {/* 相册入口 */}
-        <div className="mobile-gallery-entrance">
-          <div className="mobile-gallery-card" onClick={goToGallery}>
-            <div className="gallery-icon">📸</div>
-            <div className="gallery-title">亲子相册</div>
-            <div className="gallery-desc">点击查看相册</div>
+        <div className="mobile-gallery-entrance" style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '10px auto' }}>
+          <div className="mobile-gallery-card" onClick={goToGallery} style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            width: '100%',
+            maxWidth: '90vw',
+            padding: '16px',
+            borderRadius: '16px',
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)',
+            boxShadow: '0 8px 16px rgba(31, 38, 135, 0.15)',
+            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            cursor: 'pointer',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-5px)';
+            e.currentTarget.style.boxShadow = '0 12px 20px rgba(31, 38, 135, 0.25)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 8px 16px rgba(31, 38, 135, 0.15)';
+          }}>
+            <div className="gallery-icon" style={{ 
+              fontSize: '36px', 
+              marginBottom: '8px',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+            }}>📸</div>
+            <div className="gallery-title" style={{ 
+              fontSize: '20px', 
+              fontWeight: 'bold', 
+              marginBottom: '6px',
+              color: '#2c3e50',
+              textShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            }}>亲子相册</div>
+            <div className="gallery-desc" style={{ 
+              fontSize: '14px', 
+              marginBottom: '12px',
+              color: '#7f8c8d'
+            }}>点击查看相册</div>
             
             {/* 显示最近6个媒体文件小图，一行3张 */}
             {uploadedFiles.length > 0 && (
-              <div className="gallery-preview">
+              <div style={{ 
+                display:'grid', 
+                gridTemplateColumns:'repeat(3, 1fr)', 
+                gap:'8px', 
+                marginBottom: '16px',
+                width: '100%',
+                maxWidth: '180px',
+                justifyItems: 'center',
+                alignItems: 'center'
+              }}>
                 {uploadedFiles.slice(0, 6).map((file, index) => (
                   <div 
                     key={file.id || index} 
-                    className={`preview-thumb ${file.type === 'video' ? 'video-thumb' : 'photo-thumb'}`}
+                    className={`${file.type === 'video' ? 'video-thumb' : 'photo-thumb'}`}
+                    style={{ 
+                      width:'80px', 
+                      height:'80px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      transition: 'transform 0.2s ease'
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (file.type === 'image') {
@@ -693,21 +746,44 @@ const SimpleHomePage = () => {
                         openVideoPlayer(index);
                       }
                     }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
                   >
                     {file.type === 'image' ? (
                       <img 
                         src={file.preview} 
                         alt={file.name} 
                         className="preview-image"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     ) : (
-                      <div className="video-preview-container">
+                      <div className="video-preview-container" style={{ position: 'relative', width: '100%', height: '100%' }}>
                         <img 
                           src={file.preview} 
                           alt={file.name} 
                           className="preview-image"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
-                        <div className="video-play-icon">▶</div>
+                        <div className="video-play-icon" style={{ 
+                          position: 'absolute', 
+                          top: '50%', 
+                          left: '50%', 
+                          transform: 'translate(-50%, -50%)', 
+                          color: 'white', 
+                          fontSize: '16px',
+                          textShadow: '0 0 4px rgba(0,0,0,0.5)',
+                          backgroundColor: 'rgba(0,0,0,0.4)',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>▶</div>
                       </div>
                     )}
                   </div>
@@ -715,7 +791,27 @@ const SimpleHomePage = () => {
               </div>
             )}
             
-            <button className="enter-gallery-btn">查看相册</button>
+            <button className="enter-gallery-btn" style={{
+              padding: '8px 24px',
+              borderRadius: '20px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 4px 8px rgba(102, 126, 234, 0.3)',
+              transition: 'all 0.3s ease',
+              marginTop: '8px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)';
+              e.currentTarget.style.boxShadow = '0 6px 12px rgba(102, 126, 234, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.3)';
+            }}>查看相册</button>
           </div>
         </div>
       </div>

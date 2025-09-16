@@ -6,7 +6,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Muyao-Softbrush-Regular', sans-serif;
-  background: linear-gradient(135deg, #e8f5e8 0%, #a8d8a8 30%, #78c6b6 70%, #4ecdc4 100%);
+  background: var(--theme-bg, linear-gradient(135deg, #e8f5e8 0%, #a8d8a8 30%, #78c6b6 70%, #4ecdc4 100%));
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -1090,7 +1090,7 @@ body {
 .mobile-album-item img,
 .mobile-album-item video {
   width: 100%;
-  height: 100%;
+  height: 120px;
   object-fit: cover;
 }
 

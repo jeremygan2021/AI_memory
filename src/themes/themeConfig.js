@@ -3,43 +3,43 @@ import { saveThemeToCloud, loadThemeFromCloud, syncThemeSettings } from '../serv
 import { getUserCode } from '../utils/userCode.js';
 
 export const themes = {
-  // 默认绿色主题（现有的）
+  // 默认绿色主题（优化后的清新绿意）
   default: {
     id: 'default',
     name: '清新绿意',
     icon: '🌿',
     colors: {
       // 背景色
-      primaryBg: 'linear-gradient(135deg, #a8e6a3 0%, #88d982 50%, #a8e6a3 100%)',
-      containerBg: '#ffffe6',
-      headerBg: 'rgba(255, 255, 255, 0.15)',
+      primaryBg: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%)',
+      containerBg: '#ffffff',
+      headerBg: 'rgba(255, 255, 255, 0.9)',
       commentBg: 'rgba(255, 255, 255, 0.8)',
-      secondaryBg: '#f0f8e6',
+      secondaryBg: '#f1f8e9',
       
       // 主色调
-      primary: '#4ac967',
-      primaryHover: '#88d982',
-      secondary: '#2d5016',
-      tertiary: '#88d982',
-      accent: '#4ac967',
+      primary: '#66bb6a',
+      primaryHover: '#81c784',
+      secondary: '#2e7d32',
+      tertiary: '#a5d6a7',
+      accent: '#4caf50',
       
       // 按钮色
-      buttonBg: '#f8fae6',
-      buttonText: '#2d5016',
-      buttonHover: 'rgba(255, 255, 255, 0.35)',
+      buttonBg: '#66bb6a',
+      buttonText: '#ffffff',
+      buttonHover: '#81c784',
       
       // 文本色
-      textPrimary: '#2d5016',
-      textSecondary: '#333',
-      textLight: 'white',
-      text: '#2d5016',
+      textPrimary: '#1b5e20',
+      textSecondary: '#33691e',
+      textLight: '#ffffff',
+      text: '#2e7d32',
       
       // 边框和阴影
-      border: 'rgba(255, 255, 255, 0.3)',
-      borderLight: 'rgba(255, 255, 255, 0.4)',
-      borderDark: 'rgba(0, 0, 0, 0.1)',
-      shadow: 'rgba(45, 80, 22, 0.15)',
-      cardShadow: '0 25px 80px rgba(45, 80, 22, 0.15), 0 10px 35px rgba(45, 80, 22, 0.1)',
+      border: 'rgba(102, 187, 106, 0.3)',
+      borderLight: 'rgba(102, 187, 106, 0.2)',
+      borderDark: 'rgba(46, 125, 50, 0.2)',
+      shadow: 'rgba(46, 125, 50, 0.1)',
+      cardShadow: '0 8px 24px rgba(46, 125, 50, 0.12), 0 4px 12px rgba(46, 125, 50, 0.08)',
     },
     assets: {
       backgroundImage: '/asset/background2.png',
@@ -47,38 +47,38 @@ export const themes = {
     }
   },
 
-   // 严肃深沉又温馨主题
-   serene: {
+   // 温馨深邃主题（优化后的配色）
+  serene: {
     id: 'serene',
     name: '温馨深邃',
     icon: '🕯️',
     colors: {
-      primaryBg: 'linear-gradient(135deg, #232946 0%, #393e46 50%, #232946 100%)',
-      containerBg: '#f6e7cb',
-      headerBg: 'rgba(35, 41, 70, 0.7)',
-      commentBg: 'rgba(246, 231, 203, 0.85)',
-      secondaryBg: '#e6d7bb',
+      primaryBg: 'linear-gradient(135deg, #3e2723 0%, #5d4037 50%, #6d4c41 100%)',
+      containerBg: '#efebe9',
+      headerBg: 'rgba(239, 235, 233, 0.9)',
+      commentBg: 'rgba(255, 255, 255, 0.8)',
+      secondaryBg: '#d7ccc8',
       
-      primary: '#bfa46f', // 温暖金色
-      primaryHover: '#ffe6a7',
-      secondary: '#6d4c41', // 深棕色
-      tertiary: '#ffe6a7',
-      accent: '#bfa46f',
+      primary: '#8d6e63', // 温暖棕色
+      primaryHover: '#a1887f',
+      secondary: '#3e2723', // 深棕色
+      tertiary: '#bcaaa4',
+      accent: '#ff8a65',
       
-      buttonBg: '#ffe6a7',
-      buttonText: '#232946',
-      buttonHover: 'rgba(191, 164, 111, 0.25)',
+      buttonBg: '#8d6e63',
+      buttonText: '#ffffff',
+      buttonHover: '#a1887f',
       
-      textPrimary: '#232946',
-      textSecondary: '#6d4c41',
-      textLight: '#fff',
-      text: '#232946',
+      textPrimary: '#3e2723',
+      textSecondary: '#5d4037',
+      textLight: '#ffffff',
+      text: '#3e2723',
       
-      border: 'rgba(191, 164, 111, 0.3)',
-      borderLight: 'rgba(191, 164, 111, 0.4)',
-      borderDark: 'rgba(0, 0, 0, 0.1)',
-      shadow: 'rgba(35, 41, 70, 0.15)',
-      cardShadow: '0 25px 80px rgba(35, 41, 70, 0.15), 0 10px 35px rgba(191, 164, 111, 0.08)',
+      border: 'rgba(141, 110, 99, 0.3)',
+      borderLight: 'rgba(141, 110, 99, 0.2)',
+      borderDark: 'rgba(62, 39, 35, 0.2)',
+      shadow: 'rgba(62, 39, 35, 0.1)',
+      cardShadow: '0 8px 24px rgba(62, 39, 35, 0.12), 0 4px 12px rgba(62, 39, 35, 0.08)',
     },
     assets: {
       backgroundImage: '/asset/wxbj.png',
@@ -86,38 +86,38 @@ export const themes = {
     }
   },
 
-  // 宇宙主题
+  // 宇宙主题（优化后的配色）
   dark: {
     id: 'dark',
     name: '宇宙黑洞',
     icon: '🌙',
     colors: {
-      primaryBg: 'linear-gradient(135deg, #2d3436 0%, #636e72 50%, #2d3436 100%)',
-      containerBg: '#2d3436',
-      headerBg: 'rgba(45, 52, 54, 0.8)',
-      commentBg: 'rgba(45, 52, 54, 0.9)',
-      secondaryBg: '#1a1a1e',
+      primaryBg: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+      containerBg: 'rgba(36, 36, 62, 0.8)',
+      headerBg: 'rgba(15, 12, 41, 0.9)',
+      commentBg: 'rgba(48, 43, 99, 0.7)',
+      secondaryBg: 'rgba(15, 12, 41, 0.6)',
       
-      primary: '#74b9ff',
-      primaryHover: '#0984e3',
-      secondary: '#ddd',
-      tertiary: '#a29bfe',
-      accent: '#fd79a8',
+      primary: '#6a5acd', // 深紫色
+      primaryHover: '#7b68ee',
+      secondary: '#e0e0e0',
+      tertiary: '#9370db',
+      accent: '#ff6b6b',
       
-      buttonBg: '#636e72',
-      buttonText: '#ddd',
-      buttonHover: 'rgba(116, 185, 255, 0.35)',
+      buttonBg: '#6a5acd',
+      buttonText: '#ffffff',
+      buttonHover: '#7b68ee',
       
-      textPrimary: '#ddd',
-      textSecondary: '#ccc',
-      textLight: 'white',
-      text: '#ddd',
+      textPrimary: '#e0e0e0',
+      textSecondary: '#bdbdbd',
+      textLight: '#ffffff',
+      text: '#e0e0e0',
       
-      border: 'rgba(116, 185, 255, 0.3)',
-      borderLight: 'rgba(116, 185, 255, 0.4)',
+      border: 'rgba(106, 90, 205, 0.3)',
+      borderLight: 'rgba(106, 90, 205, 0.2)',
       borderDark: 'rgba(0, 0, 0, 0.3)',
-      shadow: 'rgba(0, 0, 0, 0.3)',
-      cardShadow: '0 25px 80px rgba(0, 0, 0, 0.3), 0 10px 35px rgba(0, 0, 0, 0.2)',
+      shadow: 'rgba(0, 0, 0, 0.4)',
+      cardShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3)',
     },
     assets: {
       backgroundImage: '/asset/yzbj.jpg',
@@ -125,38 +125,38 @@ export const themes = {
     }
   },
 
-  // 海洋蓝主题
+  // 海洋蓝主题（优化后的配色）
   ocean: {
     id: 'ocean',
     name: '深海蓝调',
     icon: '🌊',
     colors: {
-      primaryBg: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #74b9ff 100%)',
+      primaryBg: 'linear-gradient(135deg, #0d47a1 0%, #1976d2 50%, #42a5f5 100%)',
       containerBg: '#e3f2fd',
-      headerBg: 'rgba(116, 185, 255, 0.15)',
-      commentBg: 'rgba(227, 242, 253, 0.8)',
+      headerBg: 'rgba(227, 242, 253, 0.9)',
+      commentBg: 'rgba(255, 255, 255, 0.8)',
       secondaryBg: '#bbdefb',
       
-      primary: '#0984e3',
-      primaryHover: '#74b9ff',
-      secondary: '#2d3436',
-      tertiary: '#74b9ff',
-      accent: '#00cec9',
+      primary: '#1976d2',
+      primaryHover: '#42a5f5',
+      secondary: '#0d47a1',
+      tertiary: '#64b5f6',
+      accent: '#00acc1',
       
-      buttonBg: '#e3f2fd',
-      buttonText: '#2d3436',
-      buttonHover: 'rgba(116, 185, 255, 0.35)',
+      buttonBg: '#1976d2',
+      buttonText: '#ffffff',
+      buttonHover: '#42a5f5',
       
-      textPrimary: '#2d3436',
-      textSecondary: '#333',
-      textLight: 'white',
-      text: '#2d3436',
+      textPrimary: '#0d47a1',
+      textSecondary: '#1565c0',
+      textLight: '#ffffff',
+      text: '#0d47a1',
       
-      border: 'rgba(116, 185, 255, 0.3)',
-      borderLight: 'rgba(116, 185, 255, 0.4)',
-      borderDark: 'rgba(0, 0, 0, 0.1)',
-      shadow: 'rgba(9, 132, 227, 0.15)',
-      cardShadow: '0 25px 80px rgba(9, 132, 227, 0.15), 0 10px 35px rgba(9, 132, 227, 0.1)',
+      border: 'rgba(25, 118, 210, 0.3)',
+      borderLight: 'rgba(25, 118, 210, 0.2)',
+      borderDark: 'rgba(13, 71, 161, 0.2)',
+      shadow: 'rgba(13, 71, 161, 0.1)',
+      cardShadow: '0 8px 24px rgba(13, 71, 161, 0.12), 0 4px 12px rgba(13, 71, 161, 0.08)',
     },
     assets: {
       backgroundImage: '/asset/hybj.jpg',
@@ -164,38 +164,38 @@ export const themes = {
     }
   },
 
-  // 温暖橙主题
+  // 温暖橙主题（优化后的配色）
   sunset: {
     id: 'sunset',
     name: '温暖黄昏',
     icon: '🌅',
     colors: {
-      primaryBg: 'linear-gradient(135deg, #fdcb6e 0%, #e17055 50%, #fdcb6e 100%)',
+      primaryBg: 'linear-gradient(135deg, #ff8a65 0%, #ff7043 50%, #ff5722 100%)',
       containerBg: '#fff3e0',
-      headerBg: 'rgba(253, 203, 110, 0.15)',
-      commentBg: 'rgba(255, 243, 224, 0.8)',
+      headerBg: 'rgba(255, 243, 224, 0.9)',
+      commentBg: 'rgba(255, 255, 255, 0.8)',
       secondaryBg: '#ffe0b2',
       
-      primary: '#e17055',
-      primaryHover: '#fdcb6e',
-      secondary: '#5d4037',
-      tertiary: '#fdcb6e',
-      accent: '#ff8a65',
+      primary: '#ff7043',
+      primaryHover: '#ff8a65',
+      secondary: '#bf360c',
+      tertiary: '#ffab91',
+      accent: '#ffb74d',
       
-      buttonBg: '#fff3e0',
-      buttonText: '#5d4037',
-      buttonHover: 'rgba(253, 203, 110, 0.35)',
+      buttonBg: '#ff7043',
+      buttonText: '#ffffff',
+      buttonHover: '#ff8a65',
       
-      textPrimary: '#5d4037',
-      textSecondary: '#333',
-      textLight: 'white',
-      text: '#5d4037',
+      textPrimary: '#bf360c',
+      textSecondary: '#d84315',
+      textLight: '#ffffff',
+      text: '#bf360c',
       
-      border: 'rgba(253, 203, 110, 0.3)',
-      borderLight: 'rgba(253, 203, 110, 0.4)',
-      borderDark: 'rgba(0, 0, 0, 0.1)',
-      shadow: 'rgba(225, 112, 85, 0.15)',
-      cardShadow: '0 25px 80px rgba(225, 112, 85, 0.15), 0 10px 35px rgba(225, 112, 85, 0.1)',
+      border: 'rgba(255, 112, 67, 0.3)',
+      borderLight: 'rgba(255, 112, 67, 0.2)',
+      borderDark: 'rgba(191, 54, 12, 0.2)',
+      shadow: 'rgba(191, 54, 12, 0.1)',
+      cardShadow: '0 8px 24px rgba(191, 54, 12, 0.12), 0 4px 12px rgba(191, 54, 12, 0.08)',
     },
     assets: {
       backgroundImage: '/asset/wxbj.jpg',
@@ -203,38 +203,38 @@ export const themes = {
     }
   },
 
-  // 紫色梦幻主题
+  // 紫色梦幻主题（优化后的配色）
   purple: {
     id: 'purple',
     name: '紫色梦境',
     icon: '🔮',
     colors: {
-      primaryBg: 'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 50%, #a29bfe 100%)',
-      containerBg: '#f3f0ff',
-      headerBg: 'rgba(162, 155, 254, 0.15)',
-      commentBg: 'rgba(243, 240, 255, 0.8)',
-      secondaryBg: '#e8e5ff',
+      primaryBg: 'linear-gradient(135deg, #7b1fa2 0%, #8e24aa 50%, #9c27b0 100%)',
+      containerBg: '#f3e5f5',
+      headerBg: 'rgba(243, 229, 245, 0.9)',
+      commentBg: 'rgba(255, 255, 255, 0.8)',
+      secondaryBg: '#e1bee7',
       
-      primary: '#6c5ce7',
-      primaryHover: '#a29bfe',
-      secondary: '#2d3436',
-      tertiary: '#a29bfe',
-      accent: '#fd79a8',
+      primary: '#8e24aa',
+      primaryHover: '#ab47bc',
+      secondary: '#4a148c',
+      tertiary: '#ce93d8',
+      accent: '#ec407a',
       
-      buttonBg: '#f3f0ff',
-      buttonText: '#2d3436',
-      buttonHover: 'rgba(162, 155, 254, 0.35)',
+      buttonBg: '#8e24aa',
+      buttonText: '#ffffff',
+      buttonHover: '#ab47bc',
       
-      textPrimary: '#2d3436',
-      textSecondary: '#333',
-      textLight: 'white',
-      text: '#2d3436',
+      textPrimary: '#4a148c',
+      textSecondary: '#6a1b9a',
+      textLight: '#ffffff',
+      text: '#4a148c',
       
-      border: 'rgba(162, 155, 254, 0.3)',
-      borderLight: 'rgba(162, 155, 254, 0.4)',
-      borderDark: 'rgba(0, 0, 0, 0.1)',
-      shadow: 'rgba(108, 92, 231, 0.15)',
-      cardShadow: '0 25px 80px rgba(108, 92, 231, 0.15), 0 10px 35px rgba(108, 92, 231, 0.1)',
+      border: 'rgba(142, 36, 170, 0.3)',
+      borderLight: 'rgba(142, 36, 170, 0.2)',
+      borderDark: 'rgba(74, 20, 140, 0.2)',
+      shadow: 'rgba(74, 20, 140, 0.1)',
+      cardShadow: '0 8px 24px rgba(74, 20, 140, 0.12), 0 4px 12px rgba(74, 20, 140, 0.08)',
     },
     assets: {
       backgroundImage: '/asset/zsbj.jpg',
@@ -244,38 +244,38 @@ export const themes = {
 
   
 
-  // 粉色甜美主题
+  // 粉色甜美主题（优化后的配色）
   pink: {
     id: 'pink',
     name: '粉色甜心',
     icon: '🌸',
     colors: {
-      primaryBg: 'linear-gradient(135deg, #ffb6c1 0%, #ff91a4 50%, #ff6b95 100%)',
-      containerBg: '#fff0f5',
-      headerBg: 'rgba(255, 182, 193, 0.15)',
-      commentBg: 'rgba(255, 240, 245, 0.8)',
-      secondaryBg: '#ffe4ec',
+      primaryBg: 'linear-gradient(135deg, #f48fb1 0%, #f06292 50%, #ec407a 100%)',
+      containerBg: '#fce4ec',
+      headerBg: 'rgba(252, 228, 236, 0.9)',
+      commentBg: 'rgba(255, 255, 255, 0.8)',
+      secondaryBg: '#f8bbd0',
       
-      primary: '#ff69b4',
-      primaryHover: '#ff91a4',
-      secondary: '#2d3436',
-      tertiary: '#ffb6c1',
-      accent: '#ff1493',
+      primary: '#ec407a',
+      primaryHover: '#f06292',
+      secondary: '#880e4f',
+      tertiary: '#f48fb1',
+      accent: '#ff80ab',
       
-      buttonBg: '#fff0f5',
-      buttonText: '#2d3436',
-      buttonHover: 'rgba(255, 182, 193, 0.35)',
+      buttonBg: '#ec407a',
+      buttonText: '#ffffff',
+      buttonHover: '#f06292',
       
-      textPrimary: '#2d3436',
-      textSecondary: '#333',
-      textLight: 'white',
-      text: '#2d3436',
+      textPrimary: '#880e4f',
+      textSecondary: '#ad1457',
+      textLight: '#ffffff',
+      text: '#880e4f',
       
-      border: 'rgba(255, 182, 193, 0.3)',
-      borderLight: 'rgba(255, 182, 193, 0.4)',
-      borderDark: 'rgba(0, 0, 0, 0.1)',
-      shadow: 'rgba(255, 105, 180, 0.15)',
-      cardShadow: '0 25px 80px rgba(255, 105, 180, 0.15), 0 10px 35px rgba(255, 105, 180, 0.1)',
+      border: 'rgba(236, 64, 122, 0.3)',
+      borderLight: 'rgba(236, 64, 122, 0.2)',
+      borderDark: 'rgba(136, 14, 79, 0.2)',
+      shadow: 'rgba(136, 14, 79, 0.1)',
+      cardShadow: '0 8px 24px rgba(136, 14, 79, 0.12), 0 4px 12px rgba(136, 14, 79, 0.08)',
     },
     assets: {
       backgroundImage: '/asset/yhbj.jpg',
@@ -283,43 +283,43 @@ export const themes = {
     }
   },
 
-  // 商务风格主题
+  // 商务风格主题（优化后的配色）
   business: {
     id: 'business',
     name: '商务风格',
     icon: '💼',
     colors: {
       // 背景色
-      primaryBg: 'linear-gradient(135deg, rgba(26, 35, 126, 0.8) 0%, rgba(40, 53, 147, 0.7) 25%, rgba(57, 73, 171, 0.6) 50%, rgba(63, 81, 181, 0.7) 75%, rgba(92, 107, 192, 0.8) 100%)',
-      containerBg: 'rgba(26, 35, 126, 0.7)',
-      headerBg: 'rgba(26, 35, 126, 0.9)',
-      commentBg: 'rgba(26, 35, 126, 0.7)',
-      secondaryBg: 'rgba(22, 33, 62, 0.8)',
+      primaryBg: 'linear-gradient(135deg, #1a237e 0%, #283593 25%, #3949ab 50%, #3f51b5 75%, #5c6bc0 100%)',
+      containerBg: 'rgba(26, 35, 126, 0.8)',
+      headerBg: 'rgba(26, 35, 126, 0.95)',
+      commentBg: 'rgba(255, 255, 255, 0.9)',
+      secondaryBg: 'rgba(22, 33, 62, 0.9)',
       
       // 主色调
-      primary: '#00bcd4',
-      primaryHover: '#4dd0e1',
+      primary: '#00acc1',
+      primaryHover: '#26c6da',
       secondary: '#ffffff',
-      tertiary: '#667eea',
-      accent: '#764ba2',
+      tertiary: '#5c6bc0',
+      accent: '#7986cb',
       
       // 按钮色
-      buttonBg: 'rgba(0, 188, 212, 0.2)',
-      buttonText: '#00bcd4',
-      buttonHover: 'rgba(0, 188, 212, 0.3)',
+      buttonBg: '#00acc1',
+      buttonText: '#ffffff',
+      buttonHover: '#26c6da',
       
       // 文本色
       textPrimary: '#ffffff',
-      textSecondary: 'rgba(255, 255, 255, 0.7)',
+      textSecondary: 'rgba(255, 255, 255, 0.8)',
       textLight: '#ffffff',
       text: '#ffffff',
       
       // 边框和阴影
-      border: 'rgba(255, 255, 255, 0.1)',
-      borderLight: 'rgba(255, 255, 255, 0.15)',
-      borderDark: 'rgba(0, 0, 0, 0.1)',
-      shadow: 'rgba(0, 0, 0, 0.2)',
-      cardShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+      border: 'rgba(255, 255, 255, 0.15)',
+      borderLight: 'rgba(255, 255, 255, 0.1)',
+      borderDark: 'rgba(0, 0, 0, 0.2)',
+      shadow: 'rgba(0, 0, 0, 0.25)',
+      cardShadow: '0 10px 30px rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.15)',
     },
     assets: {
       backgroundImage: '/asset/earth.png',
