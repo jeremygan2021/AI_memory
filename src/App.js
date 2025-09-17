@@ -7,7 +7,6 @@ import FamilyPage from './pages/Family/FamilyPage';
 import RecordComponent from './pages/Record/record';
 import PlayerPage from './pages/Player/PlayerPage';
 import AudioLibrary from './pages/AudioLibrary/AudioLibrary';
-import ModernSearchBox from './components/common/ModernSearchBox';
 import UploadMediaPage from './pages/UploadMedia/UploadMediaPage';
 import GalleryPage from './pages/UploadMedia/GalleryPage';
 import VideoPlayerPage from './pages/VideoPlayer/VideoPlayerPage';
@@ -22,9 +21,8 @@ import UserProfilePage from './pages/UserProfile/UserProfilePage';
 import CopyTest from './components/utils/CopyTest';
 import ThemeCloudTest from './components/theme/ThemeCloudTest';
 import AIConversationPage from './pages/AIConversation/AIConversationPage';
-import SimpleHomePage from './SimpleHomePage';
 import BusinessHomePage from './pages/Business/BusinessHomePage';
-import CombinedHomePage from './pages/Combined/CombinedHomePage';
+import MemoryPage from './MemoryPage';
 import ThemeSwitcher from './components/theme/ThemeSwitcher';
 import { isWechatMiniProgram } from './utils/environment';
 import { syncAllCustomNamesFromCloud, getCustomName, deriveDisplayNameFromFileName } from './utils/displayName';
@@ -1025,6 +1023,12 @@ const HomePage = ({ onNavigate }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // 处理主题切换
+  const handleThemeChange = useCallback((newTheme) => {
+    console.log('主题已切换:', newTheme.name);
+    // 可以在这里添加主题切换后的额外逻辑
+  }, []);
+
   // 如果没有用户ID，显示输入界面
   if (!userid) {
     // 无论是小程序还是H5都显示用户代码输入界面
@@ -1033,33 +1037,6 @@ const HomePage = ({ onNavigate }) => {
 
   return (
     <div className={`memory-app-bg ${isWechatMiniProgram() ? 'miniprogram' : ''}`}>
-      {/* 顶部导航栏 - 小程序环境下隐藏 */}
-      {/* {!isWechatMiniProgram() && (
-        <div className="memory-navbar">
-          <div className="navbar-left">
-            <img src="https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/images/shouye.png" className="memory-logo" alt="logo" />
-            <span className="memory-title">Memory</span>
-          </div>
-          <div className="navbar-center">
-            <ModernSearchBox
-              placeholder="Search"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onSearch={handleSearch}
-              onKeyPress={handleKeyPress}
-              size="medium"
-              width="100%"
-            />
-          </div>
-          <div className="navbar-right">
-            <span className="memory-icon bell" />
-            <span className="memory-icon settings" />
-            <span className="memory-icon user" />
-            <ThemeSwitcher forceGreenTheme={true} />
-          </div>
-        </div>
-      )} */}
-
       {/* 菜单栏 - 小程序环境下隐藏，H5环境下修改为三个页面导航 */}
       {!isWechatMiniProgram() && (
         <div className="memory-menu">
@@ -1099,13 +1076,15 @@ const HomePage = ({ onNavigate }) => {
             onClick={() => {
               if (userCode) {
                 const sessionId = Math.random().toString(36).substr(2, 6);
-                navigate(`/${userCode}/simple`);
+                navigate(`/${userCode}/memory`);
               }
             }}
             style={{ cursor: 'pointer' }}
           >
             回忆
           </span>
+          {/* 主题切换器和操作按钮 */}
+          <ThemeSwitcher onThemeChange={handleThemeChange} />
         </div>
       )}
 
@@ -1133,45 +1112,6 @@ const HomePage = ({ onNavigate }) => {
                 fontSize: '14px'
               }}>✓ 已激活</div>
             </div>
-            {/* 平板专用：录音和相册入口，录音在前 */}
-            {isTabletView && (
-              <>
-                <div className="center-voice-card tablet-only" onClick={goToRecordPage}>
-                  <div className="voice-icon">🎤</div>
-                  <div className="voice-title">录制我的声音</div>
-                  <div className="voice-desc">智能语音助手，记录您的美好时光</div>
-                  <button className="voice-action">开始录制</button>
-                </div>
-                <div className="mobile-gallery-entrance mobile-left-gallery tablet-only">
-                  <div className="mobile-gallery-card" onClick={goToGallery}>
-                    <div className="gallery-icon">📸</div>
-                    <div className="gallery-title">亲子相册</div>
-                    <div className="gallery-desc">点击可查看相册和上传照片和视频</div>
-                    <button className="enter-gallery-btn">上传照片和视频</button>
-                  </div>
-                </div>
-              </>
-            )}
-            {/* 非平板：原有移动端录音和相册入口 */}
-            {!isTabletView && (
-              <>
-                <div className="center-voice-card mobile-voice-card" onClick={goToRecordPage}>
-                  <div className="voice-icon">🎤</div>
-                  <div className="voice-title">录制我的声音</div>
-                  <div className="voice-desc">智能语音助手，记录您的美好时光</div>
-                  <button className="voice-action">开始录制</button>
-                </div>
-                {isMobileView && (
-                  <div className="mobile-gallery-entrance mobile-left-gallery">
-                    <div className="mobile-gallery-card" onClick={goToGallery}>
-                      <div className="gallery-icon">📸</div>
-                      <div className="gallery-title">亲子相册</div>
-                      <div className="gallery-desc">点击可查看相册和上传照片和视频</div>
-                      <button className="enter-gallery-btn">上传照片和视频</button>
-                    </div>
-                  </div>
-                )}
-              </>            )}
             {/* 用户信息 */}
             <div className="baby-info" style={{
               background: 'var(--theme-containerBg)',
@@ -1402,6 +1342,16 @@ const HomePage = ({ onNavigate }) => {
             <div className="voice-icon">🎤</div>
             <div className="voice-title">录制我的声音</div>
             <div className="voice-desc">智能语音助手，记录您的美好时光</div>
+            <div className="waveform">
+              <div className="wave-container">
+                {Array.from({length: 50}, (_, i) => (
+                  <div key={i} className="wave-bar" style={{
+                    height: Math.random() * 40 + 10 + 'px',
+                    animationDelay: i * 0.1 + 's'
+                  }}></div>
+                ))}
+              </div>
+            </div>
             <button
               className="voice-action"
             >
@@ -1425,7 +1375,7 @@ const HomePage = ({ onNavigate }) => {
               marginBottom: '12px'
             }}>
               <div className="book-card-title" style={{
-                color: 'var(--theme-primary)',
+                color: '#ffffff',
                 fontSize: '18px',
                 fontWeight: 'bold',
                 display: 'flex',
@@ -1437,45 +1387,10 @@ const HomePage = ({ onNavigate }) => {
                 }}>📚</span>
                 回忆书籍
               </div>
-              <div className="book-card-stats" style={{
-                display: 'flex',
-                gap: '16px'
-              }}>
-                <span className="stat-item" style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center'
-                }}>
-                  <span className="stat-number" style={{
-                    color: 'var(--theme-primary)',
-                    fontSize: '18px',
-                    fontWeight: 'bold'
-                  }}>{booksCount}</span>
-                  <span className="stat-label" style={{
-                    color: 'var(--theme-primary)',
-                    fontSize: '12px'
-                  }}>书籍</span>
-                </span>
-                <span className="stat-item" style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center'
-                }}>
-                  <span className="stat-number" style={{
-                    color: 'var(--theme-primary)',
-                    fontSize: '18px',
-                    fontWeight: 'bold'
-                  }}>{totalConversations}</span>
-                  <span className="stat-label" style={{
-                    color: 'var(--theme-primary)',
-                    fontSize: '12px'
-                  }}>对话</span>
-                </span>
-              </div>
             </div>
             <div className="book-card-content">
               <p className="book-card-desc" style={{
-                color: 'var(--theme-primary)',
+                color: '#fff',
                 fontSize: '14px',
                 marginBottom: '12px'
               }}>与AI进行智能对话和内容检索</p>
@@ -1546,7 +1461,7 @@ const HomePage = ({ onNavigate }) => {
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {pdfFiles.map((f, idx) => (
                       <li key={f.objectKey || idx} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 0', gap:'10px' }}>
-                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%', color: 'var(--theme-primary)', fontSize: 14 }}>{f.name}</span>
+                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%', color: '#fff', fontSize: 14 }}>我的回忆书籍</span>
                         <div style={{display: 'flex' , flex: '1' , gap:'5px', alignItems:'end'}}>
                           <a href={f.url} target="_blank" rel="noreferrer" className="book-card-action1" style={{ 
                             padding:'6px 10px',
@@ -1654,10 +1569,11 @@ const HomePage = ({ onNavigate }) => {
                         <div className="empty-desc">点击"上传照片"开始记录美好时光</div>
                       </div>
                     ) : (
-                      photoData.slice(0, 3).map((file, idx) => (
+                      photoData.slice(0, 4).map((file, idx) => (
                         <div
                           key={file.id || idx}
                           className="album-item"
+                          style={{width:'100%', height:'240px'}}
                           onClick={() => openPhotoPreview(idx)}
                         >
                           <img
@@ -1679,10 +1595,11 @@ const HomePage = ({ onNavigate }) => {
                         <div className="empty-desc">点击"上传视频"开始记录美好时光</div>
                       </div>
                     ) : (
-                      videoData.slice(0, 3).map((file, idx) => (
+                      videoData.slice(0, 4).map((file, idx) => (
                         <div
                           key={file.id || idx}
                           className="album-item"
+                          style={{width:'100%', height:'240px'}}
                           onClick={() => openVideoPlayer(idx)}
                         >
                           <div className="video-preview-container">
@@ -1704,6 +1621,114 @@ const HomePage = ({ onNavigate }) => {
                     )}
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 移动端相册区域 - 小屏幕设备显示 */}
+        {isMobileView && !isTabletView && (
+          <div className="mobile-album-section">
+            <div className="mobile-album-header">
+              <h3 className="mobile-album-title">亲子相册</h3>
+              <div className="mobile-album-tabs">
+                <div 
+                  className={`mobile-album-tab ${activeMediaTab === 'photos' ? 'active' : ''}`}
+                  onClick={() => setActiveMediaTab('photos')}
+                >
+                  照片
+                </div>
+                <div 
+                  className={`mobile-album-tab ${activeMediaTab === 'videos' ? 'active' : ''}`}
+                  onClick={() => setActiveMediaTab('videos')}
+                >
+                  视频
+                </div>
+              </div>
+            </div>
+            
+            <div className="mobile-album-content">
+              {activeMediaTab === 'photos' ? (
+                /* 照片内容 */
+                <div className="mobile-album-grid">
+                  {photoData.length === 0 ? (
+                    <div className="mobile-empty-album">
+                      <div className="mobile-empty-icon">📷</div>
+                      <div className="mobile-empty-text">还没有上传任何照片</div>
+                      <div className="mobile-empty-desc">点击"上传照片"开始记录美好时光</div>
+                      <button 
+                        className="mobile-upload-btn"
+                        onClick={() => handleUpload('photo')}
+                      >
+                        上传照片
+                      </button>
+                    </div>
+                  ) : (
+                    photoData.slice(0, 4).map((file, idx) => (
+                      <div
+                        key={file.id || idx}
+                        className="mobile-album-item"
+                        onClick={() => openPhotoPreview(idx)}
+                      >
+                        <img
+                          src={file.ossUrl || file.preview}
+                          className="mobile-album-img"
+                          alt={file.name || `照片${idx + 1}`}
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                /* 视频内容 */
+                <div className="mobile-album-grid">
+                  {videoData.length === 0 ? (
+                    <div className="mobile-empty-album">
+                      <div className="mobile-empty-icon">🎬</div>
+                      <div className="mobile-empty-text">还没有上传任何视频</div>
+                      <div className="mobile-empty-desc">点击"上传视频"开始记录美好时光</div>
+                      <button 
+                        className="mobile-upload-btn"
+                        onClick={() => handleUpload('video')}
+                      >
+                        上传视频
+                      </button>
+                    </div>
+                  ) : (
+                    videoData.slice(0, 4).map((file, idx) => (
+                      <div
+                        key={file.id || idx}
+                        className="mobile-album-item"
+                        onClick={() => openVideoPlayer(idx)}
+                      >
+                        <div className="mobile-video-preview-container">
+                          <video
+                            src={file.ossUrl || file.preview}
+                            className="mobile-album-img"
+                            muted
+                            preload="metadata"
+                            onLoadedMetadata={(e) => {
+                              e.target.currentTime = 1;
+                            }}
+                          />
+                          <div className="mobile-video-overlay">
+                            <img src="./asset/play_button.png" className="mobile-play-icon" alt="播放" />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+              
+              {/* 查看完整相册按钮 */}
+              <div className="mobile-view-gallery-container">
+                <button 
+                  className="mobile-view-gallery-btn"
+                  onClick={goToGallery}
+                >
+                  查看完整相册
+                </button>
               </div>
             </div>
           </div>
@@ -1804,8 +1829,7 @@ function App() {
       <Routes>
         <Route path="/" element={<UserCodeInput />} />
         <Route path="/:userid" element={<HomePage />} />
-        <Route path="/:userid/simple" element={<SimpleHomePage />} />
-        <Route path="/:userid/combined" element={<CombinedHomePage />} />
+        <Route path="/:userid/memory" element={<MemoryPage />} />
         <Route path="/bus/A1B2" element={<BusinessHomePage />} />
         <Route path="/family" element={<FamilyPage />} />
         <Route path="/:userid/audio-library" element={<AudioLibrary />} />

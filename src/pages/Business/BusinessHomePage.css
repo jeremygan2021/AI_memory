@@ -458,6 +458,167 @@
   font-size: 24px;
   font-weight: 700;
   text-shadow: 0 2px 8px var(--theme-primary, rgba(0, 188, 212, 0.5));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.age-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.age-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.edit-birth-date-btn {
+  background: var(--theme-secondaryBg, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.2));
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--theme-primary, #00bcd4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-birth-date-btn:hover {
+  background: var(--theme-containerBg, rgba(0, 188, 212, 0.2));
+  border-color: var(--theme-primary, #00bcd4);
+}
+
+.loading-indicator {
+  font-size: 12px;
+  color: var(--theme-textSecondary, rgba(255, 255, 255, 0.7));
+}
+
+/* 出生日期编辑器 */
+.birth-date-editor {
+  background: var(--theme-secondaryBg, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.2));
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.editor-title {
+  color: var(--theme-textPrimary, #ffffff);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.birth-date-input {
+  width: 100%;
+  padding: 8px;
+  background: var(--theme-containerBg, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.2));
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--theme-textPrimary, #ffffff);
+  margin-bottom: 12px;
+}
+
+.birth-date-input:focus {
+  outline: none;
+  border-color: var(--theme-primary, #00bcd4);
+  box-shadow: 0 0 8px var(--theme-primary, rgba(0, 188, 212, 0.3));
+}
+
+.editor-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cancel-btn, .save-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background: var(--theme-containerBg, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.2));
+  color: var(--theme-textPrimary, #ffffff);
+}
+
+.cancel-btn:hover {
+  background: var(--theme-secondaryBg, rgba(255, 255, 255, 0.2));
+}
+
+.save-btn {
+  background: var(--theme-primary, #00bcd4);
+  border: none;
+  color: var(--theme-buttonText, #ffffff);
+}
+
+.save-btn:hover {
+  background: var(--theme-primaryHover, #00acc1);
+}
+
+.save-btn:disabled {
+  background: var(--theme-border, rgba(255, 255, 255, 0.2));
+  cursor: not-allowed;
+}
+
+/* 年龄进度条 */
+.baby-progress {
+  margin-top: 16px;
+}
+
+.age-slider-container {
+  position: relative;
+}
+
+.age-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--theme-secondaryBg, rgba(255, 255, 255, 0.1));
+  outline: none;
+  -webkit-appearance: none;
+  margin: 8px 0;
+}
+
+.age-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--theme-primary, #00bcd4);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--theme-primary, rgba(0, 188, 212, 0.5));
+}
+
+.age-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--theme-primary, #00bcd4);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 8px var(--theme-primary, rgba(0, 188, 212, 0.5));
+}
+
+.slider-marks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  width: 100%;
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+
+.slider-marks span {
+  font-size: 14px;
+  color: var(--theme-textSecondary, rgba(255, 255, 255, 0.7));
+  font-weight: 500;
 }
 
 /* 时间轴组件样式已移至 LifetimeTimeline.css */
@@ -513,12 +674,8 @@
 .recording-section h2 {
   font-size: 28px;
   font-weight: 800;
-  color: var(--theme-textPrimary, #1e293b);
+  color: white;
   margin: 0 0 8px 0;
-  background: linear-gradient(45deg, var(--theme-textPrimary, #1e293b), var(--theme-primary, #3b82f6));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .recording-section p {

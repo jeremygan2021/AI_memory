@@ -490,6 +490,16 @@ const GalleryPage = () => {
     }
   };
 
+  // 获取最近上传的6张照片和视频
+  const getRecentMedia = () => {
+    // 按上传时间倒序排序，取前6个
+    return uploadedFiles
+      .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime))
+      .slice(0, 6);
+  };
+
+  const recentMedia = getRecentMedia();
+
   // userCode变化时加载云端媒体文件
   useEffect(() => {
     if (userCode) {
@@ -547,6 +557,47 @@ const GalleryPage = () => {
               🎬 视频 ({uploadedFiles.filter(f => f.type === 'video').length})
             </button>
           </div>
+          
+          {/* 移动端最近媒体预览 - 只在移动端显示 */}
+          {isMobile && (
+            <div className="mobile-recent-media">
+              <div className="mobile-recent-media-title">最近上传</div>
+              <div className="mobile-recent-media-grid">
+                {recentMedia.length > 0 ? (
+                  recentMedia.map(file => (
+                    <div 
+                      key={file.id} 
+                      className="mobile-recent-media-item"
+                      onClick={() => handleMediaClick(file)}
+                    >
+                      {file.type === 'image' ? (
+                        <img 
+                          src={file.ossUrl || file.preview || file.url} 
+                          alt={file.name} 
+                          className="mobile-recent-media-preview"
+                          onError={e => { e.target.style.background = '#fdd'; }}
+                        />
+                      ) : (
+                        <div className="mobile-recent-video-preview">
+                          <video 
+                            src={file.ossUrl || file.preview || file.url} 
+                            className="mobile-recent-media-preview"
+                            muted
+                            preload="metadata"
+                            onLoadedMetadata={(e) => { e.target.currentTime = 1; }}
+                            onError={e => { e.target.style.background = '#fdd'; }}
+                          />
+                          <div className="mobile-recent-video-play-icon">▶</div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="mobile-recent-media-empty">暂无最近上传的媒体</div>
+                )}
+              </div>
+            </div>
+          )}
           
           <div className="gallery-section-header">
             {totalPages > 1 && (

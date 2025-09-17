@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './BusinessHomePage.css';
 // import MemoryTimeline from '../../components/common/MemoryTimeline';
@@ -6,7 +6,8 @@ import './BusinessHomePage.css';
 import LifetimeTimeline from '../../components/common/LifetimeTimeline';
 import WelcomeScreen from '../../components/common/WelcomeScreen';
 import { getUserCode } from '../../utils/userCode';
-import { formatBabyAge } from '../../services/babyInfoCloudService';
+import { formatBabyAge, calculateBabyAgeInMonths} from '../../services/babyInfoCloudService';
+import { loadBabyBirthDateFromCloud, saveBabyBirthDateToCloud } from '../../services/babyInfoCloudService';
 
 const BusinessHomePage = () => {
   const { userid } = useParams();
@@ -23,25 +24,139 @@ const BusinessHomePage = () => {
   const [totalConversations] = useState(0);
   const [showWelcome, setShowWelcome] = useState(true);
   
+  // 出生日期相关状态
+  const [babyBirthDate, setBabyBirthDate] = useState('');
+  const [babyAgeMonths, setBabyAgeMonths] = useState(0);
+  const [isEditingBirthDate, setIsEditingBirthDate] = useState(false);
+  const [tempBirthDate, setTempBirthDate] = useState('');
+  const [isLoadingBirthDate, setIsLoadingBirthDate] = useState(false);
+  
   // 从URL参数获取用户代码
   useEffect(() => {
     if (userid) {
-      setUserCode(userid);
-    } else {
-      const code = getUserCode();
-      if (code) {
-        setUserCode(code);
+      // 验证用户ID格式（4字符）
+      if (userid.length === 4 && /^[A-Z0-9]{4}$/.test(userid.toUpperCase())) {
+        const upperUserCode = userid.toUpperCase();
+        setUserCode(upperUserCode);
+        // 同时存储到localStorage作为备份
+        localStorage.setItem('currentUserCode', upperUserCode);
+      } else {
+        // 如果URL中的用户ID格式不正确，跳转到默认页面
+        navigate('/');
       }
+    } else {
+      // 如果没有用户ID，显示输入提示
+      setUserCode('');
     }
-  }, [userid]);
+  }, [userid, navigate]);
+
+  // 加载宝宝出生日期
+  useEffect(() => {
+    const loadBabyBirthDate = async () => {
+      const currentUserCode = userCode || getUserCode();
+      if (!currentUserCode) return;
+      
+      setIsLoadingBirthDate(true);
+      
+      try {
+        // 首先尝试从云端加载
+        const cloudResult = await loadBabyBirthDateFromCloud(currentUserCode);
+        
+        if (cloudResult.success && cloudResult.birthDate) {
+          setBabyBirthDate(cloudResult.birthDate);
+          const months = calculateBabyAgeInMonths(cloudResult.birthDate);
+          setBabyAgeMonths(months);
+          console.log('从云端加载宝宝出生日期成功:', cloudResult.birthDate);
+        } else {
+          // 云端加载失败，尝试从本地存储加载
+          const localBirthDate = localStorage.getItem(`baby_birth_date_${currentUserCode}`);
+          if (localBirthDate) {
+            setBabyBirthDate(localBirthDate);
+            const months = calculateBabyAgeInMonths(localBirthDate);
+            setBabyAgeMonths(months);
+            console.log('从本地加载宝宝出生日期:', localBirthDate);
+          }
+        }
+      } catch (error) {
+        console.error('加载宝宝出生日期失败:', error);
+      } finally {
+        setIsLoadingBirthDate(false);
+      }
+    };
+    
+    loadBabyBirthDate();
+  }, [userCode]);
+
+  // 保存宝宝出生日期
+  const saveBabyBirthDate = async (date) => {
+    const currentUserCode = userCode || getUserCode();
+    if (!currentUserCode) return;
+    
+    try {
+      // 尝试保存到云端
+      const cloudResult = await saveBabyBirthDateToCloud(currentUserCode, date);
+      
+      if (cloudResult.success) {
+        console.log('宝宝出生日期已保存到云端:', date);
+      } else {
+        console.warn('云端保存失败，仅保存到本地');
+      }
+      
+      // 出错时也保存到本地
+      setBabyBirthDate(date);
+      const months = calculateBabyAgeInMonths(date);
+      setBabyAgeMonths(months);
+      localStorage.setItem(`baby_birth_date_${currentUserCode}`, date);
+    } catch (error) {
+      console.error('保存宝宝出生日期失败:', error);
+      // 出错时也保存到本地
+      setBabyBirthDate(date);
+      const months = calculateBabyAgeInMonths(date);
+      setBabyAgeMonths(months);
+      localStorage.setItem(`baby_birth_date_${currentUserCode}`, date);
+    }
+  };
+
+  // 开始编辑出生日期
+  const startEditBirthDate = () => {
+    setTempBirthDate(babyBirthDate || '');
+    setIsEditingBirthDate(true);
+  };
+
+  // 取消编辑出生日期
+  const cancelEditBirthDate = () => {
+    setIsEditingBirthDate(false);
+    setTempBirthDate('');
+  };
+
+  // 确认保存出生日期
+  const confirmSaveBirthDate = async () => {
+    if (tempBirthDate) {
+      await saveBabyBirthDate(tempBirthDate);
+    }
+    setIsEditingBirthDate(false);
+    setTempBirthDate('');
+  };
+
+  // 计算滑块的最大值（根据宝宝年龄动态设置）
+  const calculateSliderMax = (currentAgeMonths) => {
+    // 根据实际年龄加一岁（12个月）计算最大值
+    return currentAgeMonths + 12;
+  };
+
+  // 处理月份滑块变化（禁用手动调节）
+  const handleAgeSliderChange = (e) => {
+    // 滑块已禁用，此函数不会被调用
+    // 保留函数以避免错误
+  };
 
   // 格式化年龄显示
   const formattedAge = useMemo(() => {
-    return formatBabyAge(protagonistAgeMonths);
-  }, [protagonistAgeMonths]);
+    return formatBabyAge(babyAgeMonths);
+  }, [babyAgeMonths]);
 
   const handleNavigate = (page) => {
-    const currentUserCode = getUserCode();
+    const currentUserCode = userCode || getUserCode();
     if (!currentUserCode) {
       alert('请先输入用户代码');
       return;
@@ -65,6 +180,16 @@ const BusinessHomePage = () => {
     }
   };
 
+  // 跳转到相册页面（无上传功能）
+  const goToGallery = useCallback(() => {
+    const currentUserCode = userCode || getUserCode();
+    if (currentUserCode) {
+      navigate(`/${currentUserCode}/gallerys`);
+    } else {
+      alert('请先输入用户代码');
+    }
+  }, [navigate, userCode]);
+
   // 处理欢迎页面完成
   const handleWelcomeFinished = () => {
     setShowWelcome(false);
@@ -77,25 +202,24 @@ const BusinessHomePage = () => {
       
       {/* 顶部导航栏 */}
       <div className="chronos-header">
-        <div className="chronos-logo">
+        {/* <div className="chronos-logo">
           <span className="logo-icon">⏰</span>
           <span className="logo-text">CHRONOS</span>
         </div>
         <div className="chronos-search">
           <input type="text" placeholder="Search" className="search-input" />
-        </div>
+        </div> */}
         <div className="chronos-nav">
           <div className="nav-item">首页</div>
-          <div className="nav-item active">HOME</div>
-          <div className="nav-item">AUDIO</div>
+          <div className="nav-item">录音</div>
           <div className="nav-item">上传</div>
           <div className="nav-item">回忆</div>
         </div>
-        <div className="chronos-user-controls">
+        {/* <div className="chronos-user-controls">
           <div className="user-notifications">🔔</div>
           <div className="user-settings">⚙️</div>
           <div className="user-profile">👤</div>
-        </div>
+        </div> */}
       </div>
 
       {/* 主要内容区域 */}
@@ -109,21 +233,96 @@ const BusinessHomePage = () => {
               </div>
             </div>
             <div className="profile-info">
-              <h3>YOUR PROFILE</h3>
-              <div className="profile-details">
-                <div className="profile-name">NAME: {userCode || 'John Smith'}</div>
-                <div className="profile-birth">1996 年 28, 1980 日</div>
-              </div>
-              <div className="profile-stats">
-                <div className="stat-circle">
-                  <div className="circle-progress"></div>
-                  <div className="stat-text">
-                    <div className="stat-number">1000</div>
-                    <div className="stat-label">COMPLETE</div>
-                  </div>
+                <h3>YOUR PROFILE</h3>
+                <div className="profile-details">
+                    <div className="profile-name">NAME: {userCode}</div>
+                    <div className="profile-birth">
+                        {babyBirthDate ? new Date(babyBirthDate).toLocaleDateString('zh-CN', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        }) : '未设置出生日期'}
+                    </div>
                 </div>
-                <div className="age-display">{formattedAge}</div>
-              </div>
+                <div className="profile-stats">
+                    <div className="stat-circle">
+                        <div className="circle-progress"></div>
+                        <div className="stat-text">
+                            <div className="stat-number">1000</div>
+                            <div className="stat-label">COMPLETE</div>
+                        </div>
+                    </div>
+                    <div className="age-display">
+                        <span className="age-label">年龄:</span>
+                        <span className="age-value">{formattedAge}</span>
+                        {isLoadingBirthDate ? (
+                            <span className="loading-indicator">加载中...</span>
+                        ) : (
+                            <button 
+                                className="edit-birth-date-btn" 
+                                onClick={startEditBirthDate}
+                                title="设置出生日期"
+                            >
+                                设置生日
+                            </button>
+                        )}
+                    </div>
+                </div>
+                
+                {/* 出生日期编辑器 */}
+                {isEditingBirthDate && (
+                    <div className="birth-date-editor">
+                        <div className="editor-title">设置出生日期</div>
+                        <input
+                            type="date"
+                            value={tempBirthDate}
+                            onChange={(e) => setTempBirthDate(e.target.value)}
+                            className="birth-date-input"
+                            max={new Date().toISOString().split('T')[0]}
+                        />
+                        <div className="editor-buttons">
+                            <button 
+                                className="cancel-btn" 
+                                onClick={cancelEditBirthDate}
+                            >
+                                取消
+                            </button>
+                            <button 
+                                className="save-btn" 
+                                onClick={confirmSaveBirthDate}
+                                disabled={!tempBirthDate}
+                            >
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                )}
+                
+                {/* 年龄进度条 */}
+                {babyBirthDate && !isEditingBirthDate && (
+                    <div className="baby-progress">
+                        <div className="age-slider-container">
+                            <input
+                                type="range"
+                                min="1"
+                                max={calculateSliderMax(babyAgeMonths)}
+                                value={babyAgeMonths}
+                                onChange={handleAgeSliderChange}
+                                className="age-slider"
+                                disabled
+                                readOnly
+                            />
+                            <div className="slider-marks">
+                                <span>1月</span>
+                                <span>
+                                    {calculateSliderMax(babyAgeMonths) >= 12 
+                                        ? `${Math.floor(calculateSliderMax(babyAgeMonths) / 12)}岁` 
+                                        : `${calculateSliderMax(babyAgeMonths)}月`}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
           </div>
           
@@ -200,7 +399,7 @@ const BusinessHomePage = () => {
               <div className="tab">🎬 视频</div>
             </div>
             <div className="upload-section">
-              <button className="upload-btn">上传照片</button>
+              <button className="upload-btn" onClick={goToGallery}>查看相册</button>
             </div>
             <div className="media-preview">
               <div className="preview-placeholder">

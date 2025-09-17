@@ -27,7 +27,7 @@
   width: 100vw;
   height: 100vh;
   font-size: 7rem;
-  font-weight: bold;
+  font-weight: 400;
   color: var(--theme-textLight, white);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   text-align: center;
