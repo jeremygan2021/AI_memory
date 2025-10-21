@@ -1537,13 +1537,13 @@ const HomePage = ({ onNavigate }) => {
                   className={`media-tab ${activeMediaTab === 'photos' ? 'active' : ''}`}
                   onClick={() => setActiveMediaTab('photos')}
                 >
-                  亲子照片
+                  照片
                 </div>
                 <div 
                   className={`media-tab ${activeMediaTab === 'videos' ? 'active' : ''}`}
                   onClick={() => setActiveMediaTab('videos')}
                 >
-                  亲子视频
+                  视频
                 </div>
               </div>
               
