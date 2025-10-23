@@ -14,6 +14,51 @@ const MemoryTimeline = ({ userCode }) => {
   const [endDate, setEndDate] = useState(''); // 结束日期
   const [showDateFilter, setShowDateFilter] = useState(false); // 是否显示日期筛选器
   const [syncing, setSyncing] = useState(false); // 是否正在同步
+  
+  // 新增状态：用于手动输入大事件
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [eventTitle, setEventTitle] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventDescription, setEventDescription] = useState('');
+  const [majorEvents, setMajorEvents] = useState([]);
+  const [selectedIcon, setSelectedIcon] = useState('⭐'); // 选中的图标
+  const [selectedColor, setSelectedColor] = useState('#FF6B6B'); // 选中的颜色
+  
+  // 定义可选的图标
+const eventIcons = [
+  { value: '🍼', label: '出生' }, // 人生起点
+  { value: '🧸', label: '童年' }, // 无忧无虑的童年时光
+  { value: '🎒', label: '入学' }, // 第一次走进校园
+  { value: '🌱', label: '青春期' }, // 懵懂又热烈的少年时代
+  { value: '💘', label: '初恋' }, // 第一次心动
+  { value: '🎓', label: '毕业' }, // 重要学业节点（小学/中学/大学）
+  { value: '💼', label: '入职' }, // 第一份工作
+  { value: '💍', label: '结婚' }, // 与伴侣组建家庭
+  { value: '👼', label: '生子' }, // 成为父母
+  { value: '🏆', label: '成就' }, // 事业/人生重要突破
+  { value: '👴', label: '亲情' }, // 与父母/长辈的难忘时刻
+  { value: '🔄', label: '转折' }, // 人生重大选择（换城市/换行等）
+  { value: '🎂', label: '生日' }, // 特别的生日（如18岁/60岁）
+  { value: '🌴', label: '退休' }, // 告别职场
+  { value: '📅', label: '纪念' }, // 重要纪念日（结婚周年等）
+  { value: '✈️', label: '远行' }, // 改变心境的旅行
+  { value: '🤝', label: '重逢' }, // 与老友/故人再遇
+  { value: '💪', label: '康复' }, // 战胜疾病或困境
+  { value: '🌟', label: '高光' }, // 人生闪亮瞬间
+  { value: '🌅', label: '暮年' }, // 回望一生的平静时刻
+];
+  
+  // 定义可选的颜色
+  const eventColors = [
+    { value: '#FF6B6B', label: '热情红' },
+    { value: '#4ECDC4', label: '清新青' },
+    { value: '#45B7D1', label: '天空蓝' },
+    { value: '#96CEB4', label: '自然绿' },
+    { value: '#FECA57', label: '阳光黄' },
+    { value: '#DDA0DD', label: '梦幻紫' },
+    { value: '#FF9FF3', label: '甜美粉' },
+    { value: '#54A0FF', label: '深海蓝' }
+  ];
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
@@ -25,11 +70,15 @@ const MemoryTimeline = ({ userCode }) => {
           console.log('自定义名称云端同步结果:', result);
           // 同步完成后加载时间线数据
           loadTimelineData();
+          // 加载本地存储的大事件
+          loadMajorEvents();
         })
         .catch(error => {
           console.error('自定义名称云端同步失败:', error);
           // 同步失败仍然加载时间线数据，使用本地存储的自定义名称
           loadTimelineData();
+          // 加载本地存储的大事件
+          loadMajorEvents();
         });
     }
   }, [userCode]);
@@ -71,96 +120,14 @@ const MemoryTimeline = ({ userCode }) => {
 
   // 加载时间线数据
   const loadTimelineData = async () => {
+    if (!userCode) return;
+    
+    setLoading(true);
     try {
-      setLoading(true);
-      if (!userCode) return;
-
-      const prefix = `recordings/${userCode}/`;
-      const response = await fetch(
-        `${API_BASE_URL}/files?prefix=${encodeURIComponent(prefix)}&max_keys=1000`
-      );
-      
-      if (!response.ok) throw new Error('获取文件失败');
-      
-      const result = await response.json();
-      const files = result.files || result.data || result.objects || result.items || result.results || [];
-
-      // 处理文件数据，分类并生成时间线项目
-      const processedItems = files.map(file => {
-        const objectKey = file.object_key || file.objectKey || file.key || file.name;
-        const fileName = objectKey ? objectKey.split('/').pop() : '';
-        const contentType = file.content_type || '';
-        const uploadTime = file.last_modified || file.lastModified || file.modified || new Date().toISOString();
-        
-        // 解析会话ID
-        const pathParts = objectKey ? objectKey.split('/') : [];
-        const sessionId = pathParts.length >= 3 ? pathParts[2] : 'unknown';
-
-        // 判断文件类型
-        const isImage = contentType.startsWith('image/') || /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
-        const isVideo = contentType.startsWith('video/') || /\.(mp4|avi|mov|wmv|flv|mkv|webm)$/i.test(fileName);
-        const isAudio = contentType.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac|flac|wma|amr|3gp|opus|webm)$/i.test(fileName);
-
-        if (!isImage && !isVideo && !isAudio) return null;
-
-        // 生成OSS URL
-        let ossKey = objectKey;
-        if (ossKey && ossKey.startsWith('recordings/')) {
-          ossKey = ossKey.substring('recordings/'.length);
-        }
-        const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
-        const previewUrl = ossKey ? ossBase + 'recordings/' + ossKey : '';
-
-        // 生成唯一ID
-        const timestamp = Date.parse(uploadTime);
-        const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
-        const uniqueId = nameWithoutExt.slice(-8) || Math.random().toString(36).substr(2, 8);
-        
-        let type, icon, pageUrl;
-        if (isAudio) {
-          type = 'audio';
-          icon = '🎵';
-          // 提取录音ID用于跳转
-          const parts = nameWithoutExt.split('_');
-          const recordingId = parts[parts.length - 1] || 'default';
-          pageUrl = `/${userCode}/${sessionId}/play/${recordingId}`;
-        } else if (isImage) {
-          type = 'image';
-          icon = '📷';
-          // 跳转到图片大图预览页面，携带对象键以直达原图
-          pageUrl = `/${userCode}/image-viewer/${sessionId}/${encodeURIComponent(nameWithoutExt)}?ok=${encodeURIComponent(objectKey)}`;
-        } else if (isVideo) {
-          type = 'video';
-          icon = '🎬';
-          // 生成视频ID用于跳转
-          const videoId = `vid_${sessionId}_${timestamp}_${uniqueId}`;
-          pageUrl = `/${userCode}/video-player/${sessionId}/${videoId}`;
-        }
-
-        const displayName = getCustomName(objectKey) || deriveDisplayNameFromFileName(fileName);
-
-        return {
-          id: `${type}_${sessionId}_${timestamp}_${uniqueId}`,
-          type,
-          icon,
-          title: displayName,
-          sessionId,
-          uploadTime,
-          timestamp,
-          previewUrl,
-          pageUrl,
-          fileName,
-          objectKey
-        };
-      }).filter(Boolean);
-
-      // 按时间倒序排序
-      const sortedItems = processedItems
-        .sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
-
-      setAllItems(sortedItems);
-      setTimelineItems(sortedItems.slice(0, itemsPerPage));
-      setCurrentPage(1);
+      // 不再加载云端文件，只加载本地存储的大事件
+      setAllItems([]);
+      setTimelineItems([]);
+      loadMajorEvents();
     } catch (error) {
       console.error('加载时间线数据失败:', error);
       setTimelineItems([]);
@@ -197,7 +164,91 @@ const MemoryTimeline = ({ userCode }) => {
     setCurrentPage(1);
   };
 
-  // 手动同步自定义名称
+  // 加载本地存储的大事件
+  const loadMajorEvents = () => {
+    try {
+      const storedEvents = localStorage.getItem(`majorEvents_${userCode}`);
+      if (storedEvents) {
+        const events = JSON.parse(storedEvents);
+        setMajorEvents(events);
+        // 将大事件合并到时间线中
+        mergeEventsWithTimeline(events);
+      }
+    } catch (error) {
+      console.error('加载大事件失败:', error);
+    }
+  };
+  
+  // 保存大事件到本地存储
+  const saveMajorEvents = (events) => {
+    try {
+      localStorage.setItem(`majorEvents_${userCode}`, JSON.stringify(events));
+      setMajorEvents(events);
+      // 将大事件合并到时间线中
+      mergeEventsWithTimeline(events);
+    } catch (error) {
+      console.error('保存大事件失败:', error);
+    }
+  };
+  
+  // 将大事件合并到时间线中
+  const mergeEventsWithTimeline = (events) => {
+    // 将大事件转换为时间线项目格式
+    const eventItems = events.map(event => ({
+      id: event.id,
+      type: 'major-event',
+      icon: event.icon || '⭐',
+      color: event.color || '#FF6B6B',
+      title: event.title,
+      uploadTime: new Date(event.date).toISOString(),
+      timestamp: new Date(event.date).getTime(),
+      sessionId: 'major-event',
+      pageUrl: null,
+      previewUrl: null,
+      description: event.description,
+      isMajorEvent: true
+    }));
+    
+    // 只显示大事件，不显示上传的文件记录
+    setAllItems(eventItems);
+    setTimelineItems(eventItems.slice(0, itemsPerPage));
+  };
+  
+  // 添加新的大事件
+  const handleAddEvent = () => {
+    if (!eventTitle.trim() || !eventDate) {
+      alert('请填写事件标题和日期');
+      return;
+    }
+    
+    const newEvent = {
+      id: `event_${Date.now()}`,
+      title: eventTitle.trim(),
+      date: eventDate,
+      description: eventDescription.trim(),
+      icon: selectedIcon,
+      color: selectedColor
+    };
+    
+    const updatedEvents = [...majorEvents, newEvent];
+    saveMajorEvents(updatedEvents);
+    
+    // 重置表单
+    setEventTitle('');
+    setEventDate('');
+    setEventDescription('');
+    setSelectedIcon('⭐');
+    setSelectedColor('#FF6B6B');
+    setShowEventForm(false);
+  };
+  
+  // 删除大事件
+  const handleDeleteEvent = (eventId) => {
+    if (window.confirm('确定要删除这个重要事件吗？')) {
+      const updatedEvents = majorEvents.filter(event => event.id !== eventId);
+      saveMajorEvents(updatedEvents);
+    }
+  };
   const handleSyncCustomNames = async () => {
     if (!userCode || syncing) return;
     
@@ -319,10 +370,97 @@ const MemoryTimeline = ({ userCode }) => {
   if (allItems.length === 0) {
     return (
       <div className="memory-timeline">
+        <div className="add-event-section">
+          <button 
+            className="add-event-btn"
+            onClick={() => setShowEventForm(!showEventForm)}
+          >
+            ⭐ {showEventForm ? '取消' : '添加'}重要事件
+          </button>
+        </div>
+        
+        {showEventForm && (
+          <div className="event-form">
+            <div className="form-group">
+              <label>事件标题</label>
+              <input
+                type="text"
+                value={eventTitle}
+                onChange={(e) => setEventTitle(e.target.value)}
+                placeholder="输入重要事件的标题"
+                className="form-input"
+              />
+            </div>
+            <div className="form-group">
+              <label>事件日期</label>
+              <input
+                type="date"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                className="form-input"
+              />
+            </div>
+            <div className="form-group">
+              <label>事件描述（可选）</label>
+              <textarea
+                value={eventDescription}
+                onChange={(e) => setEventDescription(e.target.value)}
+                placeholder="描述这个重要事件"
+                className="form-textarea"
+                rows={3}
+              />
+            </div>
+            <div className="form-group">
+              <label>选择图标</label>
+              <div className="icon-selector">
+                {eventIcons.map((icon) => (
+                  <button
+                    key={icon.value}
+                    className={`icon-option ${selectedIcon === icon.value ? 'selected' : ''}`}
+                    onClick={() => setSelectedIcon(icon.value)}
+                    title={icon.label}
+                  >
+                    {icon.value}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="form-group">
+              <label>选择颜色</label>
+              <div className="color-selector">
+                {eventColors.map((color) => (
+                  <button
+                    key={color.value}
+                    className={`color-option ${selectedColor === color.value ? 'selected' : ''}`}
+                    style={{ backgroundColor: color.value }}
+                    onClick={() => setSelectedColor(color.value)}
+                    title={color.label}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="form-actions">
+              <button onClick={handleAddEvent} className="submit-btn">
+                保存事件
+              </button>
+              <button onClick={() => {
+                setShowEventForm(false);
+                setEventTitle('');
+                setEventDate('');
+                setEventDescription('');
+                setSelectedIcon('⭐');
+                setSelectedColor('#FF6B6B');
+              }} className="cancel-btn">
+                取消
+              </button>
+            </div>
+          </div>
+        )}
+        
         <div className="timeline-empty">
           <div className="empty-icon">📝</div>
-          <div className="empty-text">还没有回忆记录</div>
-          <div className="empty-desc">开始录音或上传照片吧</div>
+          <div className="empty-text">还没有添加任何重要事件</div>
+          <div className="empty-desc">点击上方按钮添加宝宝成长中的重要时刻</div>
         </div>
       </div>
     );
@@ -332,6 +470,95 @@ const MemoryTimeline = ({ userCode }) => {
 
   return (
     <div className="memory-timeline">
+      {/* 添加大事件按钮 */}
+      <div className="add-event-section">
+        <button 
+          className="add-event-btn"
+          onClick={() => setShowEventForm(!showEventForm)}
+        >
+          ⭐ {showEventForm ? '取消' : '添加'}重要事件
+        </button>
+      </div>
+      
+      {/* 大事件输入表单 */}
+      {showEventForm && (
+        <div className="event-form">
+          <div className="form-group">
+            <label>事件标题</label>
+            <input
+              type="text"
+              value={eventTitle}
+              onChange={(e) => setEventTitle(e.target.value)}
+              placeholder="输入重要事件的标题"
+              className="form-input"
+            />
+          </div>
+          <div className="form-group">
+            <label>事件日期</label>
+            <input
+              type="date"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              className="form-input"
+            />
+          </div>
+          <div className="form-group">
+            <label>事件描述（可选）</label>
+            <textarea
+              value={eventDescription}
+              onChange={(e) => setEventDescription(e.target.value)}
+              placeholder="描述这个重要事件"
+              className="form-textarea"
+              rows={3}
+            />
+          </div>
+          <div className="form-group">
+            <label>选择图标</label>
+            <div className="icon-selector">
+              {eventIcons.map((icon) => (
+                <button
+                  key={icon.value}
+                  className={`icon-option ${selectedIcon === icon.value ? 'selected' : ''}`}
+                  onClick={() => setSelectedIcon(icon.value)}
+                  title={icon.label}
+                >
+                  {icon.value}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="form-group">
+            <label>选择颜色</label>
+            <div className="color-selector">
+              {eventColors.map((color) => (
+                <button
+                  key={color.value}
+                  className={`color-option ${selectedColor === color.value ? 'selected' : ''}`}
+                  style={{ backgroundColor: color.value }}
+                  onClick={() => setSelectedColor(color.value)}
+                  title={color.label}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="form-actions">
+            <button onClick={handleAddEvent} className="submit-btn">
+              保存事件
+            </button>
+            <button onClick={() => {
+              setShowEventForm(false);
+              setEventTitle('');
+              setEventDate('');
+              setEventDescription('');
+              setSelectedIcon('⭐');
+              setSelectedColor('#FF6B6B');
+            }} className="cancel-btn">
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* 日期筛选器 */}
       <div className="timeline-filters">
         <div className="filter-buttons">
@@ -379,7 +606,7 @@ const MemoryTimeline = ({ userCode }) => {
 
       {/* 统计信息 */}
       <div className="timeline-stats">
-        <span>共找到 {allItems.length} 条回忆记录</span>
+        <span>共找到 {allItems.length} 条重要事件</span>
         {(startDate || endDate) && (
           <span className="filter-info">
             (已筛选: {startDate || '不限'} 至 {endDate || '不限'})
@@ -393,21 +620,40 @@ const MemoryTimeline = ({ userCode }) => {
           <div 
             key={item.id} 
             className={`timeline-item ${item.type}`}
-            onClick={() => handleItemClick(item)}
+            onClick={() => !item.isMajorEvent && handleItemClick(item)}
           >
             <div className="timeline-dot">
               <div className="timeline-dot-inner"></div>
             </div>
             
             <div className="timeline-content">
-              <div className="timeline-icon">{item.icon}</div>
+              <div className="timeline-icon" style={{ color: item.isMajorEvent && item.color ? item.color : undefined }}>
+                {item.icon}
+              </div>
               <div className="timeline-info">
                 <div className="timeline-title">{item.title}</div>
                 <div className="timeline-time">{formatTimeDisplay(item.uploadTime)}</div>
-                <div className="timeline-session">会话: {item.sessionId}</div>
+                {item.isMajorEvent && item.description && (
+                  <div className="timeline-description">{item.description}</div>
+                )}
+                {!item.isMajorEvent && (
+                  <div className="timeline-session">会话: {item.sessionId}</div>
+                )}
               </div>
               
-              {item.type !== 'audio' && item.previewUrl && (
+              {item.isMajorEvent && (
+                <button 
+                  className="delete-event-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteEvent(item.id);
+                  }}
+                >
+                  删除
+                </button>
+              )}
+              
+              {!item.isMajorEvent && item.type !== 'audio' && item.previewUrl && (
                 <div className="timeline-preview">
                   {item.type === 'image' ? (
                     <img 

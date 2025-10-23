@@ -1338,7 +1338,7 @@ const HomePage = ({ onNavigate }) => {
         {/* 中间：录制声音、亲子活动和活动时长 */}
         <div className="memory-center">
           {/* 录制声音功能 */}
-          <div className="center-voice-card center-voice-card-center" onClick={goToAudioLibrary}>
+          <div className="center-voice-card center-voice-card-center">
             <div className="voice-icon">🎤</div>
             <div className="voice-title">录制我的声音</div>
             <div className="voice-desc">智能语音助手，记录您的美好时光</div>
@@ -1354,6 +1354,7 @@ const HomePage = ({ onNavigate }) => {
             </div>
             <button
               className="voice-action"
+              onClick={goToAudioLibrary}
             >
               开始录制
             </button>
