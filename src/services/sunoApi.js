@@ -1,6 +1,6 @@
 // src/services/sunoApi.js
 const SUNO_API_URL = 'https://api.sunoapi.org/api/v1';
-const SUNO_API_TOKEN = '74126cb41a9bd93283d4a2d612707483';
+const SUNO_API_TOKEN = 'e697428ff65f905c7a18a0e43cfe7d90';
 const CALLBACK_URL = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com';
 
 class SunnoApiService {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './App.css';
 import './themes/pink-theme-overrides.css';
-import MemoryTimeline from './components/common/MemoryTimeline';
+import ManualEventTimeline from './components/common/ManualEventTimeline';
 import WelcomeScreen from './components/common/WelcomeScreen';
 import ThemeSwitcher from './components/theme/ThemeSwitcher';
 import { getUserCode } from './utils/userCode';
@@ -914,7 +914,7 @@ const MemoryPage = () => {
             {/* 回忆时间线 */}
             <div className="memory-left-title">回忆时间线</div>
             <div className="memory-timeline-container">
-              <MemoryTimeline userCode={userCode} />
+              <ManualEventTimeline userCode={userCode} />
             </div>
           </div>
           
