@@ -1,6 +1,6 @@
 @font-face {
-  font-family: 'MUYAO-SOFTBRUSH';
-  src: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/fonts/Muyao-Softbrush-2.ttf') format('truetype');
+  font-family: 'SongTi';
+  src: url('https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/uploads/memory_fount/fonts/song.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 
@@ -49,7 +49,7 @@
 .back-text {
   color: #6ebf8e;
   font-size: 24px;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
   font-weight: normal;
   white-space: nowrap;
   line-height: 24px;
@@ -87,7 +87,7 @@
   border-radius: 20px;
   padding: 10px 20px;
   font-size: 16px;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
   color: #3bb6a6;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -147,7 +147,7 @@
 .upload-text {
   color: #6ebf8e;
   font-size: 32px;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
   font-weight: normal;
   text-align: center;
   white-space: nowrap;
@@ -187,7 +187,7 @@
 .pagination-info {
   color: #12a4b2;
   font-size: 16px;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
 }
 
 .photos-grid {
@@ -306,7 +306,7 @@
 .media-name {
   font-size: 16px;
   color: #333;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -316,7 +316,7 @@
 .media-time {
   font-size: 12px;
   color: #666;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
 }
 
 /* 空状态 */
@@ -333,13 +333,13 @@
 
 .empty-text {
   font-size: 24px;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'SongTi', sans-serif;
   margin-bottom: 10px;
 }
 
 .empty-subtext {
   font-size: 16px;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'SongTi', sans-serif;
   opacity: 0.7;
 }
 
@@ -469,14 +469,14 @@
 .preview-info h4 {
   margin: 0 0 10px 0;
   color: #333;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'SongTi', sans-serif;
   font-size: 18px;
 }
 
 .preview-info p {
   margin: 0;
   color: #666;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'SongTi', sans-serif;
   font-size: 14px;
 }
 
@@ -538,7 +538,7 @@
   }
   
   .back-text {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 20px;
   }
   
@@ -613,7 +613,7 @@
   }
   
   .back-text {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 16px;
   }
   
@@ -671,12 +671,12 @@
   }
   
   .media-name {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 14px;
   }
   
   .media-time {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 11px;
   }
   
@@ -747,7 +747,7 @@
   }
   
   .back-text {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 15px;
   }
   
@@ -816,7 +816,7 @@
   }
   
   .back-text {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 14px;
   }
   
@@ -878,12 +878,12 @@
   }
   
   .media-name {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 12px;
   }
   
   .media-time {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 10px;
   }
   
@@ -975,7 +975,7 @@
   }
   
   .back-text {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 13px;
   }
   
@@ -1026,12 +1026,12 @@
   }
   
   .media-name {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 11px;
   }
   
   .media-time {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 9px;
   }
   
@@ -1086,7 +1086,7 @@
   }
   
   .back-text {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 12px;
   }
   
@@ -1137,12 +1137,12 @@
   }
   
   .media-name {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 10px;
   }
   
   .media-time {
-    font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+    font-family: 'SongTi', sans-serif;
     font-size: 8px;
   }
   
@@ -1275,7 +1275,7 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'SongTi', sans-serif;
 }
 
 .pagination-controls button:hover:not(:disabled) {
@@ -1303,7 +1303,7 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: 'Muyao-Softbrush-2', sans-serif;
+  font-family: 'SongTi', sans-serif;
 }
 
 .page-number:hover {
@@ -1380,7 +1380,7 @@
   font-size: 18px;
   font-weight: bold;
   color: #00bcd4;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
 }
 
 .success-icon {
@@ -1396,7 +1396,7 @@
   margin-bottom: 8px;
   max-width: 200px;
   word-break: break-word;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
 }
 
 .upload-success-message {
@@ -1404,7 +1404,7 @@
   color: #4CAF50;
   font-weight: bold;
   animation: fadeIn 0.5s ease;
-  font-family: 'MUYAO-SOFTBRUSH', sans-serif;
+  font-family: 'SongTi', sans-serif;
 }
 
 /* 图片预览和ID显示样式 */
