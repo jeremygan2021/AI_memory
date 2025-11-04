@@ -180,7 +180,10 @@ const GalleryPage = () => {
 
   // 长按开始处理
   const handleLongPressStart = (file, e) => {
-    e.preventDefault();
+    // 只在事件可取消时才调用preventDefault
+    if (e && e.cancelable) {
+      e.preventDefault();
+    }
     setIsLongPress(false);
     
     // 设置长按定时器（800ms后触发）
@@ -200,7 +203,10 @@ const GalleryPage = () => {
 
   // 长按结束处理
   const handleLongPressEnd = (e) => {
-    e.preventDefault();
+    // 只在事件可取消时才调用preventDefault
+    if (e && e.cancelable) {
+      e.preventDefault();
+    }
     
     // 清除长按定时器
     if (longPressTimer) {
@@ -208,9 +214,26 @@ const GalleryPage = () => {
       setLongPressTimer(null);
     }
     
-    // 如果不是长按状态，则执行正常的点击操作
+    // 重置长按状态
+    setIsLongPress(false);
+  };
+
+  // 长按结束处理（带点击事件）
+  const handleLongPressEndWithClick = (file, e) => {
+    // 只在事件可取消时才调用preventDefault
+    if (e && e.cancelable) {
+      e.preventDefault();
+    }
+    
+    // 清除长按定时器
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    
+    // 如果不是长按状态，则执行正常的点击操作（仅桌面设备）
     if (!isLongPress) {
-      // 正常点击操作已在handleMediaClick中处理
+      handleMediaClick(file);
     }
     
     // 重置长按状态
@@ -614,18 +637,20 @@ const GalleryPage = () => {
                   <div key={file.id} className="gallery-media-item">
                     <div 
                       className="gallery-media-content" 
-                      onClick={() => handleMediaClick(file)}
                       onMouseDown={(e) => handleLongPressStart(file, e)}
-                      onMouseUp={(e) => handleLongPressEnd(e)}
+                      onMouseUp={(e) => handleLongPressEndWithClick(file, e)}
                       onMouseLeave={(e) => handleLongPressEnd(e)}
                       onTouchStart={(e) => {
                         // 确保事件不是被动的，以便可以调用preventDefault
-                        if (e.cancelable) {
-                          e.preventDefault();
-                        }
                         handleLongPressStart(file, e);
                       }}
-                      onTouchEnd={(e) => handleLongPressEnd(e)}
+                      onTouchEnd={(e) => {
+                        handleLongPressEnd(e);
+                        // 如果不是长按，则触发点击事件
+                        if (!isLongPress) {
+                          handleMediaClick(file);
+                        }
+                      }}
                       onTouchCancel={(e) => handleLongPressEnd(e)}
                       onContextMenu={(e) => e.preventDefault()}
                       style={{ 
