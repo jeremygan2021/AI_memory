@@ -595,7 +595,7 @@ const MemoryPage = () => {
                 <div className="mobile-gallery-entrance mobile-left-gallery tablet-only">
                   <div className="mobile-gallery-card" onClick={goToGallery}>
                     <div className="gallery-icon">📸</div>
-                    <div className="gallery-title">亲子相册</div>
+                    <div className="gallery-title">相册</div>
                     <div className="gallery-desc">点击可查看相册</div>
                     <button 
                   className="view-gallery-btn"
@@ -642,7 +642,7 @@ const MemoryPage = () => {
                   <div className="mobile-gallery-entrance mobile-left-gallery">
                     <div className="mobile-gallery-card" onClick={goToGallery}>
                       <div className="gallery-icon">📸</div>
-                      <div className="gallery-title">亲子相册</div>
+                      <div className="gallery-title">相册</div>
                       <div className="gallery-desc">点击可查看相册</div>
                       <button 
                   className="view-gallery-btn"
@@ -1080,7 +1080,7 @@ const MemoryPage = () => {
           </div>
         </div>
 
-        {/* 右侧：亲子相册 - 桌面端和平板端显示 */}
+        {/* 右侧：相册 - 桌面端和平板端显示 */}
         {(!isMobileView || isTabletView) && (
           <div className="memory-right">
             {/* 合并的亲子媒体模块 */}

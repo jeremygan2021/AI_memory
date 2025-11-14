@@ -1527,7 +1527,7 @@ const HomePage = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* 右侧：亲子相册 - 桌面端和平板端显示 */}
+        {/* 右侧：相册 - 桌面端和平板端显示 */}
         {(!isMobileView || isTabletView) && (
           <div className="memory-right">
             {/* 合并的亲子媒体模块 */}
@@ -1631,7 +1631,7 @@ const HomePage = ({ onNavigate }) => {
         {isMobileView && !isTabletView && (
           <div className="mobile-album-section">
             <div className="mobile-album-header">
-              <h3 className="mobile-album-title">亲子相册</h3>
+              <h3 className="mobile-album-title">相册</h3>
               <div className="mobile-album-tabs">
                 <div 
                   className={`mobile-album-tab ${activeMediaTab === 'photos' ? 'active' : ''}`}

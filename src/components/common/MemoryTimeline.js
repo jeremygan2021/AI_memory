@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './MemoryTimeline.css';
-import { getCustomName, deriveDisplayNameFromFileName, syncAllCustomNamesFromCloud } from '../../utils/displayName';
+import { syncAllCustomNamesFromCloud } from '../../utils/displayName';
+import { saveMajorEventsToCloud, syncMajorEventsSettings, forceRefreshMajorEventsFromCloud } from '../../services/majorEventsCloudService';
 
 const MemoryTimeline = ({ userCode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [timelineItems, setTimelineItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [allItems, setAllItems] = useState([]); // 存储所有项目
@@ -13,7 +15,6 @@ const MemoryTimeline = ({ userCode }) => {
   const [startDate, setStartDate] = useState(''); // 开始日期
   const [endDate, setEndDate] = useState(''); // 结束日期
   const [showDateFilter, setShowDateFilter] = useState(false); // 是否显示日期筛选器
-  const [syncing, setSyncing] = useState(false); // 是否正在同步
   
   // 新增状态：用于手动输入大事件
   const [showEventForm, setShowEventForm] = useState(false);
@@ -24,12 +25,21 @@ const MemoryTimeline = ({ userCode }) => {
   const [selectedIcon, setSelectedIcon] = useState('⭐'); // 选中的图标
   const [selectedColor, setSelectedColor] = useState('#FF6B6B'); // 选中的颜色
   
+  // 根据当前路径判断是否显示添加事件按钮
+  const pathSegments = location.pathname.split('/');
+  const isMemoryPage = pathSegments.length === 3 && pathSegments[2] === 'memory';
+  const shouldShowAddButton = !isMemoryPage;
+  console.log('MemoryTimeline: 当前路径:', location.pathname, '路径段:', pathSegments, '是否是记忆页面:', isMemoryPage, '是否显示按钮:', shouldShowAddButton);
+  
+  // 为容器添加特殊类名，用于CSS控制
+  const containerClass = shouldShowAddButton ? 'memory-timeline' : 'memory-timeline memory-page';
+  
   // 定义可选的图标
 const eventIcons = [
   { value: '🍼', label: '出生' }, // 人生起点
   { value: '🧸', label: '童年' }, // 无忧无虑的童年时光
   { value: '🎒', label: '入学' }, // 第一次走进校园
-  { value: '🌱', label: '青春期' }, // 懵懂又热烈的少年时代
+  { value: '🌱', label: '青春期' }, // 懵懂又激烈的少年时代
   { value: '💘', label: '初恋' }, // 第一次心动
   { value: '🎓', label: '毕业' }, // 重要学业节点（小学/中学/大学）
   { value: '💼', label: '入职' }, // 第一份工作
@@ -60,66 +70,107 @@ const eventIcons = [
     { value: '#54A0FF', label: '深海蓝' }
   ];
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+  // 将大事件合并到时间线中
+  const mergeEventsWithTimeline = useCallback((events) => {
+    // 将大事件转换为时间线项目格式
+    const eventItems = events.map(event => ({
+      id: event.id,
+      type: 'major-event',
+      icon: event.icon || '⭐',
+      color: event.color || '#FF6B6B',
+      title: event.title,
+      uploadTime: new Date(event.date).toISOString(),
+      timestamp: new Date(event.date).getTime(),
+      sessionId: 'major-event',
+      pageUrl: null,
+      previewUrl: null,
+      description: event.description,
+      isMajorEvent: true
+    }));
+    
+    // 只显示大事件，不显示上传的文件记录
+    setAllItems(eventItems);
+    setTimelineItems(eventItems.slice(0, itemsPerPage));
+  }, [itemsPerPage]);
 
-  useEffect(() => {
-    if (userCode) {
-      // 先从云端同步自定义名称
-      syncAllCustomNamesFromCloud(userCode)
-        .then(result => {
-          console.log('自定义名称云端同步结果:', result);
-          // 同步完成后加载时间线数据
-          loadTimelineData();
-          // 加载本地存储的大事件
-          loadMajorEvents();
-        })
-        .catch(error => {
-          console.error('自定义名称云端同步失败:', error);
-          // 同步失败仍然加载时间线数据，使用本地存储的自定义名称
-          loadTimelineData();
-          // 加载本地存储的大事件
-          loadMajorEvents();
-        });
-    }
-  }, [userCode]);
-
-  // 监听自定义名称更新事件
-  useEffect(() => {
-    const handleCustomNamesUpdated = () => {
-      // 当自定义名称更新时，重新加载时间线数据
-      if (userCode) {
-        loadTimelineData();
+  // 强制从云端重新加载重要事件
+  const forceRefreshFromCloud = useCallback(async () => {
+    if (!userCode) return;
+    
+    try {
+      console.log('强制从云端重新加载重要事件...');
+      setLoading(true);
+      
+      // 使用新的强制刷新函数
+      const refreshResult = await forceRefreshMajorEventsFromCloud(userCode);
+      
+      if (refreshResult.success) {
+        console.log('强制从云端加载重要事件成功:', refreshResult.events.length);
+        setMajorEvents(refreshResult.events);
+        mergeEventsWithTimeline(refreshResult.events);
+        
+        // 显示成功消息
+        alert(refreshResult.message);
+      } else {
+        console.log('云端没有重要事件数据');
+        setMajorEvents([]);
+        mergeEventsWithTimeline([]);
+        alert(refreshResult.message);
       }
-    };
+    } catch (error) {
+      console.error('强制从云端加载失败:', error);
+      alert('从云端加载失败: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [userCode, mergeEventsWithTimeline]);
 
-    // 添加事件监听器
-    window.addEventListener('customNamesUpdated', handleCustomNamesUpdated);
-
-    // 清理函数，组件卸载时移除事件监听器
-    return () => {
-      window.removeEventListener('customNamesUpdated', handleCustomNamesUpdated);
-    };
-  }, [userCode]);
-
-  // 监听主题变化事件
-  useEffect(() => {
-    const handleThemeChange = (event) => {
-      console.log('MemoryTimeline: 收到主题变化事件');
-      // 主题变化时强制重新渲染组件
-      // 由于样式使用CSS变量，会自动应用新主题
-    };
-
-    // 添加主题变化事件监听器
-    window.addEventListener('themeChanged', handleThemeChange);
-
-    // 清理函数，组件卸载时移除事件监听器
-    return () => {
-      window.removeEventListener('themeChanged', handleThemeChange);
-    };
-  }, []);
+  // 加载本地存储的大事件
+  const loadMajorEvents = useCallback(async () => {
+    if (!userCode) return;
+    
+    try {
+      console.log('开始加载重要事件，优先从云端获取最新数据...');
+      
+      // 优先从云端同步重要事件
+      const syncResult = await syncMajorEventsSettings(userCode);
+      
+      if (syncResult.success && syncResult.events) {
+        console.log('成功加载重要事件:', syncResult.action, syncResult.events.length, '个事件');
+        setMajorEvents(syncResult.events);
+        // 将大事件合并到时间线中
+        mergeEventsWithTimeline(syncResult.events);
+        return; // 成功加载，直接返回
+      }
+      
+      console.log('云端和本地都没有重要事件数据');
+      setMajorEvents([]);
+      mergeEventsWithTimeline([]);
+    } catch (error) {
+      console.error('加载大事件失败:', error);
+      // 最后的降级策略：从本地存储加载
+      try {
+        const storedEvents = localStorage.getItem(`majorEvents_${userCode}`);
+        if (storedEvents) {
+          const events = JSON.parse(storedEvents);
+          console.log('从本地存储加载大事件:', events.length);
+          setMajorEvents(events);
+          mergeEventsWithTimeline(events);
+        } else {
+          console.log('本地也没有重要事件数据，使用空数组');
+          setMajorEvents([]);
+          mergeEventsWithTimeline([]);
+        }
+      } catch (localError) {
+        console.error('从本地存储加载大事件也失败:', localError);
+        setMajorEvents([]);
+        mergeEventsWithTimeline([]);
+      }
+    }
+  }, [userCode, mergeEventsWithTimeline]);
 
   // 加载时间线数据
-  const loadTimelineData = async () => {
+  const loadTimelineData = useCallback(async () => {
     if (!userCode) return;
     
     setLoading(true);
@@ -127,7 +178,7 @@ const eventIcons = [
       // 不再加载云端文件，只加载本地存储的大事件
       setAllItems([]);
       setTimelineItems([]);
-      loadMajorEvents();
+      await loadMajorEvents();
     } catch (error) {
       console.error('加载时间线数据失败:', error);
       setTimelineItems([]);
@@ -135,7 +186,46 @@ const eventIcons = [
     } finally {
       setLoading(false);
     }
-  };
+  }, [userCode, loadMajorEvents]);
+
+
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (userCode) {
+        setLoading(true);
+        try {
+          // 先从云端同步自定义名称
+          console.log('开始同步自定义名称...');
+          await syncAllCustomNamesFromCloud(userCode);
+          console.log('自定义名称同步完成');
+          
+          // 加载本地存储的大事件（优先从云端）
+          console.log('开始加载重要事件...');
+          await loadMajorEvents();
+          console.log('重要事件加载完成');
+          
+          // 加载时间线数据
+          console.log('开始加载时间线数据...');
+          await loadTimelineData();
+          console.log('时间线数据加载完成');
+        } catch (error) {
+          console.error('数据加载过程中出错:', error);
+          // 出错时仍然尝试加载本地数据
+          try {
+            await loadMajorEvents();
+            await loadTimelineData();
+          } catch (innerError) {
+            console.error('加载本地数据也失败:', innerError);
+          }
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    loadData();
+  }, [userCode, loadTimelineData, loadMajorEvents]);
 
   // 应用日期筛选
   const applyDateFilter = () => {
@@ -164,58 +254,78 @@ const eventIcons = [
     setCurrentPage(1);
   };
 
-  // 加载本地存储的大事件
-  const loadMajorEvents = () => {
-    try {
-      const storedEvents = localStorage.getItem(`majorEvents_${userCode}`);
-      if (storedEvents) {
-        const events = JSON.parse(storedEvents);
-        setMajorEvents(events);
-        // 将大事件合并到时间线中
-        mergeEventsWithTimeline(events);
+  // 监听自定义名称更新事件
+  useEffect(() => {
+    const handleCustomNamesUpdated = () => {
+      // 当自定义名称更新时，重新加载时间线数据
+      if (userCode) {
+        loadTimelineData();
       }
-    } catch (error) {
-      console.error('加载大事件失败:', error);
-    }
-  };
+    };
+
+    // 添加事件监听器
+    window.addEventListener('customNamesUpdated', handleCustomNamesUpdated);
+
+    // 清理函数，组件卸载时移除事件监听器
+    return () => {
+      window.removeEventListener('customNamesUpdated', handleCustomNamesUpdated);
+    };
+  }, [userCode, loadTimelineData]);
+
+  // 监听主题变化事件
+  useEffect(() => {
+    const handleThemeChange = (event) => {
+      console.log('MemoryTimeline: 收到主题变化事件');
+      // 主题变化时强制重新渲染组件
+      // 由于样式使用CSS变量，会自动应用新主题
+    };
+
+    // 添加主题变化事件监听器
+    window.addEventListener('themeChanged', handleThemeChange);
+
+    // 清理函数，组件卸载时移除事件监听器
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange);
+    };
+  }, []);
+
   
-  // 保存大事件到本地存储
-  const saveMajorEvents = (events) => {
+  // 保存大事件到本地存储和云端
+  const saveMajorEvents = async (events) => {
     try {
+      // 先保存到本地存储作为备份
       localStorage.setItem(`majorEvents_${userCode}`, JSON.stringify(events));
       setMajorEvents(events);
+      
       // 将大事件合并到时间线中
       mergeEventsWithTimeline(events);
+      
+      // 尝试保存到云端
+      if (userCode) {
+        const cloudResult = await saveMajorEventsToCloud(userCode, events);
+        if (cloudResult.success) {
+          console.log('重要事件已成功保存到云端:', cloudResult);
+        } else {
+          console.warn('保存到云端失败，但本地保存成功:', cloudResult.message);
+        }
+      }
     } catch (error) {
       console.error('保存大事件失败:', error);
+      // 即使云端保存失败，也要确保本地保存成功
+      try {
+        localStorage.setItem(`majorEvents_${userCode}`, JSON.stringify(events));
+        setMajorEvents(events);
+        mergeEventsWithTimeline(events);
+      } catch (localError) {
+        console.error('本地保存也失败:', localError);
+      }
     }
   };
   
-  // 将大事件合并到时间线中
-  const mergeEventsWithTimeline = (events) => {
-    // 将大事件转换为时间线项目格式
-    const eventItems = events.map(event => ({
-      id: event.id,
-      type: 'major-event',
-      icon: event.icon || '⭐',
-      color: event.color || '#FF6B6B',
-      title: event.title,
-      uploadTime: new Date(event.date).toISOString(),
-      timestamp: new Date(event.date).getTime(),
-      sessionId: 'major-event',
-      pageUrl: null,
-      previewUrl: null,
-      description: event.description,
-      isMajorEvent: true
-    }));
-    
-    // 只显示大事件，不显示上传的文件记录
-    setAllItems(eventItems);
-    setTimelineItems(eventItems.slice(0, itemsPerPage));
-  };
+
   
   // 添加新的大事件
-  const handleAddEvent = () => {
+  const handleAddEvent = async () => {
     if (!eventTitle.trim() || !eventDate) {
       alert('请填写事件标题和日期');
       return;
@@ -231,7 +341,7 @@ const eventIcons = [
     };
     
     const updatedEvents = [...majorEvents, newEvent];
-    saveMajorEvents(updatedEvents);
+    await saveMajorEvents(updatedEvents);
     
     // 重置表单
     setEventTitle('');
@@ -243,39 +353,12 @@ const eventIcons = [
   };
   
   // 删除大事件
-  const handleDeleteEvent = (eventId) => {
+  const handleDeleteEvent = async (eventId) => {
     if (window.confirm('确定要删除这个重要事件吗？')) {
       const updatedEvents = majorEvents.filter(event => event.id !== eventId);
-      saveMajorEvents(updatedEvents);
+      await saveMajorEvents(updatedEvents);
     }
   };
-  const handleSyncCustomNames = async () => {
-    if (!userCode || syncing) return;
-    
-    try {
-      setSyncing(true);
-      console.log('开始手动同步自定义名称...');
-      
-      const result = await syncAllCustomNamesFromCloud(userCode);
-      console.log('手动同步自定义名称结果:', result);
-      
-      // 同步完成后重新加载时间线数据
-      await loadTimelineData();
-      
-      // 显示同步结果提示
-      if (result.success) {
-        alert(`同步成功！从 ${result.sessionsCount || 0} 个会话同步了 ${result.totalMappings || 0} 个自定义名称`);
-      } else {
-        alert(`同步失败：${result.error || result.message || '未知错误'}`);
-      }
-    } catch (error) {
-      console.error('手动同步自定义名称失败:', error);
-      alert(`同步失败：${error.message}`);
-    } finally {
-      setSyncing(false);
-    }
-  };
-
   // 分页处理
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -314,22 +397,6 @@ const eventIcons = [
     return Math.ceil(filtered.length / itemsPerPage);
   };
 
-  // 生成友好的文件显示名称
-  const getFileDisplayName = (fileName, type) => {
-    const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
-    
-    switch (type) {
-      case 'audio':
-        return '录音回忆';
-      case 'image':
-        return '照片回忆';
-      case 'video':
-        return '视频回忆';
-      default:
-        return nameWithoutExt;
-    }
-  };
-
   // 格式化时间显示
   const formatTimeDisplay = (timestamp) => {
     const date = new Date(timestamp);
@@ -358,7 +425,7 @@ const eventIcons = [
 
   if (loading) {
     return (
-      <div className="memory-timeline">
+      <div className={containerClass}>
         <div className="timeline-loading">
           <div className="loading-spinner"></div>
           <span>加载回忆中...</span>
@@ -369,15 +436,18 @@ const eventIcons = [
 
   if (allItems.length === 0) {
     return (
-      <div className="memory-timeline">
-        <div className="add-event-section">
-          <button 
-            className="add-event-btn"
-            onClick={() => setShowEventForm(!showEventForm)}
-          >
-            ⭐ {showEventForm ? '取消' : '添加'}重要事件
-          </button>
-        </div>
+      <div className={containerClass}>
+        {/* 添加大事件按钮 */}
+        {shouldShowAddButton && (
+          <div className="add-event-section">
+            <button 
+              className="add-event-btn"
+              onClick={() => setShowEventForm(!showEventForm)}
+            >
+              ⭐ {showEventForm ? '取消' : '添加'}重要事件
+            </button>
+          </div>
+        )}
         
         {showEventForm && (
           <div className="event-form">
@@ -460,7 +530,7 @@ const eventIcons = [
         <div className="timeline-empty">
           <div className="empty-icon">📝</div>
           <div className="empty-text">还没有添加任何重要事件</div>
-          <div className="empty-desc">点击上方按钮添加宝宝成长中的重要时刻</div>
+          <div className="empty-desc">点击上方按钮添加主人公成长中的重要时刻</div>
         </div>
       </div>
     );
@@ -469,16 +539,18 @@ const eventIcons = [
   const totalPages = getTotalPages();
 
   return (
-    <div className="memory-timeline">
-      {/* 添加大事件按钮 */}
-      <div className="add-event-section">
-        <button 
-          className="add-event-btn"
-          onClick={() => setShowEventForm(!showEventForm)}
-        >
-          ⭐ {showEventForm ? '取消' : '添加'}重要事件
-        </button>
-      </div>
+    <div className={containerClass}>
+      {/* 添加事件表单 */}
+      {shouldShowAddButton && (
+        <div className="add-event-section">
+          <button 
+            className="add-event-btn"
+            onClick={() => setShowEventForm(!showEventForm)}
+          >
+            ⭐ {showEventForm ? '取消' : '添加'}重要事件
+          </button>
+        </div>
+      )}
       
       {/* 大事件输入表单 */}
       {showEventForm && (
@@ -606,12 +678,60 @@ const eventIcons = [
 
       {/* 统计信息 */}
       <div className="timeline-stats">
-        <span>共找到 {allItems.length} 条重要事件</span>
-        {(startDate || endDate) && (
-          <span className="filter-info">
-            (已筛选: {startDate || '不限'} 至 {endDate || '不限'})
-          </span>
-        )}
+        <div className="stats-left">
+          <span>共找到 {allItems.length} 条重要事件</span>
+          {(startDate || endDate) && (
+            <span className="filter-info">
+              (已筛选: {startDate || '不限'} 至 {endDate || '不限'})
+            </span>
+          )}
+        </div>
+        <div className="stats-right">
+          <button 
+            className="refresh-button" 
+            onClick={forceRefreshFromCloud}
+            title="从云端重新加载重要事件"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = '0 4px 8px rgba(99, 102, 241, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 2px 4px rgba(99, 102, 241, 0.3)';
+            }}
+          >
+            <span 
+              className="refresh-icon"
+              style={{
+                fontSize: '16px',
+                animation: 'spin 2s linear infinite',
+                animationPlayState: 'paused'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.animationPlayState = 'running';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.animationPlayState = 'paused';
+              }}
+            >↻</span>
+            刷新云端数据
+          </button>
+        </div>
       </div>
 
       {/* 时间线列表 */}
@@ -641,7 +761,7 @@ const eventIcons = [
                 )}
               </div>
               
-              {item.isMajorEvent && (
+              {item.isMajorEvent && shouldShowAddButton && (
                 <button 
                   className="delete-event-btn"
                   onClick={(e) => {

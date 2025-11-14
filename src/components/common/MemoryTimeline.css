@@ -8,6 +8,34 @@
   border-radius: 12px;
 }
 
+/* 记忆页面特殊样式 - 完全隐藏添加按钮 */
+.memory-timeline.memory-page .add-event-section {
+  display: none !important;
+}
+
+/* 记忆页面特殊样式 - 隐藏所有可能的添加按钮 */
+.memory-page .add-event-btn,
+.memory-page .add-event-section {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 记忆页面特殊样式 - 隐藏删除按钮 */
+.memory-page .delete-event-btn {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 /* 添加大事件按钮样式 */
 .add-event-section {
   margin-bottom: 24px;

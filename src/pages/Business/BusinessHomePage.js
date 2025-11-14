@@ -13,7 +13,6 @@ const BusinessHomePage = () => {
   const { userid } = useParams();
   const navigate = useNavigate();
   const [userCode, setUserCode] = useState('');
-  const [protagonistAgeMonths] = useState(24); // 改为主人公年龄
   const [uploadedPhotos] = useState([
     // 添加一些示例照片数据用于时间轴显示
     { id: 1, name: '家庭聚会', createTime: Date.now() - 86400000 * 7, type: 'photo' },
