@@ -1,17 +1,17 @@
-// 重要事件云端存储服务
-// 参考主题系统的云端保存机制实现重要事件的云端同步
+// 时间轴云端存储服务
+// 参考主题系统的云端保存机制实现时间轴的云端同步
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
 
 /**
- * 保存重要事件到云端
+ * 保存时间轴到云端
  * @param {string} userCode - 用户代码
- * @param {Array} events - 重要事件列表
+ * @param {Array} events - 时间轴列表
  * @returns {Promise<object>} 保存结果
  */
 export const saveMajorEventsToCloud = async (userCode, events) => {
   try {
-    console.log('开始保存重要事件到云端:', { userCode, eventsCount: events.length });
+    console.log('开始保存时间轴到云端:', { userCode, eventsCount: events.length });
 
     // 验证参数
     if (!userCode) {
@@ -30,7 +30,7 @@ export const saveMajorEventsToCloud = async (userCode, events) => {
       timestamp: Date.now()
     };
 
-    console.log('重要事件文件数据:', JSON.stringify(eventsFileData, null, 2));
+    console.log('时间轴文件数据:', JSON.stringify(eventsFileData, null, 2));
 
     // 生成文件名（使用固定格式避免重复）
     const fileName = `baby_info_major_events_latest.txt`;
@@ -69,10 +69,10 @@ export const saveMajorEventsToCloud = async (userCode, events) => {
     }
 
     const result = await response.json();
-    console.log('重要事件上传响应:', result);
+    console.log('时间轴上传响应:', result);
 
     if (!result.success) {
-      throw new Error(result.message || '重要事件保存失败');
+      throw new Error(result.message || '时间轴保存失败');
     }
 
     // 将成功信息保存到本地，用于后续查询
@@ -86,18 +86,18 @@ export const saveMajorEventsToCloud = async (userCode, events) => {
 
     localStorage.setItem(`major_events_cloud_info_${userCode}`, JSON.stringify(saveInfo));
     
-    console.log('重要事件保存到云端成功:', saveInfo);
+    console.log('时间轴保存到云端成功:', saveInfo);
 
     return {
       success: true,
       eventsCount: events.length,
       objectKey,
       cloudUrl: result.url || result.cloudUrl,
-      message: '重要事件已保存到云端'
+      message: '时间轴已保存到云端'
     };
 
   } catch (error) {
-    console.error('保存重要事件到云端失败:', error);
+    console.error('保存时间轴到云端失败:', error);
     
     return {
       success: false,
@@ -109,13 +109,13 @@ export const saveMajorEventsToCloud = async (userCode, events) => {
 };
 
 /**
- * 从云端加载重要事件
+ * 从云端加载时间轴
  * @param {string} userCode - 用户代码
- * @returns {Promise<object>} 重要事件数据
+ * @returns {Promise<object>} 时间轴数据
  */
 export const loadMajorEventsFromCloud = async (userCode) => {
   try {
-    console.log('开始从云端加载重要事件:', { userCode });
+    console.log('开始从云端加载时间轴:', { userCode });
 
     if (!userCode) {
       throw new Error('缺少用户代码');
@@ -232,11 +232,11 @@ export const loadMajorEventsFromCloud = async (userCode) => {
     });
 
     if (eventFiles.length === 0) {
-      console.log('云端未找到重要事件文件，使用本地设置');
+      console.log('云端未找到时间轴文件，使用本地设置');
       return {
         success: false,
         fallback: 'local',
-        message: '云端未找到重要事件'
+        message: '云端未找到时间轴'
       };
     }
 
@@ -330,7 +330,7 @@ export const loadMajorEventsFromCloud = async (userCode) => {
           events: validEvents,
           lastUpdated: eventsData.lastUpdated || eventsData.timestamp || new Date().toISOString(),
           source: 'cloud',
-          message: `从云端加载重要事件成功 (${validEvents.length}个有效事件)`
+          message: `从云端加载时间轴成功 (${validEvents.length}个有效事件)`
         };
       } catch (error) {
         console.log(`处理文件失败: ${error.message}，尝试下一个文件`);
@@ -348,7 +348,7 @@ export const loadMajorEventsFromCloud = async (userCode) => {
     };
 
   } catch (error) {
-    console.error('从云端加载重要事件失败:', error);
+    console.error('从云端加载时间轴失败:', error);
     
     return {
       success: false,
@@ -361,13 +361,13 @@ export const loadMajorEventsFromCloud = async (userCode) => {
 };
 
 /**
- * 强制从云端重新加载重要事件，清除所有本地缓存
+ * 强制从云端重新加载时间轴，清除所有本地缓存
  * @param {string} userCode - 用户代码
  * @returns {Promise<object>} 刷新结果
  */
 export const forceRefreshMajorEventsFromCloud = async (userCode) => {
   try {
-    console.log('强制从云端重新加载重要事件，清除所有本地缓存...');
+    console.log('强制从云端重新加载时间轴，清除所有本地缓存...');
     
     // 清除所有本地缓存
     localStorage.removeItem(`majorEvents_${userCode}`);
@@ -378,7 +378,7 @@ export const forceRefreshMajorEventsFromCloud = async (userCode) => {
     const loadResult = await loadMajorEventsFromCloud(userCode);
     
     if (loadResult.success && loadResult.events) {
-      console.log('强制从云端加载重要事件成功:', loadResult.events.length);
+      console.log('强制从云端加载时间轴成功:', loadResult.events.length);
       
       // 保存到本地
       localStorage.setItem(`majorEvents_${userCode}`, JSON.stringify(loadResult.events));
@@ -393,15 +393,15 @@ export const forceRefreshMajorEventsFromCloud = async (userCode) => {
         success: true,
         events: loadResult.events,
         action: 'force_refresh_from_cloud',
-        message: `已从云端重新加载 ${loadResult.events.length} 个重要事件`
+        message: `已从云端重新加载 ${loadResult.events.length} 个时间轴`
       };
     } else {
-      console.log('云端没有重要事件数据');
+      console.log('云端没有时间轴数据');
       return {
         success: false,
         events: [],
         action: 'no_cloud_data',
-        message: '云端没有重要事件数据'
+        message: '云端没有时间轴数据'
       };
     }
   } catch (error) {
@@ -417,19 +417,19 @@ export const forceRefreshMajorEventsFromCloud = async (userCode) => {
 };
 
 /**
- * 同步重要事件设置（智能选择本地或云端最新版本）
+ * 同步时间轴设置（智能选择本地或云端最新版本）
  * @param {string} userCode - 用户代码
  * @returns {Promise<object>} 同步结果
  */
 export const syncMajorEventsSettings = async (userCode) => {
   try {
-    console.log('开始同步重要事件设置:', { userCode });
+    console.log('开始同步时间轴设置:', { userCode });
 
     // 从云端加载最新事件
     const loadResult = await loadMajorEventsFromCloud(userCode);
     
     if (loadResult.success) {
-      console.log('从云端同步重要事件成功:', loadResult.events.length);
+      console.log('从云端同步时间轴成功:', loadResult.events.length);
       
       // 将云端数据保存到本地作为备份
       try {
@@ -442,7 +442,7 @@ export const syncMajorEventsSettings = async (userCode) => {
         success: true,
         action: 'loaded_from_cloud',
         events: loadResult.events,
-        message: `已从云端同步 ${loadResult.events.length} 个重要事件`
+        message: `已从云端同步 ${loadResult.events.length} 个时间轴`
       };
     }
 
@@ -471,7 +471,7 @@ export const syncMajorEventsSettings = async (userCode) => {
             success: true,
             action: 'uploaded_to_cloud',
             events: localEvents,
-            message: `本地 ${localEvents.length} 个重要事件已上传到云端`
+            message: `本地 ${localEvents.length} 个时间轴已上传到云端`
           };
         } else {
           console.warn('上传本地事件到云端失败:', uploadResult.message);
@@ -485,11 +485,11 @@ export const syncMajorEventsSettings = async (userCode) => {
       success: true,
       action: 'used_local',
       events: localEvents,
-      message: `使用本地 ${localEvents.length} 个重要事件`
+      message: `使用本地 ${localEvents.length} 个时间轴`
     };
 
   } catch (error) {
-    console.error('同步重要事件设置失败:', error);
+    console.error('同步时间轴设置失败:', error);
     
     return {
       success: false,

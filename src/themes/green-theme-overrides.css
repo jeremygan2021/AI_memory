@@ -1,0 +1,100 @@
+/* 清新绿意主题样式覆盖 */
+
+/* 移动端相册卡片优化 */
+.mobile-gallery-card {
+  background: var(--theme-containerBg, rgba(45, 90, 45, 0.85)) !important;
+  border: 1px solid var(--theme-border, rgba(74, 124, 89, 0.4)) !important;
+  box-shadow: var(--theme-cardShadow, 0 8px 24px rgba(10, 46, 10, 0.25), 0 4px 12px rgba(10, 46, 10, 0.15)) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+.mobile-gallery-card:hover {
+  box-shadow: 0 12px 30px rgba(10, 46, 10, 0.35) !important;
+  transform: translateY(-2px) !important;
+}
+
+.gallery-icon {
+  font-size: 36px !important;
+  margin-bottom: 12px !important;
+  background: var(--theme-secondary, #2d5a2d) !important;
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0px 15px 30px var(--theme-primary, rgba(74, 124, 89, 0.5)) !important;
+  color: var(--theme-textLight, #ffffff) !important;
+}
+
+.mobile-gallery-card .gallery-title {
+  color: var(--theme-textLight, #ffffff) !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  margin-bottom: 8px !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.gallery-desc {
+  color: var(--theme-textSecondary, #c8e6c9) !important;
+  font-size: 14px !important;
+  margin-bottom: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.preview-thumb {
+  border: 2px solid var(--theme-border, rgba(74, 124, 89, 0.4)) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+}
+
+.enter-gallery-btn {
+  background: linear-gradient(135deg, var(--theme-primary, #4a7c59) 0%, var(--theme-accent, #7fb069) 100%) !important;
+  box-shadow: 0 4px 15px var(--theme-primary, rgba(74, 124, 89, 0.3)) !important;
+  border: none !important;
+  border-radius: 20px !important;
+  padding: 8px 20px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--theme-textLight, #ffffff) !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+.enter-gallery-btn:hover {
+  background: linear-gradient(135deg, var(--theme-primaryHover, #5a8c69) 0%, var(--theme-tertiary, #6fa86f) 100%) !important;
+  box-shadow: 0 6px 20px var(--theme-primary, rgba(74, 124, 89, 0.4)) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* 年龄显示优化 */
+.age-label {
+  color: var(--theme-textSecondary, #c8e6c9) !important;
+}
+
+.age-value {
+  color: var(--theme-textLight, #ffffff) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .mobile-gallery-card .gallery-title {
+    font-size: 16px !important;
+  }
+  
+  .gallery-desc {
+    font-size: 12px !important;
+  }
+  
+  .enter-gallery-btn {
+    font-size: 12px !important;
+    padding: 6px 16px !important;
+  }
+  
+  .age-value {
+    font-size: 18px !important;
+  }
+}

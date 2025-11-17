@@ -9,37 +9,37 @@ export const themes = {
     name: '清新绿意',
     icon: '🌿',
     colors: {
-      // 背景色
-      primaryBg: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%)',
-      containerBg: '#ffffff',
-      headerBg: 'rgba(255, 255, 255, 0.9)',
-      commentBg: 'rgba(255, 255, 255, 0.8)',
-      secondaryBg: '#f1f8e9',
+      // 背景色 - 使用与开屏页相同的墨绿色渐变
+      primaryBg: 'linear-gradient(135deg, #0a2e0a 0%, #1a4d1a 30%, #2d5a2d 70%, #1a4d1a 100%)',
+      containerBg: 'rgba(45, 90, 45, 0.85)',
+      headerBg: 'rgba(10, 46, 10, 0.9)',
+      commentBg: 'rgba(26, 77, 26, 0.8)',
+      secondaryBg: 'rgba(15, 40, 15, 0.7)',
       
-      // 主色调
-      primary: '#66bb6a',
-      primaryHover: '#81c784',
-      secondary: '#2e7d32',
-      tertiary: '#a5d6a7',
-      accent: '#4caf50',
+      // 主色调 - 调整为与墨绿色背景协调的颜色
+      primary: '#4a7c59',
+      primaryHover: '#5a8c69',
+      secondary: '#2d5a2d',
+      tertiary: '#6fa86f',
+      accent: '#7fb069',
       
       // 按钮色
-      buttonBg: '#66bb6a',
+      buttonBg: '#4a7c59',
       buttonText: '#ffffff',
-      buttonHover: '#81c784',
+      buttonHover: '#5a8c69',
       
-      // 文本色
-      textPrimary: '#1b5e20',
-      textSecondary: '#33691e',
+      // 文本色 - 使用更亮的颜色确保在深色背景上可读
+      textPrimary: '#e8f5e9',
+      textSecondary: '#c8e6c9',
       textLight: '#ffffff',
-      text: '#2e7d32',
+      text: '#dcedc8',
       
-      // 边框和阴影
-      border: 'rgba(102, 187, 106, 0.3)',
-      borderLight: 'rgba(102, 187, 106, 0.2)',
-      borderDark: 'rgba(46, 125, 50, 0.2)',
-      shadow: 'rgba(46, 125, 50, 0.1)',
-      cardShadow: '0 8px 24px rgba(46, 125, 50, 0.12), 0 4px 12px rgba(46, 125, 50, 0.08)',
+      // 边框和阴影 - 调整为与墨绿色背景协调
+      border: 'rgba(74, 124, 89, 0.4)',
+      borderLight: 'rgba(74, 124, 89, 0.3)',
+      borderDark: 'rgba(45, 90, 45, 0.3)',
+      shadow: 'rgba(10, 46, 10, 0.3)',
+      cardShadow: '0 8px 24px rgba(10, 46, 10, 0.25), 0 4px 12px rgba(10, 46, 10, 0.15)',
     },
     assets: {
       backgroundImage: '/asset/background2.png',

@@ -61,7 +61,7 @@ const RecordComponent = () => {
   const [isMobileRecordingPaused, setIsMobileRecordingPaused] = useState(false); // 移动端录音是否暂停
   const [mobileRecordingTime, setMobileRecordingTime] = useState(0); // 移动端录音时长
   
-  // AI音乐生成相关状态
+  // 我的专属音乐相关状态
   const [showAIMusicGenerator, setShowAIMusicGenerator] = useState(false); // 是否显示AI音乐生成器
   
   // 引用

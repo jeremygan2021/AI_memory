@@ -93,26 +93,26 @@ const eventIcons = [
     setTimelineItems(eventItems.slice(0, itemsPerPage));
   }, [itemsPerPage]);
 
-  // 强制从云端重新加载重要事件
+  // 强制从云端重新加载时间轴
   const forceRefreshFromCloud = useCallback(async () => {
     if (!userCode) return;
     
     try {
-      console.log('强制从云端重新加载重要事件...');
+      console.log('强制从云端重新加载时间轴...');
       setLoading(true);
       
       // 使用新的强制刷新函数
       const refreshResult = await forceRefreshMajorEventsFromCloud(userCode);
       
       if (refreshResult.success) {
-        console.log('强制从云端加载重要事件成功:', refreshResult.events.length);
+        console.log('强制从云端加载时间轴成功:', refreshResult.events.length);
         setMajorEvents(refreshResult.events);
         mergeEventsWithTimeline(refreshResult.events);
         
         // 显示成功消息
         alert(refreshResult.message);
       } else {
-        console.log('云端没有重要事件数据');
+        console.log('云端没有时间轴数据');
         setMajorEvents([]);
         mergeEventsWithTimeline([]);
         alert(refreshResult.message);
@@ -130,20 +130,20 @@ const eventIcons = [
     if (!userCode) return;
     
     try {
-      console.log('开始加载重要事件，优先从云端获取最新数据...');
+      console.log('开始加载时间轴，优先从云端获取最新数据...');
       
-      // 优先从云端同步重要事件
+      // 优先从云端同步时间轴
       const syncResult = await syncMajorEventsSettings(userCode);
       
       if (syncResult.success && syncResult.events) {
-        console.log('成功加载重要事件:', syncResult.action, syncResult.events.length, '个事件');
+        console.log('成功加载时间轴:', syncResult.action, syncResult.events.length, '个事件');
         setMajorEvents(syncResult.events);
         // 将大事件合并到时间线中
         mergeEventsWithTimeline(syncResult.events);
         return; // 成功加载，直接返回
       }
       
-      console.log('云端和本地都没有重要事件数据');
+      console.log('云端和本地都没有时间轴数据');
       setMajorEvents([]);
       mergeEventsWithTimeline([]);
     } catch (error) {
@@ -157,7 +157,7 @@ const eventIcons = [
           setMajorEvents(events);
           mergeEventsWithTimeline(events);
         } else {
-          console.log('本地也没有重要事件数据，使用空数组');
+          console.log('本地也没有时间轴数据，使用空数组');
           setMajorEvents([]);
           mergeEventsWithTimeline([]);
         }
@@ -201,9 +201,9 @@ const eventIcons = [
           console.log('自定义名称同步完成');
           
           // 加载本地存储的大事件（优先从云端）
-          console.log('开始加载重要事件...');
+          console.log('开始加载时间轴...');
           await loadMajorEvents();
-          console.log('重要事件加载完成');
+          console.log('时间轴加载完成');
           
           // 加载时间线数据
           console.log('开始加载时间线数据...');
@@ -304,7 +304,7 @@ const eventIcons = [
       if (userCode) {
         const cloudResult = await saveMajorEventsToCloud(userCode, events);
         if (cloudResult.success) {
-          console.log('重要事件已成功保存到云端:', cloudResult);
+          console.log('时间轴已成功保存到云端:', cloudResult);
         } else {
           console.warn('保存到云端失败，但本地保存成功:', cloudResult.message);
         }
@@ -354,7 +354,7 @@ const eventIcons = [
   
   // 删除大事件
   const handleDeleteEvent = async (eventId) => {
-    if (window.confirm('确定要删除这个重要事件吗？')) {
+    if (window.confirm('确定要删除这个时间轴吗？')) {
       const updatedEvents = majorEvents.filter(event => event.id !== eventId);
       await saveMajorEvents(updatedEvents);
     }
@@ -444,7 +444,7 @@ const eventIcons = [
               className="add-event-btn"
               onClick={() => setShowEventForm(!showEventForm)}
             >
-              ⭐ {showEventForm ? '取消' : '添加'}重要事件
+              ⭐ {showEventForm ? '取消' : '添加'}时间轴
             </button>
           </div>
         )}
@@ -457,7 +457,7 @@ const eventIcons = [
                 type="text"
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
-                placeholder="输入重要事件的标题"
+                placeholder="输入时间轴的标题"
                 className="form-input"
               />
             </div>
@@ -475,7 +475,7 @@ const eventIcons = [
               <textarea
                 value={eventDescription}
                 onChange={(e) => setEventDescription(e.target.value)}
-                placeholder="描述这个重要事件"
+                placeholder="描述这个时间轴"
                 className="form-textarea"
                 rows={3}
               />
@@ -529,7 +529,7 @@ const eventIcons = [
         
         <div className="timeline-empty">
           <div className="empty-icon">📝</div>
-          <div className="empty-text">还没有添加任何重要事件</div>
+          <div className="empty-text">还没有添加任何时间轴</div>
           <div className="empty-desc">点击上方按钮添加主人公成长中的重要时刻</div>
         </div>
       </div>
@@ -547,7 +547,7 @@ const eventIcons = [
             className="add-event-btn"
             onClick={() => setShowEventForm(!showEventForm)}
           >
-            ⭐ {showEventForm ? '取消' : '添加'}重要事件
+            ⭐ {showEventForm ? '取消' : '添加'}时间轴
           </button>
         </div>
       )}
@@ -561,7 +561,7 @@ const eventIcons = [
               type="text"
               value={eventTitle}
               onChange={(e) => setEventTitle(e.target.value)}
-              placeholder="输入重要事件的标题"
+              placeholder="输入时间轴的标题"
               className="form-input"
             />
           </div>
@@ -579,7 +579,7 @@ const eventIcons = [
             <textarea
               value={eventDescription}
               onChange={(e) => setEventDescription(e.target.value)}
-              placeholder="描述这个重要事件"
+              placeholder="描述这个时间轴"
               className="form-textarea"
               rows={3}
             />
@@ -679,7 +679,7 @@ const eventIcons = [
       {/* 统计信息 */}
       <div className="timeline-stats">
         <div className="stats-left">
-          <span>共找到 {allItems.length} 条重要事件</span>
+          <span>共找到 {allItems.length} 条时间轴</span>
           {(startDate || endDate) && (
             <span className="filter-info">
               (已筛选: {startDate || '不限'} 至 {endDate || '不限'})
@@ -690,7 +690,7 @@ const eventIcons = [
           <button 
             className="refresh-button" 
             onClick={forceRefreshFromCloud}
-            title="从云端重新加载重要事件"
+            title="从云端重新加载时间轴"
             style={{
               display: 'flex',
               alignItems: 'center',

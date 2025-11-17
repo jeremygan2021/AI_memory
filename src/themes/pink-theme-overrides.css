@@ -60,7 +60,7 @@
   color: var(--theme-primary, #ec407a) !important;
 }
 
-/* 回忆书籍卡片粉色主题优化 */
+/* 我的故事卡片粉色主题优化 */
 .book-memory-card {
   background: linear-gradient(135deg, var(--theme-primary, #ec407a) 0%, var(--theme-primaryHover, #f06292) 100%) !important;
   box-shadow: 0 10px 30px rgba(136, 14, 79, 0.12) !important;

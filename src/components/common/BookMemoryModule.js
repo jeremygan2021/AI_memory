@@ -183,7 +183,7 @@ const BookMemoryModule = () => {
       <div className="book-module-header">
         <div className="book-module-title">
           <span className="book-icon">📚</span>
-          回忆书籍
+          生命的织锦
         </div>
         <div className="book-stats">
           <span className="stat-item">

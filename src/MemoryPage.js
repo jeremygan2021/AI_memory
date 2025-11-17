@@ -965,7 +965,7 @@ const MemoryPage = () => {
                 <span className="book-icon" style={{
                   fontSize: '20px'
                 }}>📚</span>
-                回忆书籍
+                我的故事
               </div>
             </div>
             <div className="book-card-content">
@@ -1025,12 +1025,12 @@ const MemoryPage = () => {
             {showPdfList && (
               <div style={{ marginTop: 12, maxHeight: 220, overflowY: 'auto', borderTop: '1px dashed var(--theme-border)', paddingTop: 10, scrollbarWidth: 'thin', scrollbarColor: 'var(--theme-primary, #3bb6a6) var(--theme-containerBg, #ffffff)' }}>
                 {pdfFiles.length === 0 ? (
-                  <div style={{ color:'var(--theme-primary)', fontSize: 12 }}>暂无回忆书籍</div>
+                  <div style={{ color:'var(--theme-primary)', fontSize: 12 }}>暂无我的故事</div>
                 ) : (
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {pdfFiles.map((f, idx) => (
                       <li key={f.objectKey || idx} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 0', gap:'10px' }}>
-                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%', color: 'white', fontSize: 14 }}>我的回忆书籍</span>
+                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'30%', color: 'white', fontSize: 14 }}>我的我的故事</span>
                         <div style={{display: 'flex' , flex: '1' , gap:'5px', alignItems:'end'}}>
                           <a href={f.url} target="_blank" rel="noreferrer" className="book-card-action1" style={{ 
                             padding:'6px 10px',
@@ -1053,12 +1053,12 @@ const MemoryPage = () => {
             <input ref={fileInputRef} type="file" accept="application/pdf" style={{ display:'none' }} onChange={onChoosePdf} />
           </div>
 
-          {/* AI音乐生成模块 - 新增入口卡片 */}
+          {/* 我的专属音乐模块 - 新增入口卡片 */}
           <div className="ai-music-card">
             <div className="ai-music-card-header">
               <div className="ai-music-card-title">
                 <span className="ai-music-icon">🎵</span>
-                AI音乐生成
+                我的专属音乐
               </div>
             </div>
             <div className="ai-music-card-content">

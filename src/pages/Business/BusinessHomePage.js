@@ -362,11 +362,11 @@ const BusinessHomePage = () => {
             </div>
           </div>
 
-          {/* 回忆书籍区域 */}
+          {/* 我的故事区域 */}
           <div className="memory-books-section">
             <div className="books-header">
               <div className="books-icon animated-icon">📚</div>
-              <h3>回忆书籍</h3>
+              <h3>我的故事</h3>
               <div className="stats-container">
                 <div className="books-count">
                   <span className="count-number animated-count">{booksCount}</span>

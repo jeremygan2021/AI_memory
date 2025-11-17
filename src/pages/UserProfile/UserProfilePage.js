@@ -123,7 +123,7 @@ const UserProfilePage = () => {
         <div className="membership-left">
           <div className="crown-icon">👑</div>
           <div className="membership-info">
-            <div className="membership-title">时与墨AI回忆录会员</div>
+            <div className="membership-title">时与墨驻时之墨会员</div>
             <div className="membership-benefits">
               权益描述01·权益描述02·权益描述03
             </div>

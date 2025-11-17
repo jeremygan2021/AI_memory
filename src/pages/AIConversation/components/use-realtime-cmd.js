@@ -18,7 +18,7 @@ const useRealtimeCmd = () => {
           type: "retrieval",
           function: {
             description:
-              "本知识库可以回答用户【生命的织锦：家族与传承的交织故事】相关问题",
+              "本知识库可以回答用户【我的故事：家族与传承的交织故事】相关问题",
             options: {
               // 文本检索
               vector_store_id: "276921286739320832",
@@ -31,7 +31,7 @@ const useRealtimeCmd = () => {
           type: "retrieval",
           function: {
             description:
-              "本知识库可以回答用户【生命的织锦：家族与传承的交织故事】相关问题",
+              "本知识库可以回答用户【我的故事：家族与传承的交织故事】相关问题",
             options: {
               // 图片检索
               vector_store_id: "276946092016758784",

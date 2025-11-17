@@ -7,7 +7,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, #0a2e0a 0%, #1a4d1a 30%, #2d5a2d 70%, #1a4d1a 100%);
   z-index: 9999;
   transition: opacity 1s ease-in-out;
   overflow: hidden;
