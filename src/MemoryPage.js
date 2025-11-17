@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import './themes/pink-theme-overrides.css';
 import MemoryTimeline from './components/common/MemoryTimeline';
@@ -19,6 +19,7 @@ import { syncThemeOnStartup } from './themes/themeConfig';
 const MemoryPage = () => {
   const { userid } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [userCode, setUserCode] = useState('');
   const [babyAgeMonths, setBabyAgeMonths] = useState(12);
   const [babyBirthDate, setBabyBirthDate] = useState('');
@@ -41,6 +42,9 @@ const MemoryPage = () => {
   const [pdfFiles, setPdfFiles] = useState([]);
   const [showPdfList, setShowPdfList] = useState(false);
   const [pdfMessage, setPdfMessage] = useState('');
+  
+  // 检测当前URL路径是否包含"/memory"
+  const isMemoryPath = location.pathname.endsWith('/memory');
   // 从URL参数获取用户代码
   useEffect(() => {
     if (userid) {
@@ -738,23 +742,25 @@ const MemoryPage = () => {
                       marginLeft: '8px'
                     }}>加载中...</span>
                   ) : (
-                    <button 
-                      className="edit-birth-date-btn" 
-                      onClick={startEditBirthDate}
-                      title="设置用户出生日期"
-                      style={{
-                        background: 'var(--theme-secondaryBg)',
-                        border: '1px solid var(--theme-border)',
-                        borderRadius: '4px',
-                        padding: '4px 8px',
-                        fontSize: '12px',
-                        color: 'var(--theme-primary)',
-                        cursor: 'pointer',
-                        marginLeft: '8px'
-                      }}
-                    >
-                      设置生日
-                    </button>
+                    !isMemoryPath && (
+                      <button 
+                        className="edit-birth-date-btn" 
+                        onClick={startEditBirthDate}
+                        title="设置用户出生日期"
+                        style={{
+                          background: 'var(--theme-secondaryBg)',
+                          border: '1px solid var(--theme-border)',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '12px',
+                          color: 'var(--theme-primary)',
+                          cursor: 'pointer',
+                          marginLeft: '8px'
+                        }}
+                      >
+                        设置生日
+                      </button>
+                    )
                   )}
                 </div>
               </div>
