@@ -402,6 +402,31 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   100% { transform: scale(1); }
 }
 
+/* 录音按钮样式 */
+.voice-action-btn {
+  background: var(--theme-primary);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.voice-action-btn:hover {
+  background: var(--theme-primaryDark);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px var(--theme-cardShadow);
+}
+
+.voice-action-btn:active {
+  transform: translateY(0);
+}
+
 .center-voice-card .voice-title {
   font-size: 2rem;
   font-weight: 900;
@@ -898,6 +923,159 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
 
 
 
+/* 对话框样式 */
+.dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.dialog-box {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  padding: 0;
+  overflow: hidden;
+  animation: dialogFadeIn 0.3s ease-out;
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dialog-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.dialog-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.dialog-close:hover {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.dialog-content {
+  padding: 20px 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px 20px;
+  background-color: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+.dialog-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+.cancel-btn {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.confirm-btn {
+  background-color: #4ecdc4;
+  color: white;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background-color: #3db8af;
+}
+
+.confirm-btn:disabled {
+  background-color: #b2e8e4;
+  cursor: not-allowed;
+}
+
 /* ai音乐卡片样式 */
 .ai-music-card {
   background: var(--theme-primary);
@@ -986,12 +1164,72 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   position: relative;
   z-index: 1;
   width: 100%;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.ai-music-card-action::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.ai-music-card-action:hover::before {
+  left: 100%;
 }
 
 .ai-music-card-action:hover {
   background: var(--theme-secondaryBg);
-  transform: translateY(-2px);
-  box-shadow: var(--theme-cardShadow);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 绑定音乐按钮特殊样式 */
+.bind-music-btn {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.bind-music-btn:hover {
+  background: linear-gradient(135deg, #ff8a8e 0%, #fbc0b4 100%);
+  box-shadow: 0 8px 20px rgba(255, 154, 158, 0.3);
+}
+
+/* 播放音乐按钮特殊样式 */
+.play-music-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.play-music-btn:hover {
+  background: linear-gradient(135deg, #3f9cfe 0%, #00e2ee 100%);
+  box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+}
+
+.play-music-btn:disabled {
+  background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+  color: #9e9e9e;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.play-music-btn:disabled::before {
+  display: none;
 }
 
 /* 响应式设计 */

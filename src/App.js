@@ -36,6 +36,10 @@ import {
   calculateBabyAgeInMonths, 
   formatBabyAge 
 } from './services/babyInfoCloudService';
+import { 
+  saveMusicUrlToCloud, 
+  loadMusicUrlFromCloud 
+} from './services/musicUrlCloudService';
 
 // 折线图数据
 const chartData = [
@@ -291,6 +295,12 @@ const HomePage = ({ onNavigate }) => {
   const [showPdfList, setShowPdfList] = useState(false);
   const [pdfMessage, setPdfMessage] = useState('');
   const fileInputRef = React.useRef(null);
+  
+  // 音乐URL相关状态
+  const [musicUrl, setMusicUrl] = useState('');
+  const [showMusicUrlDialog, setShowMusicUrlDialog] = useState(false);
+  const [tempMusicUrl, setTempMusicUrl] = useState('');
+  const [isLoadingMusicUrl, setIsLoadingMusicUrl] = useState(false);
 
   // 移动端滚动性能优化
   useEffect(() => {
@@ -425,6 +435,32 @@ const HomePage = ({ onNavigate }) => {
     };
     
     loadBabyBirthDate();
+  }, [userCode]); // 添加userCode依赖，确保用户切换时重新加载
+  
+  // 加载音乐URL
+  useEffect(() => {
+    const loadMusicUrl = async () => {
+      const currentUserCode = getUserCode();
+      if (!currentUserCode) return;
+      
+      setIsLoadingMusicUrl(true);
+      
+      try {
+        // 从云端加载音乐URL
+        const cloudResult = await loadMusicUrlFromCloud(currentUserCode);
+        
+        if (cloudResult.success && cloudResult.musicUrl) {
+          setMusicUrl(cloudResult.musicUrl);
+          console.log('从云端加载音乐URL成功:', cloudResult.musicUrl);
+        }
+      } catch (error) {
+        console.error('加载音乐URL失败:', error);
+      } finally {
+        setIsLoadingMusicUrl(false);
+      }
+    };
+    
+    loadMusicUrl();
   }, [userCode]); // 添加userCode依赖，确保用户切换时重新加载
 
   // 保存宝宝出生日期
@@ -744,6 +780,49 @@ const HomePage = ({ onNavigate }) => {
       navigate(`/${userCode}/${randomId}?aiMusic=true`); 
     }
   }, [userCode, navigate]);
+  
+  // 打开绑定音乐URL对话框
+  const openBindMusicDialog = useCallback(() => {
+    setTempMusicUrl(musicUrl);
+    setShowMusicUrlDialog(true);
+  }, [musicUrl]);
+  
+  // 关闭绑定音乐URL对话框
+  const closeBindMusicDialog = useCallback(() => {
+    setShowMusicUrlDialog(false);
+    setTempMusicUrl('');
+  }, []);
+  
+  // 保存音乐URL
+  const saveMusicUrl = useCallback(async () => {
+    const currentUserCode = getUserCode();
+    console.log('开始保存音乐URL:', { currentUserCode, tempMusicUrl });
+    
+    if (!currentUserCode || !tempMusicUrl.trim()) {
+      alert('请输入有效的音乐URL');
+      return;
+    }
+    
+    try {
+      console.log('调用saveMusicUrlToCloud函数...');
+      // 保存到云端
+      const cloudResult = await saveMusicUrlToCloud(currentUserCode, tempMusicUrl.trim());
+      console.log('saveMusicUrlToCloud返回结果:', cloudResult);
+      
+      if (cloudResult.success) {
+        setMusicUrl(tempMusicUrl.trim());
+        closeBindMusicDialog();
+        console.log('音乐URL保存成功:', tempMusicUrl.trim());
+        alert('音乐URL保存成功！');
+      } else {
+        console.error('音乐URL保存失败:', cloudResult.error);
+        alert(`保存失败: ${cloudResult.error || '未知错误'}`);
+      }
+    } catch (error) {
+      console.error('音乐URL保存失败:', error);
+      alert(`保存失败: ${error.message || '网络错误，请稍后重试'}`);
+    }
+  }, [tempMusicUrl, closeBindMusicDialog]);
 
   // 切换相册显示状态（保留函数以避免错误）
   const togglePhotoDisplay = useCallback(() => {
@@ -1508,7 +1587,7 @@ const HomePage = ({ onNavigate }) => {
           </div>
 
           {/* 我的专属音乐模块 - 新增入口卡片 */}
-          <div className="ai-music-card" onClick={goToAIMusic}>
+          <div className="ai-music-card">
             <div className="ai-music-card-header">
               <div className="ai-music-card-title">
                 <span className="ai-music-icon">🎵</span>
@@ -1523,9 +1602,16 @@ const HomePage = ({ onNavigate }) => {
                 <span className="feature-tag">🎧 高品质音效</span>
               </div>
             </div>
-            <button className="ai-music-card-action">
-              生成AI音乐
-            </button>
+            <div className="ai-music-card-actions">
+                <button className="ai-music-card-action" onClick={goToAIMusic}>
+                  <span>🎵</span>
+                  <span>生成AI音乐</span>
+                </button>
+                <button className="ai-music-card-action bind-music-btn" onClick={openBindMusicDialog}>
+                  <span>🔗</span>
+                  <span>绑定音乐</span>
+                </button>
+            </div>
           </div>
         </div>
 
@@ -1772,6 +1858,44 @@ const HomePage = ({ onNavigate }) => {
                 <button className="album-preview-arrow right" onClick={showNextPhoto}>›</button>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 绑定音乐URL对话框 */}
+      {showMusicUrlDialog && (
+        <div className="dialog-mask" onClick={closeBindMusicDialog}>
+          <div className="dialog-box" onClick={e => e.stopPropagation()}>
+            <div className="dialog-header">
+              <h3 className="dialog-title">绑定音乐URL</h3>
+              <button className="dialog-close" onClick={closeBindMusicDialog}>×</button>
+            </div>
+            <div className="dialog-content">
+              <div className="form-group">
+                <label htmlFor="music-url" className="form-label">音乐URL</label>
+                <input
+                  id="music-url"
+                  type="url"
+                  className="form-input"
+                  placeholder="请输入音乐URL"
+                  value={tempMusicUrl}
+                  onChange={(e) => setTempMusicUrl(e.target.value)}
+                />
+                <div className="form-hint">请输入有效的音乐链接，如网易云音乐、QQ音乐等</div>
+              </div>
+            </div>
+            <div className="dialog-actions">
+              <button className="dialog-btn cancel-btn" onClick={closeBindMusicDialog}>
+                取消
+              </button>
+              <button 
+                className="dialog-btn confirm-btn" 
+                onClick={saveMusicUrl}
+                disabled={!tempMusicUrl.trim()}
+              >
+                保存
+              </button>
+            </div>
           </div>
         </div>
       )}

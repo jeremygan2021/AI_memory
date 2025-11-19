@@ -14,6 +14,7 @@ import {
   loadBabyBirthDateFromCloud,
   saveBabyBirthDateToCloud
 } from './services/babyInfoCloudService';
+import { loadMusicUrlFromCloud } from './services/musicUrlCloudService';
 import { syncThemeOnStartup } from './themes/themeConfig';
 
 const MemoryPage = () => {
@@ -42,9 +43,94 @@ const MemoryPage = () => {
   const [pdfFiles, setPdfFiles] = useState([]);
   const [showPdfList, setShowPdfList] = useState(false);
   const [pdfMessage, setPdfMessage] = useState('');
+  const [musicUrl, setMusicUrl] = useState('');
+  const [isLoadingMusicUrl, setIsLoadingMusicUrl] = useState(false);
   
   // 检测当前URL路径是否包含"/memory"
   const isMemoryPath = location.pathname.endsWith('/memory');
+  
+  // 处理录音卡片点击事件
+  const handleVoiceCardClick = async () => {
+    if (isMemoryPath) {
+      try {
+        // 获取用户的实际录音会话数据
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://data.tangledup-ai.com';
+        const response = await fetch(
+          `${API_BASE_URL}/files?prefix=${encodeURIComponent(`recordings/${userid}/`)}&max_keys=1000`
+        );
+        
+        if (!response.ok) {
+          throw new Error('获取录音数据失败');
+        }
+        
+        const result = await response.json();
+        const files = result.files || result.data || result.objects || result.items || result.results || [];
+        
+        // 按会话ID分组
+        const sessionsMap = new Map();
+        files.forEach(file => {
+          if (!file || typeof file !== 'object') return;
+          
+          const objectKey = file.object_key || file.objectKey || file.key || file.name;
+          if (!objectKey) return;
+          
+          // 解析文件路径: recordings/{userCode}/{sessionId}/{filename}
+          const pathParts = objectKey.split('/');
+          if (pathParts.length >= 4 && pathParts[0] === 'recordings' && pathParts[1] === userid) {
+            const sessionId = pathParts[2];
+            // 仅处理会话ID为8位的文件
+            if (!/^[a-zA-Z0-9]{8}$/.test(sessionId)) return;
+            
+            if (!sessionsMap.has(sessionId)) {
+              sessionsMap.set(sessionId, []);
+            }
+            sessionsMap.get(sessionId).push(file);
+          }
+        });
+        
+        // 转换为数组并过滤有效会话
+        const sessions = Array.from(sessionsMap.entries())
+          .map(([sessionId, sessionFiles]) => ({ sessionId, recordings: sessionFiles }))
+          .filter(session => session.recordings.length > 0);
+        
+        if (sessions.length > 0) {
+          // 随机选择一个会话
+          const randomSession = sessions[Math.floor(Math.random() * sessions.length)];
+          // 随机选择该会话中的一个录音文件
+          const randomRecording = randomSession.recordings[Math.floor(Math.random() * randomSession.recordings.length)];
+          
+          // 从录音文件名提取voiceId
+          const objectKey = randomRecording.object_key || randomRecording.objectKey || randomRecording.key || randomRecording.name;
+          const fileName = objectKey.split('/').pop() || '';
+          const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+          
+          let voiceId = Date.now().toString();
+          if (nameWithoutExt.includes('recording_')) {
+            const parts = nameWithoutExt.split('_');
+            if (parts.length >= 2) {
+              voiceId = parts[1];
+            }
+          } else if (nameWithoutExt.includes('_')) {
+            const parts = nameWithoutExt.split('_');
+            voiceId = parts[parts.length - 1];
+          }
+          
+          // 跳转到实际的录音播放页面
+          navigate(`/${userid}/${randomSession.sessionId}/play/${voiceId}`);
+        } else {
+          // 如果没有录音，仍然跳转到音频库
+          navigate(`/${userid}/audio-library`);
+        }
+      } catch (error) {
+        console.error('获取录音数据错误:', error);
+        // 出错时跳转到音频库
+        navigate(`/${userid}/audio-library`);
+      }
+    } else {
+      // 非/memory路由下的默认行为
+      navigate(`/${userid}/audio-library`);
+    }
+  }
   // 从URL参数获取用户代码
   useEffect(() => {
     if (userid) {
@@ -99,6 +185,51 @@ const MemoryPage = () => {
     };
     
     loadBabyBirthDate();
+  }, [userCode]);
+
+  // 加载音乐URL
+  useEffect(() => {
+    const loadMusicUrl = async () => {
+      const currentUserCode = getUserCode();
+      console.log('MemoryPage: 开始加载音乐URL，用户代码:', currentUserCode);
+      
+      if (!currentUserCode) {
+        console.log('MemoryPage: 用户代码为空，跳过加载');
+        return;
+      }
+      
+      setIsLoadingMusicUrl(true);
+      
+      try {
+        // 从云端加载音乐URL
+        console.log('MemoryPage: 调用loadMusicUrlFromCloud函数');
+        const result = await loadMusicUrlFromCloud(currentUserCode);
+        console.log('MemoryPage: loadMusicUrlFromCloud返回结果:', result);
+        
+        if (result.success && result.musicUrl) {
+          setMusicUrl(result.musicUrl);
+          console.log('MemoryPage: 从云端加载音乐URL成功:', result.musicUrl);
+        } else {
+          console.log('MemoryPage: 云端加载失败，尝试从本地存储加载');
+          // 云端加载失败，尝试从本地存储加载
+          const localMusicUrl = localStorage.getItem(`music_url_${currentUserCode}`);
+          console.log('MemoryPage: 本地存储中的音乐URL:', localMusicUrl);
+          if (localMusicUrl) {
+            setMusicUrl(localMusicUrl);
+            console.log('MemoryPage: 从本地加载音乐URL:', localMusicUrl);
+          } else {
+            console.log('MemoryPage: 本地也没有找到音乐URL');
+          }
+        }
+      } catch (error) {
+        console.error('MemoryPage: 加载音乐URL失败:', error);
+      } finally {
+        setIsLoadingMusicUrl(false);
+        console.log('MemoryPage: 音乐URL加载完成，当前musicUrl:', musicUrl);
+      }
+    };
+    
+    loadMusicUrl();
   }, [userCode]);
 
   // 优化窗口大小监听 - 使用防抖
@@ -379,6 +510,21 @@ const MemoryPage = () => {
     }
   }, [userCode, navigate]);
 
+  // 播放专属音乐
+  const playPersonalizedMusic = useCallback(() => {
+    console.log('MemoryPage: 播放音乐按钮被点击，当前musicUrl:', musicUrl);
+    
+    if (musicUrl) {
+      // 在新窗口中打开音乐URL
+      console.log('MemoryPage: 打开音乐URL:', musicUrl);
+      window.open(musicUrl, '_blank');
+    } else {
+      // 如果没有音乐URL，显示提示
+      console.log('MemoryPage: 没有音乐URL，显示提示');
+      alert('您还没有绑定专属音乐，请先在首页绑定音乐URL');
+    }
+  }, [musicUrl]);
+
   // 跳转到相册页面（无上传功能）
   const goToGallery = useCallback(() => {
     if (userCode) {
@@ -581,10 +727,10 @@ const MemoryPage = () => {
             {/* 平板专用：录音和相册入口，相册在前 */}
             {isTabletView && (
               <>
-               <div className="center-voice-card tablet-only">
+               <div className="center-voice-card tablet-only" onClick={() => handleVoiceCardClick()}>
                   <div className="voice-icon">🎤</div>
-                  <div className="voice-title">录制我的声音</div>
-                  <div className="voice-desc">智能语音助手，记录您的美好时光</div>
+                  <div className="voice-title">{isMemoryPath ? '听取录音' : '录制我的声音'}</div>
+                  <div className="voice-desc">{isMemoryPath ? '播放您的录音记录' : '智能语音助手，记录您的美好时光'}</div>
                   <div className="waveform">
               <div className="wave-container">
                 {Array.from({length: 50}, (_, i) => (
@@ -595,6 +741,9 @@ const MemoryPage = () => {
                 ))}
               </div>
             </div>
+                  <button className="voice-action-btn">
+                    {isMemoryPath ? '播放录音' : '开始录制'}
+                  </button>
                 </div>
                 <div className="mobile-gallery-entrance mobile-left-gallery tablet-only">
                   <div className="mobile-gallery-card" onClick={goToGallery}>
@@ -684,10 +833,10 @@ const MemoryPage = () => {
                     </div>
                   </div>
                 )}
-                <div className="center-voice-card mobile-voice-card">
+                <div className="center-voice-card mobile-voice-card" onClick={() => handleVoiceCardClick()}>
                   <div className="voice-icon">🎤</div>
-                  <div className="voice-title">录制我的声音</div>
-                  <div className="voice-desc">智能语音助手，记录您的美好时光</div>
+                  <div className="voice-title">{isMemoryPath ? '听取录音' : '录制我的声音'}</div>
+                  <div className="voice-desc">{isMemoryPath ? '播放您的录音记录' : '智能语音助手，记录您的美好时光'}</div>
                   <div className="waveform">
               <div className="wave-container">
                 {Array.from({length: 50}, (_, i) => (
@@ -698,6 +847,9 @@ const MemoryPage = () => {
                 ))}
               </div>
             </div>
+                  <button className="voice-action-btn">
+                    {isMemoryPath ? '播放录音' : '开始录制'}
+                  </button>
                 </div>
               </>            )}
             {/* 用户信息 */}
@@ -929,10 +1081,10 @@ const MemoryPage = () => {
         {/* 中间：录制声音、亲子活动和活动时长 */}
         <div className="memory-center">
           {/* 录制声音功能 */}
-          <div className="center-voice-card center-voice-card-center">
+          <div className="center-voice-card center-voice-card-center" onClick={() => handleVoiceCardClick()}>
             <div className="voice-icon">🎤</div>
-            <div className="voice-title">录制我的声音</div>
-            <div className="voice-desc">智能语音助手，记录您的美好时光</div>
+            <div className="voice-title">{isMemoryPath ? '听取录音' : '录制我的声音'}</div>
+            <div className="voice-desc">{isMemoryPath ? '播放您的录音记录' : '智能语音助手，记录您的美好时光'}</div>
            <div className="waveform">
               <div className="wave-container">
                 {Array.from({length: 50}, (_, i) => (
@@ -943,6 +1095,9 @@ const MemoryPage = () => {
                 ))}
               </div>
             </div>
+            <button className="voice-action-btn">
+              {isMemoryPath ? '播放录音' : '开始录制'}
+            </button>
           </div>
 
           {/* 回忆书籍模块：AI对话 + PDF上传/查看 */}
@@ -1083,6 +1238,30 @@ const MemoryPage = () => {
                   }}></div>
                 ))}
               </div>
+            <div className="ai-music-card-actions">
+              <button 
+                className="ai-music-card-action play-music-btn" 
+                onClick={playPersonalizedMusic}
+                disabled={!musicUrl}
+                style={{
+                  background: musicUrl ? 'var(--theme-primary)' : 'var(--theme-border)',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  fontSize: '14px',
+                  color: 'var(--theme-buttonText)',
+                  cursor: musicUrl ? 'pointer' : 'not-allowed',
+                  marginTop: '10px'
+                }}
+              >
+                <span>{musicUrl ? '▶️' : '⏸️'}</span>
+                <span>{musicUrl ? '播放专属音乐' : '未绑定音乐'}</span>
+              </button>
+              {/* 调试信息 */}
+              <div style={{ fontSize: '10px', color: '#666', marginTop: '5px', textAlign: 'center' }}>
+                {musicUrl ? `已绑定: ${musicUrl.substring(0, 30)}...` : '未绑定音乐URL'}
+              </div>
+            </div>
           </div>
         </div>
 
