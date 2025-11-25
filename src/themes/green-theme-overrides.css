@@ -51,7 +51,7 @@
 }
 
 .enter-gallery-btn {
-  background: linear-gradient(135deg, var(--theme-primary, #4a7c59) 0%, var(--theme-accent, #7fb069) 100%) !important;
+  background: linear-gradient(135deg, var(--theme-primary, #4a7c59) 0%, var(--theme-accent, #76a461) 100%) !important;
   box-shadow: 0 4px 15px var(--theme-primary, rgba(74, 124, 89, 0.3)) !important;
   border: none !important;
   border-radius: 20px !important;

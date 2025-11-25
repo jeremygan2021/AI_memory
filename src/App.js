@@ -38,7 +38,8 @@ import {
 } from './services/babyInfoCloudService';
 import { 
   saveMusicUrlToCloud, 
-  loadMusicUrlFromCloud 
+  loadMusicUrlFromCloud,
+  deleteMusicUrlFromCloud
 } from './services/musicUrlCloudService';
 
 // 折线图数据
@@ -301,6 +302,7 @@ const HomePage = ({ onNavigate }) => {
   const [showMusicUrlDialog, setShowMusicUrlDialog] = useState(false);
   const [tempMusicUrl, setTempMusicUrl] = useState('');
   const [isLoadingMusicUrl, setIsLoadingMusicUrl] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // 移动端滚动性能优化
   useEffect(() => {
@@ -441,22 +443,41 @@ const HomePage = ({ onNavigate }) => {
   useEffect(() => {
     const loadMusicUrl = async () => {
       const currentUserCode = getUserCode();
-      if (!currentUserCode) return;
+      console.log('HomePage: 开始加载音乐URL，用户代码:', currentUserCode);
+      
+      if (!currentUserCode) {
+        console.log('HomePage: 用户代码为空，跳过加载');
+        return;
+      }
       
       setIsLoadingMusicUrl(true);
       
       try {
         // 从云端加载音乐URL
+        console.log('HomePage: 调用loadMusicUrlFromCloud函数');
         const cloudResult = await loadMusicUrlFromCloud(currentUserCode);
+        console.log('HomePage: loadMusicUrlFromCloud返回结果:', cloudResult);
         
         if (cloudResult.success && cloudResult.musicUrl) {
           setMusicUrl(cloudResult.musicUrl);
-          console.log('从云端加载音乐URL成功:', cloudResult.musicUrl);
+          console.log('HomePage: 从云端加载音乐URL成功:', cloudResult.musicUrl);
+        } else {
+          console.log('HomePage: 云端加载失败，尝试从本地存储加载');
+          // 云端加载失败，尝试从本地存储加载
+          const localMusicUrl = localStorage.getItem(`music_url_${currentUserCode}`);
+          console.log('HomePage: 本地存储中的音乐URL:', localMusicUrl);
+          if (localMusicUrl) {
+            setMusicUrl(localMusicUrl);
+            console.log('HomePage: 从本地加载音乐URL:', localMusicUrl);
+          } else {
+            console.log('HomePage: 本地也没有找到音乐URL');
+          }
         }
       } catch (error) {
-        console.error('加载音乐URL失败:', error);
+        console.error('HomePage: 加载音乐URL失败:', error);
       } finally {
         setIsLoadingMusicUrl(false);
+        console.log('HomePage: 音乐URL加载完成，当前musicUrl:', musicUrl);
       }
     };
     
@@ -793,6 +814,65 @@ const HomePage = ({ onNavigate }) => {
     setTempMusicUrl('');
   }, []);
   
+  // 删除音乐URL
+  const deleteMusicUrl = useCallback(async () => {
+    const currentUserCode = getUserCode();
+    console.log('开始删除音乐URL:', { currentUserCode });
+    
+    if (!currentUserCode) {
+      alert('用户代码无效');
+      return;
+    }
+    
+    if (!musicUrl) {
+      alert('当前没有设置音乐URL');
+      return;
+    }
+    
+    setShowDeleteConfirm(true);
+  }, [musicUrl]);
+
+  // 确认删除音乐URL
+  const confirmDeleteMusicUrl = useCallback(async () => {
+    const currentUserCode = getUserCode();
+    setShowDeleteConfirm(false);
+    
+    try {
+      console.log('调用deleteMusicUrlFromCloud函数...');
+      // 从云端删除音乐URL
+      const cloudResult = await deleteMusicUrlFromCloud(currentUserCode);
+      console.log('deleteMusicUrlFromCloud返回结果:', cloudResult);
+      
+      if (cloudResult.success) {
+        setMusicUrl('');
+        // 同时删除本地存储
+        localStorage.removeItem(`music_url_${currentUserCode}`);
+        closeBindMusicDialog();
+        console.log('音乐URL删除成功');
+        alert('音乐URL删除成功！');
+      } else {
+        // 云端删除失败，至少删除本地存储
+        setMusicUrl('');
+        localStorage.removeItem(`music_url_${currentUserCode}`);
+        closeBindMusicDialog();
+        console.log('音乐URL云端删除失败，已删除本地:', cloudResult.error);
+        alert('音乐URL已删除（云端同步失败）');
+      }
+    } catch (error) {
+      console.error('音乐URL删除失败:', error);
+      // 出错时也删除本地存储
+      setMusicUrl('');
+      localStorage.removeItem(`music_url_${currentUserCode}`);
+      closeBindMusicDialog();
+      alert(`音乐URL已删除（云端同步失败: ${error.message}）`);
+    }
+  }, [closeBindMusicDialog]);
+
+  // 取消删除音乐URL
+  const cancelDeleteMusicUrl = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, []);
+
   // 保存音乐URL
   const saveMusicUrl = useCallback(async () => {
     const currentUserCode = getUserCode();
@@ -811,16 +891,26 @@ const HomePage = ({ onNavigate }) => {
       
       if (cloudResult.success) {
         setMusicUrl(tempMusicUrl.trim());
+        // 同时保存到本地作为备份
+        localStorage.setItem(`music_url_${currentUserCode}`, tempMusicUrl.trim());
         closeBindMusicDialog();
         console.log('音乐URL保存成功:', tempMusicUrl.trim());
         alert('音乐URL保存成功！');
       } else {
-        console.error('音乐URL保存失败:', cloudResult.error);
-        alert(`保存失败: ${cloudResult.error || '未知错误'}`);
+        // 云端保存失败，至少保存到本地
+        setMusicUrl(tempMusicUrl.trim());
+        localStorage.setItem(`music_url_${currentUserCode}`, tempMusicUrl.trim());
+        closeBindMusicDialog();
+        console.log('音乐URL云端保存失败，已保存到本地:', tempMusicUrl.trim());
+        alert('音乐URL已保存到本地（云端同步失败）');
       }
     } catch (error) {
       console.error('音乐URL保存失败:', error);
-      alert(`保存失败: ${error.message || '网络错误，请稍后重试'}`);
+      // 出错时也保存到本地
+      setMusicUrl(tempMusicUrl.trim());
+      localStorage.setItem(`music_url_${currentUserCode}`, tempMusicUrl.trim());
+      closeBindMusicDialog();
+      alert(`音乐URL已保存到本地（云端同步失败: ${error.message}）`);
     }
   }, [tempMusicUrl, closeBindMusicDialog]);
 
@@ -1888,12 +1978,40 @@ const HomePage = ({ onNavigate }) => {
               <button className="dialog-btn cancel-btn" onClick={closeBindMusicDialog}>
                 取消
               </button>
+              {musicUrl && (
+                <button className="dialog-btn delete-btn" onClick={deleteMusicUrl}>
+                  删除
+                </button>
+              )}
               <button 
                 className="dialog-btn confirm-btn" 
                 onClick={saveMusicUrl}
                 disabled={!tempMusicUrl.trim()}
               >
                 保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 删除音乐URL确认对话框 */}
+      {showDeleteConfirm && (
+        <div className="dialog-mask" onClick={cancelDeleteMusicUrl}>
+          <div className="dialog-box" onClick={e => e.stopPropagation()}>
+            <div className="dialog-header">
+              <h3 className="dialog-title">确认删除</h3>
+              <button className="dialog-close" onClick={cancelDeleteMusicUrl}>×</button>
+            </div>
+            <div className="dialog-content">
+              <p>确定要删除当前的音乐URL吗？</p>
+            </div>
+            <div className="dialog-actions">
+              <button className="dialog-btn cancel-btn" onClick={cancelDeleteMusicUrl}>
+                取消
+              </button>
+              <button className="dialog-btn delete-btn" onClick={confirmDeleteMusicUrl}>
+                确认删除
               </button>
             </div>
           </div>

@@ -1062,6 +1062,15 @@ div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, label {
   background-color: #e0e0e0;
 }
 
+.delete-btn {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #ff5252;
+}
+
 .confirm-btn {
   background-color: #4ecdc4;
   color: white;
