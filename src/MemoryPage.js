@@ -94,8 +94,27 @@ const MemoryPage = () => {
           .filter(session => session.recordings.length > 0);
         
         if (sessions.length > 0) {
+          // 过滤掉绑定的音乐录音
+          const filteredSessions = sessions.map(session => {
+            // 过滤掉与绑定音乐URL匹配的录音文件
+            const filteredRecordings = session.recordings.filter(recording => {
+              const objectKey = recording.object_key || recording.objectKey || recording.key || recording.name;
+              const ossBase = 'https://tangledup-ai-staging.oss-cn-shanghai.aliyuncs.com/';
+              const recordingUrl = `${ossBase}${objectKey}`;
+              // 排除与绑定音乐URL匹配的录音
+              return recordingUrl !== musicUrl;
+            });
+            return { ...session, recordings: filteredRecordings };
+          }).filter(session => session.recordings.length > 0); // 只保留有录音的会话
+          
+          if (filteredSessions.length === 0) {
+            // 如果过滤后没有录音，仍然跳转到音频库
+            navigate(`/${userid}/audio-library`);
+            return;
+          }
+          
           // 随机选择一个会话
-          const randomSession = sessions[Math.floor(Math.random() * sessions.length)];
+          const randomSession = filteredSessions[Math.floor(Math.random() * filteredSessions.length)];
           // 随机选择该会话中的一个录音文件
           const randomRecording = randomSession.recordings[Math.floor(Math.random() * randomSession.recordings.length)];
           

@@ -9,6 +9,7 @@ import ThemedIcon from '../../components/theme/ThemedIcon';
 import { getCurrentTheme, applyTheme } from '../../themes/themeConfig';
 import { getCustomName, deriveDisplayNameFromFileName } from '../../utils/displayName';
 import WelcomeScreen from '../../components/common/WelcomeScreen';
+import { loadMusicUrlFromCloud } from '../../services/musicUrlCloudService';
 // Swiper相关引入
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -61,6 +62,9 @@ const PlayerPage = () => {
   const [audioFiles, setAudioFiles] = useState([]); // 会话下的所有音频文件
   const [currentAudioIndex, setCurrentAudioIndex] = useState(0); // 当前播放的音频索引
   const [showAudioModal, setShowAudioModal] = useState(false); // 是否显示音频列表弹窗
+  
+  // 绑定音乐URL状态
+  const [musicUrl, setMusicUrl] = useState(''); // 用户绑定的专属音乐URL
 
   // 检测iOS设备
   useEffect(() => {
@@ -158,6 +162,33 @@ const PlayerPage = () => {
       navigate('/');
     }
   }, [userid, navigate]);
+  
+  // 加载用户绑定的音乐URL
+  useEffect(() => {
+    const loadMusicUrl = async () => {
+      if (!userCode) return;
+      
+      try {
+        // 从云端加载音乐URL
+        const result = await loadMusicUrlFromCloud(userCode);
+        if (result.success && result.musicUrl) {
+          setMusicUrl(result.musicUrl);
+          console.log('PlayerPage: 从云端加载音乐URL成功:', result.musicUrl);
+        } else {
+          // 云端加载失败，尝试从本地存储加载
+          const localMusicUrl = localStorage.getItem(`music_url_${userCode}`);
+          if (localMusicUrl) {
+            setMusicUrl(localMusicUrl);
+            console.log('PlayerPage: 从本地加载音乐URL:', localMusicUrl);
+          }
+        }
+      } catch (error) {
+        console.error('PlayerPage: 加载音乐URL失败:', error);
+      }
+    };
+    
+    loadMusicUrl();
+  }, [userCode]);
 
   // 监听主题变化事件
   useEffect(() => {
@@ -390,13 +421,19 @@ const PlayerPage = () => {
           const timeB = new Date(b.timestamp);
           return timeB - timeA;
         });
+        
+        // 过滤掉与绑定音乐URL匹配的音频文件
+        const filteredAudioFiles = sortedAudioFiles.filter(audio => {
+          // 比较音频文件的URL与绑定音乐URL
+          return audio.signedUrl !== musicUrl && audio.cloudUrl !== musicUrl;
+        });
 
-        setAudioFiles(sortedAudioFiles);
+        setAudioFiles(filteredAudioFiles);
 
         // 查找指定的录音文件
         let targetIndex = 0; // 默认播放第一个
         if (recordingId) {
-          const foundIndex = sortedAudioFiles.findIndex(audio => {
+          const foundIndex = filteredAudioFiles.findIndex(audio => {
             const nameWithoutExt = audio.fileName.replace(/\.[^/.]+$/, "");
             
             // 多种匹配策略
@@ -426,7 +463,7 @@ const PlayerPage = () => {
             for (let i = 0; i < strategies.length; i++) {
               try {
                 if (strategies[i]()) {
-                  console.log(`找到匹配的音频文件，索引: ${sortedAudioFiles.indexOf(audio)}`);
+                  console.log(`找到匹配的音频文件，索引: ${filteredAudioFiles.indexOf(audio)}`);
                   return true;
                 }
               } catch (e) {
@@ -443,8 +480,8 @@ const PlayerPage = () => {
 
         setCurrentAudioIndex(targetIndex);
         
-        if (sortedAudioFiles.length > 0) {
-          const targetRecording = sortedAudioFiles[targetIndex];
+        if (filteredAudioFiles.length > 0) {
+          const targetRecording = filteredAudioFiles[targetIndex];
           console.log('设置当前录音:', targetRecording);
           setRecording(targetRecording);
           // 预加载对应歌词
