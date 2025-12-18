@@ -2,32 +2,72 @@ import { useEffect } from "react";
 import { useConversationStore } from "./use-conversation-store";
 import { useDeviceStore } from "./use-device-store";
 import { base64ToArrayBuffer, mergeInt16Arrays } from "./audio-utils";
+import useRealtimeCmd from "./use-realtime-cmd";
 
 const useRealtimeMsgEffect = (wsInstance) => {
   const { setCurrentSessionId, setCurrentSessionList } = useConversationStore();
   const { wavStreamPlayer } = useDeviceStore();
+  const { sendPrompt, createHello, createResponse } = useRealtimeCmd();
 
   useEffect(() => {
-    const parsedData = JSON.parse(wsInstance.lastMessage?.data ?? "{}");
+    const processMessage = async () => {
+      if (!wsInstance.lastMessage?.data) return;
 
-    if (parsedData.type === "session.created") {
-      console.info("session.created");
-      setCurrentSessionId(parsedData.session.id);
-      setCurrentSessionList(() => {
-        return { id: parsedData.session.id, message: [] };
-      });
-    }
+      let data = wsInstance.lastMessage.data;
+      if (data instanceof Blob) {
+        try {
+          data = await data.text();
+        } catch (e) {
+          console.error("Failed to read Blob message:", e);
+          return;
+        }
+      }
 
-    if (parsedData.type === "conversation.item.created") {
-      console.info("conversation.item.created");
-      const currentEventId = parsedData.event_id;
-      const currentEventName = parsedData.type;
-      const currentItemId = parsedData.item.id;
-      const currentRole = parsedData.item.role;
-      const userContent = parsedData.item.content?.at(0).text;
-      const currentPreviousItemId = parsedData.previous_item_id;
+      let parsedData;
+      try {
+        parsedData = JSON.parse(data);
+      } catch (e) {
+        // console.error("Failed to parse WebSocket message:", e);
+        return;
+      }
 
-      if (currentRole === "assistant") {
+      console.log('Received WebSocket event:', parsedData.type, parsedData);
+
+      if (parsedData.type === "session.created") {
+        console.info("session.created");
+        setCurrentSessionId(parsedData.session.id);
+        setCurrentSessionList(() => {
+          return { id: parsedData.session.id, message: [] };
+        });
+
+        // Step 1: Initialize session
+        console.log("Session created, sending session update...");
+        sendPrompt();
+      }
+
+      if (parsedData.type === "session.updated") {
+        console.info("session.updated");
+        // Step 2: Session updated confirmed, sending hello message
+        console.log("Session updated, creating hello message...");
+        createHello("你好");
+      }
+
+      if (parsedData.type === "conversation.item.created") {
+        console.info("conversation.item.created");
+        const currentEventId = parsedData.event_id;
+        const currentEventName = parsedData.type;
+        const currentItemId = parsedData.item.id;
+        const currentRole = parsedData.item.role;
+        const userContent = parsedData.item.content?.at(0).text;
+        const currentPreviousItemId = parsedData.previous_item_id;
+
+        // Step 3: User message created confirmed, requesting response
+        if (currentRole === "user") {
+           console.log("User message created, requesting response...");
+           createResponse();
+        }
+
+        if (currentRole === "assistant") {
         setCurrentSessionList((prev) => ({
           ...prev,
           message: [
@@ -217,6 +257,9 @@ const useRealtimeMsgEffect = (wsInstance) => {
     if (parsedData.type === "response.done") {
       console.info("response.done");
     }
+  };
+
+  processMessage();
   }, [wsInstance.lastMessage?.data]);
 };
 

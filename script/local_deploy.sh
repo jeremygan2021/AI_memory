@@ -95,6 +95,27 @@ echo -e "${GREEN}✅ 项目构建成功${NC}\n${BLUE}═════════
 echo -e "\n${BLUE}╔══════════════════════════════════════╗
 ║          📦 压缩构建文件          ║
 ╚══════════════════════════════════════╝\n${NC}\n${YELLOW}📦 正在压缩构建文件...${NC}"
+
+# 压缩 Step-Realtime-Console 目录 (本地构建版本)
+echo -e "${BLUE}🛠️  正在构建 Step-Realtime-Console (本地)...${NC}"
+(
+  cd Step-Realtime-Console || exit 1
+  echo -e "${YELLOW}  安装依赖...${NC}"
+  bun install || exit 1
+  echo -e "${YELLOW}  执行构建...${NC}"
+  bun run build || exit 1
+) || {
+  echo -e "${RED}❌ Step-Realtime-Console 构建失败${NC}"
+  exit 1
+}
+
+echo -e "${BLUE}📦 压缩 Step-Realtime-Console 构建产物...${NC}"
+# 只打包构建产物和必要文件，排除源码和开发依赖
+zip -r step-console.zip Step-Realtime-Console/build Step-Realtime-Console/package.json Step-Realtime-Console/bun.lockb || {
+  echo -e "${RED}❌ Step-Realtime-Console 压缩失败，错误代码: $?${NC}"
+  exit 1
+}
+
 # 检查构建输出目录
 if [ -d "out" ]; then
     echo -e "${BLUE}📦 发现 out 目录，压缩 out 文件夹...${NC}"
@@ -160,8 +181,18 @@ sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no "$SERVER" "
 
 # 上传构建文件
 echo -e "${YELLOW}📦 上传构建文件...${NC}"
-sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no "$ZIP_FILE" "$SERVER:$REMOTE_PROJECT_DIR/" || {
+sshpass -p "$PASSWORD" scp -o StrictHostKeyChecking=no "$ZIP_FILE" step-console.zip "$SERVER:$REMOTE_PROJECT_DIR/" || {
     echo -e "${RED}❌ 构建文件上传失败，错误代码: $?${NC}"
+    exit 1
+}
+
+# 解压 Step-Realtime-Console
+echo -e "${YELLOW}📦 解压中转服务文件...${NC}"
+sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no "$SERVER" "
+  unzip -o '$REMOTE_PROJECT_DIR/step-console.zip' -d '$REMOTE_PROJECT_DIR/'
+  rm -f '$REMOTE_PROJECT_DIR/step-console.zip'
+" || {
+    echo -e "${RED}❌ 中转服务解压失败${NC}"
     exit 1
 }
 
@@ -234,16 +265,16 @@ echo -e "\n${BLUE}╔═══════════════════�
 ╚══════════════════════════════════════╝\n${NC}"
 
 # 删除本地的out.zip文件
-echo -e "${YELLOW}🗑️ 正在删除本地的 $ZIP_FILE 文件...${NC}"
-rm -rf "$ZIP_FILE" || {
-    echo -e "${RED}❌ 删除 $ZIP_FILE 文件失败，错误代码: $?${NC}"
+echo -e "${YELLOW}🗑️ 正在删除本地的压缩文件...${NC}"
+rm -rf "$ZIP_FILE" step-console.zip || {
+    echo -e "${RED}❌ 删除压缩文件失败，错误代码: $?${NC}"
     exit 1
 }
-echo -e "${GREEN}✅ $ZIP_FILE 文件删除成功${NC}"
+echo -e "${GREEN}✅ 压缩文件删除成功${NC}"
 
 # 删除本地的构建文件夹
 echo -e "${YELLOW}🗑️ 正在删除本地的构建文件夹...${NC}"
-rm -rf build out .next || {
+rm -rf build out .next Step-Realtime-Console/build || {
     echo -e "${RED}❌ 删除构建文件夹失败，错误代码: $?${NC}"
     exit 1
 }

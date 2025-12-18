@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Node.js Frontend Service
+  frontend:
+    image: tangledup-ai-frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-https://data.tangledup-ai.com}
+        - REACT_APP_STEP_API_KEY=${REACT_APP_STEP_API_KEY:-2cWTfZARIvc6QkurxSHKyXmBPt6o10f5psYU23XKuJHADzMQkwWnlo9rJsEi1VNWG}
+        - REACT_APP_REALTIME_ENDPOINT=ws://localhost:8081
+    ports:
+      - "3100:3000"
+    restart: always
+    env_file:
+      - .env
+
+  # Bun WebSocket Relay Service
+  relay:
+    image: tangledup-ai-relay:latest
+    build:
+      context: ./Step-Realtime-Console
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081" # WebSocket Port
+      - "18082:8082" # HTTP Port
+    environment:
+      - PORT=8082
+      - WS_PORT=8081
+      # - API_KEY=${STEP_API_KEY} # Optional if passed from frontend
+    restart: always

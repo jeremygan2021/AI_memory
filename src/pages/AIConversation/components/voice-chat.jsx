@@ -17,7 +17,20 @@ function VoiceChat() {
   const [isRecording, setIsRecording] = useState(false);
 
   async function requestPermission() {
-    await wavStreamPlayer.connect();
+    try {
+      await wavStreamPlayer.connect();
+    } catch (error) {
+      console.error("WavStreamPlayer connect error:", error);
+      // 检查是否是因为非安全上下文导致
+      if (window.location.protocol === 'http:' && 
+          !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+        alert("⚠️ 录音组件初始化失败\n\n原因：浏览器限制 AudioWorklet 必须在 HTTPS 或 localhost 环境下运行。\n\n解决方法：\n1. 请配置 HTTPS 证书\n2. 或在 Chrome 地址栏输入 chrome://flags/#unsafely-treat-insecure-origin-as-secure \n   启用并将当前地址加入白名单");
+      } else {
+        alert(`录音组件初始化失败: ${error.message}`);
+      }
+      return;
+    }
+
     const permissions = window.navigator.permissions;
     if (permissions) {
       const permissionStatus = await permissions.query({ name: "microphone" });
@@ -57,11 +70,12 @@ function VoiceChat() {
   }
 
   useEffect(() => {
-    if (wsInstance?.readyState === ReadyState.OPEN) {
-      sendPrompt();
-      createHello("你好");
-      createResponse();
-    }
+    // Only send prompt if explicitly needed, otherwise let the session initialization handle it
+    // if (wsInstance?.readyState === ReadyState.OPEN) {
+    //   sendPrompt();
+    //   createHello("你好");
+    //   createResponse();
+    // }
   }, [wsInstance?.readyState]);
 
   return (

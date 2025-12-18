@@ -96,6 +96,95 @@ detect_deploy_type() {
     fi
 }
 
+# 检测并安装 Bun
+install_bun() {
+    if ! command -v bun >/dev/null 2>&1; then
+        log_info "Bun 未安装，正在安装..."
+        curl -fsSL https://bun.sh/install | bash
+        export BUN_INSTALL="$HOME/.bun"
+        export PATH="$BUN_INSTALL/bin:$PATH"
+        
+        # 将环境变量添加到 .bashrc
+        if ! grep -q "BUN_INSTALL" ~/.bashrc; then
+            echo 'export BUN_INSTALL="$HOME/.bun"' >> ~/.bashrc
+            echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> ~/.bashrc
+        fi
+        log_success "Bun 安装完成"
+    else
+        log_info "Bun 已安装: $(bun --version)"
+    fi
+}
+
+# 部署 WebSocket 中转服务
+deploy_relay_service() {
+    log_info "开始部署 WebSocket 中转服务..."
+    
+    local relay_dir="$REMOTE_PROJECT_DIR/Step-Realtime-Console"
+    
+    # 检查中转服务目录是否存在
+    if [ ! -d "$relay_dir" ]; then
+        log_error "未找到 WebSocket 中转服务目录: $relay_dir"
+        return 1
+    fi
+    
+    cd "$relay_dir" || return 1
+    
+    # 安装依赖 (仅生产依赖)
+    log_info "安装中转服务依赖 (生产模式)..."
+    bun install --production
+    
+    # 跳过构建 (已在本地构建)
+    log_info "跳过构建 (使用本地构建产物)"
+    # bun run build
+    
+    return 0
+}
+
+# 启动 WebSocket 中转服务
+start_relay_service() {
+    log_info "启动 WebSocket 中转服务..."
+    
+    local relay_dir="$REMOTE_PROJECT_DIR/Step-Realtime-Console"
+    local build_file="$relay_dir/build/index.js"
+    local log_file="/var/log/${RELAY_SERVICE_NAME}.log"
+    local pid_file="/var/run/${RELAY_SERVICE_NAME}.pid"
+    
+    if [ ! -f "$build_file" ]; then
+        log_error "未找到中转服务构建文件: $build_file"
+        return 1
+    fi
+    
+    # 终止旧进程
+    kill_port_process "$WS_RELAY_PORT"
+    kill_port_process "$SVELTE_PORT"
+    
+    # 设置环境变量并启动
+    export PORT=$SVELTE_PORT
+    export WS_PORT=$WS_RELAY_PORT
+    
+    log_info "在端口 $WS_RELAY_PORT (WS) 和 $SVELTE_PORT (HTTP) 启动中转服务..."
+    nohup bun "$build_file" > "$log_file" 2>&1 &
+    local pid=$!
+    
+    echo $pid > "$pid_file"
+    
+    sleep 3
+    
+    if kill -0 $pid 2>/dev/null; then
+        log_success "中转服务启动成功，PID: $pid"
+        return 0
+    else
+        log_error "中转服务启动失败"
+        if [ -f "$log_file" ]; then
+             log_error "启动日志:"
+             tail -10 "$log_file" | while read line; do
+                 log_error "  $line"
+             done
+        fi
+        return 1
+    fi
+}
+
 # 部署应用
 deploy_app() {
     log_info "开始部署应用..."
@@ -472,7 +561,8 @@ main() {
     case "$action" in
         "deploy")
             log_info "执行完整部署流程..."
-            if deploy_app && start_app && configure_nginx; then
+            install_bun
+            if deploy_app && deploy_relay_service && start_app && start_relay_service && configure_nginx; then
                 log_success "部署完成"
             else
                 log_error "部署失败"
@@ -481,24 +571,42 @@ main() {
             ;;
         "start")
             log_info "启动应用..."
+            install_bun
             start_app
+            start_relay_service
             ;;
         "stop")
             log_info "停止应用..."
             kill_port_process "$SERVICE_PORT"
+            kill_port_process "$WS_RELAY_PORT"
+            kill_port_process "$SVELTE_PORT"
             rm -f "/var/run/${SERVICE_NAME}.pid"
+            rm -f "/var/run/${RELAY_SERVICE_NAME}.pid"
             ;;
         "restart")
             log_info "重启应用..."
             kill_port_process "$SERVICE_PORT"
+            kill_port_process "$WS_RELAY_PORT"
+            kill_port_process "$SVELTE_PORT"
             rm -f "/var/run/${SERVICE_NAME}.pid"
+            rm -f "/var/run/${RELAY_SERVICE_NAME}.pid"
+            install_bun
             start_app
+            start_relay_service
             ;;
         "status")
             if check_app_status; then
-                log_success "应用正在运行"
+                log_success "AI_memory 应用正在运行"
             else
-                log_warning "应用未运行"
+                log_warning "AI_memory 应用未运行"
+            fi
+            
+            # 检查中转服务状态
+            local relay_pid_file="/var/run/${RELAY_SERVICE_NAME}.pid"
+            if [ -f "$relay_pid_file" ] && kill -0 $(cat "$relay_pid_file") 2>/dev/null; then
+                log_success "StepFun 中转服务正在运行"
+            else
+                log_warning "StepFun 中转服务未运行"
             fi
             ;;
         "monitor")

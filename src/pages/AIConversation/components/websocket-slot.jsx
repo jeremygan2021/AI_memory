@@ -10,7 +10,13 @@ function WebSocketSlot({ children }) {
 
   const apiKey = process.env.REACT_APP_STEP_API_KEY;
   const baseUrl = process.env.REACT_APP_REALTIME_ENDPOINT;
-  const url = new URL(baseUrl ?? "wss://api.stepfun.com/v1/realtime");
+  
+  // Use local proxy if baseUrl is not set or if it points to the direct StepFun API (which fails due to browser header limitations)
+  const targetUrl = (baseUrl && !baseUrl.includes("api.stepfun.com")) 
+    ? baseUrl 
+    : "ws://localhost:8081";
+    
+  const url = new URL(targetUrl);
   url.searchParams.set("model", "step-1o-audio");
   url.searchParams.set("apiKey", apiKey ?? "");
 

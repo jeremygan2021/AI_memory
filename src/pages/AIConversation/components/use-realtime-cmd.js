@@ -51,8 +51,8 @@ const useRealtimeCmd = () => {
       type: "session.update",
       session: {
         modalities: ["text", "audio"],
-        instructions: agent?.agent_prompt,
-        voice: agent?.voice_type,
+        instructions: agent?.agent_prompt ?? "你是一个智能助手",
+        voice: agent?.voice_type ?? "jingdiannvsheng", // Use server default to be safe
         input_audio_format: "pcm16",
         output_audio_format: "pcm16",
         turn_detection: {
