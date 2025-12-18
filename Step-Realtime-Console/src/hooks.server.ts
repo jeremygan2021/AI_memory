@@ -28,7 +28,7 @@ async function startWebSocketServer() {
 
   try {
     const defaultWsUrl = 'wss://api.stepfun.com/v1/realtime';
-    const defaultModel = 'step-audio-2';
+    const defaultModel = 'step-1o-audio';
     const defaultApiKey = env.API_KEY || '';
 
     // 创建 Bun WebSocket 服务器
@@ -228,6 +228,13 @@ async function startWebSocketServer() {
 
           finalServerWs.onerror = error => {
             console.error('Error from final server:', error);
+            // Log full error details if available
+            if (typeof error === 'object') {
+                try {
+                    console.error('Error details:', JSON.stringify(error));
+                } catch(e) {}
+            }
+            
             ws.data.connectionFailed = true; // 标记连接失败
 
             // 清空消息队列，防止后续尝试发送
@@ -248,7 +255,9 @@ async function startWebSocketServer() {
               // 检查是否为特定错误（401、429等）
               try {
                 // 安全地访问 error.message
-                const errorMsg = (error as any).message || '';
+                const errorMsg = (error as any).message || (error as any).toString() || '';
+                console.log('Extracted error message:', errorMsg);
+                
                 if (errorMsg.includes('401')) {
                   errorMessage.error = { code: 401, message: 'Invalid API Key' };
                   errorMessage.message = 'Invalid API Key, please check and try again';
@@ -256,13 +265,13 @@ async function startWebSocketServer() {
                   errorMessage.error = { code: 429, message: 'Rate limit exceeded' };
                   errorMessage.message = 'The connection through your private key has rejected due to the frequency or concurrency limits. You can try again later';
                 } else {
-                  errorMessage.error = { code: 0, message: 'Connection error' };
-                  errorMessage.message = 'Error occurred while connecting to server';
+                  errorMessage.error = { code: 0, message: errorMsg || 'Connection error' };
+                  errorMessage.message = `Error connecting to server: ${errorMsg}`;
                 }
               } catch (e) {
                 // 如果无法访问 error.message，使用默认错误消息
                 errorMessage.error = { code: 0, message: 'Connection error' };
-                errorMessage.message = 'Error occurred while connecting to server';
+                errorMessage.message = 'Error occurred while connecting to server (failed to parse error details)';
               }
 
               ws.send(JSON.stringify(errorMessage));

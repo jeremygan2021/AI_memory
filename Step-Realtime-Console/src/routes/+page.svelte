@@ -23,7 +23,7 @@
 
   let wsUrl = $state('wss://api.stepfun.com/v1/realtime'); // WebSocket URL state variable
   let modelName = $state(availableModels[0]); // Selected model
-  let apiKey = $state(''); // API_KEY
+  let apiKey = $state('2cWTfZARIvc6QkurxSHKyXmBPt6o10f5psYU23XKuJHADzMQkwWnlo9rJsEi1VNWG'); // API_KEY
   let apiKeyType = $state('private');
   let voice = $state(''); // Voice tone (user input)
 

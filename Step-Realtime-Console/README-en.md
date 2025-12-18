@@ -88,7 +88,7 @@ After successfully running the project, you need to click the **Server Settings*
 
 1.  **Server Address**: wss://api.stepfun.com/v1/realtime
 
-2.  **Model Name**: Currently supports four versions of models: step-audio-2, step-audio-2-mini, step-audio-2-think, step-audio-2-mini-think
+2.  **Model Name**: Currently supports four versions of models: step-audio-2, step-1o-audio, step-audio-2-think, step-1o-audio-think
 
 3.  **API Key**: You need to obtain the API key through the Stepfun Open Platform. Please visit [Stepfun Open Platform](https://platform.stepfun.com/) to register and get your API Key.
 

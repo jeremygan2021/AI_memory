@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# Load .env file if it exists to get API keys
+if [ -f .env ]; then
+  # Load environment variables from .env file
+  set -a
+  source .env
+  set +a
+fi
+
+# Set API_KEY for the relay server from REACT_APP_STEP_API_KEY if not already set
+if [ -z "$API_KEY" ] && [ -n "$REACT_APP_STEP_API_KEY" ]; then
+  export API_KEY=$REACT_APP_STEP_API_KEY
+fi
+
 # Set ports
 # PORT is for the SvelteKit main server (we don't use its UI, so put it on a different port)
 export PORT=8082

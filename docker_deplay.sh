@@ -17,7 +17,7 @@ SERVER_PORT="22"                 # SSH端口，默认22
 # 项目配置
 PROJECT_NAME="ai_memory"         # Docker Compose 项目名称
 TAR_FILE="ai_memory_images.tar"  # 镜像压缩包文件名
-REMOTE_DIR="/mnt/server/${PROJECT_NAME}" # 远程部署目录
+REMOTE_DIR="~/${PROJECT_NAME}" # 远程部署目录
 
 # 镜像列表 (需与 docker-compose.yml 中的 image 字段一致)
 IMAGES=("tangledup-ai-frontend:latest" "tangledup-ai-relay:latest")
@@ -166,18 +166,24 @@ upload_to_server() {
 deploy_on_server() {
     log_info "开始在服务器上部署..."
     
+    # 构造清理镜像的命令
+    CLEAN_IMAGES_CMD=""
+    for img in "${IMAGES[@]}"; do
+        CLEAN_IMAGES_CMD="${CLEAN_IMAGES_CMD}
+        if \$SUDO docker image inspect $img >/dev/null 2>&1; then
+            echo \"[INFO] 发现同名镜像，正在删除: $img\"
+            \$SUDO docker rmi -f $img || true
+        fi"
+    done
+
     sshpass -p "$SERVER_PASSWORD" ssh -p "$SERVER_PORT" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" << EOF
         set -e
         cd ${REMOTE_DIR}
         
-        echo "[INFO] 加载 Docker 镜像..."
         # 使用 sudo 如果需要，这里假设用户有 docker 权限或需要 sudo
         if command -v sudo >/dev/null; then SUDO="sudo"; else SUDO=""; fi
         
-        \$SUDO docker load -i ${TAR_FILE}
-        
-        echo "[INFO] 重启服务..."
-        # 尝试使用 docker compose (新版) 或 docker-compose (旧版)
+        # 查找 docker compose
         if docker compose version >/dev/null 2>&1; then
             DOCKER_COMPOSE="docker compose"
         elif command -v docker-compose >/dev/null; then
@@ -186,17 +192,18 @@ deploy_on_server() {
             echo "[ERROR] 未找到 docker compose 或 docker-compose"
             exit 1
         fi
-        
-        # 确保使用 sudo
-        if [ -n "$SUDO" ]; then
-             # 注意这里不要直接修改 DOCKER_COMPOSE 变量，而是在执行时拼接
-             :
-        fi
 
+        echo "[INFO] 停止旧服务..."
         # 尝试停止并删除容器（忽略错误）
         \$SUDO \$DOCKER_COMPOSE down --rmi local --volumes || true
         
-        # 启动服务
+        echo "[INFO] 清理旧镜像..."
+        ${CLEAN_IMAGES_CMD}
+        
+        echo "[INFO] 加载 Docker 镜像..."
+        \$SUDO docker load -i ${TAR_FILE}
+        
+        echo "[INFO] 启动服务..."
         \$SUDO \$DOCKER_COMPOSE up -d --no-build
         
         echo "[INFO] 清理镜像包..."

@@ -40,16 +40,24 @@ const useRealtimeMsgEffect = (wsInstance) => {
           return { id: parsedData.session.id, message: [] };
         });
 
-        // Step 1: Initialize session
-        console.log("Session created, sending session update...");
+        // Step 1: Initialize session (Pipeline Optimization)
+        // We send all initialization commands in sequence without waiting for server confirmation
+        // This significantly reduces latency (saves 2 RTTs)
+        console.log("Session created, pipelining initialization (Update -> Hello -> Response)...");
+        
+        // 1. Update Session Config
         sendPrompt();
+        
+        // 2. Send Hello Message
+        createHello("你好");
+        
+        // 3. Request Response
+        createResponse();
       }
 
       if (parsedData.type === "session.updated") {
         console.info("session.updated");
-        // Step 2: Session updated confirmed, sending hello message
-        console.log("Session updated, creating hello message...");
-        createHello("你好");
+        // Session update confirmed
       }
 
       if (parsedData.type === "conversation.item.created") {
@@ -61,10 +69,9 @@ const useRealtimeMsgEffect = (wsInstance) => {
         const userContent = parsedData.item.content?.at(0).text;
         const currentPreviousItemId = parsedData.previous_item_id;
 
-        // Step 3: User message created confirmed, requesting response
+        // User message created confirmed
         if (currentRole === "user") {
-           console.log("User message created, requesting response...");
-           createResponse();
+           console.log("User message created (confirmed by server)");
         }
 
         if (currentRole === "assistant") {

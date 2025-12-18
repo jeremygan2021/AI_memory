@@ -88,7 +88,7 @@ bun run build
 
 1. **服务器地址**：wss://api.stepfun.com/v1/realtime
 
-2. **模型名称**：当前支持step-audio-2、step-audio-2-mini、step-audio-2-think、step-audio-2-mini-think 共四个版本模型
+2. **模型名称**：当前支持step-audio-2、step-1o-audio、step-audio-2-think、step-1o-audio-think 共四个版本模型
 
 3. **API Key**：您需要通过阶跃星辰开放平台获取 API 密钥。请访问 [阶跃星辰开放平台](https://platform.stepfun.com/) 注册并获取您的 API Key。
 
