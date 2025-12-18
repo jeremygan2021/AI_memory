@@ -51,6 +51,16 @@ check_dependencies() {
     log_success "依赖检查完成"
 }
 
+# 加载 .env 文件
+load_env() {
+    if [ -f ".env" ]; then
+        log_info "加载 .env 环境变量..."
+        export $(grep -v '^#' .env | xargs)
+    else
+        log_warning ".env 文件不存在，将使用默认环境变量或空值"
+    fi
+}
+
 # 解析命令行参数
 parse_arguments() {
     while [[ $# -gt 0 ]]; do
@@ -110,9 +120,21 @@ build_images() {
 
     # 2. 构建 Frontend
     log_info "构建 Frontend..."
+    
+    # 确定 WebSocket 地址
+    # 如果未设置 REACT_APP_REALTIME_ENDPOINT，则默认使用 wss://me.tangledup-ai.com/step-realtime (适配生产环境)
+    REALTIME_ENDPOINT=${REACT_APP_REALTIME_ENDPOINT:-wss://me.tangledup-ai.com/step-realtime}
+    
+    # 确定 API KEY
+    # 如果 .env 中没有设置，使用硬编码的默认值 (User Requested)
+    STEP_API_KEY=${REACT_APP_STEP_API_KEY:-2cWTfZARIvc6QkurxSHKyXmBPt6o10f5psYU23XKuJHADzMQkwWnlo9rJsEi1VNWG}
+    
     docker buildx build --platform "$PLATFORM" \
         -t "${IMAGES[0]}" \
         --load \
+        --build-arg REACT_APP_API_URL=${REACT_APP_API_URL:-https://data.tangledup-ai.com} \
+        --build-arg REACT_APP_STEP_API_KEY=${STEP_API_KEY} \
+        --build-arg REACT_APP_REALTIME_ENDPOINT=${REALTIME_ENDPOINT} \
         -f Dockerfile . \
         || { log_error "Frontend 构建失败"; exit 1; }
 
@@ -231,6 +253,7 @@ cleanup_local() {
 
 # 主函数
 main() {
+    load_env
     parse_arguments "$@"
     
     if [ "$UPLOAD_ONLY" != true ]; then

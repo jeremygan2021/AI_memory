@@ -10,7 +10,7 @@ services:
       args:
         - REACT_APP_API_URL=${REACT_APP_API_URL:-https://data.tangledup-ai.com}
         - REACT_APP_STEP_API_KEY=${REACT_APP_STEP_API_KEY:-2cWTfZARIvc6QkurxSHKyXmBPt6o10f5psYU23XKuJHADzMQkwWnlo9rJsEi1VNWG}
-        - REACT_APP_REALTIME_ENDPOINT=ws://localhost:8081
+        - REACT_APP_REALTIME_ENDPOINT=${REACT_APP_REALTIME_ENDPOINT:-wss://me.tangledup-ai.com/step-realtime}
     ports:
       - "3100:3000"
     restart: always
