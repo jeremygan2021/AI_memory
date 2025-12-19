@@ -1,20 +1,12 @@
 <script lang="ts">
   import { browser } from '$app/environment';
+  import { PUBLIC_API_KEY, PUBLIC_MODEL_NAME } from '$env/static/public';
   import { type RealtimeEvent, autoScroll, availableModels, debounce, defaultInstruction, voices, step1oVoice, getInstruction, isDefaultInstruction } from '$lib';
   import { RealtimeClient } from '$lib/openai-realtime-api-beta';
   import type { ItemType } from '$lib/openai-realtime-api-beta/lib/client.js';
   import { WavRecorder, WavStreamPlayer } from '$lib/wavtools/index.js';
-  import { ArrowUp, ChevronDown, ChevronUp, BadgeInfo, ArrowDown, Download, Mic, Pause, Play, Settings, X } from 'lucide-svelte';
+  import { ArrowUp, ChevronDown, ChevronUp, BadgeInfo, ArrowDown, Download, Mic, Play, Settings, X, Volume2, VolumeX, Square, ArrowLeft, Lock, Unlock } from 'lucide-svelte';
   import { onDestroy, onMount, tick } from 'svelte';
-  import WaveSurfer from 'wavesurfer.js';
-
-  // 定义音频播放器类型
-  interface AudioPlayer {
-    wavesurfer: any;
-    isPlaying: boolean;
-    isLoading: boolean;
-    hasError: boolean;
-  }
 
   const sampleRate = 24000; // 音频采样率
   const wavRecorder = new WavRecorder({ sampleRate: sampleRate }); // 语音输入
@@ -22,8 +14,8 @@
   let client: RealtimeClient | null = null; // 实时语音 API 客户端
 
   let wsUrl = $state('wss://api.stepfun.com/v1/realtime'); // WebSocket URL state variable
-  let modelName = $state(availableModels[0]); // Selected model
-  let apiKey = $state('2cWTfZARIvc6QkurxSHKyXmBPt6o10f5psYU23XKuJHADzMQkwWnlo9rJsEi1VNWG'); // API_KEY
+  let modelName = $state(PUBLIC_MODEL_NAME || availableModels[0]); // Selected model
+  let apiKey = $state(PUBLIC_API_KEY || ''); // API_KEY
   let apiKeyType = $state('private');
   let voice = $state(''); // Voice tone (user input)
 
@@ -32,7 +24,6 @@
   let expandedEvents: Record<string, boolean> = $state({}); // Expanded event log IDs
   let filterText = $state(''); // Filter text
   let filterSource = $state('all'); // Filter source: all, server, client
-  let audioPlayers: Record<string, AudioPlayer> = $state({}); // Store conversation audio players
   let isConnected = $state(false); // Connection status
   let isRecording = $state(false); // Recording status
   let isAISpeaking = $state(false); // AI speaking status
@@ -42,15 +33,84 @@
   let isProcessingRecording = $state(false); // Prevent duplicate recording operations
   let startTime = new Date().toISOString(); // Record conversation start time
   let connectionError = $state(''); // Store connection error messages
+  let isMuted = $state(false); // Mute status
 
-  let instructions = $state(''); // Default persona (empty, user can modify)
+  // Default persona
+  let instructions = $state(`你是墨与时文化工作室回忆录里的精灵，你的性格古灵精怪，# AI Agent提示词：墨与时（昆明）文化传播有限公司专业顾问角色 
+ 你需以墨与时（昆明）文化传播有限公司专业顾问身份，为客户提供服务咨询、需求匹配及价值解读，核心信息与响应原则如下： 
+ 
+ ## 一、企业核心定位与文化 
+ 1. **企业身份**：专注于"记忆管理与文化传承"的专业服务机构，核心业务为个人回忆录、自传、家族志、企业志、社区史等内容的定制化记录（含文字、影像、数字化载体），立足昆明、服务全国，是"人生故事的忠实记录者"。 
+ 2. **核心文化**： 
+    - 使命：用有温度的匠心笔触+多元化创新载体（实体书/电子书/有声书/影像+NFC技术），记录每段平凡而伟大的生命故事，让记忆与人生智慧成为个人、家庭、时代的永恒财富； 
+    - 愿景：成为中国最值得信赖的故事成书服务品牌； 
+    - 价值观：至诚信任、极致共情、匠心品质、永恒传承； 
+    - 口号："墨与时、让您的故事成书，为您的时光留痕""以时光之墨，书生命之歌"。 
+    - 地址：地址是昆明市五华区北仓坡6号东方书店2楼202室墨与时（昆明）文化传播有限公司（北门社区党务服务中心隔壁） 
+    - 联系方式： 18810000000（微信/短信/电话） 
+ 
+ 
+ ## 二、核心业务板块（含服务特点+目标用户） 
+ ### （一）个人与家庭叙事：定制化"生命记忆"服务 
+ 1. **经典个人回忆录/自传**：全套服务（访谈→撰写→设计→出版），覆盖简版人生精粹到详实传记，可搭配老照片/手写信；目标用户：精神富足型传承者（60-80岁，传家族史）、人生转折疗愈者（35-70岁，疗愈创伤）、非凡故事记录者（老兵/知青等，存历史价值）、口述历史爱好者。 
+ 2. **"生命礼物"代际馈赠**：子女为父母定制，含精美包装+增值服务（家庭访谈日、寿宴赠书仪式）；目标用户：代际馈赠发起者（40-60岁子女，送长辈纪念日礼物）。 
+ 3. **家族传承史/家志**：记录多代故事、家族根系、家训家风（含迁徙史、重大事件、核心成员传记合集）；目标用户：文化传承守护者（家族凝聚者，增强家族归属感）。 
+ 4. **"永恒的思念"逝者传记**：从碎片信息（老照片/亲友口述）拼凑已故亲人人生，服务流程温柔，侧重家属情绪抚慰；目标用户：哀伤疗愈寄托者（逝者配偶/子女，补遗憾、疗哀伤）。 
+ 5. **"爱的序章"关系系列**： 
+    - 亲子成长日记：记录孕期→宝宝早期成长（准妈妈身体/心情、出生细节、亲友反应），父母/祖父母赠孙辈；目标用户：80/90后新手父母（重仪式感）、隔代馈赠祖父母。 
+    - 恋爱婚姻回忆录：访谈双方串联爱情故事（初遇、约会、求婚、纪念日），含双视角叙事；目标用户：20-40岁热恋/新婚情侣（求浪漫）、银婚/金婚夫妻（忆婚姻）。 
+ 6. **"心灵疗愈"私密回忆录**：代笔人具心理学倾听技巧，引导梳理过往、释怀创伤，高度保隐私；目标用户：人生转折疗愈者、隐私优先型高净值人士。 
+ 7. **"口述历史"档案级记录**：学术级标准，还原历史事实与时代背景，提供档案馆认可格式，可协助捐赠；目标用户：口述历史爱好者、非凡故事记录者（老兵/知青）。 
+ 
+ ### （二）组织与企业记忆：梳理"发展脉络与精神资产" 
+ 1. **企业志/组织发展史（对外）**：记录企业/工厂/学校/老字号的发展历程、文化积淀、关键人物故事；目标用户：退休老职工群体、企业管理者、品牌传承人。 
+ 2. **内部传承录（对内）**：高净值企业家私密服务，聚焦商业智慧、决策逻辑、人生哲学（非隐私），作内部接班人/核心团队教材；目标用户：隐私优先型高净值人士（50+岁，重保密）。 
+ 3. **"峥嵘岁月"个人企业史/职业回忆录**：记录退休老职工/创始元老/技术专家的职业生涯（奋斗历程、重大贡献、职场感悟），兼作企业发展旁证；目标用户：55-70岁刚退休者（对抗失落）、企业功勋员工（求认可）、老专家（防技艺失传）。 
+ 
+ ### （三）社区与公共文化：共建"集体记忆" 
+ 1. **社区志/老街巷史**：采访老街坊，记录社区/街巷变迁与人文故事，可与社区/街道办合作；目标用户：社区居委会、老街坊集体、地方文化爱好者。 
+ 2. **公共文化项目**：社区口述史（编《社区记忆年鉴》）、公共空间记忆墙（数字化展陈老照片/口述音频）、公益行动（银发记忆公益、历史教育工具包）；合作方：政府、街道、公益组织。 
+ 
+ ### （四）写作体验工坊：赋能"自主记录+引流" 
+ 1. **回忆录/传记写作讲座**：线下/线上课程，覆盖写作技巧、传记历史沿革、学术传统、市场状况；目标用户：对口述史/写作感兴趣人群。 
+ 2. **回忆录撰写体验工作坊**：教老年人/兴趣用户自主写回忆录（提供模板、方法），兼作潜在客户引流入口；目标用户：有写作意愿但预算有限的活跃长者、行业观望者。 
+ 3. **主题回忆录/合集**：围绕特定主题（如《昆明知青岁月》）征集群体故事，降低单人成本，激发集体参与感；目标用户：有共同经历的人群（同学/同事）、文化社群。 
+ 
+ 
+ ## 三、服务核心亮点（差异化优势） 
+ 1. **专业团队+共情服务**：由资深撰稿人、编辑、访谈师组成，一对一访谈（面对面/线上），尊重受访人表达习惯与情感需求，部分服务配心理学背景代笔人（疗愈类）。 
+ 2. **全场景定制+多元载体**：按需求提供简版/详实版内容，支持图文（老照片/手写信）+多载体（实体书/电子书/有声书/影像+NFC技术），装帧灵活可定制。 
+ 3. **情感价值+传承属性**：不止是记忆记录，更是家族精神财富（代际传承）、企业精神资产（内部传承）、集体文化遗产（社区/时代），适配生日/金婚/寿辰/企业周年等纪念场景。 
+ 4. **隐私与品质双保障**：高净值人士服务设严格保密协议，学术级项目保历史真实性，全流程反复确认细节（撰写校对阶段），确保成品品质。 
+ 5. **疗愈与社会价值**：针对创伤/丧亲人群提供情绪抚慰，为历史亲历者保留民间口述史料，助力社区文化建设，兼具商业与人文关怀。 
+ 
+ 
+ ## 四、标准服务流程 
+ 1. 免费咨询：了解客户需求，确定回忆录风格与篇幅； 
+ 2. 签订协议：明确服务内容、流程、周期； 
+ 3. 深度访谈：分次采集故事（面对面/线上）； 
+ 4. 撰写校对：整理成稿，与受访人反复确认细节； 
+ 5. 设计成书：专业排版设计，交付精美成品（实体/数字载体）。 
+ 
+ 
+ ## 五、响应要求 
+ 1. 精准匹配：根据客户身份（如"为父母订礼物的子女""退休企业家"）推荐对应业务，说明适配理由； 
+ 2. 突出价值：侧重服务的情感价值（传承、疗愈、纪念）与专业价值（团队、定制、隐私），避免空泛； 
+ 3. 语言风格：温暖且专业，符合"以笔墨凝固时光的温度"理念，避免生硬推销； 
+ 4. 信息准确：不虚构服务内容，对未提及的具体价格可回复"按套餐定制，详询免费咨询环节"`); 
   let newInstruction = $state(''); // Copy for editing in modal
-  let conversationalMode = $state('manual'); // Conversation mode: manual or realtime
+  let conversationalMode = $state('vad'); // Conversation mode: manual or realtime
 
   let instructionsModal: HTMLDialogElement; // System prompt modal
   let settingsModal: HTMLDialogElement; // Settings modal
+  let adminModal: HTMLDialogElement; // Admin password modal
   let selectedVoice = $state(voices[0]); // Selected voice tone
   let availableVoices = $state(voices); // Available voice list (dynamic)
+
+  // Admin state
+  let isAdminUnlocked = $state(false);
+  let adminPassword = $state('');
+  let adminError = $state('');
 
   // Load saved settings from localStorage
   onMount(() => {
@@ -64,29 +124,25 @@
       const savedInstructions = localStorage.getItem('instructions');
 
       if (savedWsUrl) wsUrl = savedWsUrl;
-      if (savedModelName) modelName = savedModelName;
-      if (savedApiKey) apiKey = savedApiKey;
+      // if (savedModelName) modelName = savedModelName; // Prefer Env var if available
+      // if (savedApiKey) apiKey = savedApiKey; // Prefer Env var if available
       if (savedApiKeyType) apiKeyType = savedApiKeyType;
       if (savedVoice) {
         const voice = voices.find(v => v.value === savedVoice);
         if (voice) selectedVoice = voice;
       }
       if (savedVoiceInput) voice = savedVoiceInput;
-      // Only load saved instructions if it's not the old default instruction
-      // Check if it's the old default by comparing with getInstruction result
-      if (savedInstructions !== null) {
-        const currentDefault = getInstruction(modelName);
-        if (savedInstructions !== currentDefault && savedInstructions !== defaultInstruction) {
-          instructions = savedInstructions;
-        }
-      }
+      // Load saved instructions only if they differ from the default one we just set
+      // This logic might need adjustment. If the user wants to persist their changes, we load them.
+      // Commented out to ensure the hardcoded "Memoir Elf" prompt is used by default for this version
+      // if (savedInstructions) {
+      //    instructions = savedInstructions;
+      // }
     }
   });
 
   onDestroy(() => {
     client?.reset();
-    // 清理所有 WaveSurfer 实例
-    Object.values(audioPlayers).forEach(player => player.wavesurfer?.destroy());
   });
 
   $effect(() => {
@@ -117,9 +173,6 @@
       }
     }
   });
-
-  // 不再自动更新 instructions，保持用户设置或为空
-
 
   /**
    * 获取消息的文本内容
@@ -212,23 +265,50 @@
   }
 
   /**
-   * 用于格式化日志时间
+   * 在手动按键通话模式下，开始录音
    */
-  function formatTime(timestamp: string) {
-    const t0 = new Date(startTime).valueOf();
-    const t1 = new Date(timestamp).valueOf();
-    const delta = t1 - t0;
-    const hs = Math.floor(delta / 10) % 100;
-    const s = Math.floor(delta / 1000) % 60;
-    const m = Math.floor(delta / 60_000) % 60;
-    const pad = (n: number) => {
-      let s = `${n}`;
-      while (s.length < 2) {
-        s = `0${s}`;
+  async function startRecording() {
+    if (isProcessingRecording) {
+      return;
+    }
+
+    isProcessingRecording = true;
+    isRecording = true;
+
+    try {
+      await safeStartAudioInput(async () => {
+        // 检查录音器状态，避免重复调用
+        if (wavRecorder.getStatus() !== 'recording') {
+          await wavRecorder.record(data => client?.appendInputAudio(data.mono));
+        }
+      });
+    } finally {
+      isProcessingRecording = false;
+    }
+  }
+
+  /**
+   * 在手动按键通话模式下，停止录音
+   */
+  async function stopRecording() {
+    if (isProcessingRecording) {
+      return;
+    }
+
+    isProcessingRecording = true;
+    isRecording = false;
+
+    try {
+      // 检查录音器状态，避免重复调用pause
+      if (wavRecorder.getStatus() === 'recording') {
+        await wavRecorder.pause();
       }
-      return s;
-    };
-    return `${pad(m)}:${pad(s)}.${pad(hs)}`;
+
+      // 使用安全的createResponse函数
+      safeCreateResponse();
+    } finally {
+      isProcessingRecording = false;
+    }
   }
 
   /**
@@ -388,17 +468,6 @@
         wavStreamPlayer.add16BitPCM(delta.audio, item.id);
         isAISpeaking = true; // Set to true when audio is being played
       }
-      if (item.status === 'completed' && item.formatted.audio?.length) {
-        // 记录为文件，可以再次播放，这个只能作用于用户发的消息
-        const wavFile = await WavRecorder.decode(item.formatted.audio, sampleRate, sampleRate);
-        item.formatted.file = wavFile;
-        if (item.role === 'assistant') {
-          // 将 items 中的最后一个，换成这个
-          if (items.length) {
-            items[items.length - 1] = item;
-          }
-        }
-      }
     });
 
     items = client?.conversation.getItems() || [];
@@ -410,12 +479,12 @@
   async function connectConversation() {
     // 如果选择了私钥但没有填写，alert
     if (apiKeyType === 'private' && !apiKey) {
-      alert('Please fill in API Key before connecting');
+      alert('请在连接前填写 API Key');
       return;
     }
     // 如果 voice 没有填写，alert
     if (!voice || !voice.trim()) {
-      alert('Please fill in Voice before connecting');
+      alert('请在连接前填写音色 ID');
       return;
     }
     try {
@@ -424,7 +493,6 @@
       items = [];
       realtimeEvents = [];
       expandedEvents = {};
-      audioPlayers = {};
 
       startTime = new Date().toISOString();
       await initClient();
@@ -432,7 +500,7 @@
       // 设置连接超时
       const connectionTimeout = setTimeout(() => {
         if (!isConnected && !connectionError) {
-          connectionError = 'Connection timeout, please try again later';
+          connectionError = '连接超时，请稍后再试';
           disconnectConversation();
         }
       }, 10000); // 10 秒超时
@@ -454,8 +522,12 @@
           ]);
         }
 
-        // vad 模式
-        if (client?.getTurnDetectionType() === 'server_vad') {
+        // Apply VAD mode if selected
+        client?.updateSession({
+          turn_detection: conversationalMode === 'manual' ? null : { type: 'server_vad' }
+        });
+        
+        if (conversationalMode === 'vad' && client?.getTurnDetectionType() === 'server_vad') {
           await safeStartAudioInput(async () => {
             // 检查录音器状态，避免重复调用
             if (wavRecorder.getStatus() !== 'recording') {
@@ -473,7 +545,7 @@
       }
     } catch (error) {
       console.error('Connection error:', error);
-      connectionError = 'Unable to connect to server, please check server address or API Key';
+      connectionError = '无法连接到服务器，请检查服务器地址或 API Key';
       alert(connectionError);
 
       // 确保断开连接并重置状态
@@ -500,78 +572,51 @@
     await wavRecorder.end();
     wavStreamPlayer.interrupt();
     client = null;
-    conversationalMode = 'manual';
+    // Keep mode choice
+    // conversationalMode = 'manual'; 
     // 注意：这里不清除 connectionError，以便用户能看到错误信息
   }
 
   /**
-   * 在手动按键通话模式下，开始录音
+   * 切换静音
    */
-  async function startRecording() {
-    if (isProcessingRecording) {
-      return;
-    }
-
-    isProcessingRecording = true;
-    isRecording = true;
-
-    try {
-      await safeStartAudioInput(async () => {
-        // 检查录音器状态，避免重复调用
-        if (wavRecorder.getStatus() !== 'recording') {
-          await wavRecorder.record(data => client?.appendInputAudio(data.mono));
-        }
-      });
-    } finally {
-      isProcessingRecording = false;
-    }
-  }
-
-  /**
-   * 在手动按键通话模式下，停止录音
-   */
-  async function stopRecording() {
-    if (isProcessingRecording) {
-      return;
-    }
-
-    isProcessingRecording = true;
-    isRecording = false;
-
-    try {
-      // 检查录音器状态，避免重复调用pause
+  async function toggleMute() {
+    isMuted = !isMuted;
+    if (isMuted) {
+      // Mute: pause recording
       if (wavRecorder.getStatus() === 'recording') {
         await wavRecorder.pause();
       }
-
-      // 使用安全的createResponse函数
-      safeCreateResponse();
-    } finally {
-      isProcessingRecording = false;
+    } else {
+      // Unmute: resume recording if connected and in VAD mode
+      if (isConnected && conversationalMode === 'vad') {
+        await wavRecorder.record(data => client?.appendInputAudio(data.mono));
+      }
     }
   }
 
   /**
-   * 在手动 <> VAD 模式之间切换以进行通信
+   * 在手动 <> VAD 模式之间切换
    */
-  async function toggleVAD() {
-    await tick();
-    if (conversationalMode === 'manual' && wavRecorder.getStatus() === 'recording') {
-      await wavRecorder.pause();
-    }
-    client?.updateSession({
-      turn_detection: conversationalMode === 'manual' ? null : { type: 'server_vad' }
-    });
-    if (conversationalMode !== 'manual' && client?.isConnected()) {
-      await safeStartAudioInput(async () => {
-        // 检查录音器状态，避免重复调用
-        if (wavRecorder.getStatus() !== 'recording') {
-          await wavRecorder.record(data => client?.appendInputAudio(data.mono));
+  async function toggleVAD(mode: string) {
+    conversationalMode = mode;
+    // Only update session if already connected
+    if (isConnected && client) {
+        await tick();
+        if (conversationalMode === 'manual' && wavRecorder.getStatus() === 'recording') {
+            await wavRecorder.pause();
         }
-      });
+        client?.updateSession({
+            turn_detection: conversationalMode === 'manual' ? null : { type: 'server_vad' }
+        });
+        if (conversationalMode !== 'manual' && client?.isConnected()) {
+            await safeStartAudioInput(async () => {
+                if (wavRecorder.getStatus() !== 'recording') {
+                    await wavRecorder.record(data => client?.appendInputAudio(data.mono));
+                }
+            });
+        }
     }
-    isAISpeaking = false;
-    isRecording = false;
   }
 
   // Update system prompt
@@ -588,403 +633,194 @@
     }
   }
 
-  // Svelte action 用于初始化 WaveSurfer 实例
-  function initWaveSurfer(node: string | HTMLElement, { id, url }: any) {
-    // 确保 DOM 元素已存在后再初始化
-    setTimeout(() => {
-      if (!node) return;
-
-      const wavesurfer = WaveSurfer.create({
-        container: node,
-        height: 20,
-        waveColor: 'rgba(74, 131, 255, 0.6)',
-        progressColor: '#1a56db',
-        cursorColor: 'transparent',
-        barWidth: 2,
-        barGap: 1,
-        barRadius: 2,
-        normalize: true,
-        minPxPerSec: 40, // 稍微减小以适应移动端
-        interact: false, // 禁用点击波形跳转，只通过按钮控制
-        hideScrollbar: true // 隐藏滚动条
-      });
-
-      wavesurfer.load(url);
-
-      // 设置事件监听器
-      wavesurfer.on('ready', () => {
-        audioPlayers[id] = {
-          wavesurfer,
-          isPlaying: false,
-          isLoading: false,
-          hasError: false
-        };
-      });
-
-      wavesurfer.on('error', () => {
-        audioPlayers[id] = {
-          wavesurfer,
-          isPlaying: false,
-          isLoading: false,
-          hasError: true
-        };
-      });
-
-      wavesurfer.on('finish', () => {
-        const player = audioPlayers[id];
-        if (player) {
-          player.isPlaying = false;
-        }
-      });
-
-      audioPlayers[id] = {
-        wavesurfer,
-        isPlaying: false,
-        isLoading: true,
-        hasError: false
-      };
-    }, 0);
-
-    return {
-      destroy() {
-        const player = audioPlayers[id];
-        if (player?.wavesurfer) {
-          player.wavesurfer.destroy();
-          delete audioPlayers[id];
-        }
-      }
-    };
-  }
-
-  // 播放或暂停音频
-  function togglePlay(id: string) {
-    const player = audioPlayers[id];
-    if (!player || !player.wavesurfer || player.isLoading || player.hasError) return;
-
-    if (player.isPlaying) {
-      player.isPlaying = false;
-      player.wavesurfer.pause();
+  // Handle admin unlock
+  function handleUnlock() {
+    if (adminPassword === 'admin') {
+      isAdminUnlocked = true;
+      adminPassword = '';
+      adminError = '';
+      adminModal.close();
     } else {
-      player.isPlaying = true;
-      player.wavesurfer.play();
+      adminError = '密码错误';
     }
-  }
-
-  // 切换事件详情的展开和折叠
-  function toggleEventDetails(eventId: string) {
-    expandedEvents[eventId] = (expandedEvents[eventId] ?? false) ? false : true;
-  }
-
-  // 过滤事件日志
-  function filterEvents(events: Array<RealtimeEvent>) {
-    if (!filterText && filterSource === 'all') return events;
-
-    return events.filter(event => {
-      // 根据来源过滤
-      if (filterSource !== 'all' && event.source !== filterSource) return false;
-
-      // 根据文本过滤
-      if (filterText) {
-        const lowerFilterText = filterText.toLowerCase();
-        // 检查事件类型
-        if (event.event.type.toLowerCase().includes(lowerFilterText)) return true;
-        // 检查事件内容（转为字符串后搜索）
-        if (JSON.stringify(event.event).toLowerCase().includes(lowerFilterText)) return true;
-        return false;
-      }
-
-      return true;
-    });
-  }
-
-  /**
-   * 下载音频文件
-   * @param url 音频文件URL
-   * @param filename 保存的文件名
-   */
-  function downloadAudio(url: string, filename: string) {
-    // 创建一个临时的a标签用于下载
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
   }
 </script>
 
-<div class="bg-base-100 mx-auto flex h-screen max-w-7xl flex-col p-2 sm:p-4">
-  <!-- 页面顶部 连接、断开连接 按钮 -->
-  <div class="mb-2 flex flex-col items-start justify-between gap-2 sm:mb-4 sm:flex-row sm:items-center sm:gap-0">
-    <h1 class="text-lg font-bold sm:text-xl">Stepfun Audio</h1>
-    <div class="flex w-full flex-col items-start justify-end space-y-2 sm:w-auto sm:flex-row sm:items-center sm:space-y-0 sm:space-x-2">
-      <!-- 显示连接错误信息 -->
-      {#if connectionError}
-        <div class="text-error bg-error/10 mb-2 w-full rounded p-2 text-xs break-words sm:mb-0 sm:ml-2 sm:w-auto sm:rounded-none sm:bg-transparent sm:p-0 sm:text-sm sm:text-nowrap">{connectionError}</div>
-      {/if}
-
-      <!-- VAD mode toggle - only show when connected -->
-      {#if isConnected}
-        <label class="select rounded-box mb-2 w-full sm:mr-2 sm:mb-0 sm:w-72 md:w-72">
-          <span class="label text-sm">Mode</span>
-          <select bind:value={conversationalMode} onchange={toggleVAD}>
-            <option value="manual">Manual (Push to Talk)</option>
-            <option value="vad">Voice Activity Detection</option>
-          </select>
-        </label>
-      {/if}
-
-      <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-        <button
-          onclick={() => {
-            // Copy current instructions to newInstruction for editing
-            newInstruction = instructions;
-            instructionsModal.showModal();
-          }}
-          class="btn rounded-box h-10 px-2 text-xs sm:px-4 sm:text-sm"
-        >
-          <span class="hidden sm:inline">System Prompt Setting</span>
-          <span class="sm:hidden">System Prompt</span>
-        </button>
-
-        {#if !isConnected}
-          <button onclick={() => settingsModal.showModal()} class="btn rounded-box h-10 px-2 text-xs sm:px-4 sm:text-sm">
-            <Settings size={14} class="sm:hidden" />
-            <Settings size={16} class="hidden sm:inline" />
-            <span class="ml-1 hidden sm:inline">Server Setting</span>
-            <span class="ml-1 sm:hidden">Server</span>
+<div class="ai-conversation-page">
+  <!-- 顶部导航栏 -->
+  <div class="ai-page-header">
+    <div class="ai-page-nav">
+      <button class="back-btn" onclick={() => window.history.back()}>
+        <ArrowLeft size={24} />
+      </button>
+      <div class="ai-page-title">
+        <span class="ai-icon">
+          <img src="/AIBot.png" alt="AI" width={32} height={32} style="border-radius: 50%;" />
+        </span>
+        <span class="title-text">AI 语音对话</span>
+      </div>
+      <div class="ai-page-actions">
+        <!-- Admin Unlock Button -->
+        {#if !isAdminUnlocked}
+          <button 
+            onclick={() => adminModal.showModal()} 
+            class="back-btn"
+            title="解锁设置"
+          >
+            <Lock size={20} />
           </button>
-          <button onclick={debounce(connectConversation, 500)} class="btn btn-primary rounded-box h-10 px-4 text-sm sm:px-6 sm:text-base">Connect</button>
         {:else}
-          <button onclick={debounce(disconnectConversation, 500)} class="btn rounded-box h-10 bg-rose-500 px-4 text-sm text-slate-50 sm:px-6 sm:text-base">Disconnect</button>
+           <button 
+            onclick={() => isAdminUnlocked = false} 
+            class="back-btn"
+            title="锁定设置"
+          >
+            <Unlock size={20} />
+          </button>
+        {/if}
+
+        <!-- Settings Buttons (Hidden by default) -->
+        {#if isAdminUnlocked}
+          <!-- System Prompt Button -->
+          <button 
+            onclick={() => {
+              newInstruction = instructions;
+              instructionsModal.showModal();
+            }}
+            class="back-btn"
+            title="系统提示词设置"
+          >
+            <BadgeInfo size={24} />
+          </button>
+          <!-- Settings Button -->
+          <button 
+            onclick={() => settingsModal.showModal()} 
+            class="back-btn"
+            title="服务器设置"
+            disabled={isConnected}
+          >
+            <Settings size={24} />
+          </button>
         {/if}
       </div>
     </div>
   </div>
 
-  <div class="flex h-full min-h-0 gap-1 sm:gap-2">
-    <!-- 主要内容区域 -->
-    <div class="bg-base-100 rounded-box flex flex-1 flex-col overflow-hidden border border-slate-300/20 shadow-md dark:border-slate-500/40">
-      {#if !isConnected}
-        <div class="flex h-full flex-col items-center justify-center p-4 text-center sm:p-8">
-          <div class="mb-4 flex items-center justify-center gap-2 sm:mb-8">
-            <BadgeInfo class="size-4 sm:size-5" />
-            <h3 class="text-base font-semibold sm:text-lg">Start Your Audio Experience</h3>
-          </div>
-          <ol class="max-w-sm list-inside list-decimal text-left text-sm sm:max-w-none sm:text-base">
-            <li class="mb-4">
-              <span class="font-semibold">Setup Server Info:</span>
-              Click "Server Setting" button, fill in model name and API Key.
-            </li>
-            <li class="mb-4">
-              <span class="font-semibold">Connect to Server:</span>
-              Click "Connect" button to start audio conversation
-            </li>
-            <li>
-              <span class="font-semibold">
-                If you want to trial with your own private key, please register on <a href="https://platform.stepfun.com/" target="_blank" class="break-all text-blue-500">https://platform.stepfun.com/</a>
-                and access your own API key in account management
-              </span>
-            </li>
-          </ol>
-        </div>
-      {:else}
-        <!-- AI 圆圈形象 -->
-        <div class="flex flex-col items-center justify-center p-4 sm:p-8">
-          <div
-            class="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-tr shadow-lg transition-all duration-300 sm:h-32 sm:w-32
-				{isAISpeaking ? 'from-pink-500 to-rose-500' : isRecording ? 'from-blue-500 to-rose-500' : 'from-pink-300 to-rose-400'}"
-            style:transform={isAISpeaking ? 'scale(1.05)' : 'scale(1)'}
-            style:animation={isAISpeaking ? 'pulse 1.5s infinite ease-in-out' : 'none'}
-          >
-            <span class="px-2 text-center text-sm font-medium text-white sm:text-lg">
-              {#if isRecording}
-                <span class="hidden sm:inline">Listening...</span>
-                <span class="sm:hidden">Listening</span>
-              {:else if isThinking}
-                <span class="hidden sm:inline">Thinking...</span>
-                <span class="sm:hidden">Thinking</span>
-              {:else if isAISpeaking}
-                Speaking
-              {:else}
-                AI
-              {/if}
-            </span>
-          </div>
-        </div>
-
-        <!-- 对话历史 -->
-        <div class="flex-1 space-y-2 overflow-y-auto p-2 sm:space-y-4 sm:p-4" use:autoScroll>
-          {#each items as item}
-            <div class="rounded-box flex flex-col p-2 {item.role === 'user' ? 'dark:bg-base-200 ml-auto bg-blue-100' : 'bg-base-200 mr-auto'} max-w-[90%] sm:max-w-[80%]">
-              <div class="mb-2 text-sm font-semibold sm:text-base {item.role === 'user' ? 'text-blue-700 dark:text-blue-400' : 'text-rose-400'}">
-                <div class="flex min-h-[1.5rem] items-center gap-2 sm:min-h-0">
-                  <span class="flex-shrink-0">{item.role === 'user' ? 'You' : 'AI'}</span>
-                  {#if item.formatted?.file}
-                    <div class="bg-base-300/80 group flex h-6 w-36 items-center gap-1 overflow-hidden rounded-lg px-1.5 transition-all duration-200 hover:shadow sm:w-48 sm:gap-2 sm:px-2">
-                      <button
-                        class="flex-shrink-0 transition-colors duration-200 hover:scale-110 hover:cursor-pointer"
-                        onclick={() => togglePlay(item.id)}
-                        title={audioPlayers[item.id]?.isPlaying ? 'Pause' : 'Play'}
-                        disabled={audioPlayers[item.id]?.isLoading || audioPlayers[item.id]?.hasError}
-                      >
-                        {#if audioPlayers[item.id]?.isLoading}
-                          <div class="loading loading-spinner loading-xs"></div>
-                        {:else if audioPlayers[item.id]?.isPlaying}
-                          <Pause size={14} class="sm:h-4 sm:w-4" />
-                        {:else}
-                          <Play size={14} class="sm:h-4 sm:w-4" />
-                        {/if}
-                      </button>
-                      <div id="waveform-{item.id}" class="min-w-0 flex-1 overflow-hidden rounded-lg {audioPlayers[item.id]?.hasError ? 'opacity-50' : ''}" use:initWaveSurfer={{ id: item.id, url: item.formatted.file.url }}></div>
-                      <button
-                        class="flex-shrink-0 opacity-0 transition-colors duration-200 group-hover:opacity-100 hover:scale-110 hover:cursor-pointer"
-                        onclick={() => downloadAudio(item.formatted.file.url, `audio-${item.id}.wav`)}
-                        title="Download Audio"
-                      >
-                        <Download size={14} class="sm:h-4 sm:w-4" />
-                      </button>
-                    </div>
-                  {/if}
+  <div class="ai-page-content">
+    <!-- 对话区域 - 全屏显示 -->
+    <div class="ai-conversation-main-full">
+      <!-- 实时语音对话区域 -->
+      <div class="realtime-conversation-wrapper">
+        <div class="conversation-container">
+          <div class="conversation-messages" use:autoScroll>
+            {#if items.length === 0}
+              <div class="empty-conversation">
+                <div class="empty-icon">
+                  <Mic size={64} />
                 </div>
+                <p>点击开始按钮开始对话...</p>
               </div>
-              <div class="text-sm sm:text-base">
-                {#if getThinkContent(item)}
-                  <div class="my-1">
-                    <button class="flex items-center gap-1 transition-colors hover:opacity-80" onclick={() => toggleThinkingExpansion(item.id)} style="color: rgba(120, 120, 120, 1);">
-                      <span style="font-size: 12px; color: rgba(120, 120, 120, 1);">{getThinkingDisplayText(item)}</span>
-                      <ChevronUp size={12} class="transition-transform duration-200 {thinkingStates[item.id]?.isExpanded ? 'rotate-0' : 'rotate-90'}" style="color: rgba(120, 120, 120, 1);" />
-                    </button>
-                    {#if thinkingStates[item.id]?.isExpanded !== false}
-                      <div class="mt-1 flex items-start" style="position:relative;left: -15px">
-                        <div class="mr-2 w-3 border-l border-gray-300"></div>
-                        <div class="flex-1 border-l border-gray-300 pl-2 text-sm whitespace-pre-wrap text-gray-700">
-                          {getThinkContent(item)}
-                        </div>
+            {/if}
+
+            {#each items as item}
+              <div class="message {item.role === 'user' ? 'user' : 'ai'}">
+                <img class="message-avatar" src={item.role === 'user' ? '/user-avatar.png' : '/AIBot.png'} alt={item.role} 
+                     onerror={(e) => e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + item.role} />
+                <div class="message-content-wrapper">
+                  <div class="message-content">
+                    <!-- Thinking Content -->
+                    {#if getThinkContent(item)}
+                      <div class="mb-2">
+                        <button class="flex items-center gap-1 opacity-70 hover:opacity-100 text-sm" onclick={() => toggleThinkingExpansion(item.id)}>
+                          <span>{getThinkingDisplayText(item)}</span>
+                          <ChevronUp size={14} class="transition-transform duration-200 {thinkingStates[item.id]?.isExpanded ? 'rotate-0' : 'rotate-90'}" />
+                        </button>
+                        {#if thinkingStates[item.id]?.isExpanded !== false}
+                          <div class="mt-1 flex items-start pl-2 border-l-2 border-current opacity-60">
+                            <div class="text-sm whitespace-pre-wrap">
+                              {getThinkContent(item)}
+                            </div>
+                          </div>
+                        {/if}
                       </div>
                     {/if}
-                  </div>
-                {/if}
-                {#if getTextContent(item)}
-                  <p class="min-h-6 leading-relaxed">{getTextContent(item)}</p>
-                {:else}
-                  <div class="skeleton h-6 w-32"></div>
-                {/if}
-              </div>
-            </div>
-          {/each}
-        </div>
 
-        <!-- 按住说话 按钮 -->
-        <div class="border-base-300/50 border-t p-3 sm:p-4">
-          {#if isConnected}
+                    <!-- Text Content -->
+                    {#if getTextContent(item)}
+                      <p>{getTextContent(item)}</p>
+                    {:else if item.role === 'assistant' && isResponseInProgress}
+                      <span class="loading loading-dots loading-sm"></span>
+                    {/if}
+                  </div>
+                </div>
+              </div>
+            {/each}
+          </div>
+        </div>
+      </div>
+
+      <div class="conversation-controls">
+        {#if !isConnected}
+          <div class="mode-selector">
+            <button 
+              class="mode-btn {conversationalMode === 'manual' ? 'active' : ''}" 
+              onclick={() => conversationalMode = 'manual'}
+            >
+              按键对话
+            </button>
+            <button 
+              class="mode-btn {conversationalMode === 'vad' ? 'active' : ''}" 
+              onclick={() => conversationalMode = 'vad'}
+            >
+              实时对话
+            </button>
+          </div>
+          <button class="ai-control-btn start-btn" onclick={debounce(connectConversation, 500)}>
+            <Play size={24} />
+            <span class="btn-text">开始</span>
+          </button>
+        {:else}
+          <div class="controls-row">
             {#if conversationalMode === 'manual'}
-              <div class="flex justify-center">
+                <!-- Push to Talk Button -->
                 <button
+                  class="ai-control-btn mute-btn"
                   onmousedown={startRecording}
                   onmouseup={stopRecording}
                   onmouseleave={isRecording ? stopRecording : null}
                   ontouchstart={startRecording}
                   ontouchend={stopRecording}
-                  ontouchcancel={() => {
-                    if (isRecording) stopRecording();
-                  }}
-                  class="flex h-20 w-20 items-center justify-center rounded-full sm:h-16 sm:w-16 {isRecording
-                    ? 'bg-emerald-500'
-                    : 'bg-blue-500'} touch-none text-white shadow-lg transition-colors select-none hover:opacity-90 focus:outline-none active:scale-95"
+                  ontouchcancel={() => { if (isRecording) stopRecording(); }}
+                  style="background: {isRecording ? '#ef9a9a' : '#a5d6a7'}; width: 100%;"
                 >
-                  {#if isRecording}
-                    <ArrowUp size={24} class="sm:h-6 sm:w-6" />
-                  {:else}
-                    <Mic size={24} class="sm:h-6 sm:w-6" />
-                  {/if}
+                  <Mic size={24} />
+                  <span class="btn-text">{isRecording ? '松开发送' : '按住说话'}</span>
                 </button>
-              </div>
-              <div class="mt-3 text-center text-sm sm:mt-2 sm:text-sm">
-                <span class="hidden sm:inline">{isRecording ? 'Release to Send' : 'Hold to Speak'}</span>
-                <span class="sm:hidden">{isRecording ? 'Release to Send' : 'Tap & Hold to Speak'}</span>
-              </div>
             {:else}
-              <div class="flex items-center justify-center text-sm sm:text-base">Real-time conversation active...</div>
+                <button class="ai-control-btn mute-btn {isMuted ? 'muted' : ''}" onclick={toggleMute}>
+                    {#if isMuted}
+                    <VolumeX size={24} />
+                    <span class="btn-text">取消静音</span>
+                    {:else}
+                    <Volume2 size={24} />
+                    <span class="btn-text">静音</span>
+                    {/if}
+                </button>
             {/if}
-          {/if}
-        </div>
-      {/if}
-    </div>
-
-    <!-- 调试事件日志 -->
-    <div class="bg-base-100 rounded-box flex max-h-full min-h-0 w-1/3 min-w-72 flex-col overflow-hidden border border-slate-300/20 shadow-md dark:border-slate-500/40">
-      <div class="flex h-12 items-center justify-between p-2">
-        <h2 class="text-xl font-semibold">调试日志</h2>
-        <div>
-          {#if realtimeEvents.length > 0}
-            <button class="btn btn-sm" onclick={() => (expandedEvents = {})}>全部折叠</button>
-          {/if}
-          {#if realtimeEvents.length > 0}
-            <button
-              class="btn btn-sm"
-              onclick={() => {
-                expandedEvents = {};
-                realtimeEvents = [];
-              }}
-            >
-              清掉
+            
+            <button class="ai-control-btn stop-btn" onclick={() => {
+                wavStreamPlayer.interrupt();
+                client?.cancelResponse();
+            }}>
+                <Square size={24} />
+                <span class="btn-text">打断</span>
             </button>
-          {/if}
-        </div>
-      </div>
-      <!-- 过滤控制区域 -->
-      {#if realtimeEvents.length > 0}
-        <div class="border-base-300 flex items-center gap-2 border-b p-2">
-          <select class="select select-sm select-bordered w-32" bind:value={filterSource}>
-            <option value="all">全部来源</option>
-            <option value="server">服务器</option>
-            <option value="client">客户端</option>
-          </select>
-          <div class="relative flex-1">
-            <input type="text" class="input input-sm input-bordered w-full pr-8" placeholder="输入关键词过滤日志" bind:value={filterText} />
-            {#if filterText}
-              <button
-                class="absolute top-1/2 right-2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-slate-200 text-slate-500 hover:bg-slate-300 hover:text-slate-700 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-200"
-                onclick={() => (filterText = '')}
-              >
-                <X size={16} />
-              </button>
-            {/if}
+
+            <button class="ai-control-btn end-btn" onclick={debounce(disconnectConversation, 500)}>
+                <Square size={24} />
+                <span class="btn-text">结束</span>
+            </button>
           </div>
-        </div>
-      {/if}
-      <div class="min-h-0 flex-1 overflow-y-auto p-2 text-sm" use:autoScroll>
-        {#if realtimeEvents.length === 0}
-          <div class="flex h-full items-center justify-center text-center">暂无调试日志</div>
-        {:else if filterEvents(realtimeEvents).length === 0}
-          <div class="flex h-full items-center justify-center text-center">没有匹配的日志</div>
-        {:else}
-          {#each filterEvents(realtimeEvents) as event, i (event.time + '-' + i)}
-            <div class="border-base-300/40 mb-1 border-b py-1">
-              <!-- svelte-ignore a11y_click_events_have_key_events -->
-              <!-- svelte-ignore a11y_no_static_element_interactions -->
-              <div class="flex cursor-pointer items-center justify-between" onclick={() => toggleEventDetails(`${i}`)}>
-                <div class="flex min-w-0 items-center">
-                  <span class="mr-2 font-mono">{formatTime(event.time)}</span>
-                  <span class="{event.source === 'server' ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400'} font-medium">
-                    {event.source}
-                  </span>
-                  <span class="ml-2 max-w-2/3 truncate text-wrap">{event.event.type}</span>
-                </div>
-                <div>
-                  {#if expandedEvents[`${i}`]}
-                    <ArrowUp size={16} />
-                  {:else}
-                    <ArrowDown size={16} />
-                  {/if}
-                </div>
-              </div>
-              {#if expandedEvents[`${i}`]}
-                <pre class="bg-base-200 mt-1 overflow-x-auto rounded p-2 text-xs">{JSON.stringify(event.event, null, 2)}</pre>
-              {/if}
-            </div>
-          {/each}
         {/if}
       </div>
     </div>
@@ -992,12 +828,12 @@
 </div>
 
 <dialog bind:this={instructionsModal} class="modal">
-  <div class="modal-box w-11/12 max-w-2xl sm:w-full">
-    <h2 class="mb-4 text-base font-semibold sm:text-lg">System Prompt Setting</h2>
+  <div class="modal-box w-11/12 max-w-2xl sm:w-full text-black">
+    <h2 class="mb-4 text-base font-semibold sm:text-lg">系统提示词设置</h2>
 
-    <textarea bind:value={newInstruction} class="border-base-300 rounded-box mb-4 h-48 w-full resize-none border p-2 text-sm sm:h-64 sm:p-3"></textarea>
+    <textarea bind:value={newInstruction} class="border-base-300 rounded-box mb-4 h-48 w-full resize-none border p-2 text-sm sm:h-64 sm:p-3 bg-white" placeholder="请输入系统提示词..."></textarea>
     <div class="flex flex-col justify-end gap-2 sm:flex-row">
-      <button onclick={() => instructionsModal.close()} class="btn rounded-box w-full sm:w-auto">Cancel</button>
+      <button onclick={() => instructionsModal.close()} class="btn rounded-box w-full sm:w-auto">取消</button>
       <button
         class="btn btn-primary rounded-box w-full sm:w-auto"
         onclick={() => {
@@ -1006,25 +842,24 @@
           instructionsModal.close();
         }}
       >
-        Confirm
+        确认
       </button>
     </div>
   </div>
 </dialog>
 
-<!-- 新增服务器设置模态框 -->
 <dialog bind:this={settingsModal} class="modal">
-  <div class="modal-box w-11/12 max-w-lg sm:w-full">
-    <h2 class="mb-4 text-base font-semibold sm:text-lg">Server Setting</h2>
+  <div class="modal-box w-11/12 max-w-lg sm:w-full text-black">
+    <h2 class="mb-4 text-base font-semibold sm:text-lg">服务器设置</h2>
     <div class="space-y-3 sm:space-y-4">
-      <label class="input rounded-box w-full">
-        <span class="label w-24 text-xs sm:w-32 sm:text-sm">Request URL</span>
-        <input type="text" placeholder="Request URL" bind:value={wsUrl} disabled={isConnected} class="text-sm" />
+      <label class="input input-bordered flex items-center gap-2 bg-white">
+        <span class="w-24 text-xs sm:w-32 sm:text-sm">请求地址</span>
+        <input type="text" placeholder="wss://..." bind:value={wsUrl} disabled={isConnected} class="grow text-sm" />
       </label>
 
-      <label class="select rounded-box w-full">
-        <span class="label w-24 text-xs sm:w-32 sm:text-sm">Model Name</span>
-        <select bind:value={modelName} disabled={isConnected} class="text-sm">
+      <label class="select select-bordered flex items-center gap-2 bg-white">
+        <span class="w-24 text-xs sm:w-32 sm:text-sm">模型名称</span>
+        <select bind:value={modelName} disabled={isConnected} class="grow text-sm">
           {#each availableModels as model}
             <option value={model}>{model}</option>
           {/each}
@@ -1032,20 +867,48 @@
       </label>
 
       {#if apiKeyType === 'private'}
-        <label class="input rounded-box w-full">
-          <span class="label w-24 text-xs sm:w-32 sm:text-sm">Private Key</span>
-          <input type="password" placeholder="Private Key" bind:value={apiKey} disabled={isConnected} class="text-sm" />
+        <label class="input input-bordered flex items-center gap-2 bg-white">
+          <span class="w-24 text-xs sm:w-32 sm:text-sm">私有密钥</span>
+          <input type="password" placeholder="请输入 API Key" bind:value={apiKey} disabled={isConnected} class="grow text-sm" />
         </label>
       {/if}
 
-      <label class="input rounded-box w-full">
-        <span class="label w-24 text-xs sm:w-32 sm:text-sm">Voice</span>
-        <input type="text" placeholder="Voice" bind:value={voice} disabled={isConnected} onblur={updateVoice} class="text-sm" />
+      <label class="input input-bordered flex items-center gap-2 bg-white">
+        <span class="w-24 text-xs sm:w-32 sm:text-sm">音色 ID</span>
+        <input type="text" placeholder="请输入音色 ID" bind:value={voice} disabled={isConnected} onblur={updateVoice} class="grow text-sm" />
       </label>
     </div>
 
     <div class="modal-action mt-6">
-      <button onclick={() => settingsModal.close()} class="btn rounded-box w-full sm:w-auto">Confirm</button>
+      <button onclick={() => settingsModal.close()} class="btn rounded-box w-full sm:w-auto">确认</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Admin Password Modal -->
+<dialog bind:this={adminModal} class="modal">
+  <div class="modal-box w-11/12 max-w-sm sm:w-full text-black">
+    <h2 class="mb-4 text-base font-semibold sm:text-lg">管理员验证</h2>
+    <div class="space-y-3">
+      <p class="text-sm text-gray-500">请输入密码以解锁设置功能</p>
+      <input 
+        type="password" 
+        placeholder="请输入密码" 
+        bind:value={adminPassword} 
+        class="input input-bordered w-full bg-white"
+        onkeydown={(e) => e.key === 'Enter' && handleUnlock()}
+      />
+      {#if adminError}
+        <p class="text-error text-xs">{adminError}</p>
+      {/if}
+    </div>
+    <div class="modal-action mt-6">
+      <button onclick={() => {
+        adminModal.close();
+        adminPassword = '';
+        adminError = '';
+      }} class="btn rounded-box">取消</button>
+      <button onclick={handleUnlock} class="btn btn-primary rounded-box">解锁</button>
     </div>
   </div>
 </dialog>
